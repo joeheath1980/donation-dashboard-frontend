@@ -14,7 +14,6 @@ function Layout({ children }) {
           <li><Link to="/ImpactSpace" className={styles.navLink}>IMPACT SPACE</Link></li>
           <li><Link to="/profile" className={styles.navLink}>PROFILE</Link></li>
           <li><Link to="/impact" className={styles.navLink}>IMPACT</Link></li>
-          <li><Link to="/opportunities" className={styles.navLink}>OPPORTUNITIES</Link></li>
           <li><Link to="/matching" className={styles.navLink}>MATCHING</Link></li>
           <li><Link to="/YourAccount" className={styles.navLink}>YOUR ACCOUNT</Link></li>
         </ul>

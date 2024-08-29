@@ -18,7 +18,7 @@ function VolunteerActivitiesComponent({ userId }) {
   const fetchActivities = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:3002/api/volunteer-activities`, {
+      const response = await axios.get(`http://localhost:3002/api/volunteerActivities`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -37,7 +37,7 @@ function VolunteerActivitiesComponent({ userId }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:3002/api/volunteer-activities', newActivity, {
+      const response = await axios.post('http://localhost:3002/api/volunteerActivities', newActivity, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

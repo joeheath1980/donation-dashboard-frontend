@@ -22,7 +22,7 @@ export const ImpactProvider = ({ children }) => {
     
     try {
       // Fetch donations
-      const donationsResponse = await axios.get('http://localhost:3002/api/donations/my-donations', { headers });
+      const donationsResponse = await axios.get('http://localhost:3002/api/donations', { headers });
       const fetchedDonations = donationsResponse.data;
       setDonations(fetchedDonations);
       console.log('Fetched Donations:', fetchedDonations);
@@ -30,7 +30,7 @@ export const ImpactProvider = ({ children }) => {
       // Fetch volunteer activities
       let fetchedVolunteerActivities = [];
       try {
-        const volunteerResponse = await axios.get('http://localhost:3002/api/volunteer/my-activities', { headers });
+        const volunteerResponse = await axios.get('http://localhost:3002/api/volunteerActivities', { headers });
         fetchedVolunteerActivities = volunteerResponse.data;
         setVolunteerActivities(fetchedVolunteerActivities);
         console.log('Fetched Volunteer Activities:', fetchedVolunteerActivities);
@@ -47,7 +47,7 @@ export const ImpactProvider = ({ children }) => {
       // Fetch fundraising campaigns
       let fetchedFundraisingCampaigns = [];
       try {
-        const fundraisingResponse = await axios.get('http://localhost:3002/api/fundraising/my-campaigns', { headers });
+        const fundraisingResponse = await axios.get('http://localhost:3002/api/fundraisingCampaigns', { headers });
         fetchedFundraisingCampaigns = fundraisingResponse.data;
         setFundraisingCampaigns(fetchedFundraisingCampaigns);
         console.log('Fetched Fundraising Campaigns:', fetchedFundraisingCampaigns);

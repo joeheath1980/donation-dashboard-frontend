@@ -19,7 +19,7 @@ function FundraisingCampaignsComponent({ userId }) {
   const fetchCampaigns = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:3002/api/fundraising-campaigns`, {
+      const response = await axios.get(`http://localhost:3002/api/fundraisingCampaigns`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -39,7 +39,7 @@ function FundraisingCampaignsComponent({ userId }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:3002/api/fundraising-campaigns', newCampaign, {
+      const response = await axios.post('http://localhost:3002/api/fundraisingCampaigns', newCampaign, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

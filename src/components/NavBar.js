@@ -22,11 +22,6 @@ function NavBar() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/Opportunities" activeClassName={styles.active}>
-            Opportunities
-          </NavLink>
-        </li>
-        <li>
           <NavLink to="/profile" activeClassName={styles.active}>
             Profile/Settings
           </NavLink>

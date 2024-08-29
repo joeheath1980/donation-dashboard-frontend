@@ -6,7 +6,6 @@ import ImpactSpace from './components/ImpactSpace'; // Updated from Dashboard
 import Impact from './components/Impact';
 import Profile from './components/Profile';
 import Matching from './components/Matching';
-import Opportunities from './components/Opportunities';
 import Login from './components/Login';
 import YourAccount from './components/YourAccount'; // Import the component
 
@@ -48,14 +47,6 @@ function App() {
             element={
               <Layout>
                 <Matching />
-              </Layout>
-            }
-          />
-          <Route
-            path="/opportunities"
-            element={
-              <Layout>
-                <Opportunities />
               </Layout>
             }
           />
