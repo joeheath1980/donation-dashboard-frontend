@@ -1,0 +1,40 @@
+.donationsContainer {
+  margin-bottom: 20px;
+}
+
+.donationsHeader {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.donationsList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.donationItem {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.donationCharity {
+  font-weight: bold;
+}
+
+.donationAmount {
+  color: #28a745;
+  margin-left: 10px;
+}
+
+.donationDate {
+  color: #6c757d;
+  font-size: 0.9em;
+  margin-left: 10px;
+}
+
+.noDonations {
+  color: #6c757d;
+  font-style: italic;
+}

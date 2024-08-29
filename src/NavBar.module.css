@@ -1,0 +1,26 @@
+.navBar {
+    display: flex;
+    justify-content: space-around;
+    background-color: #007bff; /* Background color of the navbar */
+    padding: 10px 0;
+  }
+  
+  .navItem {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 15px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .navItem:hover {
+    background-color: #0056b3;
+    border-radius: 4px;
+  }
+  
+  .active {
+    background-color: #0056b3;
+    border-radius: 4px;
+  }
+  

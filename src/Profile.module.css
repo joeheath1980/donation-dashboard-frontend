@@ -1,0 +1,131 @@
+.profileContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.impactScoreBox {
+  background-color: #e0f7fa;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.impactScoreBox h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #007bff;
+}
+
+.impactScoreBox p {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.impactContainer {
+  margin-bottom: 20px;
+}
+
+.impactContainer h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.column {
+  flex: 1;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+
+.column h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+.column ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.column ul li {
+  background-color: #f1f1f1;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.donorPersonaContainer {
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.donorPersonaContainer h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.donorPersonaContainer p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.charityTypesContainer {
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.charityTypesContainer h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.charityTypesContainer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.charityTypesContainer ul li {
+  background-color: #f1f1f1;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.badgesContainer {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badgesContainer h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.badges {
+  display: flex;
+  gap: 10px;
+}
+

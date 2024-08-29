@@ -1,0 +1,138 @@
+.container {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 4px;
+  margin-bottom: 40px;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr;
+  gap: 25px;
+}
+
+.impactColumn {
+  grid-column: span 1;
+}
+
+.updatesColumn, .opportunitiesColumn, .matchingColumn {
+  padding: 20px;
+  border-radius: 4px;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #007BFF;
+  height: 40px; /* Fixed height for headers */
+  display: flex;
+  align-items: center;
+}
+
+.rectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.rect {
+  height: 70px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.impact-score-container {
+  padding: 15px;
+  border-radius: 4px;
+  background-color: #f0fff4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  text-align: center;
+  border: 2px solid #06BA60;
+}
+
+.impactScoreBox {
+  background-color: #e0f7fa;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  padding: 15px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #007bff;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  margin-bottom: 20px;
+}
+
+.impactScoreBox h4 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-bottom: 10px;
+  color: #007bff;
+}
+
+/* Existing styles... */
+
+.matchingColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.matchingOpportunitiesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.matchingOpportunity {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.matchingOpportunity p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.participateButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.participateButton:hover {
+  background-color: #0056b3;
+}
+
+/* ... rest of the existing styles */
+
+@media (max-width: 1200px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
