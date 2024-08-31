@@ -1,12 +1,14 @@
 import React, { useContext, useEffect } from 'react';
-import ImpactVisualization from './ImpactVisualization';
-import NewsFeedComponent from './NewsFeedComponent';
 import { ImpactContext } from '../contexts/ImpactContext';
+import ImpactVisualization from './ImpactVisualization';
+import CarouselComponent from './CarouselComponent';
 import styles from '../ImpactSpace.module.css';
 
 function ImpactSpace() {
   const {
     donations,
+    oneOffContributions,
+    volunteerActivities,
     impactScore,
     fetchImpactData,
     error
@@ -16,26 +18,27 @@ function ImpactSpace() {
     fetchImpactData();
   }, [fetchImpactData]);
 
+  const projectsToSupport = [
+    { title: "Support Healthcare", description: "Provide essential medical supplies...", link: "#" },
+    { title: "Education Initiative", description: "Help underprivileged children access education...", link: "#" },
+    { title: "Clean Water Project", description: "Bring clean water to remote villages...", link: "#" },
+    { title: "Hunger Relief", description: "Support food banks and meal programs...", link: "#" },
+  ];
+
+  const impactUpdates = [
+    { title: "Healthcare Impact", description: "Your donation provided medical supplies to 100 families...", link: "#" },
+    { title: "Education Success", description: "20 students graduated thanks to your support...", link: "#" },
+    { title: "Clean Water Achievement", description: "A new well now serves 500 people in a remote village...", link: "#" },
+    { title: "Hunger Relief Results", description: "1000 meals served to those in need...", link: "#" },
+  ];
+
   if (error) {
-    return (
-      <div className={styles.errorContainer}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={fetchImpactData} className={styles.retryButton}>
-          Retry
-        </button>
-      </div>
-    );
+    return <div className={styles.error}>{error}</div>;
   }
 
-  if (!donations.length) {
-    return <div className={styles.loading}>Loading your donation data...</div>;
+  if (!donations.length && !oneOffContributions.length && !volunteerActivities.length) {
+    return <div className={styles.loading}>Loading your impact data...</div>;
   }
-
-  const donationData = donations.map(donation => ({
-    date: donation.date,
-    amount: donation.amount
-  }));
 
   return (
     <div className={styles.container}>
@@ -43,11 +46,12 @@ function ImpactSpace() {
       <div className={styles.impactScoreContainer}>
         <h3 className={styles.impactScoreTitle}>Your Impact Score</h3>
         <div className={styles.impactScoreBox}>
-          <p>{impactScore}</p>
+          <p>{impactScore.toFixed(2)}</p>
         </div>
-        <ImpactVisualization donationsData={donationData} />
+        <ImpactVisualization />
       </div>
-      <NewsFeedComponent />
+      <CarouselComponent title="Projects to Support" items={projectsToSupport} />
+      <CarouselComponent title="Your Impact Updates" items={impactUpdates} />
     </div>
   );
 }

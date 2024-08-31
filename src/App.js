@@ -8,6 +8,8 @@ import Profile from './components/Profile';
 import Matching from './components/Matching';
 import Login from './components/Login';
 import YourAccount from './components/YourAccount'; // Import the component
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 function App() {
   return (

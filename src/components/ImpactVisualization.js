@@ -1,104 +1,77 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import { ImpactContext } from '../contexts/ImpactContext';
 
 Chart.register(...registerables);
 
-function ImpactVisualization({ donationsData }) {
+function ImpactVisualization() {
+  const { donations, oneOffContributions, volunteerActivities } = useContext(ImpactContext);
   const chartRef = useRef(null);
-  const chartInstanceRef = useRef(null);
+  const chartInstance = useRef(null);
 
   useEffect(() => {
     if (chartRef.current) {
-      // Destroy the previous chart instance if it exists
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.destroy();
+      const ctx = chartRef.current.getContext('2d');
+      
+      const allContributions = [
+        ...donations.map(d => ({ date: new Date(d.date), impact: d.amount / 100, type: 'Regular Donation' })),
+        ...oneOffContributions.map(d => ({ date: new Date(d.date), impact: d.amount / 100, type: 'One-off Donation' })),
+        ...volunteerActivities.map(v => ({ date: new Date(v.date), impact: v.hours, type: 'Volunteer Hours' }))
+      ].sort((a, b) => a.date - b.date);
+
+      let cumulativeImpact = 0;
+      const dataPoints = allContributions.map(contribution => {
+        cumulativeImpact += contribution.impact;
+        return { x: contribution.date, y: cumulativeImpact };
+      });
+
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
       }
 
-      const ctx = chartRef.current.getContext('2d');
-
-      // Prepare the data for the graph
-      const dates = donationsData.map(d => new Date(d.date).toLocaleDateString());
-      const amounts = donationsData.map(d => d.amount);
-
-      // Calculate cumulative totals
-      const cumulativeAmounts = amounts.reduce((acc, amount, index) => {
-        acc.push((acc[index - 1] || 0) + amount);
-        return acc;
-      }, []);
-
-      chartInstanceRef.current = new Chart(ctx, {
+      chartInstance.current = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: dates,
-          datasets: [
-            {
-              label: 'Donation Amount',
-              data: amounts,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 2,
-              fill: false,
-              pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-              pointBorderColor: '#fff',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
-            },
-            {
-              label: 'Cumulative Amount',
-              data: cumulativeAmounts,
-              backgroundColor: 'rgba(75, 192, 192, 0.1)',
-              borderColor: 'rgba(75, 192, 192, 1)',
-              borderWidth: 2,
-              fill: true,
-              pointRadius: 0, // No points for cumulative line
-            },
-          ],
+          datasets: [{
+            label: 'Cumulative Impact Score',
+            data: dataPoints,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
           scales: {
             x: {
               type: 'time',
               time: {
-                unit: 'year', // Adjust this based on your data
+                unit: 'day'
               },
-            },
-            y: {
-              beginAtZero: true,
               title: {
                 display: true,
-                text: 'Amount ($)',
-              },
+                text: 'Date'
+              }
             },
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (tooltipItem) {
-                  return `$${tooltipItem.formattedValue}`;
-                },
-              },
-            },
-          },
-        },
+            y: {
+              title: {
+                display: true,
+                text: 'Impact Score'
+              }
+            }
+          }
+        }
       });
     }
 
-    // Cleanup function to destroy the chart instance when the component unmounts
     return () => {
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.destroy();
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
       }
     };
-  }, [donationsData]);
+  }, [donations, oneOffContributions, volunteerActivities]);
 
-  return (
-    <div style={{ position: 'relative', height: '400px', width: '100%' }}>
-      <canvas ref={chartRef}></canvas>
-    </div>
-  );
+  return <canvas ref={chartRef} />;
 }
 
 export default ImpactVisualization;
