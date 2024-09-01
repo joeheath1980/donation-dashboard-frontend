@@ -68,6 +68,7 @@
   font-weight: 600;
 }
 
+/* Delete icon styling */
 .deleteIcon {
   position: absolute;
   top: 10px;
@@ -187,8 +188,8 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background-color: white;
-  position: relative;  /* Add this line */
-  padding-right: 30px;  /* Add this line to make space for the delete button */
+  position: relative;
+  padding-right: 30px;
 }
 
 .gmailResultItem strong {
@@ -254,6 +255,42 @@
   background-color: #218838;
 }
 
+/* Impact Score Box Styling */
+.impactScoreBox {
+  background-color: #e0f7fa; /* Slightly darker background */
+  border: 1px solid #4fc3f7; /* Slightly darker border */
+  border-radius: 10px; /* More rounded corners */
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  text-align: center; /* Center the text */
+  margin-top: 20px;
+}
+
+.impactScoreBox p {
+  margin: 10px 0; /* Space between the lines */
+}
+
+.impactScoreBox .arrow {
+  font-size: 1.2em; /* Larger arrow */
+  color: #0288d1; /* Blue color for the arrow */
+}
+
+.impactScoreBox .scoreChange {
+  font-size: 0.9em;
+  color: #757575; /* Grey color for the change text */
+}
+
+.impactScoreBox .tierInfo {
+  font-weight: 600; /* Semi-bold for the tier text */
+  font-size: 1.1em;
+  color: #0288d1; /* Blue color for the tier text */
+}
+
+.impactScoreBox .nextTierInfo {
+  color: #0288d1; /* Blue color for points to next tier */
+  font-size: 1em; /* Slightly larger font */
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .formRow {
@@ -265,3 +302,4 @@
     width: 100%;
   }
 }
+

@@ -5,6 +5,9 @@ export const ImpactContext = createContext();
 
 export const ImpactProvider = ({ children }) => {
   const [impactScore, setImpactScore] = useState(0);
+  const [lastYearImpactScore, setLastYearImpactScore] = useState(0);
+  const [tier, setTier] = useState("Giver");
+  const [pointsToNextTier, setPointsToNextTier] = useState(0);
   const [donations, setDonations] = useState([]);
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [volunteerActivities, setVolunteerActivities] = useState([]);
@@ -15,7 +18,31 @@ export const ImpactProvider = ({ children }) => {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }, []);
 
+  const calculateImpactScore = (donations, oneOffContributions, volunteerHours) => {
+    const donationPoints = donations.reduce((acc, donation) => 
+      acc + (Number(donation.amount) || 0) / 100, 0);
+
+    const oneOffPoints = oneOffContributions.reduce((acc, contribution) => 
+      acc + (Number(contribution.amount) || 0) / 100, 0);
+
+    const volunteerPoints = volunteerHours.reduce((acc, activity) => 
+      acc + (Number(activity.hours) || 0), 0);
+
+    return donationPoints + oneOffPoints + volunteerPoints;
+  };
+
   const fetchImpactData = useCallback(async () => {
+    const calculateLastYearImpactScore = (donations, oneOffContributions, volunteerHours) => {
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  
+      const filteredDonations = donations.filter(donation => new Date(donation.date) <= oneYearAgo);
+      const filteredOneOffContributions = oneOffContributions.filter(contribution => new Date(contribution.date) <= oneYearAgo);
+      const filteredVolunteerHours = volunteerHours.filter(activity => new Date(activity.date) <= oneYearAgo);
+  
+      return calculateImpactScore(filteredDonations, filteredOneOffContributions, filteredVolunteerHours);
+    };
+
     setError(null);
     const headers = getAuthHeaders();
 
@@ -30,25 +57,30 @@ export const ImpactProvider = ({ children }) => {
       setOneOffContributions(oneOffRes.data);
       setVolunteerActivities(volunteerRes.data);
 
-      const score = calculateImpactScore(donationsRes.data, oneOffRes.data, volunteerRes.data);
-      setImpactScore(score);
+      const currentScore = calculateImpactScore(donationsRes.data, oneOffRes.data, volunteerRes.data);
+      setImpactScore(currentScore);
+
+      // Calculate the impact score from one year ago
+      const lastYearScore = calculateLastYearImpactScore(donationsRes.data, oneOffRes.data, volunteerRes.data);
+      setLastYearImpactScore(lastYearScore);
+
+      // Calculate the current tier and points to next tier
+      const currentTier = getTier(currentScore);
+      setTier(currentTier.tier);
+      setPointsToNextTier(currentTier.pointsToNextTier);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to fetch impact data. Please try again later.');
     }
   }, [getAuthHeaders]);
 
-  const calculateImpactScore = (donations, oneOffContributions, volunteerHours) => {
-    const donationPoints = donations.reduce((acc, donation) => 
-      acc + (Number(donation.amount) || 0) / 100, 0);
-
-    const oneOffPoints = oneOffContributions.reduce((acc, contribution) => 
-      acc + (Number(contribution.amount) || 0) / 100, 0);
-
-    const volunteerPoints = volunteerHours.reduce((acc, activity) => 
-      acc + (Number(activity.hours) || 0), 0);
-
-    return donationPoints + oneOffPoints + volunteerPoints;
+  const getTier = (score) => {
+    if (score >= 2501) return { tier: "Visionary", nextTier: null, pointsToNextTier: 0 };
+    if (score >= 1001) return { tier: "Champion", nextTier: "Visionary", pointsToNextTier: 2501 - score };
+    if (score >= 501) return { tier: "Philanthropist", nextTier: "Champion", pointsToNextTier: 1001 - score };
+    if (score >= 101) return { tier: "Altruist", nextTier: "Philanthropist", pointsToNextTier: 501 - score };
+    return { tier: "Giver", nextTier: "Altruist", pointsToNextTier: 101 - score };
   };
 
   const parseAmount = (amountString) => {
@@ -66,12 +98,12 @@ export const ImpactProvider = ({ children }) => {
         date: donation.date // Ensure this is being sent
       };
   
-      console.log('Sending donation to backend:', parsedDonation); // Add this log
+      console.log('Sending donation to backend:', parsedDonation);
   
       const response = await axios.post('http://localhost:3002/api/donations', parsedDonation, { headers });
   
       if (response.status === 201) {
-        console.log('Donation added, response:', response.data); // Add this log
+        console.log('Donation added, response:', response.data);
         setDonations(prevDonations => [...prevDonations, response.data]);
       } else {
         console.error('Failed to add donation:', response.statusText);
@@ -92,12 +124,12 @@ export const ImpactProvider = ({ children }) => {
         date: contribution.date // Ensure we're sending the original date
       };
 
-      console.log('Sending one-off contribution to backend:', parsedContribution); // Add this log
+      console.log('Sending one-off contribution to backend:', parsedContribution);
 
       const response = await axios.post('http://localhost:3002/api/contributions/one-off', parsedContribution, { headers });
 
       if (response.status === 201) {
-        console.log('One-off contribution added, response:', response.data); // Add this log
+        console.log('One-off contribution added, response:', response.data);
         setOneOffContributions(prevContributions => [...prevContributions, response.data]);
       } else {
         console.error('Failed to add contribution:', response.statusText);
@@ -115,6 +147,9 @@ export const ImpactProvider = ({ children }) => {
   return (
     <ImpactContext.Provider value={{
       impactScore,
+      lastYearImpactScore,
+      tier,
+      pointsToNextTier,
       donations,
       oneOffContributions,
       volunteerActivities,
@@ -127,15 +162,3 @@ export const ImpactProvider = ({ children }) => {
     </ImpactContext.Provider>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-

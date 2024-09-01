@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import ImpactVisualization from './ImpactVisualization';
 import CarouselComponent from './CarouselComponent';
@@ -10,6 +10,9 @@ function ImpactSpace() {
     oneOffContributions,
     volunteerActivities,
     impactScore,
+    lastYearImpactScore,
+    tier,
+    pointsToNextTier,
     fetchImpactData,
     error
   } = useContext(ImpactContext);
@@ -17,6 +20,12 @@ function ImpactSpace() {
   useEffect(() => {
     fetchImpactData();
   }, [fetchImpactData]);
+
+  const scoreChange = useMemo(() => {
+    return impactScore - lastYearImpactScore;
+  }, [impactScore, lastYearImpactScore]);
+
+  const arrow = scoreChange > 0 ? '▲' : scoreChange < 0 ? '▼' : '';
 
   const projectsToSupport = [
     { title: "Support Healthcare", description: "Provide essential medical supplies...", link: "#" },
@@ -44,10 +53,20 @@ function ImpactSpace() {
     <div className={styles.container}>
       <h2 className={styles.header}>Your Impact Space</h2>
       <div className={styles.impactScoreContainer}>
-        <h3 className={styles.impactScoreTitle}>Your Impact Score</h3>
-        <div className={styles.impactScoreBox}>
-          <p>{impactScore.toFixed(2)}</p>
-        </div>
+  <h3 className={styles.impactScoreTitle}>Your Impact Score</h3>
+  <div className={styles.impactScoreBox}>
+    <div className={styles.impactScoreValue}>{impactScore.toFixed(2)}</div>
+    <div className={styles.arrow}>{arrow}</div>
+    <div className={styles.scoreChange}>
+      {Math.abs(scoreChange).toFixed(2)} {scoreChange > 0 ? 'increase' : 'decrease'} from last year
+    </div>
+    <div className={styles.tierContainer}>
+      <p className={styles.tierInfo}>Current Tier: {tier}</p>
+      {pointsToNextTier > 0 && (
+        <p className={styles.nextTierInfo}>{pointsToNextTier.toFixed(0)} points to reach the next tier</p>
+      )}
+    </div>
+  </div>
         <ImpactVisualization />
       </div>
       <CarouselComponent title="Projects to Support" items={projectsToSupport} />
@@ -57,3 +76,5 @@ function ImpactSpace() {
 }
 
 export default ImpactSpace;
+
+
