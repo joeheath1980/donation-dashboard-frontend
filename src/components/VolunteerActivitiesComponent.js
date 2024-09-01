@@ -10,6 +10,7 @@ function VolunteerActivitiesComponent({ userId }) {
     date: '',
     description: ''
   });
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchActivities();
@@ -26,6 +27,7 @@ function VolunteerActivitiesComponent({ userId }) {
       setActivities(response.data);
     } catch (error) {
       console.error('Error fetching volunteer activities:', error);
+      setError('Failed to fetch activities. Please try again later.');
     }
   };
 
@@ -45,8 +47,10 @@ function VolunteerActivitiesComponent({ userId }) {
       });
       setActivities([...activities, response.data]);
       setNewActivity({ organization: '', hours: '', date: '', description: '' });
+      setError('');
     } catch (error) {
       console.error('Error adding volunteer activity:', error);
+      setError('Failed to add activity. Please try again.');
     }
   };
 
@@ -54,15 +58,17 @@ function VolunteerActivitiesComponent({ userId }) {
     <div className={styles.sectionContainer}>
       <h3 className={styles.sectionHeader}>Volunteer Activities</h3>
 
+      {error && <p className={styles.error}>{error}</p>}
+
       {activities.length > 0 ? (
         <ul className={styles.activityList}>
           {activities.map(activity => (
             <li key={activity._id} className={styles.activityItem}>
-              <p><strong>Organization:</strong> {activity.organization}</p>
-              <p><strong>Hours:</strong> {activity.hours}</p>
-              <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
-              <p><strong>Description:</strong> {activity.description}</p>
-              <p><strong>Status:</strong> {activity.status}</p>
+              <p className={styles.contributionDetail}><strong>Organization:</strong> {activity.organization}</p>
+              <p className={styles.contributionDetail}><strong>Hours:</strong> {activity.hours}</p>
+              <p className={styles.contributionDetail}><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
+              <p className={styles.contributionDetail}><strong>Description:</strong> {activity.description}</p>
+              <p className={styles.contributionDetail}><strong>Status:</strong> {activity.status}</p>
             </li>
           ))}
         </ul>

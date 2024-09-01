@@ -55,6 +55,12 @@ function Impact() {
     }
   };
 
+  const handleDelete = (index) => {
+    console.log('Deleting item at index:', index); // New console.log
+    const updatedResults = gmailResults.filter((_, i) => i !== index);
+    setGmailResults(updatedResults);
+  }
+
   return (
     <div className={styles.container}>
       <h2 className={styles.header}>Your Contributions</h2>
@@ -95,6 +101,13 @@ function Impact() {
                   <strong>Date:</strong> {result.date}<br />
                   <strong>Amount:</strong> {result.amount}<br />
                   <strong>Subject:</strong> {result.subject}
+                  <button
+                    className={styles.deleteIcon}
+                    onClick={() => handleDelete(index)}
+                    aria-label="Delete Gmail Result"
+                  >
+                    &times;
+                  </button>
                 </li>
               ))}
             </ul>
@@ -106,6 +119,7 @@ function Impact() {
 }
 
 export default Impact;
+
 
 
 

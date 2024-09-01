@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import styles from '../Impact.module.css'; // Make sure the path is correct
 
 function FundraisingCampaignsComponent({ userId }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -55,22 +56,22 @@ function FundraisingCampaignsComponent({ userId }) {
   };
 
   return (
-    <div className="container">
-      <h4>Fundraising Campaigns</h4>
+    <div className={styles.container}>
+      <h4 className={styles.sectionHeader}>Fundraising Campaigns</h4>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
 
       {campaigns.length > 0 ? (
-        <ul>
+        <ul className={styles.campaignList}>
           {campaigns.map(campaign => (
-            <li key={campaign._id}>
-              <p><strong>Campaign Title:</strong> {campaign.title}</p>
-              <p>{campaign.description}</p>
-              <p><strong>Goal:</strong> ${campaign.goalAmount}</p>
-              <p><strong>Raised:</strong> ${campaign.raisedAmount || 0}</p>
-              <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
-              <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
-              <p><strong>Status:</strong> {campaign.status}</p>
+            <li key={campaign._id} className={styles.campaignItem}>
+              <p className={styles.campaignTitle}><strong>Campaign Title:</strong> {campaign.title}</p>
+              <p className={styles.campaignDescription}>{campaign.description}</p>
+              <p className={styles.contributionDetail}><strong>Goal:</strong> ${campaign.goalAmount}</p>
+              <p className={styles.contributionDetail}><strong>Raised:</strong> ${campaign.raisedAmount || 0}</p>
+              <p className={styles.contributionDetail}><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+              <p className={styles.contributionDetail}><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
+              <p className={styles.contributionDetail}><strong>Status:</strong> {campaign.status}</p>
             </li>
           ))}
         </ul>
@@ -78,14 +79,15 @@ function FundraisingCampaignsComponent({ userId }) {
         <p>No fundraising campaigns found.</p>
       )}
 
-      <form onSubmit={handleSubmit}>
-          <input 
-            type="text" 
-            name="title" 
-            placeholder="Campaign Title" 
-            value={newCampaign.title} 
-            onChange={handleChange} 
-            required 
+      <form onSubmit={handleSubmit} className={styles.campaignForm}>
+        <input 
+          type="text" 
+          name="title" 
+          placeholder="Campaign Title" 
+          value={newCampaign.title} 
+          onChange={handleChange} 
+          required 
+          className={styles.formInput}
         />
         <textarea 
           name="description" 
@@ -93,32 +95,36 @@ function FundraisingCampaignsComponent({ userId }) {
           value={newCampaign.description} 
           onChange={handleChange} 
           required
+          className={styles.formTextarea}
         ></textarea>
-          <input 
-            type="number" 
-            name="goalAmount" 
-            placeholder="Goal Amount" 
-            value={newCampaign.goalAmount} 
-            onChange={handleChange} 
-            required 
-          />
-          <input 
-            type="date" 
-            name="startDate" 
-            placeholder="Start Date" 
-            value={newCampaign.startDate} 
-            onChange={handleChange} 
-            required 
-          />
-          <input 
-            type="date" 
-            name="endDate" 
-            placeholder="End Date" 
-            value={newCampaign.endDate} 
-            onChange={handleChange} 
-            required 
-          />
-        <button type="submit">Create Campaign</button>
+        <input 
+          type="number" 
+          name="goalAmount" 
+          placeholder="Goal Amount" 
+          value={newCampaign.goalAmount} 
+          onChange={handleChange} 
+          required 
+          className={styles.formInput}
+        />
+        <input 
+          type="date" 
+          name="startDate" 
+          placeholder="Start Date" 
+          value={newCampaign.startDate} 
+          onChange={handleChange} 
+          required 
+          className={styles.formInput}
+        />
+        <input 
+          type="date" 
+          name="endDate" 
+          placeholder="End Date" 
+          value={newCampaign.endDate} 
+          onChange={handleChange} 
+          required 
+          className={styles.formInput}
+        />
+        <button type="submit" className={styles.addButton}>Create Campaign</button>
       </form>
     </div>
   );

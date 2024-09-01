@@ -75,6 +75,11 @@
   font-size: 1.2em;
   cursor: pointer;
   color: #ff4136;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  z-index: 1;
 }
 
 .deleteIcon:hover {
@@ -182,6 +187,8 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background-color: white;
+  position: relative;  /* Add this line */
+  padding-right: 30px;  /* Add this line to make space for the delete button */
 }
 
 .gmailResultItem strong {
