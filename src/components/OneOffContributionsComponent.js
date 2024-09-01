@@ -1,53 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import styles from '../Impact.module.css';  // Assuming you have some styles defined for consistent UI
+import React from 'react';
+import styles from '../Impact.module.css';
+import { format, parseISO, parse } from 'date-fns';
 
-function OneOffContributionsComponent({ userId }) {
-  const [contributions, setContributions] = useState([]);
-
-  useEffect(() => {
-    const fetchContributions = async () => {
-      const token = localStorage.getItem('token');
-      try {
-        const response = await axios.get(`http://localhost:3002/api/contributions/one-off`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setContributions(response.data);
-      } catch (error) {
-        console.error('Error fetching one-off contributions:', error);
-      }
-    };
-
-    fetchContributions();
-  }, [userId]);
-
-  const handleDelete = async (contributionId) => {
+function formatDate(dateString) {
+  let date;
+  
+  try {
+    date = parseISO(dateString);
+  } catch (error) {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Update state to remove the deleted contribution
-      setContributions(contributions.filter(contribution => contribution._id !== contributionId));
+      date = parse(dateString, "EEE, dd MMM yyyy HH:mm:ss xx", new Date());
     } catch (error) {
-      console.error('Error deleting contribution:', error);
-      alert('Failed to delete contribution. Please try again.');
+      console.error("Failed to parse date:", dateString);
+      return dateString;
+    }
+  }
+  
+  return format(date, 'dd/MM/yyyy');
+}
+
+function OneOffContributionsComponent({ contributions, onDeleteContribution }) {
+  const handleDelete = async (contributionId) => {
+    if (window.confirm('Are you sure you want to delete this contribution?')) {
+      try {
+        await onDeleteContribution(contributionId);
+        console.log('Contribution deleted successfully');
+      } catch (error) {
+        console.error('Error deleting contribution:', error);
+        alert(`Failed to delete contribution: ${error.message}`);
+      }
     }
   };
 
   return (
     <div className={styles.contributionsContainer}>
-      {contributions.length > 0 ? (
+      {contributions && contributions.length > 0 ? (
         <ul className={styles.contributionsList}>
           {contributions.map((contribution) => (
             <li key={contribution._id} className={styles.contributionItem}>
               <strong>Charity:</strong> {contribution.charity}<br />
-              <strong>Date:</strong> {new Date(contribution.date).toLocaleDateString()}<br />
+              <strong>Date:</strong> {formatDate(contribution.date)}<br />
               <strong>Amount:</strong> {contribution.amount}<br />
               {contribution.subject && (
                 <>
@@ -72,6 +64,3 @@ function OneOffContributionsComponent({ userId }) {
 }
 
 export default OneOffContributionsComponent;
-
-
-

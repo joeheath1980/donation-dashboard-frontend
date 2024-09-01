@@ -51,6 +51,63 @@ export const ImpactProvider = ({ children }) => {
     return donationPoints + oneOffPoints + volunteerPoints;
   };
 
+  const parseAmount = (amountString) => {
+    const amount = parseFloat(amountString.replace(/[^\d.-]/g, ''));
+    return amount;
+  };
+
+  const addDonation = async (donation) => {
+    try {
+      const headers = getAuthHeaders();
+      const parsedDonation = {
+        ...donation,
+        amount: parseAmount(donation.amount),
+        charity: donation.charity.toLowerCase(),
+        date: donation.date // Ensure this is being sent
+      };
+  
+      console.log('Sending donation to backend:', parsedDonation); // Add this log
+  
+      const response = await axios.post('http://localhost:3002/api/donations', parsedDonation, { headers });
+  
+      if (response.status === 201) {
+        console.log('Donation added, response:', response.data); // Add this log
+        setDonations(prevDonations => [...prevDonations, response.data]);
+      } else {
+        console.error('Failed to add donation:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error adding donation:', error);
+      setError('Failed to add donation. Please try again.');
+    }
+  };
+
+  const addOneOffContribution = async (contribution) => {
+    try {
+      const headers = getAuthHeaders();
+      const parsedContribution = {
+        ...contribution,
+        amount: parseAmount(contribution.amount),
+        charity: contribution.charity.toLowerCase(),
+        date: contribution.date // Ensure we're sending the original date
+      };
+
+      console.log('Sending one-off contribution to backend:', parsedContribution); // Add this log
+
+      const response = await axios.post('http://localhost:3002/api/contributions/one-off', parsedContribution, { headers });
+
+      if (response.status === 201) {
+        console.log('One-off contribution added, response:', response.data); // Add this log
+        setOneOffContributions(prevContributions => [...prevContributions, response.data]);
+      } else {
+        console.error('Failed to add contribution:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error adding contribution:', error);
+      setError('Failed to add contribution. Please try again.');
+    }
+  };
+
   useEffect(() => {
     fetchImpactData();
   }, [fetchImpactData]);
@@ -62,12 +119,18 @@ export const ImpactProvider = ({ children }) => {
       oneOffContributions,
       volunteerActivities,
       fetchImpactData,
-      error
+      error,
+      addDonation,
+      addOneOffContribution
     }}>
       {children}
     </ImpactContext.Provider>
   );
 };
+
+
+
+
 
 
 
