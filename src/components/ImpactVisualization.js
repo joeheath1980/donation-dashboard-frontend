@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { parseISO, format } from 'date-fns';
-import { ImpactContext } from '../contexts/ImpactContext';
+import { parseISO, format, subYears } from 'date-fns';
+import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 
 Chart.register(...registerables);
 
@@ -14,49 +14,47 @@ function processData(donations, oneOffContributions, volunteerActivities) {
 
   const allContributions = [
     ...donations.map(d => ({ 
-      date: d.date, // Store the original date string
+      date: d.date,
       parsedDate: parseISO(d.date), 
-      impact: d.amount / 100, 
       type: 'Regular Donation' 
     })),
     ...oneOffContributions.map(d => ({ 
-      date: d.date, // Store the original date string
+      date: d.date,
       parsedDate: parseISO(d.date), 
-      impact: d.amount / 100, 
       type: 'One-off Donation' 
     })),
     ...volunteerActivities.map(v => ({ 
-      date: v.date, // Store the original date string
+      date: v.date,
       parsedDate: parseISO(v.date), 
-      impact: v.hours, 
       type: 'Volunteer Hours' 
     }))
   ];
 
-  console.log('Contributions before sorting:', 
-    allContributions.map(c => ({
-      ...c,
-      originalDate: c.date,
-      parsedDate: format(c.parsedDate, 'yyyy-MM-dd HH:mm:ss'),
-      parsedTimestamp: c.parsedDate.getTime()
-    }))
-  );
-
   allContributions.sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
 
-  console.log('Contributions after sorting:', 
-    allContributions.map(c => ({
-      ...c,
-      originalDate: c.date,
-      parsedDate: format(c.parsedDate, 'yyyy-MM-dd HH:mm:ss'),
-      parsedTimestamp: c.parsedDate.getTime()
-    }))
-  );
+  const benchmarks = {
+    monthlyDonationBenchmark: 100,
+    oneOffDonationBenchmark: 500
+  };
 
-  let cumulativeImpact = 0;
-  const dataPoints = allContributions.map(contribution => {
-    cumulativeImpact += contribution.impact;
-    return { x: contribution.parsedDate, y: cumulativeImpact };
+  const dataPoints = allContributions.map((_, index) => {
+    const currentDate = allContributions[index].parsedDate;
+    const oneYearAgo = subYears(currentDate, 1);
+
+    const currentData = {
+      regularDonations: donations.filter(d => parseISO(d.date) <= currentDate),
+      oneOffDonations: oneOffContributions.filter(d => parseISO(d.date) <= currentDate),
+      volunteeringActivities: volunteerActivities.filter(v => parseISO(v.date) <= currentDate),
+      previousPeriodScore: calculateComplexImpactScore({
+        regularDonations: donations.filter(d => parseISO(d.date) > oneYearAgo && parseISO(d.date) <= currentDate),
+        oneOffDonations: oneOffContributions.filter(d => parseISO(d.date) > oneYearAgo && parseISO(d.date) <= currentDate),
+        volunteeringActivities: volunteerActivities.filter(v => parseISO(v.date) > oneYearAgo && parseISO(v.date) <= currentDate),
+        previousPeriodScore: 0
+      }, benchmarks)
+    };
+
+    const score = calculateComplexImpactScore(currentData, benchmarks);
+    return { x: currentDate, y: score };
   });
 
   console.log('Final data points:', 
@@ -91,7 +89,7 @@ function ImpactVisualization() {
         type: 'line',
         data: {
           datasets: [{
-            label: 'Cumulative Impact Score',
+            label: 'Complex Impact Score',
             data: dataPoints,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -103,11 +101,9 @@ function ImpactVisualization() {
             x: {
               type: 'time',
               time: {
-                unit: 'month', // Adjust the unit to 'month' or 'year'
+                unit: 'month',
                 displayFormats: {
-                  day: 'dd/MM/yyyy', // Show day, month, and year
-                  month: 'MMM yyyy', // Show month and year
-                  year: 'yyyy' // Show only the year
+                  month: 'MMM yyyy'
                 }
               },
               title: {
@@ -118,21 +114,22 @@ function ImpactVisualization() {
             y: {
               title: {
                 display: true,
-                text: 'Impact Score'
-              }
+                text: 'Complex Impact Score'
+              },
+              min: 0,
+              max: 100
             }
           }
         }
       });
     }
   
-    // The return statement is aligned properly here
     return () => {
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
     };
-  }, [dataPoints]); // Ensure dependencies are correct
+  }, [dataPoints]);
 
   return <canvas ref={chartRef} />;
 }
