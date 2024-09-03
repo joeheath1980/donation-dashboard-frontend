@@ -1,48 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import axios from 'axios';
 
-const XIntegration = ({ user }) => {
-  const [tweets, setTweets] = useState([]);
+const API_BASE_URL = 'http://localhost:3002'; // Make sure this matches your backend server port
 
-  useEffect(() => {
-    // Function to fetch tweets from your backend
-    const fetchTweets = async () => {
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/tweets');
-        const data = await response.json();
-        setTweets(data);
-      } catch (error) {
-        console.error('Error fetching tweets:', error);
+// Search for tweets from specific charities
+export const searchTweets = async (charityNames, retries = 3) => {
+  console.log('Searching for tweets with charities:', charityNames);
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/search-tweets`, { charityNames });
+      const tweets = response.data;
+
+      console.log('Processed tweets:', tweets);
+      return tweets;
+    } catch (error) {
+      console.error(`Error fetching tweets (Attempt ${attempt}/${retries}):`, error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
       }
-    };
-
-    fetchTweets();
-  }, [user]);
-
-  return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Latest Updates from Your Charities on X</h2>
-      {tweets.map((tweet) => (
-        <Card key={tweet.id}>
-          <CardHeader>
-            <CardTitle>{tweet.author.name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{tweet.text}</p>
-            <a 
-              href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              View on X
-            </a>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+      if (attempt === retries) {
+        throw error; // Rethrow the error after all retries have failed
+      }
+      // Wait for 2 seconds before retrying
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
 };
-
-export default XIntegration;

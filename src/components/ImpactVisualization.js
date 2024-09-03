@@ -50,10 +50,10 @@ function processData(donations, oneOffContributions, volunteerActivities) {
         oneOffDonations: oneOffContributions.filter(d => parseISO(d.date) > oneYearAgo && parseISO(d.date) <= currentDate),
         volunteeringActivities: volunteerActivities.filter(v => parseISO(v.date) > oneYearAgo && parseISO(v.date) <= currentDate),
         previousPeriodScore: 0
-      }, benchmarks)
+      }, benchmarks).totalScore
     };
 
-    const score = calculateComplexImpactScore(currentData, benchmarks);
+    const score = calculateComplexImpactScore(currentData, benchmarks).totalScore;
     return { x: currentDate, y: score };
   });
 
@@ -78,6 +78,7 @@ function ImpactVisualization() {
   );
 
   useEffect(() => {
+    console.log('Rendering chart with dataPoints:', dataPoints);
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
   
@@ -135,9 +136,3 @@ function ImpactVisualization() {
 }
 
 export default ImpactVisualization;
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
 export const ImpactContext = createContext();
@@ -46,37 +46,37 @@ export const calculateComplexImpactScore = (userData, benchmarks) => {
     return hoursScore + uniqueActivitiesScore;
   })();
 
-  // Calculate base score before engagement bonus
-  const baseScore = 
-    (regularDonationScore * 0.35) +
-    (oneOffDonationScore * 0.25) +
-    (volunteeringScore * 0.30);
-
   // 4. Engagement Bonus (10%)
   const engagementBonus = (() => {
     const hasAllThreeCategories = regularDonations.length > 0 && oneOffDonations.length > 0 && volunteeringActivities.length > 0;
     const consistencyScore = hasAllThreeCategories ? 5 : 0;
-    const growthScore = Math.min(Math.max((baseScore - previousPeriodScore) / 10, 0), 5);
+    const growthScore = Math.min(Math.max((previousPeriodScore - (regularDonationScore + oneOffDonationScore + volunteeringScore)) / 10, 0), 5);
     return consistencyScore + growthScore;
   })();
 
   // Calculate final total score
-  const totalScore = baseScore + engagementBonus;
+  const totalScore = regularDonationScore + oneOffDonationScore + volunteeringScore + engagementBonus;
 
   console.log("Calculation results:", {
     regularDonationScore,
     oneOffDonationScore,
     volunteeringScore,
-    baseScore,
     engagementBonus,
     totalScore
   });
 
-  return Math.min(Math.round(totalScore), 100);
+  return {
+    totalScore: Math.min(Math.round(totalScore), 100),
+    regularDonationScore: Math.round(regularDonationScore),
+    oneOffDonationScore: Math.round(oneOffDonationScore),
+    volunteeringScore: Math.round(volunteeringScore),
+    engagementBonus: Math.round(engagementBonus)
+  };
 };
 
 export const ImpactProvider = ({ children }) => {
   const [impactScore, setImpactScore] = useState(0);
+  const [scoreDetails, setScoreDetails] = useState(null);
   const [lastYearImpactScore, setLastYearImpactScore] = useState(0);
   const [tier, setTier] = useState("Giver");
   const [pointsToNextTier, setPointsToNextTier] = useState(0);
@@ -120,8 +120,14 @@ export const ImpactProvider = ({ children }) => {
         oneOffDonationBenchmark: 500
       };
 
-      const currentScore = calculateComplexImpactScore(userData, benchmarks);
-      setImpactScore(currentScore);
+      const scoreResult = calculateComplexImpactScore(userData, benchmarks);
+      setImpactScore(scoreResult.totalScore);
+      setScoreDetails({
+        regularDonationScore: scoreResult.regularDonationScore,
+        oneOffDonationScore: scoreResult.oneOffDonationScore,
+        volunteeringScore: scoreResult.volunteeringScore,
+        engagementBonus: scoreResult.engagementBonus
+      });
 
       // Calculate the impact score from one year ago
       const lastYearUserData = {
@@ -130,11 +136,11 @@ export const ImpactProvider = ({ children }) => {
         volunteeringActivities: volunteerRes.data.filter(a => new Date(a.date) <= oneYearAgo),
         previousPeriodScore: 0 // Assume no previous score for last year's calculation
       };
-      const lastYearScore = calculateComplexImpactScore(lastYearUserData, benchmarks);
-      setLastYearImpactScore(lastYearScore);
+      const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData, benchmarks);
+      setLastYearImpactScore(lastYearScoreResult.totalScore);
 
       // Calculate the current tier and points to next tier
-      const currentTier = getTier(currentScore);
+      const currentTier = getTier(scoreResult.totalScore);
       setTier(currentTier.tier);
       setPointsToNextTier(currentTier.pointsToNextTier);
 
@@ -211,13 +217,10 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    fetchImpactData();
-  }, [fetchImpactData]);
-
   return (
     <ImpactContext.Provider value={{
       impactScore,
+      scoreDetails,
       lastYearImpactScore,
       tier,
       pointsToNextTier,
@@ -228,7 +231,7 @@ export const ImpactProvider = ({ children }) => {
       error,
       addDonation,
       addOneOffContribution,
-      calculateComplexImpactScore // Add this to make it available to consumers
+      calculateComplexImpactScore
     }}>
       {children}
     </ImpactContext.Provider>

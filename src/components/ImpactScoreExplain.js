@@ -1,52 +1,67 @@
-// src/components/ImpactScoreExplain.js
-import React from 'react';
-import Progress from './Progress';  // Adjust the path if needed
+import React, { useState, useContext } from 'react';
+import Progress from './Progress';
+import styles from '../Profile.module.css';
+import { ImpactContext } from '../contexts/ImpactContext';
 
-const ImpactScoreExplain = ({ impactScore, regularDonationScore, oneOffDonationScore, volunteeringScore, engagementBonus }) => {
+const ImpactScoreExplanation = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { impactScore, scoreDetails } = useContext(ImpactContext);
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  if (!scoreDetails) {
+    return null; // or return a loading state
+  }
+
+  const { regularDonationScore, oneOffDonationScore, volunteeringScore, engagementBonus } = scoreDetails;
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Understanding Your Impact Score</h2>
-      <p className="mb-4">Your Impact Score is calculated based on four main factors:</p>
-      
-      <div className="space-y-6">
-        <ScoreComponent 
-          title="Regular Donations" 
-          score={regularDonationScore} 
-          maxScore={35} 
-          description="Based on your monthly average, donation streak, and variety of charities supported."
-        />
-        
-        <ScoreComponent 
-          title="One-off Donations" 
-          score={oneOffDonationScore} 
-          maxScore={25} 
-          description="Considers the total amount and number of one-time donations."
-        />
-        
-        <ScoreComponent 
-          title="Volunteering" 
-          score={volunteeringScore} 
-          maxScore={30} 
-          description="Calculated from your total volunteer hours and variety of activities."
-        />
-        
-        <ScoreComponent 
-          title="Engagement Bonus" 
-          score={engagementBonus} 
-          maxScore={10} 
-          description="Extra points for consistent involvement across all categories and improvement over time."
-        />
+    <div className={`${styles.card} ${styles.impactScoreCard}`}>
+      <div className={styles.cardHeader} onClick={toggleExpand}>
+        <button className={styles.expandButton}>
+          {isExpanded ? '▲' : '▼'}
+        </button>
+        <h2 className={styles.cardTitle}>Impact Score Breakdown</h2>
       </div>
-      
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-2">Your Total Impact Score</h3>
-        <Progress value={impactScore} className="w-full h-4" />
-        <p className="text-center mt-2">{impactScore} / 100</p>
-      </div>
-      
-      <p className="mt-6 text-sm text-gray-600">
-        Note: Your Impact Score is designed to encourage consistent, diverse, and growing contributions to charitable causes. Keep up the great work!
-      </p>
+      {isExpanded && (
+        <div className={styles.cardContent}>
+          <ScoreComponent 
+            title="Regular Donations" 
+            score={regularDonationScore} 
+            maxScore={35} 
+            description="Based on monthly average, streak, and variety of charities."
+          />
+          
+          <ScoreComponent 
+            title="One-off Donations" 
+            score={oneOffDonationScore} 
+            maxScore={25} 
+            description="Based on total amount and number of donations."
+          />
+          
+          <ScoreComponent 
+            title="Volunteering" 
+            score={volunteeringScore} 
+            maxScore={30} 
+            description="Based on total hours and variety of activities."
+          />
+          
+          <ScoreComponent 
+            title="Engagement Bonus" 
+            score={engagementBonus} 
+            maxScore={10} 
+            description="Extra points for consistent involvement and improvement."
+          />
+          
+          <div className={styles.totalScore}>
+            <h3>Total Impact Score</h3>
+            <Progress value={impactScore} max={100} className={styles.progressBar} />
+            <p className={styles.totalScoreValue}>{impactScore} / 100</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -55,12 +70,13 @@ const ScoreComponent = ({ title, score, maxScore, description }) => {
   const percentage = (score / maxScore) * 100;
   
   return (
-    <div>
-      <h3 className="text-lg font-semibold mb-2">{title} ({score}/{maxScore} points)</h3>
-      <Progress value={percentage} className="w-full h-3" />
-      <p className="text-sm mt-1 text-gray-600">{description}</p>
+    <div className={styles.scoreComponent}>
+      <h3>{title}</h3>
+      <p className={styles.scoreValue}>{score}/{maxScore}</p>
+      <Progress value={percentage} max={100} className={styles.progressBar} />
+      <p className={styles.description}>{description}</p>
     </div>
   );
 };
 
-export default ImpactScoreExplain;
+export default ImpactScoreExplanation;
