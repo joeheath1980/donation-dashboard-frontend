@@ -4,6 +4,9 @@ import ImpactVisualization from './ImpactVisualization';
 import CarouselComponent from './CarouselComponent';
 import PersonalImpactScore from './PersonalImpactScore';
 import styles from '../ImpactSpace.module.css';
+import { applyGlobalStyles, globalClasses } from '../utils/styleUtils';
+
+const combinedStyles = applyGlobalStyles(styles, globalClasses);
 
 function ImpactSpace() {
   const {
@@ -36,16 +39,16 @@ function ImpactSpace() {
   ];
 
   if (impactError) {
-    return <div className={styles.error}>{impactError}</div>;
+    return <div className={combinedStyles.error}>{impactError}</div>;
   }
 
   if (!donations.length && !oneOffContributions.length && !volunteerActivities.length) {
-    return <div className={styles.loading}>Loading your impact data...</div>;
+    return <div className={combinedStyles.card}>Loading your impact data...</div>;
   }
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.header}>Your Impact Space</h2>
+    <div className={combinedStyles.container}>
+      <h2 className={combinedStyles.subheader}>Your Impact Space</h2>
       <PersonalImpactScore
         impactScore={impactScore}
         scoreChange={scoreChange}
@@ -53,8 +56,8 @@ function ImpactSpace() {
         tier={tier}
         pointsToNextTier={pointsToNextTier}
       />
-      <div className={styles.visualizationContainer}>
-        <h3>Impact Score Over Time</h3>
+      <div className={`${combinedStyles.visualizationContainer} ${combinedStyles.card}`}>
+        <h3 className={combinedStyles.subheader}>Impact Score Over Time</h3>
         <ImpactVisualization />
       </div>
       <CarouselComponent title="Projects to Support" items={projectsToSupport} />

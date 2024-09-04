@@ -1,46 +1,133 @@
-// src/components/Matching.js
-import React, { useContext, useEffect, useState } from 'react';
-import MatchingOpportunitiesComponent from './MatchingOpportunitiesComponent';
-import { ImpactContext } from '../contexts/ImpactContext';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import styles from '../Matching.module.css';
+import { applyGlobalStyles, globalClasses } from '../utils/styleUtils';
+
+const combinedStyles = applyGlobalStyles(styles, globalClasses);
 
 function Matching() {
-  const { matchingOpportunities, fetchImpactData, error } = useContext(ImpactContext);
+  const { user, getAuthHeaders } = useAuth();
+  const [matchingOpportunities, setMatchingOpportunities] = useState([]);
+  const [filteredOpportunities, setFilteredOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const loadData = async () => {
+    const fetchMatchingOpportunities = async () => {
+      if (!user) return;
+      
       setIsLoading(true);
-      await fetchImpactData();
-      setIsLoading(false);
+      setError(null);
+      
+      try {
+        const headers = getAuthHeaders();
+        const response = await axios.get('http://localhost:3002/api/matchingOpportunities', { headers });
+        setMatchingOpportunities(response.data);
+        setFilteredOpportunities(response.data);
+      } catch (err) {
+        console.error('Error fetching matching opportunities:', err);
+        setError('Failed to fetch matching opportunities. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     };
-    loadData();
-  }, [fetchImpactData]);
+
+    fetchMatchingOpportunities();
+  }, [user, getAuthHeaders]);
+
+  useEffect(() => {
+    if (filter === 'all') {
+      setFilteredOpportunities(matchingOpportunities);
+    } else {
+      setFilteredOpportunities(matchingOpportunities.filter(opp => opp.category === filter));
+    }
+  }, [filter, matchingOpportunities]);
+
+  const handleMatch = async (opportunityId) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.post(`http://localhost:3002/api/matchingOpportunities/${opportunityId}/accept`, {}, { headers });
+      setMatchingOpportunities(prevOpportunities =>
+        prevOpportunities.map(opp =>
+          opp._id === opportunityId ? { ...opp, accepted: true } : opp
+        )
+      );
+    } catch (err) {
+      console.error('Error accepting matching opportunity:', err);
+      setError('Failed to accept the matching opportunity. Please try again.');
+    }
+  };
+
+  const renderOpportunityCards = () => {
+    const cards = [];
+    for (let i = 0; i < 15; i++) {
+      const opportunity = filteredOpportunities[i] || { _id: `placeholder-${i}`, placeholder: true };
+      cards.push(
+        <div key={opportunity._id} className={`${combinedStyles.opportunityCard} ${opportunity.placeholder ? combinedStyles.placeholderCard : ''} ${combinedStyles.card}`}>
+          {!opportunity.placeholder ? (
+            <>
+              <h3 className={combinedStyles.subheader}>{opportunity.brand}</h3>
+              <p className={combinedStyles.paragraph}><strong>Conditions:</strong> {opportunity.conditions}</p>
+              <p className={combinedStyles.paragraph}><strong>Amount:</strong> ${opportunity.amount}</p>
+              <p className={combinedStyles.paragraph}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+              <button
+                onClick={() => handleMatch(opportunity._id)}
+                className={opportunity.accepted ? combinedStyles.secondaryButton : combinedStyles.primaryButton}
+                disabled={opportunity.accepted}
+              >
+                {opportunity.accepted ? 'Matched' : 'Match'}
+              </button>
+            </>
+          ) : (
+            <p className={combinedStyles.paragraph}>Future matching opportunity</p>
+          )}
+        </div>
+      );
+    }
+    return cards;
+  };
+
+  if (isLoading) {
+    return <div className={combinedStyles.card}>Loading matching opportunities...</div>;
+  }
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={fetchImpactData} className={styles.retryButton}>
+      <div className={combinedStyles.card}>
+        <h2 className={combinedStyles.subheader}>Error</h2>
+        <p className={combinedStyles.error}>{error}</p>
+        <button onClick={() => window.location.reload()} className={combinedStyles.primaryButton}>
           Retry
         </button>
       </div>
     );
   }
 
-  if (isLoading) {
-    return <div className={styles.loading}>Loading matching opportunities...</div>;
-  }
-
   return (
-    <div className={styles.container}>
-      <h2 className={styles.header}>Matching Opportunities</h2>
-      {matchingOpportunities && matchingOpportunities.length > 0 ? (
-        <MatchingOpportunitiesComponent opportunities={matchingOpportunities} />
-      ) : (
-        <p className={styles.noOpportunities}>No matching opportunities found at the moment.</p>
-      )}
+    <div className={combinedStyles.container}>
+      <h1 className={combinedStyles.header}>Matching Opportunities</h1>
+      <p className={combinedStyles.paragraph}>
+        Explore curated donation matches tailored to your interests. Find matches for your favorite charities, discover new causes, or leverage partner offers. Use filters to navigate easily. Make your giving go further with the perfect match!
+      </p>
+      
+      <div className={combinedStyles.filterContainer}>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className={combinedStyles.input}
+        >
+          <option value="all">All Opportunities</option>
+          <option value="yourCharities">Your Charities</option>
+          <option value="relevantCauses">Relevant Causes</option>
+          <option value="partners">Our Partners</option>
+        </select>
+      </div>
+
+      <div className={combinedStyles.opportunitiesGrid}>
+        {renderOpportunityCards()}
+      </div>
     </div>
   );
 }

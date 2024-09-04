@@ -1,111 +1,54 @@
-/* Layout container styling */
 .layoutContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Header styling */
-.header {
-  width: 100%;
-  background-color: #FAF7F1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0; /* Add padding to create space around the logo */
-}
-
-/* Logo styling */
-.logo {
-  width: 300px; /* Increase logo size */
-  height: auto;
-  margin-bottom: 20px; /* Add space between logo and nav bar */
-}
-
-/* NavBar container */
 .navbar {
-  width: 100%;
-  background-color: transparent; /* Make navbar background transparent */
   display: flex;
-  justify-content: center; /* Center the nav links */
-  margin-top: -10px; /* Slight adjustment to move it closer to the logo */
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Navigation links container */
-.navLinks {
-  list-style-type: none;
+.logoContainer {
   display: flex;
-  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  height: 120px; /* Doubled the logo size from 60px to 120px */
+  width: auto;
+  object-fit: contain;
+}
+
+.navLinks {
+  display: flex;
+  list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-/* Each tab (link) styling */
-.navLinks li {
-  margin: 0 10px;
-}
-
-/* Link styling */
 .navLink {
-  display: block;
-  padding: 10px 20px;
-  color: #06BA60 !important; /* Ensure text color is correct */
-  text-decoration: none !important;
-  text-transform: uppercase !important;
-  font-weight: bold !important;
-  font-family: 'Arial', sans-serif;
-  background-color: #ffffff;
-  border-radius: 4px; /* Rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  transition: color 0.3s ease, background-color 0.3s ease;
+  color: #333;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem;
+  margin: 0 0.5rem;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
-/* Hover state for the tabs */
 .navLink:hover {
-  color: #004a80 !important; /* Darker shade on hover */
-  text-decoration: underline !important;
+  color: #4CAF50;
 }
 
-/* Active tab styling */
-.activeLink {
-  color: #004a80 !important;
-  border-bottom: 3px solid #ffc107;
-}
-
-/* Content area styling */
 .content {
-  padding: 20px;
-  max-width: 900px;
-  margin: 0 auto;
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #ffffff;
 }
-
-/* Responsive design for smaller screens */
-@media (max-width: 768px) {
-  .navLinks {
-    flex-direction: column;
-  }
-
-  .navLink {
-    margin: 5px 0;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  

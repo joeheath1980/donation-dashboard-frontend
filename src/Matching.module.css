@@ -1,65 +1,115 @@
-.matchingContainer {
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.blurb {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.filterContainer {
+  margin-bottom: 30px;
+}
+
+.filterSelect {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  width: 200px;
+}
+
+.opportunitiesGrid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
-  width: 100%;
-  padding: 20px;
 }
 
-.personalImpactScore {
-  grid-column: 2 / span 1;
-  grid-row: 1 / span 1;
-  background-color: #f4f4f4;
+.opportunityCard {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  text-align: center;
-}
-
-.companyMatching {
-  grid-column: 2 / span 1;
-  grid-row: 2 / span 1;
-  background-color: #e0e0e0;
-  padding: 20px;
-}
-
-.matchYourCompany {
-  grid-column: 2 / span 1;
-  grid-row: 3 / span 1;
-  background-color: #d0d0d0;
-  padding: 20px;
-}
-
-.companyImpact {
-  grid-column: 2 / span 1;
-  grid-row: 4 / span 1;
-  background-color: #c0c0c0;
-  padding: 20px;
-  text-align: center;
-}
-
-.matchingBox {
+  transition: transform 0.3s ease;
+  min-height: 250px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
 }
 
-.regular,
-.oneOff,
-.charities,
-.projects {
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+.opportunityCard:hover {
+  transform: translateY(-5px);
 }
 
-.scoreBox {
-  font-size: 2rem;
-  font-weight: bold;
+.opportunityCard h3 {
+  font-size: 1.5rem;
   color: #333;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.opportunityCard p {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.matchButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  align-self: flex-end;
+}
+
+.matchButton:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.matchButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.loading, .errorContainer, .noOpportunities {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 50px;
+}
+
+.retryButton {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+.retryButton:hover {
+  background-color: #d32f2f;
+}
+
+.placeholderCard {
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-style: italic;
 }

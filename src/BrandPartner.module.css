@@ -1,0 +1,58 @@
+.brandContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.brandName {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.brandDetails, .supportedCharities, .csrImpact {
+  margin-bottom: 2rem;
+}
+
+.brandDetails h2, .supportedCharities h2, .csrImpact h2 {
+  font-size: 1.8rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.supportedCharities ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.supportedCharities li {
+  margin-bottom: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.followButton, .matchButton {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.followButton {
+  background-color: #2196F3;
+  color: white;
+}
+
+.matchButton {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.followButton:hover, .matchButton:hover {
+  opacity: 0.9;
+}

@@ -1,99 +1,92 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import styles from '../Login.module.css';  // Ensure the path is correct
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import styles from '../Login.module.css';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // For sign-up form
   const [error, setError] = useState(null);
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and sign-up
-
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
-      const endpoint = isLogin 
-        ? 'http://localhost:3002/api/auth' 
-        : 'http://localhost:3002/api/register'; 
-      const data = isLogin 
-        ? { email, password } 
-        : { name, email, password };
-      
-      // Send the request
-      const response = await axios.post(endpoint, data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (isLogin) {
-        const { token } = response.data;
-
-        // Store the token in localStorage
-        localStorage.setItem('token', token);
-
-        // Navigate to the ImpactSpace
-        navigate('/ImpactSpace');
-      } else {
-        // Switch back to login after successful sign-up
-        setIsLogin(true);
-        alert('Account created successfully! Please log in.');
-      }
+      await login(email, password);
+      navigate('/');
     } catch (err) {
-      setError(isLogin ? 'Invalid credentials' : 'Sign-up failed');
-      console.error(isLogin ? 'Error logging in:' : 'Error signing up:', err);
+      console.error('Error logging in:', err);
+      setError(err.response?.data?.error || 'Failed to log in. Please try again.');
     }
   };
 
+  const handleSocialLogin = (provider) => {
+    console.log(`Logging in with ${provider}`);
+    // Implement social login logic here
+  };
+
   return (
-    <div className={styles.loginContainer}>
-      <h2 className={styles.header}>{isLogin ? 'Login' : 'Sign Up'}</h2>
+    <div className={`${styles.loginContainer} container card`}>
+      <h2 className="h2">Login</h2>
       <form onSubmit={handleSubmit}>
-        {!isLogin && (
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={styles.inputField}
-              required
-            />
-          </div>
-        )}
         <div className={styles.formGroup}>
-          <label className={styles.label}>Email:</label>
+          <label className="form-label">Email:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={styles.inputField}
+            className="form-input"
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Password:</label>
+          <label className="form-label">Password:</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={styles.inputField}
+            className="form-input"
             required
           />
         </div>
-        <button type="submit" className={styles.submitButton}>
-          {isLogin ? 'Login' : 'Sign Up'}
+        <button type="submit" className="btn btn-primary">
+          Login
         </button>
-        {error && <p className={styles.errorText}>{error}</p>}
+        {error && <p className="form-error">{error}</p>}
       </form>
-      <p
-        onClick={() => setIsLogin(!isLogin)}
-        className={styles.toggleText}
-      >
-        {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+
+      <div className={`${styles.socialLogin} card`}>
+        <h3 className="h3">Or login with:</h3>
+        <button 
+          onClick={() => handleSocialLogin('google')} 
+          className="btn btn-secondary"
+          style={{backgroundColor: '#DB4437', color: 'white', marginBottom: '10px'}}
+        >
+          Google
+        </button>
+        <button 
+          onClick={() => handleSocialLogin('outlook')} 
+          className="btn btn-secondary"
+          style={{backgroundColor: '#0072C6', color: 'white', marginBottom: '10px'}}
+        >
+          Outlook
+        </button>
+        <button 
+          onClick={() => handleSocialLogin('apple')} 
+          className="btn btn-secondary"
+          style={{backgroundColor: '#000000', color: 'white'}}
+        >
+          Apple
+        </button>
+      </div>
+
+      <p className={styles.toggleText}>
+        <Link to="/signup">Need an account? Sign Up</Link>
+      </p>
+      <p className={styles.organizationSignup}>
+        <a href="/organization-signup">Are you a charity or organization? Sign up here</a>
       </p>
     </div>
   );

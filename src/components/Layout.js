@@ -1,24 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styles from '../Layout.module.css'; // Ensure this path is correct
-import logo from '../assets/logo.png';
+import styles from '../Layout.module.css';
+import logo from '../assets/download.svg';
 
 function Layout({ children }) {
   return (
-    <div className={styles.layoutContainer}>
-      <div className={styles.header}>
-        <img src={logo} alt="DonateSpace Logo" className={styles.logo} />
-      </div>
+    <div className={`${styles.layoutContainer} container`}>
       <nav className={styles.navbar}>
+        <div className={styles.logoContainer}>
+          <img src={logo} alt="DonateSpace Logo" className={styles.logo} />
+        </div>
         <ul className={styles.navLinks}>
-          <li><Link to="/ImpactSpace" className={styles.navLink}>IMPACT SPACE</Link></li>
-          <li><Link to="/profile" className={styles.navLink}>PROFILE</Link></li>
-          <li><Link to="/impact" className={styles.navLink}>IMPACT</Link></li>
-          <li><Link to="/matching" className={styles.navLink}>MATCHING</Link></li>
-          <li><Link to="/YourAccount" className={styles.navLink}>YOUR ACCOUNT</Link></li>
+          <li><Link to="/ImpactSpace" className={`${styles.navLink} btn btn-secondary`}>Impact Space</Link></li>
+          <li><Link to="/profile" className={`${styles.navLink} btn btn-secondary`}>Profile</Link></li>
+          <li><Link to="/impact" className={`${styles.navLink} btn btn-secondary`}>Impact</Link></li>
+          <li><Link to="/matching" className={`${styles.navLink} btn btn-secondary`}>Matching</Link></li>
+          <li><Link to="/your-perks" className={`${styles.navLink} btn btn-secondary`}>Your Perks</Link></li>
+          <li><Link to="/YourAccount" className={`${styles.navLink} btn btn-secondary`}>Your Account</Link></li>
+          <li><Link to="/about" className={`${styles.navLink} btn btn-secondary`}>About</Link></li>
         </ul>
       </nav>
-      <div className={styles.content}>
+      <div className={`${styles.content} card`}>
         {children}
       </div>
     </div>
@@ -26,5 +28,3 @@ function Layout({ children }) {
 }
 
 export default Layout;
-
-

@@ -1,0 +1,40 @@
+.partnersContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.partnerList {
+  margin-bottom: 2rem;
+}
+
+.partnerList h2 {
+  font-size: 1.8rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.partnerList ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.partnerList li {
+  margin-bottom: 0.5rem;
+}
+
+.partnerList a {
+  color: #2196F3;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+.partnerList a:hover {
+  text-decoration: underline;
+}
