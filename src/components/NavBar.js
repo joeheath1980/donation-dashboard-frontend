@@ -17,11 +17,6 @@ function NavBar() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/impact" activeClassName={styles.active}>
-            Impact
-          </NavLink>
-        </li>
-        <li>
           <NavLink to="/profile" activeClassName={styles.active}>
             Profile/Settings
           </NavLink>

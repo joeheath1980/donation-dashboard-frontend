@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import styles from '../Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ImpactScoreExplain from './ImpactScoreExplain';
@@ -23,7 +24,8 @@ function Profile() {
     onDeleteContribution,
     fetchImpactData,
     error: impactError,
-    volunteerActivities
+    volunteerActivities,
+    followedCharities
   } = useContext(ImpactContext);
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
@@ -131,7 +133,7 @@ function Profile() {
       });
       alert(`Failed to add completed campaign: ${error.message}`);
     }
-  }, [contextSetOneOffContributions]);
+  }, [contextSetOneOffContributions, setLocalOneOffContributions, localOneOffContributions]);
 
   const threeColumnContainerStyle = {
     display: 'flex',
@@ -210,44 +212,68 @@ function Profile() {
         <CarouselComponent title="Projects to Support" items={projectsToSupport} />
       </div>
       
-      <div className={styles.donationsContainer}>
-        <div className={styles.columns}>
-          <div className={styles.column}>
-            <h3>Regular Donations</h3>
+      <div className={styles.donationsContainer} style={threeColumnContainerStyle}>
+        <div className={styles.column} style={columnStyle}>
+          <h3>Regular Donations</h3>
+          {localDonations && localDonations.length > 0 ? (
             <ul>
               {getUniqueCharities().map((charity, index) => (
                 <li key={index}>{charity}</li>
               ))}
             </ul>
-            <div className={styles.regularContributionsWrapper}>
-              <h4 className={styles.seeHistoryHeader} onClick={toggleRegularContributions}>
-                See history {showRegularContributions ? '▲' : '▼'}
-              </h4>
-              {showRegularContributions && (
-                <div className={styles.donationsComponentWrapper}>
-                  <DonationsComponent donations={localDonations} onDeleteDonation={handleDeleteDonation} />
-                </div>
-              )}
-            </div>
+          ) : (
+            <p>No regular donations yet.</p>
+          )}
+          <div className={styles.regularContributionsWrapper}>
+            <h4 className={styles.seeHistoryHeader} onClick={toggleRegularContributions}>
+              See history {showRegularContributions ? '▲' : '▼'}
+            </h4>
+            {showRegularContributions && (
+              <div className={styles.donationsComponentWrapper}>
+                <DonationsComponent donations={localDonations} onDeleteDonation={handleDeleteDonation} />
+              </div>
+            )}
           </div>
-          <div className={styles.column}>
-            <h3>Recent One-off Donations</h3>
+        </div>
+        <div className={styles.column} style={columnStyle}>
+          <h3>Recent One-off Donations</h3>
+          {localOneOffContributions && localOneOffContributions.length > 0 ? (
             <ul>
               {getRecentOneOffDonations().map((donation, index) => (
                 <li key={index}>{donation.charity}: ${donation.amount}</li>
               ))}
             </ul>
-            <div className={styles.oneOffContributionsWrapper}>
-              <h4 className={styles.seeHistoryHeader} onClick={toggleOneOffContributions}>
-                See history {showOneOffContributions ? '▲' : '▼'}
-              </h4>
-              {showOneOffContributions && (
-                <div className={styles.contributionsComponentWrapper}>
-                  <OneOffContributionsComponent contributions={localOneOffContributions} onDeleteContribution={handleDeleteContribution} />
-                </div>
-              )}
-            </div>
+          ) : (
+            <p>No one-off donations yet.</p>
+          )}
+          <div className={styles.oneOffContributionsWrapper}>
+            <h4 className={styles.seeHistoryHeader} onClick={toggleOneOffContributions}>
+              See history {showOneOffContributions ? '▲' : '▼'}
+            </h4>
+            {showOneOffContributions && (
+              <div className={styles.contributionsComponentWrapper}>
+                <OneOffContributionsComponent contributions={localOneOffContributions} onDeleteContribution={handleDeleteContribution} />
+              </div>
+            )}
           </div>
+        </div>
+        <div className={styles.column} style={columnStyle}>
+          <h3>Charities Following</h3>
+          {followedCharities && followedCharities.length > 0 ? (
+            <ul>
+              {followedCharities.map((charity, index) => (
+                <li key={index}>
+                  {charity.logo && (
+                    <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px'}} />
+                  )}
+                  {charity.name}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Not following any charities yet.</p>
+          )}
+          <Link to="/search-charities" className={styles.searchCharitiesLink}>Search Charities</Link>
         </div>
       </div>
 

@@ -20,8 +20,7 @@ function Layout({ children }) {
             ☰
           </button>
           <ul className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
-            <li><Link to="/profile" className={styles.navLink}>Profile</Link></li>
-            <li><Link to="/impact" className={styles.navLink}>Impact</Link></li>
+            <li><Link to="/dashboard" className={styles.navLink}>Dashboard</Link></li>
             <li><Link to="/matching" className={styles.navLink}>Matching</Link></li>
             <li><Link to="/your-perks" className={styles.navLink}>Your Perks</Link></li>
             <li><Link to="/YourAccount" className={styles.navLink}>Your Account</Link></li>

@@ -1,70 +1,109 @@
-.charityContainer {
+/* CharityPartner.module.css */
+.container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
-.charityName {
-  font-size: 2.5rem;
+.header {
   color: #333;
-  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.missionStatement, .impactReports, .transparencyReports {
-  margin-bottom: 2rem;
+.card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.missionStatement h2, .impactReports h2, .transparencyReports h2 {
-  font-size: 1.8rem;
-  color: #4CAF50;
-  margin-bottom: 1rem;
+.sectionHeader {
+  color: #444;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
 }
 
-.impactReports ul, .transparencyReports ul {
-  list-style-type: none;
-  padding: 0;
+.paragraph {
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
-.impactReports li, .transparencyReports li {
-  margin-bottom: 1rem;
+.programCard {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
-.impactReports h3 {
-  font-size: 1.4rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.actions {
+.programHeader {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 }
 
-.followButton, .matchButton, .donateButton {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+.programName {
+  color: #333;
+  margin: 0;
+}
+
+.chevron {
+  font-size: 20px;
+  transition: transform 0.3s ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.programDetails {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.programDetails.open {
+  max-height: 1000px; /* Adjust this value based on your content */
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.button {
+  padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
 }
 
-.followButton {
-  background-color: #2196F3;
-  color: white;
-}
-
-.matchButton {
+.primaryButton {
+  composes: button;
   background-color: #4CAF50;
   color: white;
 }
 
-.donateButton {
-  background-color: #F44336;
+.primaryButton:hover {
+  background-color: #45a049;
+}
+
+.secondaryButton {
+  composes: button;
+  background-color: #008CBA;
   color: white;
 }
 
-.followButton:hover, .matchButton:hover, .donateButton:hover {
-  opacity: 0.9;
+.secondaryButton:hover {
+  background-color: #007B9E;
 }

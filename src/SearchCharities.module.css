@@ -1,0 +1,10 @@
+/* Add any specific styles for SearchCharities component here */
+.searchForm {
+  margin-bottom: 20px;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
