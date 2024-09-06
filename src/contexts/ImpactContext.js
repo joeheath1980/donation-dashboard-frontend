@@ -217,6 +217,26 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
+  // Add the new onDeleteContribution function
+  const onDeleteContribution = useCallback(async (contributionId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
+      
+      if (response.status === 200) {
+        setOneOffContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
+        fetchImpactData(); // Recalculate impact score
+        console.log('Contribution deleted successfully');
+      } else {
+        console.error('Failed to delete contribution:', response.statusText);
+        throw new Error('Failed to delete contribution');
+      }
+    } catch (error) {
+      console.error('Error deleting contribution:', error);
+      throw error;
+    }
+  }, [getAuthHeaders, fetchImpactData]);
+
   return (
     <ImpactContext.Provider value={{
       impactScore,
@@ -231,7 +251,8 @@ export const ImpactProvider = ({ children }) => {
       error,
       addDonation,
       addOneOffContribution,
-      calculateComplexImpactScore
+      calculateComplexImpactScore,
+      onDeleteContribution // Add this line to include the new function in the context value
     }}>
       {children}
     </ImpactContext.Provider>

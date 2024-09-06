@@ -32,15 +32,19 @@ const CarouselComponent = ({ title, items }) => {
   return (
     <div className={styles.carouselContainer}>
       <h2 className={styles.carouselTitle}>{title}</h2>
-      <Slider {...settings}>
-        {items.map((item, index) => (
-          <div key={index} className={styles.carouselItem}>
-            <h3 className={styles.itemTitle}>{item.title}</h3>
-            <p className={styles.itemDescription}>{item.description}</p>
-            <a href={item.link} className={styles.readMoreLink}>Read more</a>
-          </div>
-        ))}
-      </Slider>
+      <div className={styles.carouselWrapper}>
+        <Slider {...settings}>
+          {items.map((item, index) => (
+            <div key={index} className={styles.carouselItemWrapper}>
+              <div className={styles.carouselItem}>
+                <h3 className={styles.itemTitle}>{item.title}</h3>
+                <p className={styles.itemDescription}>{item.description}</p>
+                <a href={item.link} className={styles.readMoreLink}>Learn More</a>
+              </div>
+            </div>
+          ))}
+        </Slider>
+      </div>
     </div>
   );
 };

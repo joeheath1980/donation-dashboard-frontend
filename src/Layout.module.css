@@ -2,17 +2,23 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbarContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .logoContainer {
@@ -21,9 +27,18 @@
 }
 
 .logo {
-  height: 120px; /* Doubled the logo size from 60px to 120px */
+  height: 50px;
   width: auto;
   object-fit: contain;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #4CAF50;
 }
 
 .navLinks {
@@ -34,21 +49,54 @@
 }
 
 .navLink {
-  color: #333;
+  color: #4CAF50;
   text-decoration: none;
-  padding: 0.75rem 1.25rem;
-  margin: 0 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: color 0.3s ease;
+  white-space: nowrap;
 }
 
 .navLink:hover {
-  color: #4CAF50;
+  color: #3a7e3a;
 }
 
 .content {
   flex-grow: 1;
   padding: 2rem;
-  background-color: #ffffff;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
+
+@media (max-width: 768px) {
+  .navbarContent {
+    flex-wrap: wrap;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .navLinks {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1rem;
+  }
+
+  .navLinks.expanded {
+    display: flex;
+  }
+
+  .navLink {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+}
+
+/* Additional styles from previous CSS */
+/* ... (include any other necessary styles from the previous version) */

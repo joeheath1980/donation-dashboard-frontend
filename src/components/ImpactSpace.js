@@ -48,7 +48,7 @@ function ImpactSpace() {
 
   return (
     <div className={combinedStyles.container}>
-      <h2 className={combinedStyles.subheader}>Your Impact Space</h2>
+      <h2 className={combinedStyles.mainTitle}>Your Impact Space</h2>
       <PersonalImpactScore
         impactScore={impactScore}
         scoreChange={scoreChange}
@@ -57,7 +57,7 @@ function ImpactSpace() {
         pointsToNextTier={pointsToNextTier}
       />
       <div className={`${combinedStyles.visualizationContainer} ${combinedStyles.card}`}>
-        <h3 className={combinedStyles.subheader}>Impact Score Over Time</h3>
+        <h3 className={combinedStyles.visualizationTitle}>Your Impact Journey</h3>
         <ImpactVisualization />
       </div>
       <CarouselComponent title="Projects to Support" items={projectsToSupport} />

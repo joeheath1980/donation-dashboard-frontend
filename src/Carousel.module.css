@@ -1,33 +1,36 @@
 .carouselContainer {
-  margin: 2rem 0;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* Prevent overflow */
-  position: relative; /* Ensure buttons are positioned correctly */
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .carouselTitle {
-  font-size: 1.3rem; /* Smaller font size for title */
-  color: #333;
-  margin-bottom: 1rem;
-  text-align: center;
+  color: #2E7D32;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.carouselWrapper {
+  margin: 0 -10px;
+}
+
+.carouselItemWrapper {
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 .carouselItem {
-  padding: 1.5rem;
-  margin: 0 0.5rem; /* Reduced margin for less width */
-  background-color: white;
+  background-color: #f0f8f0;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: calc(90% - 1rem); /* Reduced width for narrower containers */
-  box-sizing: border-box;
+  border: 1px solid #4CAF50;
+  padding: 20px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  transition: all 0.3s ease;
 }
 
 .carouselItem:hover {
@@ -36,67 +39,85 @@
 }
 
 .itemTitle {
-  font-size: 1rem; /* Smaller font size for titles */
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  color: #2E7D32;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .itemDescription {
-  font-size: 0.8rem; /* Smaller font size for description */
-  color: #7f8c8d;
-  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  flex-grow: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .readMoreLink {
-  font-size: 0.9rem; /* Smaller font size for read more */
   display: inline-block;
-  color: #3498db;
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
   text-decoration: none;
   font-weight: bold;
-  transition: color 0.3s ease;
+  transition: background-color 0.3s ease;
+  margin-top: auto;
 }
 
 .readMoreLink:hover {
-  color: #2980b9;
+  background-color: #45a049;
 }
 
-/* Custom styling for carousel arrows */
-.carouselContainer :global(.slick-prev),
-.carouselContainer :global(.slick-next) {
-  z-index: 2;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Customize slick-carousel dots */
+:global(.slick-dots) {
+  bottom: -30px;
 }
 
-.carouselContainer :global(.slick-prev:before),
-.carouselContainer :global(.slick-next:before) {
-  color: #333;
-  font-size: 1.5rem;
+:global(.slick-dots li button:before) {
+  color: #4CAF50;
 }
 
-.carouselContainer :global(.slick-prev) {
-  left: 10px; /* Bring the button inside the container */
+:global(.slick-dots li.slick-active button:before) {
+  color: #2E7D32;
 }
 
-.carouselContainer :global(.slick-next) {
-  right: 10px; /* Bring the button inside the container */
+/* Customize slick-carousel arrows */
+:global(.slick-prev),
+:global(.slick-next) {
+  z-index: 1;
 }
 
-/* Ensure all carousel items have the same height */
-.slick-track {
+:global(.slick-prev:before),
+:global(.slick-next:before) {
+  color: #4CAF50;
+}
+
+:global(.slick-prev:hover:before),
+:global(.slick-next:hover:before) {
+  color: #2E7D32;
+}
+
+:global(.slick-prev) {
+  left: -25px;
+}
+
+:global(.slick-next) {
+  right: -25px;
+}
+
+/* Ensure equal height for all slides */
+:global(.slick-track) {
   display: flex !important;
-  align-items: stretch;
 }
 
-.slick-slide {
-  display: flex;
-  align-items: stretch;
+:global(.slick-slide) {
+  height: inherit !important;
 }
 
+:global(.slick-slide > div) {
+  height: 100%;
+}

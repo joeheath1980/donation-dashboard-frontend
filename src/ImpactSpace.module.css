@@ -1,168 +1,30 @@
 .container {
-  max-width: 1800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: white;
-  border-radius: 4px;
-  margin-bottom: 40px;
 }
 
-.dashboardGrid {
-  display: grid;
-  grid-template-columns: 1fr 0.9fr 0.9fr 0.9fr;
-  gap: 25px;
-}
-
-.impactColumn {
-  grid-column: span 1;
-}
-
-.updatesColumn, 
-.opportunitiesColumn, 
-.matchingColumn {
-  padding: 20px;
-  border-radius: 4px;
-  text-align: left;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.sectionHeader {
-  font-size: 1.1rem;
+.mainTitle {
+  color: #2E7D32;
+  font-size: 2.5rem;
+  margin-top: 30px;
+  margin-bottom: 30px;
   font-weight: bold;
-  margin-bottom: 15px;
-  color: #007BFF;
-  height: 40px; /* Fixed height for headers */
-  display: flex;
-  align-items: center;
 }
 
-.rectContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  flex-grow: 1;
-}
-
-.rect {
-  height: 70px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.impact-score-container {
-  padding: 15px;
-  border-radius: 4px;
-  background-color: #f0fff4;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
-  text-align: center;
-  border: 2px solid #06BA60;
-}
-
-.impactScoreBox {
-  background-color: #e0f7fa;
-  border: 2px solid #007bff;
-  border-radius: 4px;
+.visualizationContainer {
+  margin-top: 30px;
   padding: 20px;
-  display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center; /* Center align elements */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  max-width: 100%;
-}
-
-.impactScoreValue {
-  font-size: 3rem; /* Larger font for the impact score */
-  font-weight: bold; /* Bold font weight */
-  color: #007bff; /* Emphasized color */
-  margin-bottom: 5px; /* Slight spacing from arrow */
-}
-
-.arrow {
-  font-size: 2rem; /* Larger arrow */
-  color: #007bff;
-  margin-bottom: 10px; /* Space below arrow */
-}
-
-.scoreChange {
-  font-size: 1.2rem; /* Larger font for the change text */
-  color: gray;
-  margin-bottom: 20px; /* Space below the change text */
-}
-
-.tierContainer {
-  background-color: #e3f2fd; /* Different background color */
-  padding: 15px;
-  border-radius: 4px;
-  width: 100%;
-  text-align: center;
-}
-
-.tierInfo {
-  font-weight: bold; /* Bold for the tier text */
-  font-size: 1.5rem; /* Larger font */
-  color: #1976d2; /* Color for the tier text */
-  margin-bottom: 5px; /* Space below the tier text */
-}
-
-.nextTierInfo {
-  font-size: 1rem; /* Regular size font */
-  color: #1976d2; /* Matching color for points to next tier */
-}
-
-.matchingColumn {
-  display: flex;
-  flex-direction: column;
-}
-
-.matchingOpportunitiesContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.matchingOpportunity {
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.matchingOpportunity p {
-  margin: 5px 0;
-  font-size: 0.9rem;
+.visualizationTitle {
+  color: #2E7D32;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-weight: bold;
 }
 
-.participateButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-.participateButton:hover {
-  background-color: #0056b3;
-}
-
-/* Responsive design */
-@media (max-width: 1200px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-  }
-}
+/* Rest of the existing styles... */

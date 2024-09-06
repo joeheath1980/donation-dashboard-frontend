@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
-import ImpactSpace from './components/ImpactSpace';
 import Impact from './components/Impact';
 import Profile from './components/Profile';
 import Matching from './components/Matching';
@@ -15,10 +14,11 @@ import YourPerks from './components/YourPerks';
 import CharityPartner from './components/CharityPartner';
 import BrandPartner from './components/BrandPartner';
 import Partners from './components/Partners';
+import Activity from './components/Activity'; // Import the new Activity component
 import { nbcf, starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import './styles/global.css'; // Import the new global CSS file
+import './styles/global.css';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -37,10 +37,9 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               
               {/* Protected routes */}
-              <Route path="/" element={<ProtectedRoute><Layout><ImpactSpace /></Layout></ProtectedRoute>} />
-              <Route path="/ImpactSpace" element={<ProtectedRoute><Layout><ImpactSpace /></Layout></ProtectedRoute>} />
-              <Route path="/impact" element={<ProtectedRoute><Layout><Impact /></Layout></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+              <Route path="/impact" element={<ProtectedRoute><Layout><Impact /></Layout></ProtectedRoute>} />
               <Route path="/matching" element={<ProtectedRoute><Layout><Matching /></Layout></ProtectedRoute>} />
               <Route path="/YourAccount" element={<ProtectedRoute><Layout><YourAccount /></Layout></ProtectedRoute>} />
               <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
@@ -48,6 +47,7 @@ function App() {
               <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
               <Route path="/charity/nbcf" element={<ProtectedRoute><Layout><CharityPartner charity={nbcf} /></Layout></ProtectedRoute>} />
               <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
+              <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} /> {/* New route for Activity */}
             </Routes>
           </div>
         </Router>

@@ -69,22 +69,25 @@
 }
 
 /* Delete icon styling */
-.deleteIcon {
+.deleteIcon,
+.deleteButton {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 1.2em;
+  font-size: 1rem;
   cursor: pointer;
-  color: #ff4136;
-  background: none;
+  color: #fff;
+  background-color: #ff4136;
   border: none;
-  padding: 0;
+  padding: 5px 10px;
+  border-radius: 4px;
   line-height: 1;
   z-index: 1;
 }
 
-.deleteIcon:hover {
-  color: #ff725c;
+.deleteIcon:hover,
+.deleteButton:hover {
+  background-color: #ff725c;
 }
 
 /* Form styling */
@@ -303,3 +306,23 @@
   }
 }
 
+/* Toggle button styling */
+.toggleButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.toggleButton:hover {
+  background-color: #45a049;
+}
+
+/* Add Activity section styling */
+.addActivitySection {
+  margin-top: 20px;
+}

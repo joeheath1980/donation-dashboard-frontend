@@ -1,17 +1,12 @@
 import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { parseISO, format, subYears } from 'date-fns';
+import { parseISO, subYears } from 'date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 
 Chart.register(...registerables);
 
 function processData(donations, oneOffContributions, volunteerActivities) {
-  console.log('Processing data...');
-  console.log('Raw donations:', donations);
-  console.log('Raw oneOffContributions:', oneOffContributions);
-  console.log('Raw volunteerActivities:', volunteerActivities);
-
   const allContributions = [
     ...donations.map(d => ({ 
       date: d.date,
@@ -57,13 +52,6 @@ function processData(donations, oneOffContributions, volunteerActivities) {
     return { x: currentDate, y: score };
   });
 
-  console.log('Final data points:', 
-    dataPoints.map(dp => ({
-      x: format(dp.x, 'yyyy-MM-dd HH:mm:ss'),
-      y: dp.y
-    }))
-  );
-
   return dataPoints;
 }
 
@@ -78,7 +66,6 @@ function ImpactVisualization() {
   );
 
   useEffect(() => {
-    console.log('Rendering chart with dataPoints:', dataPoints);
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
   
@@ -90,14 +77,34 @@ function ImpactVisualization() {
         type: 'line',
         data: {
           datasets: [{
-            label: 'Complex Impact Score',
+            label: 'Personal Impact Score',
             data: dataPoints,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.1,
+            fill: true
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                title: function(tooltipItems) {
+                  return tooltipItems[0].label;
+                },
+                label: function(context) {
+                  return `Personal Impact Score: ${context.parsed.y.toFixed(2)}`;
+                }
+              }
+            }
+          },
           scales: {
             x: {
               type: 'time',
@@ -108,17 +115,35 @@ function ImpactVisualization() {
                 }
               },
               title: {
-                display: true,
-                text: 'Date'
+                display: false
+              },
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#2E7D32',
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 6
               }
             },
             y: {
               title: {
-                display: true,
-                text: 'Complex Impact Score'
+                display: false
               },
               min: 0,
-              max: 100
+              max: 100,
+              grid: {
+                color: 'rgba(46, 125, 50, 0.1)',
+              },
+              ticks: {
+                color: '#2E7D32',
+                padding: 5,
+                stepSize: 25,
+                callback: function(value) {
+                  return value;
+                }
+              }
             }
           }
         }
@@ -132,7 +157,11 @@ function ImpactVisualization() {
     };
   }, [dataPoints]);
 
-  return <canvas ref={chartRef} />;
+  return (
+    <div style={{ height: '400px', width: '100%' }}>
+      <canvas ref={chartRef} />
+    </div>
+  );
 }
 
 export default ImpactVisualization;

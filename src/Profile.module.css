@@ -2,231 +2,285 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.impactScoreBox {
-  background-color: #e0f7fa;
-  border: 2px solid #007bff;
+.impactScoreContainer,
+.donationsContainer,
+.activitiesContainer,
+.threeColumnsContainer {
+  background-color: #ffffff;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
-  text-align: center;
-}
-
-.impactScoreBox h3 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #007bff;
-}
-
-.impactScoreBox p {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #007bff;
-}
-
-.impactContainer {
-  margin-bottom: 20px;
-}
-
-.impactContainer h2 {
-  margin-bottom: 20px;
-  font-size: 1.8rem;
-  color: #333;
 }
 
 .columns {
   display: flex;
   justify-content: space-between;
+  gap: 20px;
 }
 
 .column {
   flex: 1;
-  background-color: #fff;
+  background-color: #f0f8f0;
+  border-radius: 8px;
   padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-right: 10px;
 }
 
-.column h3 {
+.regularContributionsWrapper,
+.oneOffContributionsWrapper {
+  margin-top: 20px;
+}
+
+.seeHistoryHeader,
+.seeBreakdownButton {
+  color: #4CAF50;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.seeHistoryHeader:hover,
+.seeBreakdownButton:hover {
+  text-decoration: underline;
+}
+
+.donationsComponentWrapper,
+.contributionsComponentWrapper {
+  margin-top: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3, h4 {
+  color: #2E7D32;
+  margin-bottom: 15px;
+}
+
+h2 {
+  font-size: 1.8rem;
+}
+
+h3 {
   font-size: 1.4rem;
-  margin-bottom: 10px;
 }
 
-.column ul {
+h4 {
+  font-size: 1.2rem;
+}
+
+ul {
   list-style-type: none;
   padding: 0;
 }
 
-.column ul li {
-  background-color: #f1f1f1;
+li {
+  background-color: #ffffff;
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.donorPersonaContainer {
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.donorPersonaContainer h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-}
-
-.donorPersonaContainer p {
-  font-size: 1rem;
-  color: #666;
-}
-
-.charityTypesContainer {
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.charityTypesContainer h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-}
-
-.charityTypesContainer ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.charityTypesContainer ul li {
-  background-color: #f1f1f1;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.badgesContainer {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badgesContainer h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
+p {
+  color: #333;
+  line-height: 1.6;
 }
 
 .badges {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
-/* Styles for ImpactScoreExplain component */
-.card {
+/* Styles for VolunteerActivitiesComponent and FundraisingCampaignsComponent */
+.activitiesContainer .column {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.activitiesContainer h4 {
+  color: #2E7D32;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.activitiesContainer ul {
   margin-bottom: 20px;
-  overflow: hidden;
 }
 
-.impactScoreCard {
-  border: 2px solid #007bff;
+.activitiesContainer li {
+  background-color: #f0f8f0;
+  border: 1px solid #4CAF50;
 }
 
-.cardHeader {
-  background-color: #e0f7fa;
+.activitiesContainer form {
+  background-color: #f0f8f0;
   padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.activitiesContainer input,
+.activitiesContainer textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+}
+
+.activitiesContainer button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.activitiesContainer button:hover {
+  background-color: #45a049;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .columns,
+  .threeColumnsContainer {
+    flex-direction: column;
+  }
+}
+
+/* New styles for VolunteerActivitiesComponent */
+.sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-}
-
-.cardTitle {
-  margin: 0;
-  font-size: 1.8rem;
-  color: #007bff;
-  text-align: center;
-  flex-grow: 1;
-}
-
-.expandButton {
-  background: none;
-  border: none;
-  color: #007bff;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0 10px;
-}
-
-.cardContent {
-  padding: 20px;
-}
-
-.scoreComponent {
-  margin-bottom: 25px;
-  text-align: center;
-}
-
-.scoreComponent h3 {
-  font-size: 1.4rem;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.scoreValue {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #007bff;
-  margin-bottom: 10px;
-}
-
-.progressBar {
-  width: 100%;
-  height: 12px;
-  background-color: #e0e0e0;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.progressBar > div {
-  height: 100%;
-  background-color: #007bff;
-  transition: width 0.5s ease-in-out;
-}
-
-.description {
-  font-size: 1rem;
-  color: #666;
-  margin-top: 10px;
-}
-
-.totalScore {
-  margin-top: 30px;
-  text-align: center;
-  background-color: #e0f7fa;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.totalScore h3 {
-  font-size: 1.8rem;
   margin-bottom: 15px;
-  color: #007bff;
 }
 
-.totalScoreValue {
-  font-size: 3.5rem;
+.toggleButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
   font-weight: bold;
-  color: #007bff;
 }
+
+.toggleButton:hover {
+  background-color: #45a049;
+}
+
+/* Personal Impact Score styles */
+.profile_impactScoreBox {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.profile_scoreLayout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile_titleColumn {
+  flex: 1;
+}
+
+.profile_impactScoreTitle {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.profile_impactScoreTitle span {
+  display: block;
+}
+
+.profile_scoreColumn {
+  flex: 1;
+  text-align: center;
+}
+
+.profile_scoreNumber {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.profile_scoreChange {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.profile_tierColumn {
+  flex: 1;
+  text-align: right;
+}
+
+.profile_tierInfoContainer {
+  display: inline-block;
+  text-align: left;
+}
+
+.profile_tierInfoContainer p {
+  margin: 5px 0;
+  opacity: 0.9;
+}
+
+.profile_tierValue {
+  font-weight: bold;
+}
+
+/* Impact Score Breakdown styles */
+.breakdownContainer {
+  margin-top: 20px;
+  background-color: #f0f8f0;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.breakdownTitle {
+  font-size: 1.2rem;
+  color: #2E7D32;
+  margin-bottom: 10px;
+}
+
+.breakdownItem {
+  margin-bottom: 15px;
+}
+
+.breakdownLabel {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.breakdownProgressBar {
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.breakdownProgress {
+  height: 100%;
+  background-color: #4CAF50;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Add any additional styles you need... */

@@ -11,6 +11,7 @@ function VolunteerActivitiesComponent({ userId }) {
     description: ''
   });
   const [error, setError] = useState('');
+  const [isMinimized, setIsMinimized] = useState(true);
 
   useEffect(() => {
     fetchActivities();
@@ -54,8 +55,35 @@ function VolunteerActivitiesComponent({ userId }) {
     }
   };
 
+  const handleDeleteActivity = async (activityId) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`http://localhost:3002/api/volunteerActivities/${activityId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      setActivities(activities.filter(activity => activity._id !== activityId));
+    } catch (error) {
+      console.error('Error deleting volunteer activity:', error);
+      setError('Failed to delete activity. Please try again.');
+    }
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
+  const containerStyle = {
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    padding: '20px',
+    marginBottom: '20px',
+  };
+
   return (
-    <div className={styles.sectionContainer}>
+    <div className={styles.sectionContainer} style={containerStyle}>
       <h3 className={styles.sectionHeader}>Volunteer Activities</h3>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -69,6 +97,12 @@ function VolunteerActivitiesComponent({ userId }) {
               <p className={styles.contributionDetail}><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
               <p className={styles.contributionDetail}><strong>Description:</strong> {activity.description}</p>
               <p className={styles.contributionDetail}><strong>Status:</strong> {activity.status}</p>
+              <button 
+                onClick={() => handleDeleteActivity(activity._id)} 
+                className={styles.deleteButton}
+              >
+                Remove
+              </button>
             </li>
           ))}
         </ul>
@@ -76,48 +110,56 @@ function VolunteerActivitiesComponent({ userId }) {
         <p>No volunteer activities found.</p>
       )}
 
-      <form onSubmit={handleSubmit} className={styles.activityForm}>
-        <div className={styles.formRow}>
-          <input 
-            type="text" 
-            name="organization" 
-            placeholder="Organization" 
-            value={newActivity.organization} 
-            onChange={handleChange} 
-            required 
-            className={styles.formInput}
-          />
-          <input 
-            type="number" 
-            name="hours" 
-            placeholder="Hours" 
-            value={newActivity.hours} 
-            onChange={handleChange} 
-            required 
-            className={styles.formInput}
-          />
-        </div>
-        <div className={styles.formRow}>
-          <input 
-            type="date" 
-            name="date" 
-            placeholder="Date" 
-            value={newActivity.date} 
-            onChange={handleChange} 
-            required 
-            className={styles.formInput}
-          />
-          <input 
-            type="text" 
-            name="description" 
-            placeholder="Description" 
-            value={newActivity.description} 
-            onChange={handleChange}
-            className={styles.formInput}
-          />
-        </div>
-        <button type="submit" className={styles.addButton}>Add Activity</button>
-      </form>
+      <div className={styles.addActivitySection}>
+        <button onClick={toggleMinimize} className={styles.toggleButton}>
+          Add Activity {isMinimized ? '▼' : '▲'}
+        </button>
+        
+        {!isMinimized && (
+          <form onSubmit={handleSubmit} className={styles.activityForm}>
+            <div className={styles.formRow}>
+              <input 
+                type="text" 
+                name="organization" 
+                placeholder="Organization" 
+                value={newActivity.organization} 
+                onChange={handleChange} 
+                required 
+                className={styles.formInput}
+              />
+              <input 
+                type="number" 
+                name="hours" 
+                placeholder="Hours" 
+                value={newActivity.hours} 
+                onChange={handleChange} 
+                required 
+                className={styles.formInput}
+              />
+            </div>
+            <div className={styles.formRow}>
+              <input 
+                type="date" 
+                name="date" 
+                placeholder="Date" 
+                value={newActivity.date} 
+                onChange={handleChange} 
+                required 
+                className={styles.formInput}
+              />
+              <input 
+                type="text" 
+                name="description" 
+                placeholder="Description" 
+                value={newActivity.description} 
+                onChange={handleChange}
+                className={styles.formInput}
+              />
+            </div>
+            <button type="submit" className={styles.addButton}>Add Activity</button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

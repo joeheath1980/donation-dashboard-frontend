@@ -5,6 +5,9 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+// Set a default API URL if the environment variable is not set
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:3002/api/users/me', {
+          const response = await axios.get(`${API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUser(response.data);
@@ -29,17 +32,36 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
+    console.log('Login function called with:', email, password);
+    console.log('API URL:', API_URL);
     try {
-      const response = await axios.post('http://localhost:3002/api/auth', { email, password });
+      const response = await axios.post(`${API_URL}/api/auth`, { email, password });
+      console.log('Login response:', response);
       const { token } = response.data;
       localStorage.setItem('token', token);
-      const userResponse = await axios.get('http://localhost:3002/api/users/me', {
+      const userResponse = await axios.get(`${API_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('User response:', userResponse);
+      setUser(userResponse.data);
+      return userResponse.data;
+    } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
+      throw error;
+    }
+  };
+
+  const socialLogin = async (token) => {
+    try {
+      localStorage.setItem('token', token);
+      const userResponse = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(userResponse.data);
       return userResponse.data;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Social login error:', error);
       throw error;
     }
   };
@@ -57,6 +79,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    socialLogin,
     logout,
     loading,
     getAuthHeaders
