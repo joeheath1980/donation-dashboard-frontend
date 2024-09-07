@@ -52,6 +52,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const businessLogin = async (contactEmail, password) => {
+    console.log('Business login function called with:', contactEmail, password);
+    try {
+      const response = await axios.post(`${API_URL}/api/business/auth`, { contactEmail, password });
+      console.log('Business login response:', response);
+      const { token, businessId } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('userType', 'business');
+      localStorage.setItem('businessId', businessId);
+      const businessResponse = await axios.get(`${API_URL}/api/business/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Business response:', businessResponse);
+      setUser({ ...businessResponse.data, isBusiness: true });
+      return businessResponse.data;
+    } catch (error) {
+      console.error('Business login error:', error);
+      console.error('Error response:', error.response);
+      throw error;
+    }
+  };
+
   const socialLogin = async (token) => {
     try {
       localStorage.setItem('token', token);
@@ -68,6 +90,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('businessId');
     setUser(null);
   };
 
@@ -79,6 +103,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    businessLogin,
     socialLogin,
     logout,
     loading,

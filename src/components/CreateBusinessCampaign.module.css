@@ -1,0 +1,74 @@
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(44, 94, 46, 0.1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #2c5e2e;
+}
+
+.formGroup input[type="number"],
+.formGroup input[type="date"],
+.formGroup select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.checkboxGroup,
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkboxGroup label,
+.radioGroup label {
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+
+.submitButton {
+  background-color: #2c5e2e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #1e401f;
+}
+
+@media (min-width: 768px) {
+  .checkboxGroup,
+  .radioGroup {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .checkboxGroup label,
+  .radioGroup label {
+    margin-right: 20px;
+  }
+}

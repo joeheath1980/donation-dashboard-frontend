@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import BusinessLayout from './components/BusinessLayout';
 import Profile from './components/Profile';
 import Matching from './components/Matching';
 import Login from './components/Login';
@@ -17,7 +18,11 @@ import SearchCharities from './components/SearchCharities';
 import Activity from './components/Activity';
 import OrganizationSignup from './components/OrganizationSignup';
 import BusinessSignup from './components/BusinessSignup';
-import BusinessDashboard from './components/BusinessDashboard'; // You'll need to create this component
+import BusinessDashboard from './components/BusinessDashboard';
+import BusinessDonations from './components/BusinessDonations';
+import BusinessReports from './components/BusinessReports';
+import BusinessSettings from './components/BusinessSettings';
+import CreateBusinessCampaign from './components/CreateBusinessCampaign';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -54,7 +59,13 @@ function App() {
               <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
-              <Route path="/business-dashboard" element={<ProtectedRoute><Layout><BusinessDashboard /></Layout></ProtectedRoute>} />
+              
+              {/* Business routes */}
+              <Route path="/business-dashboard" element={<ProtectedRoute><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-donations" element={<ProtectedRoute><BusinessLayout><BusinessDonations /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-reports" element={<ProtectedRoute><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-settings" element={<ProtectedRoute><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/create-business-campaign" element={<ProtectedRoute><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
             </Routes>
           </div>
         </Router>
