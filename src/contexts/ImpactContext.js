@@ -4,8 +4,11 @@ import axios from 'axios';
 export const ImpactContext = createContext();
 
 export const calculateComplexImpactScore = (userData, benchmarks) => {
-  console.log("Input userData:", userData);
-  console.log("Input benchmarks:", benchmarks);
+  // Ensure userData and benchmarks are valid objects
+  if (!userData || !benchmarks) {
+    console.error('Invalid input for calculateComplexImpactScore');
+    return { totalScore: 0, regularDonationScore: 0, oneOffDonationScore: 0, volunteeringScore: 0, engagementBonus: 0 };
+  }
 
   const {
     regularDonations = [],
@@ -19,51 +22,13 @@ export const calculateComplexImpactScore = (userData, benchmarks) => {
     oneOffDonationBenchmark = 500
   } = benchmarks;
 
-  // 1. Regular Donations (35%)
-  const regularDonationScore = (() => {
-    const monthlyAverage = regularDonations.reduce((sum, donation) => sum + (Number(donation.amount) || 0), 0) / 12;
-    const amountScore = Math.min((monthlyAverage / monthlyDonationBenchmark) * 20, 20);
-    const streakScore = Math.min(((regularDonations.streak || 0) / 12) * 10, 10);
-    const uniqueCharitiesCount = new Set(regularDonations.map(d => d.charity)).size;
-    const uniqueCharitiesScore = Math.min((uniqueCharitiesCount / 5) * 5, 5);
-    return amountScore + streakScore + uniqueCharitiesScore;
-  })();
+  // Calculate scores using the benchmarks
+  const regularDonationScore = Math.min((regularDonations.reduce((sum, d) => sum + d.amount, 0) / monthlyDonationBenchmark) * 35, 35);
+  const oneOffDonationScore = Math.min((oneOffDonations.reduce((sum, d) => sum + d.amount, 0) / oneOffDonationBenchmark) * 25, 25);
+  const volunteeringScore = Math.min((volunteeringActivities.length / 5) * 30, 30);
+  const engagementBonus = previousPeriodScore > 0 ? 10 : 0;
 
-  // 2. One-off Donations (25%)
-  const oneOffDonationScore = (() => {
-    const totalAmount = oneOffDonations.reduce((sum, donation) => sum + (Number(donation.amount) || 0), 0);
-    const amountScore = Math.min((totalAmount / oneOffDonationBenchmark) * 15, 15);
-    const numberScore = Math.min((oneOffDonations.length / 10) * 10, 10);
-    return amountScore + numberScore;
-  })();
-
-  // 3. Volunteering (30%)
-  const volunteeringScore = (() => {
-    const totalHours = volunteeringActivities.reduce((sum, activity) => sum + (Number(activity.hours) || 0), 0);
-    const hoursScore = Math.min((totalHours / 50) * 20, 20);
-    const uniqueActivitiesCount = new Set(volunteeringActivities.map(a => a.activity)).size;
-    const uniqueActivitiesScore = Math.min((uniqueActivitiesCount / 5) * 10, 10);
-    return hoursScore + uniqueActivitiesScore;
-  })();
-
-  // 4. Engagement Bonus (10%)
-  const engagementBonus = (() => {
-    const hasAllThreeCategories = regularDonations.length > 0 && oneOffDonations.length > 0 && volunteeringActivities.length > 0;
-    const consistencyScore = hasAllThreeCategories ? 5 : 0;
-    const growthScore = Math.min(Math.max((previousPeriodScore - (regularDonationScore + oneOffDonationScore + volunteeringScore)) / 10, 0), 5);
-    return consistencyScore + growthScore;
-  })();
-
-  // Calculate final total score
   const totalScore = regularDonationScore + oneOffDonationScore + volunteeringScore + engagementBonus;
-
-  console.log("Calculation results:", {
-    regularDonationScore,
-    oneOffDonationScore,
-    volunteeringScore,
-    engagementBonus,
-    totalScore
-  });
 
   return {
     totalScore: Math.min(Math.round(totalScore), 100),
@@ -84,6 +49,7 @@ export const ImpactProvider = ({ children }) => {
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [volunteerActivities, setVolunteerActivities] = useState([]);
   const [error, setError] = useState(null);
+  const [followedCharities, setFollowedCharities] = useState([]);
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -105,9 +71,6 @@ export const ImpactProvider = ({ children }) => {
       setOneOffContributions(oneOffRes.data);
       setVolunteerActivities(volunteerRes.data);
 
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
       const userData = {
         regularDonations: donationsRes.data,
         oneOffDonations: oneOffRes.data,
@@ -122,27 +85,24 @@ export const ImpactProvider = ({ children }) => {
 
       const scoreResult = calculateComplexImpactScore(userData, benchmarks);
       setImpactScore(scoreResult.totalScore);
-      setScoreDetails({
-        regularDonationScore: scoreResult.regularDonationScore,
-        oneOffDonationScore: scoreResult.oneOffDonationScore,
-        volunteeringScore: scoreResult.volunteeringScore,
-        engagementBonus: scoreResult.engagementBonus
-      });
-
-      // Calculate the impact score from one year ago
-      const lastYearUserData = {
-        regularDonations: donationsRes.data.filter(d => new Date(d.date) <= oneYearAgo),
-        oneOffDonations: oneOffRes.data.filter(d => new Date(d.date) <= oneYearAgo),
-        volunteeringActivities: volunteerRes.data.filter(a => new Date(a.date) <= oneYearAgo),
-        previousPeriodScore: 0 // Assume no previous score for last year's calculation
-      };
-      const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData, benchmarks);
-      setLastYearImpactScore(lastYearScoreResult.totalScore);
+      setScoreDetails(scoreResult);
 
       // Calculate the current tier and points to next tier
       const currentTier = getTier(scoreResult.totalScore);
       setTier(currentTier.tier);
       setPointsToNextTier(currentTier.pointsToNextTier);
+
+      // Calculate and set last year's impact score
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      const lastYearUserData = {
+        regularDonations: donationsRes.data.filter(d => new Date(d.date) <= oneYearAgo),
+        oneOffDonations: oneOffRes.data.filter(d => new Date(d.date) <= oneYearAgo),
+        volunteeringActivities: volunteerRes.data.filter(v => new Date(v.date) <= oneYearAgo),
+        previousPeriodScore: 0
+      };
+      const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData, benchmarks);
+      setLastYearImpactScore(lastYearScoreResult.totalScore);
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -158,31 +118,13 @@ export const ImpactProvider = ({ children }) => {
     return { tier: "Giver", nextTier: "Altruist", pointsToNextTier: 30 - score };
   };
 
-  const parseAmount = (amountString) => {
-    const amount = parseFloat(amountString.replace(/[^\d.-]/g, ''));
-    return amount;
-  };
-
   const addDonation = async (donation) => {
     try {
       const headers = getAuthHeaders();
-      const parsedDonation = {
-        ...donation,
-        amount: parseAmount(donation.amount),
-        charity: donation.charity.toLowerCase(),
-        date: donation.date
-      };
-  
-      console.log('Sending donation to backend:', parsedDonation);
-  
-      const response = await axios.post('http://localhost:3002/api/donations', parsedDonation, { headers });
-  
+      const response = await axios.post('http://localhost:3002/api/donations', donation, { headers });
       if (response.status === 201) {
-        console.log('Donation added, response:', response.data);
         setDonations(prevDonations => [...prevDonations, response.data]);
-        fetchImpactData(); // Recalculate impact score
-      } else {
-        console.error('Failed to add donation:', response.statusText);
+        fetchImpactData();
       }
     } catch (error) {
       console.error('Error adding donation:', error);
@@ -193,23 +135,10 @@ export const ImpactProvider = ({ children }) => {
   const addOneOffContribution = async (contribution) => {
     try {
       const headers = getAuthHeaders();
-      const parsedContribution = {
-        ...contribution,
-        amount: parseAmount(contribution.amount),
-        charity: contribution.charity.toLowerCase(),
-        date: contribution.date
-      };
-
-      console.log('Sending one-off contribution to backend:', parsedContribution);
-
-      const response = await axios.post('http://localhost:3002/api/contributions/one-off', parsedContribution, { headers });
-
+      const response = await axios.post('http://localhost:3002/api/contributions/one-off', contribution, { headers });
       if (response.status === 201) {
-        console.log('One-off contribution added, response:', response.data);
         setOneOffContributions(prevContributions => [...prevContributions, response.data]);
-        fetchImpactData(); // Recalculate impact score
-      } else {
-        console.error('Failed to add contribution:', response.statusText);
+        fetchImpactData();
       }
     } catch (error) {
       console.error('Error adding contribution:', error);
@@ -217,25 +146,34 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
-  // Add the new onDeleteContribution function
   const onDeleteContribution = useCallback(async (contributionId) => {
     try {
       const headers = getAuthHeaders();
       const response = await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
-      
       if (response.status === 200) {
         setOneOffContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
-        fetchImpactData(); // Recalculate impact score
-        console.log('Contribution deleted successfully');
-      } else {
-        console.error('Failed to delete contribution:', response.statusText);
-        throw new Error('Failed to delete contribution');
+        fetchImpactData();
       }
     } catch (error) {
       console.error('Error deleting contribution:', error);
-      throw error;
+      setError('Failed to delete contribution. Please try again.');
     }
   }, [getAuthHeaders, fetchImpactData]);
+
+  const addFollowedCharity = useCallback((charity) => {
+    setFollowedCharities(prevCharities => {
+      if (!prevCharities.some(c => c.ABN === charity.ABN)) {
+        return [...prevCharities, charity];
+      }
+      return prevCharities;
+    });
+  }, []);
+
+  const removeFollowedCharity = useCallback((charityABN) => {
+    setFollowedCharities(prevCharities => 
+      prevCharities.filter(c => c.ABN !== charityABN)
+    );
+  }, []);
 
   return (
     <ImpactContext.Provider value={{
@@ -252,7 +190,11 @@ export const ImpactProvider = ({ children }) => {
       addDonation,
       addOneOffContribution,
       calculateComplexImpactScore,
-      onDeleteContribution // Add this line to include the new function in the context value
+      onDeleteContribution,
+      followedCharities,
+      addFollowedCharity,
+      removeFollowedCharity,
+      getAuthHeaders
     }}>
       {children}
     </ImpactContext.Provider>

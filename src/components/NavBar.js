@@ -1,28 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../Layout.module.css'; // Assuming styles are in Layout.module.css
+import styles from '../Layout.module.css';
 
 function NavBar() {
   return (
     <nav className={styles.navbar}>
       <ul className={styles.navLinks}>
         <li>
-          <NavLink to="/ImpactSpace" activeClassName={styles.active}>
+          <NavLink to="/ImpactSpace" className={styles.navLink} activeClassName={styles.active}>
             Your ImpactSpace
           </NavLink>
         </li>
         <li>
-          <NavLink to="/contributions" activeClassName={styles.active}>
+          <NavLink to="/contributions" className={styles.navLink} activeClassName={styles.active}>
             My Contributions
           </NavLink>
         </li>
         <li>
-          <NavLink to="/profile" activeClassName={styles.active}>
+          <NavLink to="/profile" className={styles.navLink} activeClassName={styles.active}>
             Profile/Settings
           </NavLink>
         </li>
         <li>
-          <NavLink to="/matching" activeClassName={styles.active}>
+          <NavLink to="/matching" className={styles.navLink} activeClassName={styles.active}>
             Matching
           </NavLink>
         </li>

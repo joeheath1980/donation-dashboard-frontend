@@ -1,16 +1,20 @@
-.container {
+.profileContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
+.matchingHeader {
+  margin-bottom: 30px;
+}
+
 .header {
   font-size: 2.5rem;
-  color: #333;
+  color: #4CAF50; /* Changed the header color to match the primary button color */
   margin-bottom: 20px;
 }
 
-.blurb {
+.paragraph {
   font-size: 1.1rem;
   color: #666;
   margin-bottom: 30px;
@@ -21,7 +25,7 @@
   margin-bottom: 30px;
 }
 
-.filterSelect {
+.select {
   padding: 10px;
   font-size: 1rem;
   border-radius: 5px;
@@ -29,80 +33,26 @@
   width: 200px;
 }
 
-.opportunitiesGrid {
+.opportunitiesContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-.opportunityCard {
+.card {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   transition: transform 0.3s ease;
-  min-height: 250px;
+  min-height: 250px; /* Added minimum height for consistency */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.opportunityCard:hover {
+.card:hover {
   transform: translateY(-5px);
-}
-
-.opportunityCard h3 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.opportunityCard p {
-  margin-bottom: 10px;
-  color: #666;
-}
-
-.matchButton {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-  align-self: flex-end;
-}
-
-.matchButton:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.matchButton:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.loading, .errorContainer, .noOpportunities {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #666;
-  margin-top: 50px;
-}
-
-.retryButton {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 20px;
-}
-
-.retryButton:hover {
-  background-color: #d32f2f;
 }
 
 .placeholderCard {
@@ -112,4 +62,61 @@
   justify-content: center;
   color: #999;
   font-style: italic;
+}
+
+.subheader {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.primaryButton, .secondaryButton {
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  border: none;
+  margin-top: 10px;
+}
+
+.primaryButton {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.secondaryButton {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.primaryButton:disabled, .secondaryButton:disabled {
+  background-color: #cccccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.loadingContainer, .errorContainer {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 50px;
+}
+
+.error {
+  color: #f44336;
+}
+
+@media (max-width: 768px) {
+  .opportunitiesContainer {
+    grid-template-columns: 1fr;
+  }
 }

@@ -15,6 +15,9 @@ import BrandPartner from './components/BrandPartner';
 import Partners from './components/Partners';
 import SearchCharities from './components/SearchCharities';
 import Activity from './components/Activity';
+import OrganizationSignup from './components/OrganizationSignup';
+import BusinessSignup from './components/BusinessSignup';
+import BusinessDashboard from './components/BusinessDashboard'; // You'll need to create this component
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -35,6 +38,8 @@ function App() {
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/organization-signup" element={<OrganizationSignup />} />
+              <Route path="/business-signup" element={<BusinessSignup />} />
               
               {/* Protected routes */}
               <Route path="/" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
@@ -49,6 +54,7 @@ function App() {
               <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
+              <Route path="/business-dashboard" element={<ProtectedRoute><Layout><BusinessDashboard /></Layout></ProtectedRoute>} />
             </Routes>
           </div>
         </Router>

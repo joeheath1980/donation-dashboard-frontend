@@ -262,7 +262,7 @@ function Profile() {
           {followedCharities && followedCharities.length > 0 ? (
             <ul>
               {followedCharities.map((charity, index) => (
-                <li key={index}>
+                <li key={charity.ABN}>
                   {charity.logo && (
                     <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px'}} />
                   )}

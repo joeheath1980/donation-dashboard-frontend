@@ -7,6 +7,11 @@ import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactCo
 Chart.register(...registerables);
 
 function processData(donations, oneOffContributions, volunteerActivities) {
+  if (!donations || !oneOffContributions || !volunteerActivities) {
+    console.error('Invalid input for processData');
+    return [];
+  }
+
   const allContributions = [
     ...donations.map(d => ({ 
       date: d.date,
@@ -66,7 +71,7 @@ function ImpactVisualization() {
   );
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && dataPoints.length > 0) {
       const ctx = chartRef.current.getContext('2d');
   
       if (chartInstance.current) {
@@ -156,6 +161,10 @@ function ImpactVisualization() {
       }
     };
   }, [dataPoints]);
+
+  if (dataPoints.length === 0) {
+    return <div>No data available for visualization</div>;
+  }
 
   return (
     <div style={{ height: '400px', width: '100%' }}>

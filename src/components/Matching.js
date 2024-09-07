@@ -65,7 +65,7 @@ function Matching() {
     for (let i = 0; i < 15; i++) {
       const opportunity = filteredOpportunities[i] || { _id: `placeholder-${i}`, placeholder: true };
       cards.push(
-        <div key={opportunity._id} className={`${combinedStyles.opportunityCard} ${opportunity.placeholder ? combinedStyles.placeholderCard : ''} ${combinedStyles.card}`}>
+        <div key={opportunity._id} className={`${combinedStyles.card} ${combinedStyles.opportunityCard} ${opportunity.placeholder ? combinedStyles.placeholderCard : ''}`}>
           {!opportunity.placeholder ? (
             <>
               <h3 className={combinedStyles.subheader}>{opportunity.brand}</h3>
@@ -90,12 +90,12 @@ function Matching() {
   };
 
   if (isLoading) {
-    return <div className={combinedStyles.card}>Loading matching opportunities...</div>;
+    return <div className={combinedStyles.loadingContainer}>Loading matching opportunities...</div>;
   }
 
   if (error) {
     return (
-      <div className={combinedStyles.card}>
+      <div className={combinedStyles.errorContainer}>
         <h2 className={combinedStyles.subheader}>Error</h2>
         <p className={combinedStyles.error}>{error}</p>
         <button onClick={() => window.location.reload()} className={combinedStyles.primaryButton}>
@@ -106,17 +106,19 @@ function Matching() {
   }
 
   return (
-    <div className={combinedStyles.container}>
-      <h1 className={combinedStyles.header}>Matching Opportunities</h1>
-      <p className={combinedStyles.paragraph}>
-        Explore curated donation matches tailored to your interests. Find matches for your favorite charities, discover new causes, or leverage partner offers. Use filters to navigate easily. Make your giving go further with the perfect match!
-      </p>
+    <div className={combinedStyles.profileContainer}>
+      <div className={combinedStyles.matchingHeader}>
+        <h1 className={combinedStyles.header}>Matching Opportunities</h1>
+        <p className={combinedStyles.paragraph}>
+          Explore curated donation matches tailored to your interests. Find matches for your favorite charities, discover new causes, or leverage partner offers. Use filters to navigate easily. Make your giving go further with the perfect match!
+        </p>
+      </div>
       
       <div className={combinedStyles.filterContainer}>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className={combinedStyles.input}
+          className={combinedStyles.select}
         >
           <option value="all">All Opportunities</option>
           <option value="yourCharities">Your Charities</option>
@@ -125,7 +127,7 @@ function Matching() {
         </select>
       </div>
 
-      <div className={combinedStyles.opportunitiesGrid}>
+      <div className={combinedStyles.opportunitiesContainer}>
         {renderOpportunityCards()}
       </div>
     </div>

@@ -9,7 +9,8 @@
   top: 0;
   z-index: 1000;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .navbarContent {
@@ -48,19 +49,44 @@
   padding: 0;
 }
 
+.navLinks li {
+  margin: 0;
+  padding: 0;
+}
+
 .navLink {
   color: #4CAF50;
-  text-decoration: none;
+  text-decoration: none !important;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem;
   font-weight: 500;
   font-size: 1rem;
   transition: color 0.3s ease;
   white-space: nowrap;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
 }
 
-.navLink:hover {
+.navLink:hover,
+.navLink:focus,
+.navLink:active,
+.active {
   color: #3a7e3a;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
 }
 
 .content {
@@ -98,5 +124,31 @@
   }
 }
 
-/* Additional styles from previous CSS */
-/* ... (include any other necessary styles from the previous version) */
+/* Ensure no outline or shadow for both navLink and active classes */
+:global(.Layout_navLink__asN14),
+:global(.Layout_active__asN14) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
+}
+
+/* Reset styles for all potential parent elements */
+:global(.Layout_navLinks__asN14),
+:global(.Layout_navLinks__asN14) li,
+:global(.Layout_navLinks__asN14) li a {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
+}

@@ -1,0 +1,42 @@
+/* NavReset.css */
+.Layout_navLink__asN14,
+.Layout_navLink__asN14:hover,
+.Layout_navLink__asN14:focus,
+.Layout_navLink__asN14:active,
+.Layout_active__asN14 {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
+}
+
+/* Target the specific a tag */
+a.Layout_navLink__asN14 {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
+}
+
+/* Increase specificity */
+.Layout_navbar__asN14 .Layout_navLinks__asN14 .Layout_navLink__asN14 {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0 !important;
+}

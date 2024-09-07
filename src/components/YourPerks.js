@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styles from '../YourPerks.module.css';
+import PersonalImpactScore from './PersonalImpactScore';
+import { ImpactContext } from '../contexts/ImpactContext';
 
 function YourPerks() {
+  const { 
+    impactScore,
+    lastYearImpactScore,
+    tier,
+    pointsToNextTier,
+  } = useContext(ImpactContext);
+
+  const scoreChange = impactScore - lastYearImpactScore;
+  const arrow = scoreChange > 0 ? '▲' : scoreChange < 0 ? '▼' : '';
+
   return (
     <div className={styles.perksContainer}>
       <h1 className={styles.header}>Your Perks</h1>
@@ -9,6 +21,17 @@ function YourPerks() {
         As a valued member of DonateSpace, you have access to exclusive perks. 
         Here's what you can enjoy:
       </p>
+
+      <div className={styles.impactScoreContainer}>
+        <PersonalImpactScore
+          impactScore={impactScore}
+          scoreChange={scoreChange}
+          arrow={arrow}
+          tier={tier}
+          pointsToNextTier={pointsToNextTier}
+        />
+      </div>
+
       <ul className={styles.perksList}>
         <li className={styles.perkItem}>
           <h2>Exclusive Events</h2>
@@ -19,12 +42,8 @@ function YourPerks() {
           <p>Get first access to new matching opportunities from our partners.</p>
         </li>
         <li className={styles.perkItem}>
-          <h2>Personalized Impact Reports</h2>
-          <p>Receive detailed reports on how your donations are making a difference.</p>
-        </li>
-        <li className={styles.perkItem}>
-          <h2>Donor Recognition</h2>
-          <p>Special recognition in our annual impact report and on our website.</p>
+          <h2>Partner Rewards and Savings</h2>
+          <p>Enjoy special discounts and rewards from our partner organizations.</p>
         </li>
       </ul>
     </div>

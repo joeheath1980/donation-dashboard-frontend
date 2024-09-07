@@ -1,19 +1,37 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import styles from '../CharityPartner.module.css';
+import { ImpactContext } from '../contexts/ImpactContext';
 
-// Fallback data in case the API is unavailable
-const fallbackCharity = {
-  Charity_Legal_Name: "Example Charity",
-  ABN: "00000000000",
-  Charity_Type: "Public Benevolent Institution",
-  Address_Line_1: "123 Example Street",
-  Town_City: "Exampletown",
-  State: "EX",
-  Postcode: "0000",
-  Country: "Australia"
-};
+// Mock data generator function
+const generateMockCharity = (id) => ({
+  Charity_Legal_Name: `Mock Charity ${id}`,
+  ABN: `${id}0000000000`.slice(-11),
+  Charity_Type: ["Public Benevolent Institution", "Religious Institution", "Health Promotion Charity"][id % 3],
+  Address_Line_1: `${id} Mock Street`,
+  Town_City: "Mocktown",
+  State: "MT",
+  Postcode: `${id}000`.slice(-4),
+  Country: "Australia",
+  Website: `https://mockcharity${id}.org`,
+  Phone: `0${id}00000000`.slice(-10),
+  Email: `contact@mockcharity${id}.org`,
+  Description: `Mock Charity ${id} is dedicated to making a positive impact in our community. We focus on various causes including education, health, and environmental conservation.`,
+  Established_Date: `${2000 + (id % 21)}-01-01`,
+  Programs: [
+    {
+      Program_Name: `Program A of Charity ${id}`,
+      Description: "This program focuses on providing educational resources to underprivileged children.",
+      Annual_Budget: `$${(id * 10000).toLocaleString()}`,
+    },
+    {
+      Program_Name: `Program B of Charity ${id}`,
+      Description: "This program aims to improve community health through free medical camps and awareness programs.",
+      Annual_Budget: `$${(id * 15000).toLocaleString()}`,
+    },
+  ]
+});
 
 function CharityPartner() {
   const { id } = useParams();
@@ -22,6 +40,9 @@ function CharityPartner() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openPrograms, setOpenPrograms] = useState({});
+  const [useMockData, setUseMockData] = useState(false);
+  
+  const { followedCharities, addFollowedCharity, removeFollowedCharity } = useContext(ImpactContext);
   const [isFollowed, setIsFollowed] = useState(false);
 
   const fetchCharityDetails = useCallback(async () => {
@@ -36,11 +57,16 @@ function CharityPartner() {
         }
       });
 
-      if (response.data.success && response.data.result.records.length > 0) {
+      console.log('API Response:', response); // Log the entire response for debugging
+
+      if (response.data && response.data.success && response.data.result && response.data.result.records && response.data.result.records.length > 0) {
         const charityData = response.data.result.records[0];
         setCharity(charityData);
 
-        // Fetch programs data (this part might also fail if the API is unavailable)
+        // Check if the charity is already followed
+        setIsFollowed(followedCharities.some(c => c.ABN === charityData.ABN));
+
+        // Fetch programs data
         try {
           const programsResponse = await axios.get(`https://data.gov.au/data/api/3/action/datastore_search`, {
             params: {
@@ -49,29 +75,35 @@ function CharityPartner() {
             }
           });
 
-          if (programsResponse.data.success) {
+          if (programsResponse.data && programsResponse.data.success && programsResponse.data.result && programsResponse.data.result.records) {
             setPrograms(programsResponse.data.result.records);
+          } else {
+            console.warn('Unexpected programs data structure:', programsResponse.data);
+            setPrograms([]);
           }
         } catch (programError) {
           console.error('Error fetching programs:', programError);
-          // Don't set an error state here, just log it
+          setPrograms([]);
         }
       } else {
-        setError('Charity not found');
+        console.warn('Unexpected API response structure:', response.data);
+        setError('Charity not found or API returned unexpected data');
+        const mockCharity = generateMockCharity(parseInt(id));
+        setCharity(mockCharity);
+        setPrograms(mockCharity.Programs);
+        setUseMockData(true);
       }
     } catch (err) {
       console.error('Error fetching charity details:', err);
-      if (err.response && err.response.status === 403) {
-        setError('Access to charity data is currently restricted. We apologize for the inconvenience.');
-        // Use fallback data
-        setCharity(fallbackCharity);
-      } else {
-        setError('Failed to fetch charity details. Please try again later.');
-      }
+      setError('Failed to fetch charity details. Using mock data.');
+      const mockCharity = generateMockCharity(parseInt(id));
+      setCharity(mockCharity);
+      setPrograms(mockCharity.Programs);
+      setUseMockData(true);
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, followedCharities]);
 
   useEffect(() => {
     fetchCharityDetails();
@@ -79,6 +111,15 @@ function CharityPartner() {
 
   const handleFollow = () => {
     if (charity) {
+      if (isFollowed) {
+        removeFollowedCharity(charity.ABN);
+      } else {
+        addFollowedCharity({
+          ABN: charity.ABN,
+          name: charity.Charity_Legal_Name,
+          logo: charity.logo // Assuming there's a logo field, adjust if necessary
+        });
+      }
       setIsFollowed(!isFollowed);
       console.log(`Charity ${isFollowed ? 'unfollowed' : 'followed'}: ${charity.Charity_Legal_Name}`);
     }
@@ -114,21 +155,7 @@ function CharityPartner() {
   }
 
   if (error) {
-    return (
-      <div className={styles.card}>
-        <p className={styles.error}>{error}</p>
-        {charity && (
-          <div>
-            <h2>Fallback Charity Information</h2>
-            <p>We're showing limited information due to data access issues.</p>
-            {/* Display fallback charity information */}
-            <p><strong>Name:</strong> {charity.Charity_Legal_Name}</p>
-            <p><strong>ABN:</strong> {charity.ABN}</p>
-            {/* Add more fallback information as needed */}
-          </div>
-        )}
-      </div>
-    );
+    return <div className={styles.card}>{error}</div>;
   }
 
   if (!charity) {
@@ -137,6 +164,11 @@ function CharityPartner() {
 
   return (
     <div className={styles.container}>
+      {useMockData && (
+        <div className={styles.mockDataNotice}>
+          Note: Displaying mock data due to API unavailability or unexpected data structure.
+        </div>
+      )}
       <h1 className={styles.header}>{charity['Charity_Legal_Name']}</h1>
       <div className={styles.card}>
         <h2 className={styles.sectionHeader}>Charity Details</h2>
@@ -144,28 +176,28 @@ function CharityPartner() {
           <strong>Address:</strong> {formatAddress(charity)}
         </p>
         {Object.entries(charity).map(([key, value]) => (
-          value && key !== 'Charity_Legal_Name' && !key.startsWith('Address_') && (
+          value && key !== 'Charity_Legal_Name' && !key.startsWith('Address_') && key !== 'Programs' && (
             <p key={key} className={styles.paragraph}>
               <strong>{key.replace(/_/g, ' ')}:</strong> {value}
             </p>
           )
         ))}
 
-        {programs.length > 0 && (
+        {programs && programs.length > 0 && (
           <>
             <h2 className={styles.sectionHeader}>Programs</h2>
             {programs.map((program, index) => (
               <div key={index} className={styles.programCard}>
                 <div className={styles.programHeader} onClick={() => toggleProgram(index)}>
-                  <h3 className={styles.programName}>{program["Program Name"] || 'Program Name Not Available'}</h3>
+                  <h3 className={styles.programName}>{program["Program_Name"] || program["Program Name"] || 'Program Name Not Available'}</h3>
                   <span className={`${styles.chevron} ${openPrograms[index] ? styles.open : ''}`}>▼</span>
                 </div>
                 {openPrograms[index] && (
                   <div className={styles.programDetails}>
                     {Object.entries(program).map(([key, value]) => (
-                      value && key !== "Program Name" && (
+                      value && key !== "Program_Name" && key !== "Program Name" && (
                         <p key={key} className={styles.paragraph}>
-                          <strong>{key}:</strong> {value}
+                          <strong>{key.replace(/_/g, ' ')}:</strong> {value}
                         </p>
                       )
                     ))}
