@@ -24,7 +24,7 @@ function Login() {
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
       await socialLogin(token);
-      navigate('/');
+      navigate('/profile');
     } catch (err) {
       console.error('Error handling social login callback:', err);
       setError('Failed to complete social login. Please try again.');
@@ -54,7 +54,7 @@ function Login() {
         console.log('Navigation complete');
       } else {
         await login(email, password);
-        navigate('/');
+        navigate('/profile');
       }
     } catch (err) {
       console.error('Error logging in:', err);

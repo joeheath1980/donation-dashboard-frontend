@@ -23,6 +23,7 @@ import BusinessDonations from './components/BusinessDonations';
 import BusinessReports from './components/BusinessReports';
 import BusinessSettings from './components/BusinessSettings';
 import CreateBusinessCampaign from './components/CreateBusinessCampaign';
+import WelcomePage from './components/WelcomePage';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -41,15 +42,15 @@ function App() {
           <div className="app">
             <Routes>
               {/* Public routes */}
+              <Route path="/" element={<WelcomePage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/organization-signup" element={<OrganizationSignup />} />
               <Route path="/business-signup" element={<BusinessSignup />} />
               
               {/* Protected routes */}
-              <Route path="/" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
-              <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+              <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
               <Route path="/matching" element={<ProtectedRoute><Layout><Matching /></Layout></ProtectedRoute>} />
               <Route path="/YourAccount" element={<ProtectedRoute><Layout><YourAccount /></Layout></ProtectedRoute>} />
               <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
