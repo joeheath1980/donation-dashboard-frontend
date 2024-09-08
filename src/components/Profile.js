@@ -10,6 +10,7 @@ import CarouselComponent from './CarouselComponent';
 import { ImpactContext } from '../contexts/ImpactContext';
 import DonationsComponent from './DonationsComponent';
 import OneOffContributionsComponent from './OneOffContributionsComponent';
+import ExperimentalScraperResults from './ExperimentalScraperResults';
 
 function Profile() {
   const { 
@@ -311,6 +312,11 @@ function Profile() {
             {/* Space for displaying badge icons */}
           </div>
         </div>
+      </div>
+
+      <div className={styles.experimentalScraperContainer} style={columnStyle}>
+        <h2>Experimental Gmail Scraper</h2>
+        <ExperimentalScraperResults />
       </div>
     </div>
   );
