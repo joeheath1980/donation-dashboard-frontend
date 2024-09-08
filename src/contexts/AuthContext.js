@@ -15,15 +15,26 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
+      const userType = localStorage.getItem('userType');
       if (token) {
         try {
-          const response = await axios.get(`${API_URL}/api/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data);
+          let response;
+          if (userType === 'business') {
+            response = await axios.get(`${API_URL}/api/business/me`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser({ ...response.data, isBusiness: true });
+          } else {
+            response = await axios.get(`${API_URL}/api/users/me`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(response.data);
+          }
         } catch (error) {
           console.error('Authentication error:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('userType');
+          localStorage.removeItem('businessId');
         }
       }
       setLoading(false);
@@ -33,12 +44,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     console.log('Login function called with:', email, password);
-    console.log('API URL:', API_URL);
     try {
       const response = await axios.post(`${API_URL}/api/auth`, { email, password });
       console.log('Login response:', response);
       const { token } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('userType', 'user');
       const userResponse = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -77,6 +88,7 @@ export const AuthProvider = ({ children }) => {
   const socialLogin = async (token) => {
     try {
       localStorage.setItem('token', token);
+      localStorage.setItem('userType', 'user');
       const userResponse = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });

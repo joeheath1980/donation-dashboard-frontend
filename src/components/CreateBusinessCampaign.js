@@ -7,78 +7,68 @@ import styles from './CreateBusinessCampaign.module.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function CreateBusinessCampaign() {
-  const navigate = useNavigate();
   const { getAuthHeaders } = useAuth();
-  const [totalCommit, setTotalCommit] = useState('');
-  const [campaignType, setCampaignType] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [userTypes, setUserTypes] = useState({
-    youngProfessionals: false,
-    families: false,
-    retirees: false,
-    students: false,
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    totalCommit: '',
+    campaignType: '',
+    startDate: '',
+    endDate: '',
+    userTypes: '',
+    netWorth: '',
+    impactScore: ''
   });
-  const [netWorth, setNetWorth] = useState('all');
-  const [impactScore, setImpactScore] = useState('all');
 
-  const handleUserTypeChange = (event) => {
-    setUserTypes({
-      ...userTypes,
-      [event.target.name]: event.target.checked,
-    });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const campaignData = {
-        totalCommit,
-        campaignType,
-        startDate,
-        endDate,
-        userTypes: Object.keys(userTypes).filter(key => userTypes[key]),
-        netWorth,
-        impactScore,
-      };
-
-      const response = await axios.post(`${API_URL}/api/business/campaigns`, campaignData, {
-        headers: getAuthHeaders(),
-      });
-
-      console.log('Campaign created:', response.data);
-      navigate('/business-dashboard');
+      const response = await axios.post(`${API_URL}/api/campaigns`, {
+        ...formData,
+        userTypes: formData.userTypes.split(',').map(type => type.trim()),
+        totalCommit: parseFloat(formData.totalCommit),
+        impactScore: parseFloat(formData.impactScore)
+      }, { headers: getAuthHeaders() });
+      
+      if (response.status === 201) {
+        navigate('/business-dashboard');
+      }
     } catch (error) {
       console.error('Error creating campaign:', error);
-      // Handle error (e.g., show error message to user)
     }
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.createCampaign}>
       <div className={styles.header}>
-        <h1>Create Business Campaign</h1>
-        <Link to="/business-dashboard" className={styles.dashboardButton}>Dashboard</Link>
+        <h2>Create New Campaign</h2>
+        <Link to="/business-dashboard" className={styles.backButton}>Back to Dashboard</Link>
       </div>
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="totalCommit">Total to Commit:</label>
+          <label htmlFor="totalCommit">Total Commitment ($):</label>
           <input
             type="number"
             id="totalCommit"
-            value={totalCommit}
-            onChange={(e) => setTotalCommit(e.target.value)}
+            name="totalCommit"
+            value={formData.totalCommit}
+            onChange={handleChange}
             required
+            className={styles.input}
           />
         </div>
-
         <div className={styles.formGroup}>
-          <label htmlFor="campaignType">Type:</label>
+          <label htmlFor="campaignType">Campaign Type:</label>
           <select
             id="campaignType"
-            value={campaignType}
-            onChange={(e) => setCampaignType(e.target.value)}
+            name="campaignType"
+            value={formData.campaignType}
+            onChange={handleChange}
             required
+            className={styles.select}
           >
             <option value="">Select a type</option>
             <option value="yourCharities">Your Charities</option>
@@ -86,123 +76,83 @@ function CreateBusinessCampaign() {
             <option value="userLedCharities">User Led Charities</option>
           </select>
         </div>
-
         <div className={styles.formGroup}>
           <label htmlFor="startDate">Start Date:</label>
           <input
             type="date"
             id="startDate"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            name="startDate"
+            value={formData.startDate}
+            onChange={handleChange}
             required
+            className={styles.input}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label htmlFor="endDate">End Date:</label>
           <input
             type="date"
             id="endDate"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            name="endDate"
+            value={formData.endDate}
+            onChange={handleChange}
             required
+            className={styles.input}
           />
         </div>
-
         <div className={styles.formGroup}>
-          <label>User Preferences:</label>
+          <label htmlFor="userTypes">User Types:</label>
           <div className={styles.checkboxGroup}>
-            <label>
-              <input
-                type="checkbox"
-                name="youngProfessionals"
-                checked={userTypes.youngProfessionals}
-                onChange={handleUserTypeChange}
-              />
-              Young Professionals
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="families"
-                checked={userTypes.families}
-                onChange={handleUserTypeChange}
-              />
-              Families
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="retirees"
-                checked={userTypes.retirees}
-                onChange={handleUserTypeChange}
-              />
-              Retirees
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="students"
-                checked={userTypes.students}
-                onChange={handleUserTypeChange}
-              />
-              Students
-            </label>
+            {['Young Professionals', 'Families', 'Retirees', 'Students'].map((type) => (
+              <label key={type} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  name="userTypes"
+                  value={type}
+                  checked={formData.userTypes.includes(type)}
+                  onChange={(e) => {
+                    const updatedTypes = e.target.checked
+                      ? [...formData.userTypes.split(','), e.target.value].filter(Boolean).join(',')
+                      : formData.userTypes.split(',').filter(t => t !== e.target.value).join(',');
+                    setFormData({ ...formData, userTypes: updatedTypes });
+                  }}
+                  className={styles.checkbox}
+                />
+                {type}
+              </label>
+            ))}
           </div>
         </div>
-
         <div className={styles.formGroup}>
-          <label>Net Worth:</label>
-          <div className={styles.radioGroup}>
-            <label>
-              <input
-                type="radio"
-                name="netWorth"
-                value="highNetWorth"
-                checked={netWorth === 'highNetWorth'}
-                onChange={(e) => setNetWorth(e.target.value)}
-              />
-              High Net Worth
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="netWorth"
-                value="all"
-                checked={netWorth === 'all'}
-                onChange={(e) => setNetWorth(e.target.value)}
-              />
-              All
-            </label>
-          </div>
+          <label htmlFor="netWorth">Net Worth:</label>
+          <select
+            id="netWorth"
+            name="netWorth"
+            value={formData.netWorth}
+            onChange={handleChange}
+            required
+            className={styles.select}
+          >
+            <option value="">Select net worth</option>
+            <option value="highNetWorth">High Net Worth</option>
+            <option value="all">All</option>
+          </select>
         </div>
-
         <div className={styles.formGroup}>
-          <label>Impact Score:</label>
-          <div className={styles.radioGroup}>
-            <label>
-              <input
-                type="radio"
-                name="impactScore"
-                value="highImpact"
-                checked={impactScore === 'highImpact'}
-                onChange={(e) => setImpactScore(e.target.value)}
-              />
-              High Impact Score
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="impactScore"
-                value="all"
-                checked={impactScore === 'all'}
-                onChange={(e) => setImpactScore(e.target.value)}
-              />
-              All
-            </label>
-          </div>
+          <label htmlFor="impactScore">Impact Score:</label>
+          <select
+            id="impactScore"
+            name="impactScore"
+            value={formData.impactScore}
+            onChange={handleChange}
+            required
+            className={styles.select}
+          >
+            <option value="">Select impact score</option>
+            <option value="highImpact">High Impact Score</option>
+            <option value="all">All</option>
+          </select>
         </div>
-
         <button type="submit" className={styles.submitButton}>Create Campaign</button>
       </form>
     </div>

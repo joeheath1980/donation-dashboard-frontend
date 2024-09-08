@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { ImpactContext } from '../contexts/ImpactContext';
 import axios from 'axios';
 import styles from './BusinessDashboard.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function BusinessDashboard() {
-  const { getAuthHeaders } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
+  const { calculateComplexImpactScore } = useContext(ImpactContext);
   const [businessData, setBusinessData] = useState(null);
-  const [campaignData, setCampaignData] = useState(null);
-  const [performanceData, setPerformanceData] = useState(null);
-  const [userTypeData, setUserTypeData] = useState(null);
+  const [financialSummary, setFinancialSummary] = useState(null);
+  const [donationHistory, setDonationHistory] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [impactMetrics, setImpactMetrics] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
 
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -23,41 +26,74 @@ function BusinessDashboard() {
       }
     };
 
-    const fetchCampaignData = async () => {
+    const fetchFinancialSummary = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/business/campaigns`, { headers: getAuthHeaders() });
-        setCampaignData(response.data[0]); // Assuming we're displaying the latest campaign
+        const response = await axios.get(`${API_URL}/api/business/financial-summary`, { headers: getAuthHeaders() });
+        setFinancialSummary(response.data);
       } catch (error) {
-        console.error('Error fetching campaign data:', error);
+        console.error('Error fetching financial summary:', error);
       }
     };
 
-    const fetchPerformanceData = async () => {
-      // Placeholder: Replace with actual API call when implemented
-      setPerformanceData({
-        matchesMade: 15,
-        totalMatchDonated: 4500,
-        totalDonated: 9000,
-      });
+    const fetchDonationHistory = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/business/donations`, { headers: getAuthHeaders() });
+        setDonationHistory(response.data);
+      } catch (error) {
+        console.error('Error fetching donation history:', error);
+      }
     };
 
-    const fetchUserTypeData = async () => {
-      // Placeholder: Replace with actual API call when implemented
-      setUserTypeData({
-        types: [
-          { name: 'Young Professionals', percentage: 40 },
-          { name: 'Families', percentage: 30 },
-          { name: 'Retirees', percentage: 20 },
-          { name: 'Students', percentage: 10 },
-        ]
-      });
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/business/pending-requests`, { headers: getAuthHeaders() });
+        setPendingRequests(response.data);
+      } catch (error) {
+        console.error('Error fetching pending requests:', error);
+      }
+    };
+
+    const fetchImpactMetrics = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/business/impact-metrics`, { headers: getAuthHeaders() });
+        setImpactMetrics(response.data);
+      } catch (error) {
+        console.error('Error fetching impact metrics:', error);
+      }
+    };
+
+    const fetchCampaigns = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/business/campaigns`, { headers: getAuthHeaders() });
+        setCampaigns(response.data);
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      }
     };
 
     fetchBusinessData();
-    fetchCampaignData();
-    fetchPerformanceData();
-    fetchUserTypeData();
+    fetchFinancialSummary();
+    fetchDonationHistory();
+    fetchPendingRequests();
+    fetchImpactMetrics();
+    fetchCampaigns();
   }, [getAuthHeaders]);
+
+  const calculateCampaignImpact = (campaign) => {
+    const userData = {
+      regularDonations: campaign.regularDonations || [],
+      oneOffDonations: campaign.oneOffDonations || [],
+      volunteeringActivities: campaign.volunteeringActivities || [],
+      previousPeriodScore: 0
+    };
+
+    const benchmarks = {
+      monthlyDonationBenchmark: 1000,
+      oneOffDonationBenchmark: 5000
+    };
+
+    return calculateComplexImpactScore(userData, benchmarks);
+  };
 
   if (!businessData) {
     return <div>Loading...</div>;
@@ -65,48 +101,83 @@ function BusinessDashboard() {
 
   return (
     <div className={styles.dashboard}>
-      <div className={styles.dashboardHeader}>
-        <h1>Welcome, {businessData.companyName}</h1>
-        {!campaignData && (
-          <Link to="/create-business-campaign" className={styles.createCampaignButton}>
-            Create New Campaign
-          </Link>
-        )}
-      </div>
+      <h1>Welcome, {businessData.companyName}</h1>
       
-      {campaignData ? (
-        <section className={styles.currentCampaign}>
-          <h2>Current Campaign</h2>
-          <p>Total committed: ${campaignData.totalCommit}</p>
-          <p>Type: {campaignData.campaignType}</p>
-          <p>Campaign period: {new Date(campaignData.startDate).toLocaleDateString()} to {new Date(campaignData.endDate).toLocaleDateString()}</p>
-          <p>User Types: {campaignData.userTypes.join(', ')}</p>
-          <p>Net Worth: {campaignData.netWorth}</p>
-          <p>Impact Score: {campaignData.impactScore}</p>
-        </section>
-      ) : (
-        <p>No active campaigns. Click "Create New Campaign" to start one.</p>
-      )}
+      <section className={styles.overview}>
+        <h2>Business Overview</h2>
+        <p>Email: {businessData.contactEmail}</p>
+        <p>Description: {businessData.description}</p>
+        <p>Preferred Causes: {businessData.preferredCauses.join(', ')}</p>
+      </section>
 
-      {performanceData && (
-        <section className={styles.performance}>
-          <h2>Performance</h2>
-          <p>Matches made: {performanceData.matchesMade}</p>
-          <p>Total match donated: ${performanceData.totalMatchDonated}</p>
-          <p>Total donated: ${performanceData.totalDonated} (includes user contributions)</p>
-        </section>
-      )}
+      <section className={styles.financialSummary}>
+        <h2>Financial Summary</h2>
+        {financialSummary && (
+          <>
+            <p>Total Donations: ${financialSummary.totalDonations}</p>
+            <p>Monthly Average: ${financialSummary.monthlyAverage}</p>
+            <p>Year-to-Date: ${financialSummary.yearToDateTotal}</p>
+          </>
+        )}
+      </section>
 
-      {userTypeData && (
-        <section className={styles.userTypes}>
-          <h2>Match User Details</h2>
+      <section className={styles.donationHistory}>
+        <h2>Recent Donations</h2>
+        <ul>
+          {donationHistory.map(donation => (
+            <li key={donation._id}>
+              ${donation.amount} to {donation.recipient} on {new Date(donation.date).toLocaleDateString()}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={styles.pendingRequests}>
+        <h2>Pending Requests</h2>
+        <ul>
+          {pendingRequests.map(request => (
+            <li key={request._id}>
+              {request.organization} - ${request.amount} for {request.purpose}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={styles.impactMetrics}>
+        <h2>Your Overall Impact</h2>
+        {impactMetrics && (
+          <>
+            <p>Lives Touched: {impactMetrics.livesTouched}</p>
+            <p>Trees Planted: {impactMetrics.treesPlanted}</p>
+            <p>Meals Provided: {impactMetrics.mealsProvided}</p>
+          </>
+        )}
+      </section>
+
+      <section className={styles.campaigns}>
+        <h2>Your Campaigns</h2>
+        {campaigns.length > 0 ? (
           <ul>
-            {userTypeData.types.map((type, index) => (
-              <li key={index}>{type.name}: {type.percentage}%</li>
-            ))}
+            {campaigns.map(campaign => {
+              const impactScore = calculateCampaignImpact(campaign);
+              return (
+                <li key={campaign._id}>
+                  <h3>{campaign.campaignType}</h3>
+                  <p>Total Commit: ${campaign.totalCommit}</p>
+                  <p>Start Date: {new Date(campaign.startDate).toLocaleDateString()}</p>
+                  <p>End Date: {new Date(campaign.endDate).toLocaleDateString()}</p>
+                  <p>Impact Score: {impactScore.totalScore}</p>
+                  <p>Lives Touched: {campaign.livesTouched}</p>
+                  <p>Trees Planted: {campaign.treesPlanted}</p>
+                  <p>Meals Provided: {campaign.mealsProvided}</p>
+                </li>
+              );
+            })}
           </ul>
-        </section>
-      )}
+        ) : (
+          <p>No campaigns found. Start a new campaign to see it here!</p>
+        )}
+      </section>
     </div>
   );
 }
