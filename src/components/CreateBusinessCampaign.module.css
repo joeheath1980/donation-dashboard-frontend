@@ -1,74 +1,118 @@
-.container {
+.createCampaign {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
   background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(44, 94, 46, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.form {
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.createCampaign h2 {
+  color: #4CAF50;
+  margin: 0;
+}
+
+.backButton {
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: #e0e0e0;
+}
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+form {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .formGroup {
-  margin-bottom: 20px;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #2c5e2e;
-}
-
-.formGroup input[type="number"],
-.formGroup input[type="date"],
-.formGroup select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.checkboxGroup,
-.radioGroup {
   display: flex;
   flex-direction: column;
 }
 
-.checkboxGroup label,
-.radioGroup label {
-  margin-bottom: 5px;
-  font-weight: normal;
+label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .submitButton {
-  background-color: #2c5e2e;
-  color: #ffffff;
+  background-color: #4CAF50;
+  color: white;
+  padding: 1rem;
   border: none;
-  padding: 10px 20px;
   border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .submitButton:hover {
-  background-color: #1e401f;
+  background-color: #45a049;
 }
 
-@media (min-width: 768px) {
-  .checkboxGroup,
-  .radioGroup {
-    flex-direction: row;
-    flex-wrap: wrap;
+@media (max-width: 768px) {
+  .createCampaign {
+    padding: 1rem;
   }
 
-  .checkboxGroup label,
-  .radioGroup label {
-    margin-right: 20px;
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  form {
+    gap: 1rem;
   }
 }
