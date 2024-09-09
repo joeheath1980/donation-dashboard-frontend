@@ -136,7 +136,7 @@ function Activity() {
     setSelectedTypes({ ...selectedTypes, [index]: event.target.value });
   };
 
-  const handleCommit = (index) => {
+  const handleCommit = async (index) => {
     const donation = gmailResults[index];
     const selectedType = selectedTypes[index];
 
@@ -144,10 +144,24 @@ function Activity() {
 
     if (selectedType === 'regular') {
       console.log('Adding regular donation');
-      addDonation(donation);
+      try {
+        await addDonation(donation);
+        console.log('Regular donation added successfully');
+      } catch (error) {
+        console.error('Error adding regular donation:', error);
+        setError(`Failed to add regular donation: ${error.message}`);
+        return;
+      }
     } else if (selectedType === 'one-off') {
       console.log('Adding one-off contribution');
-      addOneOffContribution(donation);
+      try {
+        await addOneOffContribution(donation);
+        console.log('One-off contribution added successfully');
+      } catch (error) {
+        console.error('Error adding one-off contribution:', error);
+        setError(`Failed to add one-off contribution: ${error.message}`);
+        return;
+      }
     }
 
     handleDeleteGmailResult(index);

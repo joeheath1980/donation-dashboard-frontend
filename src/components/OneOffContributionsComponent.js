@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { ImpactContext } from '../contexts/ImpactContext';
 import styles from '../Impact.module.css';
 import { format, parseISO, parse } from 'date-fns';
 
@@ -19,7 +20,13 @@ function formatDate(dateString) {
   return format(date, 'dd/MM/yyyy');
 }
 
-function OneOffContributionsComponent({ contributions, onDeleteContribution }) {
+function OneOffContributionsComponent() {
+  const { oneOffContributions, onDeleteContribution, fetchImpactData } = useContext(ImpactContext);
+
+  useEffect(() => {
+    fetchImpactData();
+  }, [fetchImpactData]);
+
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
@@ -34,9 +41,9 @@ function OneOffContributionsComponent({ contributions, onDeleteContribution }) {
 
   return (
     <div className={styles.contributionsContainer}>
-      {contributions && contributions.length > 0 ? (
+      {oneOffContributions && oneOffContributions.length > 0 ? (
         <ul className={styles.contributionsList}>
-          {contributions.map((contribution) => (
+          {oneOffContributions.map((contribution) => (
             <li key={contribution._id} className={styles.contributionItem}>
               <strong>Charity:</strong> {contribution.charity}<br />
               <strong>Date:</strong> {formatDate(contribution.date)}<br />

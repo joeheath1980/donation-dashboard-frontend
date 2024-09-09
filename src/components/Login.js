@@ -12,6 +12,10 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 const TEST_BUSINESS_EMAIL = 'testbusiness@example.com';
 const TEST_BUSINESS_PASSWORD = 'testpassword123';
 
+// Test user credentials
+const TEST_USER_EMAIL = 'john@example.com';
+const TEST_USER_PASSWORD = 'password123';
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -73,6 +77,12 @@ function Login() {
     setEmail(TEST_BUSINESS_EMAIL);
     setPassword(TEST_BUSINESS_PASSWORD);
     setIsBusiness(true);
+  };
+
+  const fillTestUserCredentials = () => {
+    setEmail(TEST_USER_EMAIL);
+    setPassword(TEST_USER_PASSWORD);
+    setIsBusiness(false);
   };
 
   const createTestBusinessAccount = async () => {
@@ -167,7 +177,10 @@ function Login() {
         
         {process.env.NODE_ENV === 'development' && (
           <div>
-            <button onClick={fillTestBusinessCredentials} style={{marginTop: '20px'}}>
+            <button onClick={fillTestUserCredentials} style={{marginTop: '20px'}}>
+              Fill Test User Credentials
+            </button>
+            <button onClick={fillTestBusinessCredentials} style={{marginTop: '10px'}}>
               Fill Test Business Credentials
             </button>
             <button onClick={createTestBusinessAccount} style={{marginTop: '10px'}}>

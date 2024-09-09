@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
 export const ImpactContext = createContext();
@@ -39,9 +39,17 @@ export const calculateComplexImpactScore = (userData, benchmarks) => {
   };
 };
 
+const defaultScoreDetails = {
+  totalScore: 0,
+  regularDonationScore: 0,
+  oneOffDonationScore: 0,
+  volunteeringScore: 0,
+  engagementBonus: 0
+};
+
 export const ImpactProvider = ({ children }) => {
   const [impactScore, setImpactScore] = useState(0);
-  const [scoreDetails, setScoreDetails] = useState(null);
+  const [scoreDetails, setScoreDetails] = useState(defaultScoreDetails);
   const [lastYearImpactScore, setLastYearImpactScore] = useState(0);
   const [tier, setTier] = useState("Giver");
   const [pointsToNextTier, setPointsToNextTier] = useState(0);
@@ -107,6 +115,7 @@ export const ImpactProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to fetch impact data. Please try again later.');
+      setScoreDetails(defaultScoreDetails);
     }
   }, [getAuthHeaders, lastYearImpactScore]);
 
@@ -163,22 +172,73 @@ export const ImpactProvider = ({ children }) => {
   const addFollowedCharity = useCallback((charity) => {
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
-        return [...prevCharities, charity];
+        const newCharities = [...prevCharities, charity];
+        localStorage.setItem('followedCharities', JSON.stringify(newCharities));
+        // Attempt to save to the database as well
+        saveFollowedCharitiesToDB(newCharities);
+        return newCharities;
       }
       return prevCharities;
     });
   }, []);
 
   const removeFollowedCharity = useCallback((charityABN) => {
-    setFollowedCharities(prevCharities => 
-      prevCharities.filter(c => c.ABN !== charityABN)
-    );
+    setFollowedCharities(prevCharities => {
+      const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
+      localStorage.setItem('followedCharities', JSON.stringify(newCharities));
+      // Attempt to update the database as well
+      saveFollowedCharitiesToDB(newCharities);
+      return newCharities;
+    });
   }, []);
+
+  const saveFollowedCharitiesToDB = async (charities) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.post('http://localhost:3002/api/followedCharities', { charities }, { headers });
+    } catch (error) {
+      console.error('Error saving followed charities to database:', error);
+      // Don't set an error state here, as we're still using localStorage as a fallback
+    }
+  };
+
+  // Load followed charities from localStorage on component mount
+  useEffect(() => {
+    const storedCharities = localStorage.getItem('followedCharities');
+    if (storedCharities) {
+      setFollowedCharities(JSON.parse(storedCharities));
+    }
+    fetchImpactData();
+  }, [fetchImpactData]);
+
+  // Attempt to sync localStorage charities with the database
+  useEffect(() => {
+    const syncFollowedCharities = async () => {
+      try {
+        const headers = getAuthHeaders();
+        const response = await axios.get('http://localhost:3002/api/followedCharities', { headers });
+        const dbCharities = response.data;
+        
+        // Merge localStorage charities with database charities
+        const mergedCharities = [...new Set([...followedCharities, ...dbCharities])];
+        setFollowedCharities(mergedCharities);
+        localStorage.setItem('followedCharities', JSON.stringify(mergedCharities));
+        
+        // Update the database with the merged list
+        await saveFollowedCharitiesToDB(mergedCharities);
+      } catch (error) {
+        console.error('Error syncing followed charities:', error);
+        // Don't set an error state here, as we're still using localStorage as a fallback
+      }
+    };
+
+    syncFollowedCharities();
+  }, [followedCharities, getAuthHeaders]);
 
   return (
     <ImpactContext.Provider value={{
       impactScore,
-      scoreDetails,
+      scoreDetails: scoreDetails || defaultScoreDetails,
       lastYearImpactScore,
       tier,
       pointsToNextTier,
