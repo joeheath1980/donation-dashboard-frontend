@@ -33,7 +33,7 @@ const tierBadges = [
   { icon: FaHeart, title: 'Giver', color: '#E74C3C', description: 'Achieved 0-29 impact points' },
 ];
 
-const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNextTier }) => {
+const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNextTier, onSeeProgressClick }) => {
   const [animatedScore, setAnimatedScore] = useState(0);
   const [showTooltip, setShowTooltip] = useState(null);
   const [showAllBadges, setShowAllBadges] = useState(false);
@@ -109,6 +109,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
     borderRadius: '10px',
     height: '10px',
     marginTop: '10px',
+    marginBottom: '15px',
     overflow: 'hidden',
   };
 
@@ -141,7 +142,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
     padding: '10px 15px',
     borderRadius: '5px',
     cursor: 'pointer',
-    marginTop: '20px',
+    marginTop: '10px',
     fontSize: '0.9rem',
     transition: 'background-color 0.3s',
   };
@@ -262,6 +263,9 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
         <div style={progressBarContainerStyle}>
           <div style={progressBarStyle}></div>
         </div>
+        <button style={buttonStyle} onClick={onSeeProgressClick}>
+          See Progress
+        </button>
       </div>
 
       {showAllBadges && (
