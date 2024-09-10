@@ -137,19 +137,12 @@ function Profile() {
     }
   }, [contextSetOneOffContributions, setLocalOneOffContributions, localOneOffContributions]);
 
-  const containerStyle = {
+  const sectionStyle = {
     backgroundColor: '#ffffff',
     borderRadius: '12px',
     padding: '24px',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     marginBottom: '24px',
-  };
-
-  const threeColumnContainerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: '24px',
-    marginTop: '24px',
   };
 
   const columnStyle = {
@@ -161,17 +154,17 @@ function Profile() {
   };
 
   const headerStyle = {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: '16px',
+    marginBottom: '20px',
   };
 
   const subHeaderStyle = {
-    fontSize: '18px',
+    fontSize: '22px',
     fontWeight: 'bold',
     color: '#555',
-    marginBottom: '12px',
+    marginBottom: '16px',
   };
 
   const buttonStyle = {
@@ -194,6 +187,18 @@ function Profile() {
   const listItemStyle = {
     padding: '8px 0',
     borderBottom: '1px solid #eee',
+  };
+
+  const carouselStyle = {
+    ...sectionStyle,
+  };
+
+  const carouselTitleStyle = {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    textAlign: 'center',
+    marginBottom: '20px',
   };
 
   // Updated carousel items for Impact Stories with more realistic charity updates
@@ -289,8 +294,8 @@ function Profile() {
 
   return (
     <div className={styles.profileContainer}>
-      <div className={styles.impactScoreContainer} style={containerStyle}>
-        <h2 style={headerStyle}>Personal Impact Score</h2>
+      <div style={sectionStyle}>
+        <h1 style={headerStyle}>Personal Impact Score</h1>
         <PersonalImpactScore
           impactScore={impactScore}
           scoreChange={scoreChange}
@@ -299,25 +304,28 @@ function Profile() {
           pointsToNextTier={pointsToNextTier}
           onFullReportClick={toggleFullImpactReport}
         />
-        {showFullImpactReport && <ImpactScoreExplain />}
+        {showFullImpactReport && <ImpactScoreExplain onClose={toggleFullImpactReport} />}
         <ImpactVisualization />
       </div>
       
-      <div className={styles.carouselContainer} style={containerStyle}>
-        <h2 style={headerStyle}>Giving Opportunities</h2>
+      <div style={carouselStyle}>
+        <h2 style={carouselTitleStyle}>Matching Opportunities</h2>
         <CarouselComponent 
-          title="Matching Opportunities" 
           items={matchingOpportunities.map(opp => ({
             title: opp.title,
             description: `${opp.description} Amount: $${opp.amount.toLocaleString()}. Valid until: ${new Date(opp.endDate).toLocaleDateString()}`,
             link: opp.link
           }))}
         />
-        <CarouselComponent title="Projects to Support" items={projectsToSupport} />
+      </div>
+
+      <div style={carouselStyle}>
+        <h2 style={carouselTitleStyle}>Projects to Support</h2>
+        <CarouselComponent items={projectsToSupport} />
       </div>
       
-      <div className={styles.donationsContainer} style={{...containerStyle, ...threeColumnContainerStyle}}>
-        <div className={styles.column} style={columnStyle}>
+      <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>
+        <div style={columnStyle}>
           <h3 style={subHeaderStyle}>Regular Donations</h3>
           {localDonations && localDonations.length > 0 ? (
             <ul style={listStyle}>
@@ -339,7 +347,7 @@ function Profile() {
             )}
           </div>
         </div>
-        <div className={styles.column} style={columnStyle}>
+        <div style={columnStyle}>
           <h3 style={subHeaderStyle}>Recent One-off Donations</h3>
           {localOneOffContributions && localOneOffContributions.length > 0 ? (
             <ul style={listStyle}>
@@ -361,7 +369,7 @@ function Profile() {
             )}
           </div>
         </div>
-        <div className={styles.column} style={columnStyle}>
+        <div style={columnStyle}>
           <h3 style={subHeaderStyle}>Charities Following</h3>
           {followedCharities && followedCharities.length > 0 ? (
             <ul style={listStyle}>
@@ -381,19 +389,17 @@ function Profile() {
         </div>
       </div>
 
-      <div className={styles.activitiesContainer} style={{...containerStyle, ...threeColumnContainerStyle}}>
-        <div className={styles.column} style={columnStyle}>
-          <h3 style={subHeaderStyle}>Volunteer Activities</h3>
+      <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>
+        <div style={columnStyle}>
           <VolunteerActivitiesComponent />
         </div>
-        <div className={styles.column} style={columnStyle}>
-          <h3 style={subHeaderStyle}>Fundraising Campaigns</h3>
+        <div style={columnStyle}>
           <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
         </div>
       </div>
 
-      <div className={styles.impactStoriesContainer} style={containerStyle}>
-        <h2 style={headerStyle}>Impact Stories</h2>
+      <div style={carouselStyle}>
+        <h2 style={carouselTitleStyle}>Impact Stories</h2>
         <CarouselComponent items={impactStories} />
       </div>
     </div>
