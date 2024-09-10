@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import styles from '../SignUp.module.css';
+import styles from '../Login.module.css'; // Updated to use Login.module.css
 import logo from '../assets/download.svg';
 
 const SignUp = () => {
@@ -47,13 +47,13 @@ const SignUp = () => {
   };
 
   return (
-    <div className={styles.signUpContainer}>
-      <div className={styles.formWrapper}>
+    <div className={styles.pageContainer}>
+      <div className={styles.loginContainer}>
         <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
-        <h2 className={styles.header}>Create an Account</h2>
-        {error && <p className={styles.error}>{error}</p>}
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <h2>Create an Account</h2>
+        <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
+            <label htmlFor="name">Full Name:</label>
             <input
               type="text"
               id="name"
@@ -61,11 +61,10 @@ const SignUp = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              className={styles.input}
-              placeholder="Full Name"
             />
           </div>
           <div className={styles.formGroup}>
+            <label htmlFor="email">Email:</label>
             <input
               type="email"
               id="email"
@@ -73,11 +72,10 @@ const SignUp = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className={styles.input}
-              placeholder="Email Address"
             />
           </div>
           <div className={styles.formGroup}>
+            <label htmlFor="password">Password:</label>
             <input
               type="password"
               id="password"
@@ -85,11 +83,10 @@ const SignUp = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className={styles.input}
-              placeholder="Password"
             />
           </div>
           <div className={styles.formGroup}>
+            <label htmlFor="confirmPassword">Confirm Password:</label>
             <input
               type="password"
               id="confirmPassword"
@@ -97,13 +94,12 @@ const SignUp = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              className={styles.input}
-              placeholder="Confirm Password"
             />
           </div>
-          <button type="submit" className={styles.submitButton}>Sign Up</button>
+          <button type="submit">Sign Up</button>
+          {error && <p className={styles.formError}>{error}</p>}
         </form>
-        <p className={styles.loginLink}>
+        <p className={styles.toggleText}>
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>

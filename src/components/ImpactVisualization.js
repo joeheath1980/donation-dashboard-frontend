@@ -1,67 +1,48 @@
 import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { parseISO, subYears } from 'date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
+import { FaChartBar, FaDownload } from 'react-icons/fa';
 
 Chart.register(...registerables);
 
 function processData(donations, oneOffContributions, volunteerActivities) {
   if (!donations || !oneOffContributions || !volunteerActivities) {
-    console.error('Invalid input for processData');
     return [];
   }
 
-  const allContributions = [
-    ...donations.map(d => ({ 
-      date: d.date,
-      parsedDate: parseISO(d.date), 
-      type: 'Regular Donation' 
-    })),
-    ...oneOffContributions.map(d => ({ 
-      date: d.date,
-      parsedDate: parseISO(d.date), 
-      type: 'One-off Donation' 
-    })),
-    ...volunteerActivities.map(v => ({ 
-      date: v.date,
-      parsedDate: parseISO(v.date), 
-      type: 'Volunteer Hours' 
-    }))
-  ];
-
-  allContributions.sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
+  const allActivities = [
+    ...donations.map(d => ({ ...d, type: 'donation', date: new Date(d.date) })),
+    ...oneOffContributions.map(d => ({ ...d, type: 'oneOff', date: new Date(d.date) })),
+    ...volunteerActivities.map(v => ({ ...v, type: 'volunteer', date: new Date(v.date) }))
+  ].sort((a, b) => a.date - b.date);
 
   const benchmarks = {
     monthlyDonationBenchmark: 100,
     oneOffDonationBenchmark: 500
   };
 
-  const dataPoints = allContributions.map((_, index) => {
-    const currentDate = allContributions[index].parsedDate;
-    const oneYearAgo = subYears(currentDate, 1);
-
+  let cumulativeScore = 0;
+  return allActivities.map((activity, index) => {
     const currentData = {
-      regularDonations: donations.filter(d => parseISO(d.date) <= currentDate),
-      oneOffDonations: oneOffContributions.filter(d => parseISO(d.date) <= currentDate),
-      volunteeringActivities: volunteerActivities.filter(v => parseISO(v.date) <= currentDate),
-      previousPeriodScore: calculateComplexImpactScore({
-        regularDonations: donations.filter(d => parseISO(d.date) > oneYearAgo && parseISO(d.date) <= currentDate),
-        oneOffDonations: oneOffContributions.filter(d => parseISO(d.date) > oneYearAgo && parseISO(d.date) <= currentDate),
-        volunteeringActivities: volunteerActivities.filter(v => parseISO(v.date) > oneYearAgo && parseISO(v.date) <= currentDate),
-        previousPeriodScore: 0
-      }, benchmarks).totalScore
+      regularDonations: donations.filter(d => new Date(d.date) <= activity.date),
+      oneOffDonations: oneOffContributions.filter(d => new Date(d.date) <= activity.date),
+      volunteeringActivities: volunteerActivities.filter(v => new Date(v.date) <= activity.date),
+      previousPeriodScore: index > 0 ? cumulativeScore : 0
     };
 
-    const score = calculateComplexImpactScore(currentData, benchmarks).totalScore;
-    return { x: currentDate, y: score };
-  });
+    const scoreResult = calculateComplexImpactScore(currentData, benchmarks);
+    cumulativeScore = scoreResult.totalScore;
 
-  return dataPoints;
+    return {
+      x: activity.date,
+      y: cumulativeScore
+    };
+  });
 }
 
 function ImpactVisualization() {
-  const { donations, oneOffContributions, volunteerActivities } = useContext(ImpactContext);
+  const { donations, oneOffContributions, volunteerActivities, impactScore } = useContext(ImpactContext);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -71,7 +52,7 @@ function ImpactVisualization() {
   );
 
   useEffect(() => {
-    if (chartRef.current && dataPoints.length > 0) {
+    if (chartRef.current && dataPoints && dataPoints.length > 0) {
       const ctx = chartRef.current.getContext('2d');
   
       if (chartInstance.current) {
@@ -86,6 +67,7 @@ function ImpactVisualization() {
             data: dataPoints,
             borderColor: '#4CAF50',
             backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            borderWidth: 3,
             tension: 0.1,
             fill: true
           }]
@@ -102,10 +84,10 @@ function ImpactVisualization() {
               intersect: false,
               callbacks: {
                 title: function(tooltipItems) {
-                  return tooltipItems[0].label;
+                  return new Date(tooltipItems[0].parsed.x).toLocaleDateString();
                 },
                 label: function(context) {
-                  return `Personal Impact Score: ${context.parsed.y.toFixed(2)}`;
+                  return `Personal Impact Score: ${context.parsed.y}`;
                 }
               }
             }
@@ -137,7 +119,7 @@ function ImpactVisualization() {
                 display: false
               },
               min: 0,
-              max: 100,
+              max: Math.max(impactScore, ...dataPoints.map(point => point.y), 100),
               grid: {
                 color: 'rgba(46, 125, 50, 0.1)',
               },
@@ -150,6 +132,10 @@ function ImpactVisualization() {
                 }
               }
             }
+          },
+          hover: {
+            mode: 'nearest',
+            intersect: true
           }
         }
       });
@@ -160,15 +146,53 @@ function ImpactVisualization() {
         chartInstance.current.destroy();
       }
     };
-  }, [dataPoints]);
+  }, [dataPoints, impactScore]);
 
-  if (dataPoints.length === 0) {
+  const handleDownload = () => {
+    if (dataPoints && dataPoints.length > 0) {
+      const link = document.createElement('a');
+      link.download = 'impact_data.json';
+      link.href = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(dataPoints))}`;
+      link.click();
+    }
+  };
+
+  const containerStyle = {
+    background: 'linear-gradient(135deg, #f5f5f5, #e0e0e0)',
+    borderRadius: '10px',
+    padding: '20px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    padding: '10px 15px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    margin: '10px 5px',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  if (!dataPoints || dataPoints.length === 0) {
     return <div>No data available for visualization</div>;
   }
 
   return (
-    <div style={{ height: '400px', width: '100%' }}>
-      <canvas ref={chartRef} />
+    <div style={containerStyle}>
+      <h2 style={{ color: '#2E7D32', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <FaChartBar style={{ marginRight: '10px' }} /> Impact Journey
+      </h2>
+      <div style={{ height: '400px', width: '100%', marginBottom: '20px' }}>
+        <canvas ref={chartRef} />
+      </div>
+      <div>
+        <button onClick={handleDownload} style={buttonStyle}>
+          <FaDownload style={{ marginRight: '5px' }} /> Export Data
+        </button>
+      </div>
     </div>
   );
 }

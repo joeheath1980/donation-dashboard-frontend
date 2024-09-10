@@ -2,15 +2,14 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
-import ImpactScoreExplain from './ImpactScoreExplain';
-import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
-import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import ImpactVisualization from './ImpactVisualization';
 import CarouselComponent from './CarouselComponent';
 import { ImpactContext } from '../contexts/ImpactContext';
 import DonationsComponent from './DonationsComponent';
 import OneOffContributionsComponent from './OneOffContributionsComponent';
-import ExperimentalScraperResults from './ExperimentalScraperResults';
+import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
+import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
+import ImpactScoreExplain from './ImpactScoreExplain';
 
 function Profile() {
   const { 
@@ -34,9 +33,11 @@ function Profile() {
   const [showRegularContributions, setShowRegularContributions] = useState(false);
   const [showOneOffContributions, setShowOneOffContributions] = useState(false);
   const [showImpactBreakdown, setShowImpactBreakdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchImpactData();
+    setIsLoading(true);
+    fetchImpactData().finally(() => setIsLoading(false));
   }, [fetchImpactData]);
 
   useEffect(() => {
@@ -140,6 +141,7 @@ function Profile() {
     display: 'flex',
     justifyContent: 'space-between',
     gap: '20px',
+    marginTop: '20px',
   };
 
   const columnStyle = {
@@ -147,6 +149,7 @@ function Profile() {
     backgroundColor: '#f0f8f0',
     borderRadius: '8px',
     padding: '15px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
   };
 
   // Updated carousel items for Impact Stories with more realistic charity updates
@@ -178,20 +181,66 @@ function Profile() {
     }
   ];
 
+  // Matching Opportunities carousel items
+  const matchingOpportunities = [
+    { 
+      title: "Double Your Impact with TechCorp", 
+      description: "TechCorp is matching donations up to $10,000 for STEM education programs. Donate now to double your contribution!", 
+      amount: 10000,
+      endDate: "2023-12-31",
+      link: "#" 
+    },
+    { 
+      title: "GreenEarth Foundation 2x Match", 
+      description: "Help us combat climate change. All donations to GreenEarth Foundation are being matched 2:1 this month.", 
+      amount: 5000,
+      endDate: "2023-11-30",
+      link: "#" 
+    },
+    { 
+      title: "Healthcare Heroes Support", 
+      description: "Your donation to support healthcare workers will be matched 100% by MediCare Inc. Let's show our appreciation!", 
+      amount: 7500,
+      endDate: "2023-12-15",
+      link: "#" 
+    },
+    { 
+      title: "Education for All: 3x Match", 
+      description: "Triple your impact! Every dollar donated to our Education for All program will be matched 3:1 by an anonymous donor.", 
+      amount: 15000,
+      endDate: "2024-01-31",
+      link: "#" 
+    },
+    { 
+      title: "Animal Shelter Emergency Fund", 
+      description: "Help us reach our goal of $50,000 for emergency animal care. PetLove Co. will match every donation.", 
+      amount: 50000,
+      endDate: "2023-12-31",
+      link: "#" 
+    }
+  ];
+
   // Projects to Support carousel items
   const projectsToSupport = [
-    { title: "Support Healthcare", description: "Provide essential medical supplies...", link: "#" },
-    { title: "Education Initiative", description: "Help underprivileged children access education...", link: "#" },
-    { title: "Clean Water Project", description: "Bring clean water to remote villages...", link: "#" },
-    { title: "Hunger Relief", description: "Support food banks and meal programs...", link: "#" },
+    { title: "Support Healthcare", description: "Provide essential medical supplies to underserved communities. Your donation can help save lives.", link: "#" },
+    { title: "Education Initiative", description: "Help underprivileged children access quality education. Support our program to build schools and provide learning materials.", link: "#" },
+    { title: "Clean Water Project", description: "Bring clean water to remote villages. Your contribution can help install water purification systems and wells.", link: "#" },
+    { title: "Hunger Relief", description: "Support food banks and meal programs. Help us fight hunger in local communities and disaster-struck areas.", link: "#" },
+    { title: "Environmental Conservation", description: "Protect endangered species and their habitats. Join our efforts to preserve biodiversity and combat climate change.", link: "#" }
   ];
+
+  if (isLoading) {
+    return <div className={styles.loading}>Loading your impact data...</div>;
+  }
 
   if (impactError) {
     return <div className={styles.error}>{impactError}</div>;
   }
 
-  if (!localDonations.length && !localOneOffContributions.length && !volunteerActivities.length) {
-    return <div className={styles.loading}>Loading your impact data...</div>;
+  const hasData = localDonations.length > 0 || localOneOffContributions.length > 0 || volunteerActivities.length > 0;
+
+  if (!hasData) {
+    return <div className={styles.noData}>No impact data available. Start making donations to see your impact!</div>;
   }
 
   return (
@@ -209,7 +258,17 @@ function Profile() {
         </button>
         {showImpactBreakdown && <ImpactScoreExplain />}
         <ImpactVisualization />
-        <CarouselComponent title="Impact Stories" items={impactStories} />
+      </div>
+      
+      <div className={styles.carouselContainer}>
+        <CarouselComponent 
+          title="Matching Opportunities" 
+          items={matchingOpportunities.map(opp => ({
+            title: opp.title,
+            description: `${opp.description} Amount: $${opp.amount.toLocaleString()}. Valid until: ${new Date(opp.endDate).toLocaleDateString()}`,
+            link: opp.link
+          }))}
+        />
         <CarouselComponent title="Projects to Support" items={projectsToSupport} />
       </div>
       
@@ -278,45 +337,34 @@ function Profile() {
         </div>
       </div>
 
-      <div className={styles.activitiesContainer}>
-        <div className={styles.columns}>
-          <div className={styles.column}>
-            <VolunteerActivitiesComponent />
-          </div>
-          <div className={styles.column}>
-            <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
-          </div>
+      <div className={styles.activitiesContainer} style={threeColumnContainerStyle}>
+        <div className={styles.column} style={columnStyle}>
+          <VolunteerActivitiesComponent />
         </div>
-      </div>
-
-      <div className={styles.threeColumnsContainer} style={threeColumnContainerStyle}>
-        <div className={styles.donorPersonaContainer} style={columnStyle}>
+        <div className={styles.column} style={columnStyle}>
+          <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
+        </div>
+        <div className={styles.column} style={columnStyle}>
           <h2>Donor Persona</h2>
           <p>
             You're a strategic donor who focuses on select causes aligned with your values, particularly education, environment, and medical research. You prefer larger, targeted contributions to organizations with strong track records and measurable outcomes. While maintaining consistent annual giving, you're willing to increase donations for particularly compelling causes or crises.
           </p>
         </div>
-        <div className={styles.charityTypesContainer} style={columnStyle}>
-          <h2>Charity Types</h2>
-          <ul>
-            <li>Women's Health</li>
-            <li>Animal Welfare</li>
-            <li>International Aid</li>
-            <li>Medical Research</li>
-            <li>Education</li>
-          </ul>
-        </div>
-        <div className={styles.badgesContainer} style={columnStyle}>
-          <h2>Badges</h2>
-          <div className={styles.badges}>
-            {/* Space for displaying badge icons */}
-          </div>
-        </div>
       </div>
 
-      <div className={styles.experimentalScraperContainer} style={columnStyle}>
-        <h2>Experimental Gmail Scraper</h2>
-        <ExperimentalScraperResults />
+      <div className={styles.charityTypesContainer} style={columnStyle}>
+        <h2>Charity Types</h2>
+        <ul>
+          <li>Women's Health</li>
+          <li>Animal Welfare</li>
+          <li>International Aid</li>
+          <li>Medical Research</li>
+          <li>Education</li>
+        </ul>
+      </div>
+
+      <div className={styles.impactStoriesContainer}>
+        <CarouselComponent title="Impact Stories" items={impactStories} />
       </div>
     </div>
   );
