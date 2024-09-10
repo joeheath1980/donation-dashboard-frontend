@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from '../SignUp.module.css';
+import logo from '../assets/download.svg';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -47,62 +48,65 @@ const SignUp = () => {
 
   return (
     <div className={styles.signUpContainer}>
-      <h2 className={styles.header}>Sign Up</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label htmlFor="name" className={styles.label}>Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="email" className={styles.label}>Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="password" className={styles.label}>Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="confirmPassword" className={styles.label}>Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            className={styles.input}
-          />
-        </div>
-        <button type="submit" className={styles.submitButton}>Sign Up</button>
-      </form>
-      <p className={styles.loginLink}>
-        Already have an account? <Link to="/login">Login here</Link>
-      </p>
+      <div className={styles.formWrapper}>
+        <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
+        <h2 className={styles.header}>Create an Account</h2>
+        {error && <p className={styles.error}>{error}</p>}
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className={styles.input}
+              placeholder="Full Name"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className={styles.input}
+              placeholder="Email Address"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className={styles.input}
+              placeholder="Password"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className={styles.input}
+              placeholder="Confirm Password"
+            />
+          </div>
+          <button type="submit" className={styles.submitButton}>Sign Up</button>
+        </form>
+        <p className={styles.loginLink}>
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
+      </div>
     </div>
   );
 };

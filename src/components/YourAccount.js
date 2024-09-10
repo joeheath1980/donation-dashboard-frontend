@@ -1,56 +1,56 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styles from '../YourAccount.module.css';
 
-function YourAccount() {
+const YourAccount = () => {
   return (
-    <div className={`${styles.accountContainer} container`}>
-      <h1 className="h1">Your Account</h1>
-      <div className={styles.accountGrid}>
-        {/* Profile Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Profile</h2>
-          <p>Update your personal information.</p>
-          <Link to="/profile" className="btn btn-secondary">Edit Profile</Link>
-        </div>
+    <div className={styles.accountPage}>
+      <main className={styles.main}>
+        <h1 className={styles.pageTitle}>Your Account</h1>
 
-        {/* Past Activity Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Past Activity</h2>
-          <p>Review your past donations and activities.</p>
-          <Link to="/activity" className="btn btn-secondary">View Activity</Link>
-        </div>
+        <div className={styles.cardGrid}>
+          <div className={styles.card}>
+            <span className={styles.cardIcon}>👤</span>
+            <h2>Profile</h2>
+            <p>Manage your personal information and preferences.</p>
+            <button className={styles.cardButton}>Edit Profile</button>
+            <span className={styles.ctaTip}>Keep your profile updated for a better experience!</span>
+          </div>
 
-        {/* Payments Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Payments</h2>
-          <p>Manage your payment methods and history.</p>
-          <Link to="/payments" className="btn btn-secondary">Manage Payments</Link>
-        </div>
+          <div className={styles.card}>
+            <span className={styles.cardIcon}>🔒</span>
+            <h2>Privacy</h2>
+            <p>Control your privacy settings and data sharing preferences.</p>
+            <button className={styles.cardButton}>Manage Privacy</button>
+            <span className={styles.ctaTip}>Your privacy matters. Review your settings regularly.</span>
+          </div>
 
-        {/* Privacy Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Privacy</h2>
-          <p>Manage your privacy settings and data.</p>
-          <Link to="/privacy" className="btn btn-secondary">Privacy Settings</Link>
-        </div>
+          <div className={styles.card}>
+            <span className={styles.cardIcon}>💳</span>
+            <h2>Payments</h2>
+            <p>View and manage your payment methods and recurring donations.</p>
+            <button className={styles.cardButton}>Manage Payments</button>
+            <span className={styles.ctaTip}>Securely manage your payment options here.</span>
+          </div>
 
-        {/* Tax Information Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Tax Information</h2>
-          <p>Complete tax statements for all your giving.</p>
-          <Link to="/tax-info" className="btn btn-secondary">View Tax Info</Link>
-        </div>
+          <div className={styles.card}>
+            <span className={styles.cardIcon}>📅</span>
+            <h2>Past Activity</h2>
+            <p>Review your donation history and impact over time.</p>
+            <button className={styles.cardButton}>View Activity</button>
+            <span className={styles.ctaTip}>See detailed insights in your past activity.</span>
+          </div>
 
-        {/* Partners Box */}
-        <div className={`${styles.box} card`}>
-          <h2 className="h2">Partners</h2>
-          <p>View our charity and brand partners.</p>
-          <Link to="/partners" className="btn btn-secondary">Go to Partners</Link>
+          <div className={styles.card}>
+            <span className={styles.cardIcon}>⚙️</span>
+            <h2>Account Settings</h2>
+            <p>Adjust your account preferences and notification settings.</p>
+            <button className={styles.cardButton}>Manage Settings</button>
+            <span className={styles.ctaTip}>Customize your account for the best experience.</span>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
-}
+};
 
 export default YourAccount;
