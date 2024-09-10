@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import styles from '../Profile.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { FaTimes } from 'react-icons/fa';
 
-const ImpactScoreExplanation = () => {
+const ImpactScoreExplanation = ({ onClose }) => {
   const { impactScore, scoreDetails } = useContext(ImpactContext);
 
   if (!scoreDetails) {
@@ -11,8 +12,22 @@ const ImpactScoreExplanation = () => {
 
   const { regularDonationScore, oneOffDonationScore, volunteeringScore, engagementBonus } = scoreDetails;
 
+  const closeButtonStyle = {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: '#333',
+  };
+
   return (
-    <div className={styles.breakdownContainer}>
+    <div className={styles.breakdownContainer} style={{ position: 'relative' }}>
+      <button onClick={onClose} style={closeButtonStyle}>
+        <FaTimes />
+      </button>
       <h2 className={styles.breakdownTitle}>Impact Score Breakdown</h2>
       <ScoreComponent 
         title="Regular Donations" 

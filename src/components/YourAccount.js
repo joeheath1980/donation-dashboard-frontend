@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styles from '../YourAccount.module.css';
 
 const YourAccount = () => {
@@ -36,7 +37,7 @@ const YourAccount = () => {
             <span className={styles.cardIcon}>📅</span>
             <h2>Past Activity</h2>
             <p>Review your donation history and impact over time.</p>
-            <button className={styles.cardButton}>View Activity</button>
+            <Link to="/activity" className={styles.cardButton}>View Activity</Link>
             <span className={styles.ctaTip}>See detailed insights in your past activity.</span>
           </div>
 

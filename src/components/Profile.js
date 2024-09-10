@@ -32,7 +32,7 @@ function Profile() {
   const [localOneOffContributions, setLocalOneOffContributions] = useState(contextOneOffContributions || []);
   const [showRegularContributions, setShowRegularContributions] = useState(false);
   const [showOneOffContributions, setShowOneOffContributions] = useState(false);
-  const [showImpactBreakdown, setShowImpactBreakdown] = useState(false);
+  const [showFullImpactReport, setShowFullImpactReport] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -76,8 +76,8 @@ function Profile() {
     setShowOneOffContributions(!showOneOffContributions);
   };
 
-  const toggleImpactBreakdown = () => {
-    setShowImpactBreakdown(!showImpactBreakdown);
+  const toggleFullImpactReport = () => {
+    setShowFullImpactReport(!showFullImpactReport);
   };
 
   const handleDeleteDonation = useCallback(async (donationId) => {
@@ -137,19 +137,63 @@ function Profile() {
     }
   }, [contextSetOneOffContributions, setLocalOneOffContributions, localOneOffContributions]);
 
+  const containerStyle = {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    marginBottom: '24px',
+  };
+
   const threeColumnContainerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: '20px',
-    marginTop: '20px',
+    gap: '24px',
+    marginTop: '24px',
   };
 
   const columnStyle = {
     flex: '1 1 30%',
-    backgroundColor: '#f0f8f0',
+    backgroundColor: '#f8f9fa',
     borderRadius: '8px',
-    padding: '15px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    padding: '20px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+  };
+
+  const headerStyle = {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: '16px',
+  };
+
+  const subHeaderStyle = {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#555',
+    marginBottom: '12px',
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    transition: 'background-color 0.3s',
+  };
+
+  const listStyle = {
+    listStyleType: 'none',
+    padding: '0',
+    margin: '0',
+  };
+
+  const listItemStyle = {
+    padding: '8px 0',
+    borderBottom: '1px solid #eee',
   };
 
   // Updated carousel items for Impact Stories with more realistic charity updates
@@ -245,22 +289,22 @@ function Profile() {
 
   return (
     <div className={styles.profileContainer}>
-      <div className={styles.impactScoreContainer}>
+      <div className={styles.impactScoreContainer} style={containerStyle}>
+        <h2 style={headerStyle}>Personal Impact Score</h2>
         <PersonalImpactScore
           impactScore={impactScore}
           scoreChange={scoreChange}
           arrow={arrow}
           tier={tier}
           pointsToNextTier={pointsToNextTier}
+          onFullReportClick={toggleFullImpactReport}
         />
-        <button className={styles.seeBreakdownButton} onClick={toggleImpactBreakdown}>
-          {showImpactBreakdown ? 'Hide breakdown' : 'See breakdown'}
-        </button>
-        {showImpactBreakdown && <ImpactScoreExplain />}
+        {showFullImpactReport && <ImpactScoreExplain />}
         <ImpactVisualization />
       </div>
       
-      <div className={styles.carouselContainer}>
+      <div className={styles.carouselContainer} style={containerStyle}>
+        <h2 style={headerStyle}>Giving Opportunities</h2>
         <CarouselComponent 
           title="Matching Opportunities" 
           items={matchingOpportunities.map(opp => ({
@@ -272,20 +316,20 @@ function Profile() {
         <CarouselComponent title="Projects to Support" items={projectsToSupport} />
       </div>
       
-      <div className={styles.donationsContainer} style={threeColumnContainerStyle}>
+      <div className={styles.donationsContainer} style={{...containerStyle, ...threeColumnContainerStyle}}>
         <div className={styles.column} style={columnStyle}>
-          <h3>Regular Donations</h3>
+          <h3 style={subHeaderStyle}>Regular Donations</h3>
           {localDonations && localDonations.length > 0 ? (
-            <ul>
+            <ul style={listStyle}>
               {getUniqueCharities().map((charity, index) => (
-                <li key={index}>{charity}</li>
+                <li key={index} style={listItemStyle}>{charity}</li>
               ))}
             </ul>
           ) : (
             <p>No regular donations yet.</p>
           )}
           <div className={styles.regularContributionsWrapper}>
-            <h4 className={styles.seeHistoryHeader} onClick={toggleRegularContributions}>
+            <h4 className={styles.seeHistoryHeader} style={{...subHeaderStyle, cursor: 'pointer'}} onClick={toggleRegularContributions}>
               See history {showRegularContributions ? '▲' : '▼'}
             </h4>
             {showRegularContributions && (
@@ -296,18 +340,18 @@ function Profile() {
           </div>
         </div>
         <div className={styles.column} style={columnStyle}>
-          <h3>Recent One-off Donations</h3>
+          <h3 style={subHeaderStyle}>Recent One-off Donations</h3>
           {localOneOffContributions && localOneOffContributions.length > 0 ? (
-            <ul>
+            <ul style={listStyle}>
               {getRecentOneOffDonations().map((donation, index) => (
-                <li key={index}>{donation.charity}: ${donation.amount}</li>
+                <li key={index} style={listItemStyle}>{donation.charity}: ${donation.amount}</li>
               ))}
             </ul>
           ) : (
             <p>No one-off donations yet.</p>
           )}
           <div className={styles.oneOffContributionsWrapper}>
-            <h4 className={styles.seeHistoryHeader} onClick={toggleOneOffContributions}>
+            <h4 className={styles.seeHistoryHeader} style={{...subHeaderStyle, cursor: 'pointer'}} onClick={toggleOneOffContributions}>
               See history {showOneOffContributions ? '▲' : '▼'}
             </h4>
             {showOneOffContributions && (
@@ -318,13 +362,13 @@ function Profile() {
           </div>
         </div>
         <div className={styles.column} style={columnStyle}>
-          <h3>Charities Following</h3>
+          <h3 style={subHeaderStyle}>Charities Following</h3>
           {followedCharities && followedCharities.length > 0 ? (
-            <ul>
+            <ul style={listStyle}>
               {followedCharities.map((charity, index) => (
-                <li key={charity.ABN}>
+                <li key={charity.ABN} style={listItemStyle}>
                   {charity.logo && (
-                    <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px'}} />
+                    <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
                   )}
                   {charity.name}
                 </li>
@@ -333,21 +377,24 @@ function Profile() {
           ) : (
             <p>Not following any charities yet.</p>
           )}
-          <Link to="/search-charities" className={styles.searchCharitiesLink}>Search Charities</Link>
+          <Link to="/search-charities" style={{...buttonStyle, display: 'inline-block', textDecoration: 'none', marginTop: '16px'}}>Search Charities</Link>
         </div>
       </div>
 
-      <div className={styles.activitiesContainer} style={threeColumnContainerStyle}>
+      <div className={styles.activitiesContainer} style={{...containerStyle, ...threeColumnContainerStyle}}>
         <div className={styles.column} style={columnStyle}>
+          <h3 style={subHeaderStyle}>Volunteer Activities</h3>
           <VolunteerActivitiesComponent />
         </div>
         <div className={styles.column} style={columnStyle}>
+          <h3 style={subHeaderStyle}>Fundraising Campaigns</h3>
           <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
         </div>
       </div>
 
-      <div className={styles.impactStoriesContainer}>
-        <CarouselComponent title="Impact Stories" items={impactStories} />
+      <div className={styles.impactStoriesContainer} style={containerStyle}>
+        <h2 style={headerStyle}>Impact Stories</h2>
+        <CarouselComponent items={impactStories} />
       </div>
     </div>
   );
