@@ -1,38 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
 .welcomePage {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Poppins', sans-serif;
   color: #333;
   line-height: 1.6;
 }
 
 .header {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A, #CDDC39);
-  color: white;
-  padding: 1rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logoContainer {
+  display: flex;
   align-items: center;
 }
 
-.ctaButton {
-  display: inline-block;
-  background-color: white;
-  color: #4CAF50;
-  padding: 0.5rem 1rem;
-  border-radius: 30px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s ease, color 0.3s ease;
+.logo {
+  width: 50px;
+  height: auto;
+  margin-right: 10px;
 }
 
-.ctaButton:hover {
-  background-color: #e0e0e0;
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4CAF50;
+}
+
+.headerCta {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.headerCta:hover {
+  background-color: #45a049;
 }
 
 .hero {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A, #CDDC39, #FFC107);
+  background: linear-gradient(135deg, #4CAF50, #FFC107);
   color: #ffffff;
   text-align: center;
-  padding: 3rem 0;
+  padding: 5rem 2rem;
 }
 
 .heroContent {
@@ -40,24 +58,35 @@
   margin: 0 auto;
 }
 
-.welcomeText {
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+.heroTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
 
-.logoContainer {
-  background-color: white;
+.heroSubtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+.ctaButton {
   display: inline-block;
-  padding: 1.5rem;
-  border-radius: 15px;
-  cursor: pointer;
+  background-color: #FFC107;
+  color: #333;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-  width: 250px;
-  height: auto;
+.ctaButton:hover {
+  background-color: #FFD54F;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .featuresContainer {
@@ -65,7 +94,7 @@
   flex-wrap: wrap;
   justify-content: space-around;
   max-width: 1200px;
-  margin: 3rem auto;
+  margin: 4rem auto;
   padding: 0 2rem;
 }
 
@@ -73,26 +102,45 @@
   flex-basis: calc(50% - 2rem);
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #4CAF50, #8BC34A, #CDDC39);
-  border-radius: 12px;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: white;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
 .feature:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
 .featureIcon {
   font-size: 2.5rem;
+  color: #4CAF50;
   margin-bottom: 1rem;
 }
 
-.feature h2 {
-  font-size: 1.75rem;
+.feature h3 {
+  font-size: 1.5rem;
   margin-bottom: 1rem;
+  color: #4CAF50;
+}
+
+.feature p {
+  margin-bottom: 1rem;
+}
+
+.learnMoreButton {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.learnMoreButton:hover {
+  background-color: #45a049;
 }
 
 .footer {
@@ -103,19 +151,19 @@
 }
 
 @media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
   .featuresContainer {
     flex-direction: column;
   }
 
   .feature {
     flex-basis: 100%;
-  }
-
-  .logo {
-    width: 200px;
-  }
-
-  .welcomeText {
-    font-size: 2rem;
   }
 }

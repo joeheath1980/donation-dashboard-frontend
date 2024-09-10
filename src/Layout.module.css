@@ -9,8 +9,8 @@
   top: 0;
   z-index: 1000;
   background-color: #ffffff;
-  box-shadow: none !important;
-  border: none !important;
+  box-shadow: none;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .navbarContent {
@@ -47,6 +47,7 @@
   list-style-type: none;
   margin: 0;
   padding: 0;
+  justify-content: flex-end;
 }
 
 .navLinks li {
@@ -56,21 +57,13 @@
 
 .navLink {
   color: #4CAF50;
-  text-decoration: none !important;
+  text-decoration: none;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem;
   font-weight: 500;
   font-size: 1rem;
   transition: color 0.3s ease;
   white-space: nowrap;
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  background: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  border-radius: 0 !important;
 }
 
 .navLink:hover,
@@ -78,15 +71,7 @@
 .navLink:active,
 .active {
   color: #3a7e3a;
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  background: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  border-radius: 0 !important;
+  text-decoration: none;
 }
 
 .logoutButton {
@@ -145,31 +130,19 @@
   }
 }
 
-/* Ensure no outline or shadow for both navLink and active classes */
-:global(.Layout_navLink__asN14),
-:global(.Layout_active__asN14) {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  background: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  border-radius: 0 !important;
-}
-
-/* Reset styles for all potential parent elements */
-:global(.Layout_navLinks__asN14),
-:global(.Layout_navLinks__asN14) li,
-:global(.Layout_navLinks__asN14) li a {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  background: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  border-radius: 0 !important;
+/* Remove all !important declarations */
+.navLink,
+.active,
+.navLinks,
+.navLinks li,
+.navLinks li a {
+  outline: none;
+  box-shadow: none;
+  border: none;
+  text-decoration: none;
+  background: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
 }
