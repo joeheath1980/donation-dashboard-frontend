@@ -344,23 +344,6 @@ function Profile() {
         <div className={styles.column} style={columnStyle}>
           <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
         </div>
-        <div className={styles.column} style={columnStyle}>
-          <h2>Donor Persona</h2>
-          <p>
-            You're a strategic donor who focuses on select causes aligned with your values, particularly education, environment, and medical research. You prefer larger, targeted contributions to organizations with strong track records and measurable outcomes. While maintaining consistent annual giving, you're willing to increase donations for particularly compelling causes or crises.
-          </p>
-        </div>
-      </div>
-
-      <div className={styles.charityTypesContainer} style={columnStyle}>
-        <h2>Charity Types</h2>
-        <ul>
-          <li>Women's Health</li>
-          <li>Animal Welfare</li>
-          <li>International Aid</li>
-          <li>Medical Research</li>
-          <li>Education</li>
-        </ul>
       </div>
 
       <div className={styles.impactStoriesContainer}>
