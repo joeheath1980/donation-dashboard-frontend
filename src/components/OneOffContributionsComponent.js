@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './DonationCards.module.css';
 import { format, parseISO, parse } from 'date-fns';
+import OneOffContributionModal from './OneOffContributionModal';
 
 function formatDate(dateString) {
   let date;
@@ -23,6 +24,7 @@ function formatDate(dateString) {
 function OneOffContributionsComponent() {
   const { oneOffContributions, onDeleteContribution, fetchImpactData } = useContext(ImpactContext);
   const [editingContribution, setEditingContribution] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
@@ -34,6 +36,7 @@ function OneOffContributionsComponent() {
       try {
         await onDeleteContribution(contributionId);
         console.log('Contribution deleted successfully');
+        fetchImpactData(); // Refresh the data after deletion
       } catch (error) {
         console.error('Error deleting contribution:', error);
         alert(`Failed to delete contribution: ${error.message}`);
@@ -42,22 +45,25 @@ function OneOffContributionsComponent() {
   };
 
   const handleEdit = (contribution) => {
-    setEditingContribution({ ...contribution });
+    console.log('Edit button clicked for contribution:', contribution);
+    setEditingContribution(contribution);
+    setShowModal(true);
+    console.log('showModal set to:', true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (editedContribution) => {
     try {
-      const response = await fetch(`http://localhost:3002/api/contributions/one-off/${editingContribution._id}`, {
+      const response = await fetch(`http://localhost:3002/api/contributions/one-off/${editedContribution._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(editingContribution)
+        body: JSON.stringify(editedContribution)
       });
 
       if (response.ok) {
-        setEditingContribution(null);
+        setShowModal(false);
         fetchImpactData(); // Refresh the data after update
       } else {
         const errorData = await response.json();
@@ -69,14 +75,11 @@ function OneOffContributionsComponent() {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditingContribution(prev => ({ ...prev, [name]: value }));
-  };
-
   const handleShowMore = () => {
     setDisplayCount(prevCount => prevCount + 5);
   };
+
+  console.log('Current state - showModal:', showModal, 'editingContribution:', editingContribution);
 
   return (
     <div className={styles.cardContainer}>
@@ -84,73 +87,25 @@ function OneOffContributionsComponent() {
         <>
           {oneOffContributions.slice(0, displayCount).map((contribution) => (
             <div key={contribution._id} className={styles.card}>
-              {editingContribution && editingContribution._id === contribution._id ? (
-                <div className={styles.cardContent}>
-                  <input
-                    type="text"
-                    name="charity"
-                    value={editingContribution.charity}
-                    onChange={handleChange}
-                    className={styles.editInput}
-                  />
-                  <input
-                    type="date"
-                    name="date"
-                    value={editingContribution.date.split('T')[0]}
-                    onChange={handleChange}
-                    className={styles.editInput}
-                  />
-                  <input
-                    type="number"
-                    name="amount"
-                    value={editingContribution.amount}
-                    onChange={handleChange}
-                    className={styles.editInput}
-                  />
-                  <select
-                    name="charityType"
-                    value={editingContribution.charityType}
-                    onChange={handleChange}
-                    className={styles.editInput}
-                  >
-                    <option value="Health">Health</option>
-                    <option value="Education">Education</option>
-                    <option value="Environment">Environment</option>
-                    <option value="Humanitarian">Humanitarian</option>
-                    <option value="Arts and Culture">Arts and Culture</option>
-                    <option value="Religious">Religious</option>
-                    <option value="Human Rights">Human Rights</option>
-                    <option value="Children and Youth">Children and Youth</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <div className={styles.cardActions}>
-                    <button onClick={handleSave} className={styles.editButton}>Save</button>
-                    <button onClick={() => setEditingContribution(null)} className={styles.deleteButton}>Cancel</button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className={styles.cardContent}>
-                    <h3 className={styles.charityName}>{contribution.charity}</h3>
-                    <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                    <p className={styles.donationDetail}><strong>Amount:</strong> ${contribution.amount}</p>
-                    <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
-                    {contribution.subject && (
-                      <p className={styles.donationDetail}><strong>Subject:</strong> {contribution.subject}</p>
-                    )}
-                  </div>
-                  <div className={styles.cardActions}>
-                    <button onClick={() => handleEdit(contribution)} className={styles.editButton}>Edit</button>
-                    <button
-                      onClick={() => handleDelete(contribution._id)}
-                      className={styles.deleteButton}
-                      aria-label="Delete Contribution"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
+              <div className={styles.cardContent}>
+                <h3 className={styles.charityName}>{contribution.charity}</h3>
+                <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                <p className={styles.donationDetail}><strong>Amount:</strong> ${contribution.amount}</p>
+                <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
+                {contribution.subject && (
+                  <p className={styles.donationDetail}><strong>Subject:</strong> {contribution.subject}</p>
+                )}
+              </div>
+              <div className={styles.cardActions}>
+                <button onClick={() => handleEdit(contribution)} className={styles.editButton}>Edit</button>
+                <button
+                  onClick={() => handleDelete(contribution._id)}
+                  className={styles.deleteButton}
+                  aria-label="Delete Contribution"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
           {oneOffContributions.length > displayCount && (
@@ -161,6 +116,16 @@ function OneOffContributionsComponent() {
         </>
       ) : (
         <p className={styles.noDonations}>No one-off contributions found.</p>
+      )}
+      {showModal && (
+        <OneOffContributionModal
+          contribution={editingContribution}
+          onConfirm={handleSave}
+          onCancel={() => {
+            console.log('Modal closed');
+            setShowModal(false);
+          }}
+        />
       )}
     </div>
   );

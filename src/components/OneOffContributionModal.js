@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import styles from './DonationConfirmationModal.module.css';
+import styles from './OneOffContributionModal.module.css';
 
-const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
-  const [editedDonation, setEditedDonation] = useState(donation);
+const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
+  const [editedContribution, setEditedContribution] = useState(contribution);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditedDonation(prev => ({ ...prev, [name]: value }));
+    setEditedContribution(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onConfirm(editedDonation);
+    onConfirm(editedContribution);
   };
 
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
-        <h2>Confirm Donation</h2>
+        <h2>Edit One-Off Contribution</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="charity">Charity:</label>
@@ -25,7 +25,7 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               type="text"
               id="charity"
               name="charity"
-              value={editedDonation.charity}
+              value={editedContribution.charity}
               onChange={handleChange}
               required
             />
@@ -36,7 +36,7 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               type="number"
               id="amount"
               name="amount"
-              value={editedDonation.amount}
+              value={editedContribution.amount}
               onChange={handleChange}
               required
             />
@@ -47,7 +47,7 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               type="date"
               id="date"
               name="date"
-              value={editedDonation.date.split('T')[0]}
+              value={editedContribution.date.split('T')[0]}
               onChange={handleChange}
               required
             />
@@ -57,7 +57,7 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
             <select
               id="charityType"
               name="charityType"
-              value={editedDonation.charityType}
+              value={editedContribution.charityType}
               onChange={handleChange}
               required
             >
@@ -72,6 +72,18 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               <option value="Other">Other</option>
             </select>
           </div>
+          {editedContribution.subject && (
+            <div>
+              <label htmlFor="subject">Subject:</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={editedContribution.subject}
+                onChange={handleChange}
+              />
+            </div>
+          )}
           <div className={styles.buttonGroup}>
             <button type="submit">Confirm</button>
             <button type="button" onClick={onCancel}>Cancel</button>
@@ -82,4 +94,4 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
   );
 };
 
-export default DonationConfirmationModal;
+export default OneOffContributionModal;

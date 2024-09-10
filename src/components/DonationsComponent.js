@@ -111,7 +111,7 @@ function DonationsComponent() {
                 <h3 className={styles.charityName}>{donation.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
                 <p className={styles.donationDetail}><strong>Amount:</strong> ${donation.amount}</p>
-                <p className={styles.donationDetail}><strong>Tags:</strong> {donation.tags ? donation.tags.join(', ') : 'None'}</p>
+                <p className={styles.donationDetail}><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                 {donation.subject && (
                   <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>
                 )}
