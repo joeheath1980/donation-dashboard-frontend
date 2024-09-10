@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import styles from '../Impact.module.css';
+import styles from './DonationCards.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationConfirmationModal from './DonationConfirmationModal';
 
@@ -26,6 +26,7 @@ function DonationsComponent() {
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     fetchImpactData();
@@ -96,32 +97,45 @@ function DonationsComponent() {
     }
   };
 
+  const handleShowMore = () => {
+    setDisplayCount(prevCount => prevCount + 5);
+  };
+
   return (
-    <div className={styles.donationsContainer}>
+    <div className={styles.cardContainer}>
       {localDonations && localDonations.length > 0 ? (
-        localDonations.map((donation) => (
-          <div key={donation._id} className={styles.donationItem}>
-            <strong>Charity:</strong> {donation.charity}<br />
-            <strong>Date:</strong> {formatDate(donation.date)}<br />
-            <strong>Amount:</strong> {donation.amount}<br />
-            <strong>Tags:</strong> {donation.tags ? donation.tags.join(', ') : 'None'}<br />
-            {donation.subject && (
-              <>
-                <strong>Subject:</strong> {donation.subject}<br />
-              </>
-            )}
-            <button onClick={() => handleEdit(donation)}>Edit</button>
-            <button
-              className={styles.deleteIcon}
-              onClick={() => handleDelete(donation._id)}
-              aria-label="Delete Donation"
-            >
-              &times;
+        <>
+          {localDonations.slice(0, displayCount).map((donation) => (
+            <div key={donation._id} className={styles.card}>
+              <div className={styles.cardContent}>
+                <h3 className={styles.charityName}>{donation.charity}</h3>
+                <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
+                <p className={styles.donationDetail}><strong>Amount:</strong> ${donation.amount}</p>
+                <p className={styles.donationDetail}><strong>Tags:</strong> {donation.tags ? donation.tags.join(', ') : 'None'}</p>
+                {donation.subject && (
+                  <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>
+                )}
+              </div>
+              <div className={styles.cardActions}>
+                <button onClick={() => handleEdit(donation)} className={styles.editButton}>Edit</button>
+                <button
+                  onClick={() => handleDelete(donation._id)}
+                  className={styles.deleteButton}
+                  aria-label="Delete Donation"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+          {localDonations.length > displayCount && (
+            <button onClick={handleShowMore} className={styles.showMoreButton}>
+              Show More
             </button>
-          </div>
-        ))
+          )}
+        </>
       ) : (
-        <p>No donations to display.</p>
+        <p className={styles.noDonations}>No donations to display.</p>
       )}
       {showModal && (
         <DonationConfirmationModal

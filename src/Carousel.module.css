@@ -1,6 +1,6 @@
 .carouselContainer {
-  margin-top: 30px;
-  padding: 20px;
+  margin-top: 50px;
+  padding: 30px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -8,77 +8,93 @@
 
 .carouselTitle {
   color: #2E7D32;
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  margin-bottom: 30px;
   font-weight: bold;
+  text-align: center;
 }
 
 .carouselWrapper {
-  margin: 0 -10px;
+  margin: 0 -15px;
 }
 
 .carouselItemWrapper {
-  padding: 0 10px;
+  padding: 0 15px;
   box-sizing: border-box;
 }
 
 .carouselItem {
   background-color: #f0f8f0;
   border-radius: 8px;
-  border: 1px solid #4CAF50;
-  padding: 20px;
+  border: 2px solid #4CAF50;
+  padding: 25px;
   height: 100%;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .carouselItem:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.itemIcon {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 1.5rem;
+  color: #4CAF50;
 }
 
 .itemTitle {
   color: #2E7D32;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+  font-size: 1.4rem;
+  margin: 25px 0 15px;
   font-weight: bold;
+  text-align: left;
 }
 
 .itemDescription {
   color: #333;
   font-size: 1rem;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   flex-grow: 1;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  text-align: left;
 }
 
 .readMoreLink {
   display: inline-block;
   background-color: #4CAF50;
   color: white;
-  padding: 8px 15px;
+  padding: 10px 20px;
   border-radius: 4px;
   text-decoration: none;
   font-weight: bold;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: auto;
+  text-align: center;
 }
 
 .readMoreLink:hover {
   background-color: #45a049;
+  transform: translateY(-2px);
 }
 
 /* Customize slick-carousel dots */
 :global(.slick-dots) {
-  bottom: -30px;
+  bottom: -40px;
 }
 
 :global(.slick-dots li button:before) {
   color: #4CAF50;
+  font-size: 12px;
 }
 
 :global(.slick-dots li.slick-active button:before) {
@@ -89,11 +105,14 @@
 :global(.slick-prev),
 :global(.slick-next) {
   z-index: 1;
+  width: 40px;
+  height: 40px;
 }
 
 :global(.slick-prev:before),
 :global(.slick-next:before) {
   color: #4CAF50;
+  font-size: 40px;
 }
 
 :global(.slick-prev:hover:before),
@@ -102,11 +121,11 @@
 }
 
 :global(.slick-prev) {
-  left: -25px;
+  left: -40px;
 }
 
 :global(.slick-next) {
-  right: -25px;
+  right: -40px;
 }
 
 /* Ensure equal height for all slides */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaArrowUp, FaTrophy, FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaInfoCircle } from 'react-icons/fa';
+import { FaArrowUp, FaTrophy, FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaInfoCircle, FaStar, FaAward, FaHandsHelping, FaHeart } from 'react-icons/fa';
 
 const badges = [
   { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', description: 'Impact in the health sector' },
@@ -7,6 +7,14 @@ const badges = [
   { icon: FaTree, title: 'Environmental Guardian', color: '#45B649', description: 'Protecting the environment' },
   { icon: FaHandHoldingHeart, title: 'Humanitarian Helper', color: '#FF8C00', description: 'Aiding humanitarian causes' },
   { icon: FaGlobeAmericas, title: 'Global Impact', color: '#3498DB', description: 'Making a worldwide difference' },
+];
+
+const tierBadges = [
+  { icon: FaStar, title: 'Visionary', color: '#FFD700', description: 'Achieved 90+ impact points' },
+  { icon: FaAward, title: 'Champion', color: '#C0C0C0', description: 'Achieved 70-89 impact points' },
+  { icon: FaTrophy, title: 'Philanthropist', color: '#CD7F32', description: 'Achieved 50-69 impact points' },
+  { icon: FaHandsHelping, title: 'Altruist', color: '#2ECC71', description: 'Achieved 30-49 impact points' },
+  { icon: FaHeart, title: 'Giver', color: '#E74C3C', description: 'Achieved 0-29 impact points' },
 ];
 
 const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNextTier }) => {
@@ -125,6 +133,8 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
     transition: 'background-color 0.3s',
   };
 
+  const currentTierBadge = tierBadges.find(badge => badge.title === tier);
+
   return (
     <div style={containerStyle}>
       <div style={badgesContainerStyle}>
@@ -157,10 +167,12 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
       </div>
       <div style={tierContainerStyle}>
         <h3 style={{ marginBottom: '10px', color: '#2E7D32' }}>Current Tier</h3>
-        <p style={{ color: '#2E7D32', margin: '5px 0', fontSize: '1.2rem' }}>
-          <FaTrophy style={{ marginRight: '5px' }} />
-          <span style={{ fontWeight: 'bold', color: '#1B5E20' }}>{tier}</span>
-        </p>
+        {currentTierBadge && (
+          <div style={badgeStyle}>
+            <currentTierBadge.icon size={40} color={currentTierBadge.color} />
+            <span style={{ fontWeight: 'bold', color: '#1B5E20', marginTop: '5px' }}>{currentTierBadge.title}</span>
+          </div>
+        )}
         <p style={{ color: '#2E7D32', margin: '10px 0', fontSize: '1rem' }}>
           Points to next tier: <span>{pointsToNextTier}</span>
         </p>

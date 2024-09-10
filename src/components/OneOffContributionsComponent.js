@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import styles from '../Impact.module.css';
+import styles from './DonationCards.module.css';
 import { format, parseISO, parse } from 'date-fns';
 
 function formatDate(dateString) {
@@ -23,6 +23,7 @@ function formatDate(dateString) {
 function OneOffContributionsComponent() {
   const { oneOffContributions, onDeleteContribution, fetchImpactData } = useContext(ImpactContext);
   const [editingContribution, setEditingContribution] = useState(null);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     fetchImpactData();
@@ -73,36 +74,44 @@ function OneOffContributionsComponent() {
     setEditingContribution(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleShowMore = () => {
+    setDisplayCount(prevCount => prevCount + 5);
+  };
+
   return (
-    <div className={styles.contributionsContainer}>
+    <div className={styles.cardContainer}>
       {oneOffContributions && oneOffContributions.length > 0 ? (
-        <ul className={styles.contributionsList}>
-          {oneOffContributions.map((contribution) => (
-            <li key={contribution._id} className={styles.contributionItem}>
+        <>
+          {oneOffContributions.slice(0, displayCount).map((contribution) => (
+            <div key={contribution._id} className={styles.card}>
               {editingContribution && editingContribution._id === contribution._id ? (
-                <>
+                <div className={styles.cardContent}>
                   <input
                     type="text"
                     name="charity"
                     value={editingContribution.charity}
                     onChange={handleChange}
+                    className={styles.editInput}
                   />
                   <input
                     type="date"
                     name="date"
                     value={editingContribution.date.split('T')[0]}
                     onChange={handleChange}
+                    className={styles.editInput}
                   />
                   <input
                     type="number"
                     name="amount"
                     value={editingContribution.amount}
                     onChange={handleChange}
+                    className={styles.editInput}
                   />
                   <select
                     name="charityType"
                     value={editingContribution.charityType}
                     onChange={handleChange}
+                    className={styles.editInput}
                   >
                     <option value="Health">Health</option>
                     <option value="Education">Education</option>
@@ -114,35 +123,44 @@ function OneOffContributionsComponent() {
                     <option value="Children and Youth">Children and Youth</option>
                     <option value="Other">Other</option>
                   </select>
-                  <button onClick={handleSave}>Save</button>
-                  <button onClick={() => setEditingContribution(null)}>Cancel</button>
-                </>
+                  <div className={styles.cardActions}>
+                    <button onClick={handleSave} className={styles.editButton}>Save</button>
+                    <button onClick={() => setEditingContribution(null)} className={styles.deleteButton}>Cancel</button>
+                  </div>
+                </div>
               ) : (
                 <>
-                  <strong>Charity:</strong> {contribution.charity}<br />
-                  <strong>Date:</strong> {formatDate(contribution.date)}<br />
-                  <strong>Amount:</strong> {contribution.amount}<br />
-                  <strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}<br />
-                  {contribution.subject && (
-                    <>
-                      <strong>Subject:</strong> {contribution.subject}<br />
-                    </>
-                  )}
-                  <button onClick={() => handleEdit(contribution)}>Edit</button>
-                  <button
-                    className={styles.deleteIcon}
-                    onClick={() => handleDelete(contribution._id)}
-                    aria-label="Delete Contribution"
-                  >
-                    &times;
-                  </button>
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.charityName}>{contribution.charity}</h3>
+                    <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                    <p className={styles.donationDetail}><strong>Amount:</strong> ${contribution.amount}</p>
+                    <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
+                    {contribution.subject && (
+                      <p className={styles.donationDetail}><strong>Subject:</strong> {contribution.subject}</p>
+                    )}
+                  </div>
+                  <div className={styles.cardActions}>
+                    <button onClick={() => handleEdit(contribution)} className={styles.editButton}>Edit</button>
+                    <button
+                      onClick={() => handleDelete(contribution._id)}
+                      className={styles.deleteButton}
+                      aria-label="Delete Contribution"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+          {oneOffContributions.length > displayCount && (
+            <button onClick={handleShowMore} className={styles.showMoreButton}>
+              Show More
+            </button>
+          )}
+        </>
       ) : (
-        <p>No one-off contributions found.</p>
+        <p className={styles.noDonations}>No one-off contributions found.</p>
       )}
     </div>
   );
