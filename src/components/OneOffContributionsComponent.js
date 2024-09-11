@@ -21,22 +21,34 @@ function formatDate(dateString) {
   return format(date, 'dd/MM/yyyy');
 }
 
-function OneOffContributionsComponent() {
+function OneOffContributionsComponent({ displayAll }) {
   const { oneOffContributions, onDeleteContribution, fetchImpactData } = useContext(ImpactContext);
+  const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
+    console.log('Fetching impact data...');
     fetchImpactData();
   }, [fetchImpactData]);
+
+  useEffect(() => {
+    console.log('oneOffContributions updated:', oneOffContributions);
+    setLocalContributions(oneOffContributions);
+  }, [oneOffContributions]);
 
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
+        console.log('Deleting contribution:', contributionId);
         await onDeleteContribution(contributionId);
         console.log('Contribution deleted successfully');
-        fetchImpactData(); // Refresh the data after deletion
+        setLocalContributions(prevContributions => {
+          const newContributions = prevContributions.filter(contribution => contribution._id !== contributionId);
+          console.log('Updated localContributions after deletion:', newContributions);
+          return newContributions;
+        });
+        fetchImpactData();
       } catch (error) {
         console.error('Error deleting contribution:', error);
         alert(`Failed to delete contribution: ${error.message}`);
@@ -48,10 +60,10 @@ function OneOffContributionsComponent() {
     console.log('Edit button clicked for contribution:', contribution);
     setEditingContribution(contribution);
     setShowModal(true);
-    console.log('showModal set to:', true);
   };
 
   const handleSave = async (editedContribution) => {
+    console.log('Saving edited contribution:', editedContribution);
     try {
       const response = await fetch(`http://localhost:3002/api/contributions/one-off/${editedContribution._id}`, {
         method: 'PUT',
@@ -63,8 +75,18 @@ function OneOffContributionsComponent() {
       });
 
       if (response.ok) {
+        const updatedContribution = await response.json();
+        console.log('Server response:', updatedContribution);
+        setLocalContributions(prevContributions => {
+          const newContributions = prevContributions.map(contribution =>
+            contribution._id === editedContribution._id ? updatedContribution : contribution
+          );
+          console.log('Updated localContributions after edit:', newContributions);
+          return newContributions;
+        });
         setShowModal(false);
-        fetchImpactData(); // Refresh the data after update
+        setEditingContribution(null);
+        fetchImpactData();
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update contribution');
@@ -75,25 +97,30 @@ function OneOffContributionsComponent() {
     }
   };
 
-  const handleShowMore = () => {
-    setDisplayCount(prevCount => prevCount + 5);
-  };
+  console.log('Rendering component. Current state:', {
+    showModal,
+    editingContribution,
+    localContributionsCount: localContributions.length,
+    displayAll
+  });
 
-  console.log('Current state - showModal:', showModal, 'editingContribution:', editingContribution);
+  const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
 
   return (
     <div className={styles.cardContainer}>
-      {oneOffContributions && oneOffContributions.length > 0 ? (
+      {displayedContributions && displayedContributions.length > 0 ? (
         <>
-          {oneOffContributions.slice(0, displayCount).map((contribution) => (
+          {displayedContributions.map((contribution) => (
             <div key={contribution._id} className={styles.card}>
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{contribution.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
                 <p className={styles.donationDetail}><strong>Amount:</strong> ${contribution.amount}</p>
-                <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
-                {contribution.subject && (
-                  <p className={styles.donationDetail}><strong>Subject:</strong> {contribution.subject}</p>
+                {contribution.charityType && (
+                  <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType}</p>
+                )}
+                {contribution.receiptUrl && (
+                  <p className={styles.donationDetail}><strong>Receipt:</strong> <a href={contribution.receiptUrl} target="_blank" rel="noopener noreferrer">View Receipt</a></p>
                 )}
               </div>
               <div className={styles.cardActions}>
@@ -108,11 +135,6 @@ function OneOffContributionsComponent() {
               </div>
             </div>
           ))}
-          {oneOffContributions.length > displayCount && (
-            <button onClick={handleShowMore} className={styles.showMoreButton}>
-              Show More
-            </button>
-          )}
         </>
       ) : (
         <p className={styles.noDonations}>No one-off contributions found.</p>
@@ -124,6 +146,7 @@ function OneOffContributionsComponent() {
           onCancel={() => {
             console.log('Modal closed');
             setShowModal(false);
+            setEditingContribution(null);
           }}
         />
       )}

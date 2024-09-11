@@ -21,12 +21,11 @@ function formatDate(dateString) {
   return format(date, 'dd/MM/yyyy');
 }
 
-function DonationsComponent() {
+function DonationsComponent({ displayAll }) {
   const { donations, fetchImpactData } = useContext(ImpactContext);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
-  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     fetchImpactData();
@@ -97,15 +96,13 @@ function DonationsComponent() {
     }
   };
 
-  const handleShowMore = () => {
-    setDisplayCount(prevCount => prevCount + 5);
-  };
+  const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
 
   return (
     <div className={styles.cardContainer}>
-      {localDonations && localDonations.length > 0 ? (
+      {displayedDonations && displayedDonations.length > 0 ? (
         <>
-          {localDonations.slice(0, displayCount).map((donation) => (
+          {displayedDonations.map((donation) => (
             <div key={donation._id} className={styles.card}>
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{donation.charity}</h3>
@@ -128,11 +125,6 @@ function DonationsComponent() {
               </div>
             </div>
           ))}
-          {localDonations.length > displayCount && (
-            <button onClick={handleShowMore} className={styles.showMoreButton}>
-              Show More
-            </button>
-          )}
         </>
       ) : (
         <p className={styles.noDonations}>No donations to display.</p>

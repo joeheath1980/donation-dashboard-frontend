@@ -22,8 +22,6 @@ function Profile() {
     lastYearImpactScore,
     tier,
     pointsToNextTier,
-    onDeleteDonation,
-    onDeleteContribution,
     fetchImpactData,
     error: impactError,
     volunteerActivities,
@@ -84,30 +82,6 @@ function Profile() {
   const toggleTierProgressModal = () => {
     setShowTierProgressModal(!showTierProgressModal);
   };
-
-  const handleDeleteDonation = useCallback(async (donationId) => {
-    if (window.confirm('Are you sure you want to delete this donation?')) {
-      try {
-        await onDeleteDonation(donationId);
-        setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
-      } catch (error) {
-        console.error('Error deleting donation:', error);
-        alert(`Failed to delete donation: ${error.message}`);
-      }
-    }
-  }, [onDeleteDonation]);
-
-  const handleDeleteContribution = useCallback(async (contributionId) => {
-    if (window.confirm('Are you sure you want to delete this contribution?')) {
-      try {
-        await onDeleteContribution(contributionId);
-        setLocalOneOffContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
-      } catch (error) {
-        console.error('Error deleting contribution:', error);
-        alert(`Failed to delete contribution: ${error.message}`);
-      }
-    }
-  }, [onDeleteContribution]);
 
   const handleCompleteCampaign = useCallback((completedCampaign) => {
     try {
@@ -345,11 +319,11 @@ function Profile() {
           </div>
           <div className={styles.regularContributionsWrapper}>
             <button style={buttonStyle} onClick={toggleRegularContributions}>
-              See more
+              {showRegularContributions ? "Hide" : "See more"}
             </button>
             {showRegularContributions && (
               <div className={styles.donationsComponentWrapper}>
-                <DonationsComponent donations={localDonations} onDeleteDonation={handleDeleteDonation} />
+                <DonationsComponent displayAll={true} />
               </div>
             )}
           </div>
@@ -369,11 +343,11 @@ function Profile() {
           </div>
           <div className={styles.oneOffContributionsWrapper}>
             <button style={buttonStyle} onClick={toggleOneOffContributions}>
-              See more
+              {showOneOffContributions ? "Hide" : "See more"}
             </button>
             {showOneOffContributions && (
               <div className={styles.contributionsComponentWrapper}>
-                <OneOffContributionsComponent contributions={localOneOffContributions} onDeleteContribution={handleDeleteContribution} />
+                <OneOffContributionsComponent displayAll={true} />
               </div>
             )}
           </div>
