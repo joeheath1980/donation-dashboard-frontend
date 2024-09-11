@@ -4,45 +4,17 @@ import axios from 'axios';
 import styles from '../CharityPartner.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 
-// Mock data generator function
-const generateMockCharity = (id) => ({
-  Charity_Legal_Name: `Mock Charity ${id}`,
-  ABN: `${id}0000000000`.slice(-11),
-  Charity_Type: ["Public Benevolent Institution", "Religious Institution", "Health Promotion Charity"][id % 3],
-  Address_Line_1: `${id} Mock Street`,
-  Town_City: "Mocktown",
-  State: "MT",
-  Postcode: `${id}000`.slice(-4),
-  Country: "Australia",
-  Website: `https://mockcharity${id}.org`,
-  Phone: `0${id}00000000`.slice(-10),
-  Email: `contact@mockcharity${id}.org`,
-  Description: `Mock Charity ${id} is dedicated to making a positive impact in our community. We focus on various causes including education, health, and environmental conservation.`,
-  Established_Date: `${2000 + (id % 21)}-01-01`,
-  Programs: [
-    {
-      Program_Name: `Program A of Charity ${id}`,
-      Description: "This program focuses on providing educational resources to underprivileged children.",
-      Annual_Budget: `$${(id * 10000).toLocaleString()}`,
-    },
-    {
-      Program_Name: `Program B of Charity ${id}`,
-      Description: "This program aims to improve community health through free medical camps and awareness programs.",
-      Annual_Budget: `$${(id * 15000).toLocaleString()}`,
-    },
-  ]
-});
+const CHARITY_RESOURCE_ID = 'eb1e6be4-5b13-4feb-b28e-388bf7c26f93';
+const PROGRAMS_RESOURCE_ID = 'f284bce5-80d3-4ca9-b72b-0f7126495fd1';
+const API_BASE_URL = 'https://data.gov.au/data/api/3/action/datastore_search';
 
 function CharityPartner() {
   const { id } = useParams();
   const [charity, setCharity] = useState(null);
-  const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openPrograms, setOpenPrograms] = useState({});
-  const [useMockData, setUseMockData] = useState(false);
   
-  const { followedCharities, addFollowedCharity, removeFollowedCharity } = useContext(ImpactContext);
+  const { addFollowedCharity, removeFollowedCharity } = useContext(ImpactContext);
   const [isFollowed, setIsFollowed] = useState(false);
 
   const fetchCharityDetails = useCallback(async () => {
@@ -50,60 +22,52 @@ function CharityPartner() {
     setError(null);
 
     try {
-      const response = await axios.get(`https://data.gov.au/data/api/3/action/datastore_search`, {
+      const response = await axios.get(API_BASE_URL, {
         params: {
-          resource_id: 'eb1e6be4-5b13-4feb-b28e-388bf7c26f93',
+          resource_id: CHARITY_RESOURCE_ID,
           q: id
         }
       });
 
-      console.log('API Response:', response); // Log the entire response for debugging
+      console.log('Charity API Response:', response.data);
 
       if (response.data && response.data.success && response.data.result && response.data.result.records && response.data.result.records.length > 0) {
         const charityData = response.data.result.records[0];
         setCharity(charityData);
 
-        // Check if the charity is already followed
-        setIsFollowed(followedCharities.some(c => c.ABN === charityData.ABN));
-
         // Fetch programs data
         try {
-          const programsResponse = await axios.get(`https://data.gov.au/data/api/3/action/datastore_search`, {
+          console.log('Fetching programs for ABN:', charityData.ABN);
+          const programsResponse = await axios.get(API_BASE_URL, {
             params: {
-              resource_id: 'f284bce5-80d3-4ca9-b72b-0f7126495fd1',
+              resource_id: PROGRAMS_RESOURCE_ID,
               q: charityData.ABN
             }
           });
 
+          console.log('Programs API Response:', programsResponse.data);
+
           if (programsResponse.data && programsResponse.data.success && programsResponse.data.result && programsResponse.data.result.records) {
-            setPrograms(programsResponse.data.result.records);
+            const fetchedPrograms = programsResponse.data.result.records;
+            console.log('Fetched programs:', fetchedPrograms);
+            // You can process or store the programs data here if needed
           } else {
             console.warn('Unexpected programs data structure:', programsResponse.data);
-            setPrograms([]);
           }
         } catch (programError) {
           console.error('Error fetching programs:', programError);
-          setPrograms([]);
         }
       } else {
         console.warn('Unexpected API response structure:', response.data);
         setError('Charity not found or API returned unexpected data');
-        const mockCharity = generateMockCharity(parseInt(id));
-        setCharity(mockCharity);
-        setPrograms(mockCharity.Programs);
-        setUseMockData(true);
       }
     } catch (err) {
       console.error('Error fetching charity details:', err);
-      setError('Failed to fetch charity details. Using mock data.');
-      const mockCharity = generateMockCharity(parseInt(id));
-      setCharity(mockCharity);
-      setPrograms(mockCharity.Programs);
-      setUseMockData(true);
+      setError('Failed to fetch charity details.');
     } finally {
       setIsLoading(false);
     }
-  }, [id, followedCharities]);
+  }, [id]);
 
   useEffect(() => {
     fetchCharityDetails();
@@ -133,10 +97,6 @@ function CharityPartner() {
     console.log('Donating to charity:', charityId);
   };
 
-  const toggleProgram = (index) => {
-    setOpenPrograms(prev => ({ ...prev, [index]: !prev[index] }));
-  };
-
   const formatAddress = (charity) => {
     const addressParts = [
       charity['Address_Line_1'],
@@ -164,11 +124,6 @@ function CharityPartner() {
 
   return (
     <div className={styles.container}>
-      {useMockData && (
-        <div className={styles.mockDataNotice}>
-          Note: Displaying mock data due to API unavailability or unexpected data structure.
-        </div>
-      )}
       <h1 className={styles.header}>{charity['Charity_Legal_Name']}</h1>
       <div className={styles.card}>
         <h2 className={styles.sectionHeader}>Charity Details</h2>
@@ -182,31 +137,6 @@ function CharityPartner() {
             </p>
           )
         ))}
-
-        {programs && programs.length > 0 && (
-          <>
-            <h2 className={styles.sectionHeader}>Programs</h2>
-            {programs.map((program, index) => (
-              <div key={index} className={styles.programCard}>
-                <div className={styles.programHeader} onClick={() => toggleProgram(index)}>
-                  <h3 className={styles.programName}>{program["Program_Name"] || program["Program Name"] || 'Program Name Not Available'}</h3>
-                  <span className={`${styles.chevron} ${openPrograms[index] ? styles.open : ''}`}>▼</span>
-                </div>
-                {openPrograms[index] && (
-                  <div className={styles.programDetails}>
-                    {Object.entries(program).map(([key, value]) => (
-                      value && key !== "Program_Name" && key !== "Program Name" && (
-                        <p key={key} className={styles.paragraph}>
-                          <strong>{key.replace(/_/g, ' ')}:</strong> {value}
-                        </p>
-                      )
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </>
-        )}
 
         <div className={styles.buttonContainer}>
           <button onClick={handleFollow} className={styles.primaryButton}>
