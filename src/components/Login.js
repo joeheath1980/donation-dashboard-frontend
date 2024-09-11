@@ -109,6 +109,7 @@ function Login() {
       <div className={styles.loginContainer}>
         <img src={logo} alt="Logo" className={styles.logo} />
         <h2>Login</h2>
+        {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email:</label>
@@ -141,7 +142,6 @@ function Login() {
             </label>
           </div>
           <button type="submit">Login</button>
-          {error && <p className={styles.formError}>{error}</p>}
         </form>
 
         {!isBusiness && (
@@ -149,21 +149,27 @@ function Login() {
             <h3>Or login with:</h3>
             <button 
               onClick={() => handleSocialLogin('google')} 
-              style={{backgroundColor: '#DB4437', color: 'white', marginBottom: '10px'}}
+              className={`${styles.socialButton} ${styles.google}`}
             >
               Google
             </button>
             <button 
               onClick={() => handleSocialLogin('microsoft')} 
-              style={{backgroundColor: '#0072C6', color: 'white', marginBottom: '10px'}}
+              className={`${styles.socialButton} ${styles.microsoft}`}
             >
               Microsoft (Coming Soon)
             </button>
             <button 
               onClick={() => handleSocialLogin('apple')} 
-              style={{backgroundColor: '#000000', color: 'white'}}
+              className={`${styles.socialButton} ${styles.apple}`}
             >
               Apple (Coming Soon)
+            </button>
+            <button 
+              onClick={() => handleSocialLogin('facebook')} 
+              className={`${styles.socialButton} ${styles.facebook}`}
+            >
+              Facebook (Coming Soon)
             </button>
           </div>
         )}
@@ -176,14 +182,14 @@ function Login() {
         </p>
         
         {process.env.NODE_ENV === 'development' && (
-          <div>
-            <button onClick={fillTestUserCredentials} style={{marginTop: '20px'}}>
+          <div className={styles.testButtons}>
+            <button onClick={fillTestUserCredentials}>
               Fill Test User Credentials
             </button>
-            <button onClick={fillTestBusinessCredentials} style={{marginTop: '10px'}}>
+            <button onClick={fillTestBusinessCredentials}>
               Fill Test Business Credentials
             </button>
-            <button onClick={createTestBusinessAccount} style={{marginTop: '10px'}}>
+            <button onClick={createTestBusinessAccount}>
               Create Test Business Account
             </button>
           </div>

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import styles from '../Login.module.css'; // Updated to use Login.module.css
+import styles from '../Login.module.css';
 import logo from '../assets/download.svg';
+
+// Set a default API URL if the environment variable is not set
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +35,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3002/api/users/register', {
+      const response = await axios.post(`${API_URL}/api/users/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password
@@ -46,11 +49,18 @@ const SignUp = () => {
     }
   };
 
+  const handleSocialSignup = (provider) => {
+    const url = `${API_URL}/api/auth/${provider}`;
+    console.log('Social signup URL:', url);
+    window.location.href = url;
+  };
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.loginContainer}>
         <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
         <h2>Create an Account</h2>
+        {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="name">Full Name:</label>
@@ -97,8 +107,36 @@ const SignUp = () => {
             />
           </div>
           <button type="submit">Sign Up</button>
-          {error && <p className={styles.formError}>{error}</p>}
         </form>
+        
+        <div className={styles.socialLogin}>
+          <h3>Or sign up with:</h3>
+          <button 
+            onClick={() => handleSocialSignup('google')} 
+            className={`${styles.socialButton} ${styles.google}`}
+          >
+            Google
+          </button>
+          <button 
+            onClick={() => handleSocialSignup('microsoft')} 
+            className={`${styles.socialButton} ${styles.microsoft}`}
+          >
+            Microsoft (Coming Soon)
+          </button>
+          <button 
+            onClick={() => handleSocialSignup('apple')} 
+            className={`${styles.socialButton} ${styles.apple}`}
+          >
+            Apple (Coming Soon)
+          </button>
+          <button 
+            onClick={() => handleSocialSignup('facebook')} 
+            className={`${styles.socialButton} ${styles.facebook}`}
+          >
+            Facebook (Coming Soon)
+          </button>
+        </div>
+
         <p className={styles.toggleText}>
           Already have an account? <Link to="/login">Log in</Link>
         </p>

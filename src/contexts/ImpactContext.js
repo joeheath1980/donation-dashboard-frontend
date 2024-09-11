@@ -169,6 +169,16 @@ export const ImpactProvider = ({ children }) => {
     }
   }, [getAuthHeaders, fetchImpactData]);
 
+  const saveFollowedCharitiesToDB = useCallback(async (charities) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.post('http://localhost:3002/api/followedCharities', { charities }, { headers });
+    } catch (error) {
+      console.error('Error saving followed charities to database:', error);
+      // Don't set an error state here, as we're still using localStorage as a fallback
+    }
+  }, [getAuthHeaders]);
+
   const addFollowedCharity = useCallback((charity) => {
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
@@ -180,7 +190,7 @@ export const ImpactProvider = ({ children }) => {
       }
       return prevCharities;
     });
-  }, []);
+  }, [saveFollowedCharitiesToDB]);
 
   const removeFollowedCharity = useCallback((charityABN) => {
     setFollowedCharities(prevCharities => {
@@ -190,17 +200,7 @@ export const ImpactProvider = ({ children }) => {
       saveFollowedCharitiesToDB(newCharities);
       return newCharities;
     });
-  }, []);
-
-  const saveFollowedCharitiesToDB = async (charities) => {
-    try {
-      const headers = getAuthHeaders();
-      await axios.post('http://localhost:3002/api/followedCharities', { charities }, { headers });
-    } catch (error) {
-      console.error('Error saving followed charities to database:', error);
-      // Don't set an error state here, as we're still using localStorage as a fallback
-    }
-  };
+  }, [saveFollowedCharitiesToDB]);
 
   // Load followed charities from localStorage on component mount
   useEffect(() => {
@@ -233,7 +233,7 @@ export const ImpactProvider = ({ children }) => {
     };
 
     syncFollowedCharities();
-  }, [followedCharities, getAuthHeaders]);
+  }, [followedCharities, getAuthHeaders, saveFollowedCharitiesToDB]);
 
   return (
     <ImpactContext.Provider value={{

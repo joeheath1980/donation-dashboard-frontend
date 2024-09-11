@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './WelcomePage.module.css';
 import logoSvg from '../assets/download.svg';
+import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.png';
 
 const WelcomePage = () => {
   return (
@@ -15,6 +16,9 @@ const WelcomePage = () => {
       </header>
 
       <section className={styles.hero}>
+        <div className={styles.heroImageContainer}>
+          <img src={heroImage} alt="Young people activity" className={styles.heroImage} />
+        </div>
         <div className={styles.heroContent}>
           <h2 className={styles.heroTitle}>Welcome to Do-Nation</h2>
           <p className={styles.heroSubtitle}>Empower your giving journey with our intelligent donation tracking platform</p>

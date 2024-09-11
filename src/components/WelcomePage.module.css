@@ -13,6 +13,8 @@
   padding: 1rem 5%;
   background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .logoContainer {
@@ -47,27 +49,53 @@
 }
 
 .hero {
-  background: linear-gradient(135deg, #4CAF50, #FFC107);
-  color: #ffffff;
-  text-align: center;
-  padding: 5rem 2rem;
+  position: relative;
+  height: calc(100vh - 80px); /* Adjust based on your header height */
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heroImageContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .heroContent {
+  position: relative;
+  z-index: 1;
   max-width: 800px;
   margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .heroTitle {
   font-size: 3rem;
   margin-bottom: 1rem;
   font-weight: 700;
+  color: #333;
 }
 
 .heroSubtitle {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   font-weight: 300;
+  color: #555;
 }
 
 .ctaButton {
@@ -151,6 +179,15 @@
 }
 
 @media (max-width: 768px) {
+  .hero {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .heroContent {
+    padding: 2rem 1rem;
+  }
+
   .heroTitle {
     font-size: 2.5rem;
   }

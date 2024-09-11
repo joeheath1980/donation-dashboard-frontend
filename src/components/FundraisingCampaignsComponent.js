@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import styles from '../Impact.module.css';
 
 function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const [campaigns, setCampaigns] = useState([]);
