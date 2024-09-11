@@ -3,6 +3,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './DonationCards.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationConfirmationModal from './DonationConfirmationModal';
+import ValidationModal from './ValidationModal';
 
 function formatDate(dateString) {
   let date;
@@ -25,6 +26,7 @@ function DonationsComponent({ displayAll }) {
   const { donations, fetchImpactData } = useContext(ImpactContext);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
 
   useEffect(() => {
@@ -63,11 +65,13 @@ function DonationsComponent({ displayAll }) {
   };
 
   const handleEdit = (donation) => {
+    console.log('Edit button clicked for donation:', donation);
     setCurrentDonation(donation);
     setShowModal(true);
   };
 
   const handleConfirm = async (editedDonation) => {
+    console.log('Saving edited donation:', editedDonation);
     try {
       const response = await fetch(`http://localhost:3002/api/donations/${editedDonation._id}`, {
         method: 'PUT',
@@ -75,13 +79,15 @@ function DonationsComponent({ displayAll }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(editedDonation)
+        body: JSON.stringify({ ...editedDonation, needsValidation: true })
       });
 
       if (response.ok) {
+        const updatedDonation = await response.json();
+        console.log('Server response:', updatedDonation);
         setLocalDonations(prevDonations =>
           prevDonations.map(donation =>
-            donation._id === editedDonation._id ? editedDonation : donation
+            donation._id === updatedDonation._id ? updatedDonation : donation
           )
         );
         setShowModal(false);
@@ -96,6 +102,29 @@ function DonationsComponent({ displayAll }) {
     }
   };
 
+  const handleValidate = (donation) => {
+    console.log('Validate button clicked for donation:', donation);
+    setCurrentDonation({...donation, type: 'donation'});
+    setShowValidationModal(true);
+  };
+
+  const handleValidationComplete = async (validatedDonation) => {
+    console.log('Validation complete for donation:', validatedDonation);
+    try {
+      setLocalDonations(prevDonations =>
+        prevDonations.map(donation =>
+          donation._id === validatedDonation._id ? validatedDonation : donation
+        )
+      );
+      setShowValidationModal(false);
+      setCurrentDonation(null);
+      fetchImpactData();
+    } catch (error) {
+      console.error('Error handling validation completion:', error);
+      alert(`Failed to handle validation completion: ${error.message}`);
+    }
+  };
+
   const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
 
   return (
@@ -104,6 +133,14 @@ function DonationsComponent({ displayAll }) {
         <>
           {displayedDonations.map((donation) => (
             <div key={donation._id} className={styles.card}>
+              {donation.needsValidation && (
+                <button 
+                  onClick={() => handleValidate(donation)} 
+                  className={`${styles.validateButton} ${styles.topRightButton}`}
+                >
+                  Please Validate
+                </button>
+              )}
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{donation.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
@@ -111,6 +148,18 @@ function DonationsComponent({ displayAll }) {
                 <p className={styles.donationDetail}><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                 {donation.subject && (
                   <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>
+                )}
+                {donation.receiptUrl && (
+                  <p className={styles.donationDetail}>
+                    <strong>Receipt:</strong> 
+                    <a 
+                      href={`http://localhost:3002${donation.receiptUrl}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      View Receipt
+                    </a>
+                  </p>
                 )}
               </div>
               <div className={styles.cardActions}>
@@ -134,6 +183,17 @@ function DonationsComponent({ displayAll }) {
           donation={currentDonation}
           onConfirm={handleConfirm}
           onCancel={() => setShowModal(false)}
+        />
+      )}
+      {showValidationModal && currentDonation && (
+        <ValidationModal
+          item={currentDonation}
+          onValidate={handleValidationComplete}
+          onCancel={() => {
+            console.log('Validation modal closed');
+            setShowValidationModal(false);
+            setCurrentDonation(null);
+          }}
         />
       )}
     </div>

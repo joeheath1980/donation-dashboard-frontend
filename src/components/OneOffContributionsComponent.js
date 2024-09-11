@@ -3,6 +3,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './DonationCards.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
+import ValidationModal from './ValidationModal';
 
 function formatDate(dateString) {
   let date;
@@ -26,6 +27,7 @@ function OneOffContributionsComponent({ displayAll }) {
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     console.log('Fetching impact data...');
@@ -71,7 +73,7 @@ function OneOffContributionsComponent({ displayAll }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(editedContribution)
+        body: JSON.stringify({ ...editedContribution, needsValidation: true })
       });
 
       if (response.ok) {
@@ -79,7 +81,7 @@ function OneOffContributionsComponent({ displayAll }) {
         console.log('Server response:', updatedContribution);
         setLocalContributions(prevContributions => {
           const newContributions = prevContributions.map(contribution =>
-            contribution._id === editedContribution._id ? updatedContribution : contribution
+            contribution._id === updatedContribution._id ? updatedContribution : contribution
           );
           console.log('Updated localContributions after edit:', newContributions);
           return newContributions;
@@ -94,6 +96,29 @@ function OneOffContributionsComponent({ displayAll }) {
     } catch (error) {
       console.error('Error updating contribution:', error);
       alert(`Failed to update contribution: ${error.message}`);
+    }
+  };
+
+  const handleValidate = (contribution) => {
+    console.log('Validate button clicked for contribution:', contribution);
+    setEditingContribution({...contribution, type: 'contribution'});
+    setShowValidationModal(true);
+  };
+
+  const handleValidationComplete = async (validatedContribution) => {
+    console.log('Validation complete for contribution:', validatedContribution);
+    try {
+      setLocalContributions(prevContributions =>
+        prevContributions.map(contribution =>
+          contribution._id === validatedContribution._id ? validatedContribution : contribution
+        )
+      );
+      setShowValidationModal(false);
+      setEditingContribution(null);
+      fetchImpactData();
+    } catch (error) {
+      console.error('Error handling validation completion:', error);
+      alert(`Failed to handle validation completion: ${error.message}`);
     }
   };
 
@@ -112,6 +137,14 @@ function OneOffContributionsComponent({ displayAll }) {
         <>
           {displayedContributions.map((contribution) => (
             <div key={contribution._id} className={styles.card}>
+              {contribution.needsValidation && (
+                <button 
+                  onClick={() => handleValidate(contribution)} 
+                  className={`${styles.validateButton} ${styles.topRightButton}`}
+                >
+                  Please Validate
+                </button>
+              )}
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{contribution.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
@@ -120,7 +153,16 @@ function OneOffContributionsComponent({ displayAll }) {
                   <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType}</p>
                 )}
                 {contribution.receiptUrl && (
-                  <p className={styles.donationDetail}><strong>Receipt:</strong> <a href={contribution.receiptUrl} target="_blank" rel="noopener noreferrer">View Receipt</a></p>
+                  <p className={styles.donationDetail}>
+                    <strong>Receipt:</strong> 
+                    <a 
+                      href={`http://localhost:3002${contribution.receiptUrl}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      View Receipt
+                    </a>
+                  </p>
                 )}
               </div>
               <div className={styles.cardActions}>
@@ -146,6 +188,17 @@ function OneOffContributionsComponent({ displayAll }) {
           onCancel={() => {
             console.log('Modal closed');
             setShowModal(false);
+            setEditingContribution(null);
+          }}
+        />
+      )}
+      {showValidationModal && editingContribution && (
+        <ValidationModal
+          item={editingContribution}
+          onValidate={handleValidationComplete}
+          onCancel={() => {
+            console.log('Validation modal closed');
+            setShowValidationModal(false);
             setEditingContribution(null);
           }}
         />
