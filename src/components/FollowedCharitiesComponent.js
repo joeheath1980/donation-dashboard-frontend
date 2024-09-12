@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaRegHeart, FaTrash } from 'react-icons/fa';
+import { FaRegHeart, FaTimes } from 'react-icons/fa';
 
 const FollowedCharitiesComponent = () => {
   const { followedCharities, removeFollowedCharity } = useContext(ImpactContext);
@@ -59,14 +59,13 @@ const FollowedCharitiesComponent = () => {
   };
 
   const deleteButtonStyle = {
-    backgroundColor: '#ff4444',
-    color: 'white',
+    backgroundColor: 'transparent',
+    color: '#777',
     border: 'none',
-    padding: '5px 10px',
-    borderRadius: '3px',
+    padding: '2px',
     cursor: 'pointer',
     fontSize: '14px',
-    transition: 'background-color 0.3s',
+    transition: 'color 0.3s',
   };
 
   const handleDelete = (charityId) => {
@@ -96,7 +95,7 @@ const FollowedCharitiesComponent = () => {
                   style={deleteButtonStyle}
                   title="Unfollow Charity"
                 >
-                  <FaTrash />
+                  <FaTimes />
                 </button>
               </li>
             ))}
