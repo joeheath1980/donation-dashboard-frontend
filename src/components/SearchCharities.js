@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { applyGlobalStyles, globalClasses } from '../utils/styleUtils';
 import styles from '../SearchCharities.module.css';
+import { FaSearch, FaHeart, FaHandshake, FaDonate } from 'react-icons/fa';
 
 const combinedStyles = applyGlobalStyles(styles, globalClasses);
 
@@ -67,6 +68,10 @@ function SearchCharities() {
   return (
     <div className={combinedStyles.container}>
       <h1 className={combinedStyles.header}>Search Charities</h1>
+      <p className={combinedStyles.introText}>
+        Discover charities that align with your values. You can follow charities to stay updated,
+        find matching opportunities, or make direct donations to support their causes.
+      </p>
       <form onSubmit={handleSearch} className={combinedStyles.searchForm}>
         <input
           type="text"
@@ -75,10 +80,12 @@ function SearchCharities() {
           placeholder="Search for charities"
           className={combinedStyles.input}
         />
-        <button type="submit" className={combinedStyles.primaryButton}>Search</button>
+        <button type="submit" className={combinedStyles.primaryButton}>
+          <FaSearch /> Search
+        </button>
       </form>
 
-      {isLoading && <p>Loading...</p>}
+      {isLoading && <p className={combinedStyles.loading}>Loading...</p>}
       {error && <p className={combinedStyles.error}>{error}</p>}
 
       <div className={combinedStyles.resultsGrid}>
@@ -87,10 +94,30 @@ function SearchCharities() {
             <h2 className={combinedStyles.subheader}>{charity['Charity_Legal_Name']}</h2>
             <p className={combinedStyles.paragraph}><strong>ABN:</strong> {charity['ABN']}</p>
             <p className={combinedStyles.paragraph}><strong>State:</strong> {charity['State']}</p>
-            <Link to={`/charity/${charity['ABN']}`} className={combinedStyles.secondaryButton}>View Details</Link>
+            <div className={combinedStyles.actionButtons}>
+              <Link to={`/charity/${charity['ABN']}`} className={combinedStyles.secondaryButton}>
+                <FaHeart /> Follow
+              </Link>
+              <Link to={`/matching/${charity['ABN']}`} className={combinedStyles.secondaryButton}>
+                <FaHandshake /> Find Matches
+              </Link>
+              <Link to={`/donate/${charity['ABN']}`} className={combinedStyles.secondaryButton}>
+                <FaDonate /> Donate
+              </Link>
+            </div>
           </div>
         ))}
       </div>
+      {results.length > 0 && (
+        <div className={combinedStyles.guidanceBox}>
+          <h3>What you can do:</h3>
+          <ul>
+            <li><strong>Follow:</strong> Stay updated with the charity's activities and news</li>
+            <li><strong>Find Matches:</strong> Discover matching opportunities to multiply your impact</li>
+            <li><strong>Donate:</strong> Make a direct contribution to support the charity's cause</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
