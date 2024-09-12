@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaRegHeart } from 'react-icons/fa';
+import { FaRegHeart, FaTrash } from 'react-icons/fa';
 
 const FollowedCharitiesComponent = () => {
-  const { followedCharities } = useContext(ImpactContext);
+  const { followedCharities, removeFollowedCharity } = useContext(ImpactContext);
 
   const containerStyle = {
     flex: '1 1 30%',
@@ -40,6 +40,9 @@ const FollowedCharitiesComponent = () => {
   const listItemStyle = {
     padding: '8px 0',
     borderBottom: '1px solid #ccc',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   };
 
   const buttonStyle = {
@@ -55,6 +58,23 @@ const FollowedCharitiesComponent = () => {
     display: 'inline-block',
   };
 
+  const deleteButtonStyle = {
+    backgroundColor: '#ff4444',
+    color: 'white',
+    border: 'none',
+    padding: '5px 10px',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'background-color 0.3s',
+  };
+
+  const handleDelete = (charityId) => {
+    if (window.confirm('Are you sure you want to unfollow this charity?')) {
+      removeFollowedCharity(charityId);
+    }
+  };
+
   return (
     <div style={containerStyle}>
       <h3 style={headerStyle}>
@@ -65,10 +85,19 @@ const FollowedCharitiesComponent = () => {
           <ul style={listStyle}>
             {followedCharities.map((charity) => (
               <li key={charity.ABN} style={listItemStyle}>
-                {charity.logo && (
-                  <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
-                )}
-                {charity.name}
+                <span>
+                  {charity.logo && (
+                    <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
+                  )}
+                  {charity.name}
+                </span>
+                <button 
+                  onClick={() => handleDelete(charity.ABN)} 
+                  style={deleteButtonStyle}
+                  title="Unfollow Charity"
+                >
+                  <FaTrash />
+                </button>
               </li>
             ))}
           </ul>
