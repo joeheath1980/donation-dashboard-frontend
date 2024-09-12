@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import styles from '../Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ImpactVisualization from './ImpactVisualization';
@@ -11,7 +10,8 @@ import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import ImpactScoreExplain from './ImpactScoreExplain';
 import TierProgressModal from './TierProgressModal';
-import { FaRegHandshake, FaRegCalendarAlt, FaRegHeart } from 'react-icons/fa';
+import FollowedCharitiesComponent from './FollowedCharitiesComponent';
+import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
 
 function Profile() {
   const { 
@@ -24,8 +24,7 @@ function Profile() {
     pointsToNextTier,
     fetchImpactData,
     error: impactError,
-    volunteerActivities,
-    followedCharities
+    volunteerActivities
   } = useContext(ImpactContext);
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
@@ -181,34 +180,6 @@ function Profile() {
     marginBottom: '15px',
   };
 
-  const impactStories = [
-    { 
-      title: "Clean Water for All: Village Transformation", 
-      description: "Thanks to your support, we've successfully installed 50 new water pumps in rural villages, providing clean water to over 10,000 people. This has led to a 60% reduction in waterborne diseases in the area.", 
-      link: "#" 
-    },
-    { 
-      title: "Education Empowerment: 1000 New Students Enrolled", 
-      description: "Our education initiative has enabled 1000 underprivileged children to enroll in school this year. Early reports show a 40% improvement in literacy rates among participating communities.", 
-      link: "#" 
-    },
-    { 
-      title: "Reforestation Project: 100,000 Trees Planted", 
-      description: "We've reached a milestone in our reforestation efforts, planting 100,000 trees across 500 acres. This project is estimated to offset 50,000 tons of CO2 annually once the trees mature.", 
-      link: "#" 
-    },
-    { 
-      title: "Medical Research Breakthrough: New Treatment Trial", 
-      description: "Your donations have funded a promising new cancer treatment trial. Initial results show a 30% improvement in patient outcomes compared to standard treatments.", 
-      link: "#" 
-    },
-    { 
-      title: "Hunger Relief: 1 Million Meals Served", 
-      description: "Our food bank network has provided 1 million meals to families in need this quarter. This represents a 25% increase from last year, directly impacting over 100,000 individuals.", 
-      link: "#" 
-    }
-  ];
-
   const matchingOpportunities = [
     { 
       title: "Double Your Impact with TechCorp", 
@@ -352,26 +323,7 @@ function Profile() {
             )}
           </div>
         </div>
-        <div style={columnStyle}>
-          <h3 style={subHeaderStyle}><FaRegHeart style={{marginRight: '10px'}} /> Charities Following</h3>
-          <div style={miniContainerStyle}>
-            {followedCharities && followedCharities.length > 0 ? (
-              <ul style={listStyle}>
-                {followedCharities.map((charity, index) => (
-                  <li key={charity.ABN} style={listItemStyle}>
-                    {charity.logo && (
-                      <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
-                    )}
-                    {charity.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Not following any charities yet.</p>
-            )}
-          </div>
-          <Link to="/search-charities" style={buttonStyle}>Search Charities</Link>
-        </div>
+        <FollowedCharitiesComponent />
       </div>
 
       <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>
@@ -381,11 +333,6 @@ function Profile() {
         <div style={columnStyle}>
           <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
         </div>
-      </div>
-
-      <div style={carouselStyle}>
-        <h2 style={carouselTitleStyle}>Impact Stories</h2>
-        <CarouselComponent items={impactStories} style={carouselComponentStyle} />
       </div>
 
       {showTierProgressModal && (
