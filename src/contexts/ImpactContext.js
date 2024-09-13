@@ -3,6 +3,7 @@ import axios from 'axios';
 
 export const ImpactContext = createContext();
 
+// Calculation logic remains the same
 export const calculateComplexImpactScore = (userData, benchmarks) => {
   // Ensure userData and benchmarks are valid objects
   if (!userData || !benchmarks) {
@@ -95,12 +96,10 @@ export const ImpactProvider = ({ children }) => {
       setImpactScore(scoreResult.totalScore);
       setScoreDetails(scoreResult);
 
-      // Calculate the current tier and points to next tier
       const currentTier = getTier(scoreResult.totalScore);
       setTier(currentTier.tier);
       setPointsToNextTier(currentTier.pointsToNextTier);
 
-      // Calculate and set last year's impact score
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
       const lastYearUserData = {
@@ -155,27 +154,22 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
-  const onDeleteContribution = useCallback(async (contributionId) => {
+  const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
       const headers = getAuthHeaders();
-      const response = await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
-      if (response.status === 200) {
-        setOneOffContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
-        fetchImpactData();
-      }
-    } catch (error) {
-      console.error('Error deleting contribution:', error);
-      setError('Failed to delete contribution. Please try again.');
-    }
-  }, [getAuthHeaders, fetchImpactData]);
+      const charityPayload = charities.map(charity => ({
+        name: charity.name,
+        ABN: charity.ABN,
+        logo: charity.logo,
+        type: charity.type
+      }));
 
-  const saveFollowedCharitiesToDB = useCallback(async (charities) => {
-    try {
-      const headers = getAuthHeaders();
-      await axios.post('http://localhost:3002/api/followedCharities', { charities }, { headers });
+      console.log('Sending payload:', charityPayload);
+
+      const response = await axios.post('http://localhost:3002/api/followed-charities', charityPayload[0], { headers }); // Send the first charity as an object
+      console.log('Charity saved successfully:', response.data);
     } catch (error) {
-      console.error('Error saving followed charities to database:', error);
-      // Don't set an error state here, as we're still using localStorage as a fallback
+      console.error('Error saving followed charities to database:', error.response ? error.response.data : error.message);
     }
   }, [getAuthHeaders]);
 
@@ -183,28 +177,36 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
         const newCharities = [...prevCharities, charity];
-        localStorage.setItem('followedCharities', JSON.stringify(newCharities));
-        // Attempt to save to the database as well
-        saveFollowedCharitiesToDB(newCharities);
+        localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+        saveFollowedCharitiesToDb(newCharities);
         return newCharities;
       }
       return prevCharities;
     });
-  }, [saveFollowedCharitiesToDB]);
+  }, [saveFollowedCharitiesToDb]);
 
-  const removeFollowedCharity = useCallback((charityABN) => {
-    setFollowedCharities(prevCharities => {
-      const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
-      localStorage.setItem('followedCharities', JSON.stringify(newCharities));
-      // Attempt to update the database as well
-      saveFollowedCharitiesToDB(newCharities);
-      return newCharities;
-    });
-  }, [saveFollowedCharitiesToDB]);
+  const removeFollowedCharity = useCallback(async (charityABN) => {
+    try {
+      const headers = getAuthHeaders();
+  
+      // Send DELETE request with charity ID (ABN or the _id depending on your schema)
+      const response = await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
+  
+      if (response.status === 200) {
+        setFollowedCharities(prevCharities => {
+          const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
+          localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+          return newCharities;
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting followed charity:', error.response ? error.response.data : error.message);
+    }
+  }, [getAuthHeaders]);  
 
   // Load followed charities from localStorage on component mount
   useEffect(() => {
-    const storedCharities = localStorage.getItem('followedCharities');
+    const storedCharities = localStorage.getItem('followed-charities');
     if (storedCharities) {
       setFollowedCharities(JSON.parse(storedCharities));
     }
@@ -216,24 +218,30 @@ export const ImpactProvider = ({ children }) => {
     const syncFollowedCharities = async () => {
       try {
         const headers = getAuthHeaders();
-        const response = await axios.get('http://localhost:3002/api/followedCharities', { headers });
+        const response = await axios.get('http://localhost:3002/api/followed-charities', { headers });
         const dbCharities = response.data;
         
-        // Merge localStorage charities with database charities
-        const mergedCharities = [...new Set([...followedCharities, ...dbCharities])];
-        setFollowedCharities(mergedCharities);
-        localStorage.setItem('followedCharities', JSON.stringify(mergedCharities));
-        
-        // Update the database with the merged list
-        await saveFollowedCharitiesToDB(mergedCharities);
+        setFollowedCharities(prevCharities => {
+          const mergedCharities = [...new Set([...prevCharities, ...dbCharities])];
+          
+          if (JSON.stringify(mergedCharities) !== JSON.stringify(prevCharities)) {
+            localStorage.setItem('followed-charities', JSON.stringify(mergedCharities));
+            try {
+              saveFollowedCharitiesToDb(mergedCharities);
+            } catch (saveError) {
+              console.error('Error saving merged charities to database:', saveError);
+            }
+            return mergedCharities;
+          }
+          return prevCharities;
+        });
       } catch (error) {
         console.error('Error syncing followed charities:', error);
-        // Don't set an error state here, as we're still using localStorage as a fallback
       }
     };
 
     syncFollowedCharities();
-  }, [followedCharities, getAuthHeaders, saveFollowedCharitiesToDB]);
+  }, [getAuthHeaders, saveFollowedCharitiesToDb]);
 
   return (
     <ImpactContext.Provider value={{
@@ -250,7 +258,6 @@ export const ImpactProvider = ({ children }) => {
       addDonation,
       addOneOffContribution,
       calculateComplexImpactScore,
-      onDeleteContribution,
       followedCharities,
       addFollowedCharity,
       removeFollowedCharity,
@@ -260,3 +267,4 @@ export const ImpactProvider = ({ children }) => {
     </ImpactContext.Provider>
   );
 };
+
