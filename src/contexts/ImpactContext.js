@@ -153,20 +153,19 @@ export const ImpactProvider = ({ children }) => {
       setError('Failed to add contribution. Please try again.');
     }
   };
-
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
       const headers = getAuthHeaders();
-      const charityPayload = charities.map(charity => ({
-        name: charity.name,
-        ABN: charity.ABN,
-        logo: charity.logo,
-        type: charity.type
-      }));
-
-      console.log('Sending payload:', charityPayload);
-
-      const response = await axios.post('http://localhost:3002/api/followed-charities', charityPayload[0], { headers }); // Send the first charity as an object
+      const validCharities = charities.filter(charity => charity.name && charity.ABN);
+      
+      if (validCharities.length === 0) {
+        console.log('No valid charities to save');
+        return;
+      }
+  
+      console.log('Sending payload:', validCharities);
+  
+      const response = await axios.post('http://localhost:3002/api/followed-charities', validCharities[0], { headers });
       console.log('Charity saved successfully:', response.data);
     } catch (error) {
       console.error('Error saving followed charities to database:', error.response ? error.response.data : error.message);
@@ -174,11 +173,16 @@ export const ImpactProvider = ({ children }) => {
   }, [getAuthHeaders]);
 
   const addFollowedCharity = useCallback((charity) => {
+    if (!charity.name || !charity.ABN) {
+      console.error('Cannot add charity: name and ABN are required');
+      return;
+    }
+  
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
         const newCharities = [...prevCharities, charity];
         localStorage.setItem('followed-charities', JSON.stringify(newCharities));
-        saveFollowedCharitiesToDb(newCharities);
+        saveFollowedCharitiesToDb([charity]);
         return newCharities;
       }
       return prevCharities;
@@ -187,9 +191,13 @@ export const ImpactProvider = ({ children }) => {
 
   const removeFollowedCharity = useCallback(async (charityABN) => {
     try {
-      const headers = getAuthHeaders();
+      if (!charityABN) {
+        console.log('Removing charity with undefined ABN');
+        setFollowedCharities(prevCharities => prevCharities.filter(c => c.ABN));
+        return;
+      }
   
-      // Send DELETE request with charity ID (ABN or the _id depending on your schema)
+      const headers = getAuthHeaders();
       const response = await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
   
       if (response.status === 200) {
@@ -202,7 +210,7 @@ export const ImpactProvider = ({ children }) => {
     } catch (error) {
       console.error('Error deleting followed charity:', error.response ? error.response.data : error.message);
     }
-  }, [getAuthHeaders]);  
+  }, [getAuthHeaders]);
 
   // Load followed charities from localStorage on component mount
   useEffect(() => {

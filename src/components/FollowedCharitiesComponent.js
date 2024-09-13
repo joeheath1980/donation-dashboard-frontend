@@ -68,9 +68,9 @@ const FollowedCharitiesComponent = () => {
     transition: 'color 0.3s',
   };
 
-  const handleDelete = (charityId) => {
+  const handleDelete = (charityABN) => {
     if (window.confirm('Are you sure you want to unfollow this charity?')) {
-      removeFollowedCharity(charityId);
+      removeFollowedCharity(charityABN);
     }
   };
 
@@ -80,29 +80,29 @@ const FollowedCharitiesComponent = () => {
         <FaRegHeart style={{marginRight: '10px'}} /> Charities Following
       </h3>
       <div style={miniContainerStyle}>
-        {followedCharities && followedCharities.length > 0 ? (
-          <ul style={listStyle}>
-            {followedCharities.map((charity) => (
-              <li key={charity.ABN} style={listItemStyle}>
-                <span>
-                  {charity.logo && (
-                    <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
-                  )}
-                  {charity.name}
-                </span>
-                <button 
-                  onClick={() => handleDelete(charity.ABN)} 
-                  style={deleteButtonStyle}
-                  title="Unfollow Charity"
-                >
-                  <FaTimes />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Not following any charities yet.</p>
-        )}
+      {followedCharities && followedCharities.length > 0 ? (
+  <ul style={listStyle}>
+    {followedCharities.map((charity, index) => (
+      <li key={charity.ABN || `empty-${index}`} style={listItemStyle}>
+        <span>
+          {charity.logo && (
+            <img src={charity.logo} alt={`${charity.name} logo`} style={{width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle'}} />
+          )}
+          {charity.name || 'Unknown Charity'}
+        </span>
+        <button 
+          onClick={() => handleDelete(charity.ABN)}
+          style={deleteButtonStyle}
+          title="Unfollow Charity"
+        >
+          <FaTimes />
+        </button>
+      </li>
+    ))}
+  </ul>
+) : (
+  <p>Not following any charities yet.</p>
+)}
       </div>
       <Link to="/search-charities" style={buttonStyle}>Search Charities</Link>
     </div>
