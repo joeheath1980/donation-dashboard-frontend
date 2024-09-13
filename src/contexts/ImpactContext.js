@@ -59,6 +59,7 @@ export const ImpactProvider = ({ children }) => {
   const [volunteerActivities, setVolunteerActivities] = useState([]);
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -213,16 +214,23 @@ export const ImpactProvider = ({ children }) => {
   }, [getAuthHeaders]);
 
   // Load followed charities from localStorage on component mount
-  useEffect(() => {
-    const storedCharities = localStorage.getItem('followed-charities');
-    if (storedCharities) {
-      setFollowedCharities(JSON.parse(storedCharities));
-    }
-    fetchImpactData();
-  }, [fetchImpactData]);
+useEffect(() => {
+  const storedCharities = localStorage.getItem('followed-charities');
+  if (storedCharities) {
+    setFollowedCharities(JSON.parse(storedCharities));
+  }
+  
+  const token = localStorage.getItem('token');
+  if (token) {
+    setIsAuthenticated(true);
+  }
+}, []);
 
-  // Attempt to sync localStorage charities with the database
-  useEffect(() => {
+// Fetch impact data and sync followed charities when authenticated
+useEffect(() => {
+  if (isAuthenticated) {
+    fetchImpactData();
+    
     const syncFollowedCharities = async () => {
       try {
         const headers = getAuthHeaders();
@@ -249,7 +257,8 @@ export const ImpactProvider = ({ children }) => {
     };
 
     syncFollowedCharities();
-  }, [getAuthHeaders, saveFollowedCharitiesToDb]);
+  }
+}, [isAuthenticated, fetchImpactData, getAuthHeaders, saveFollowedCharitiesToDb]);
 
   return (
     <ImpactContext.Provider value={{
