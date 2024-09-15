@@ -16,6 +16,10 @@ const TEST_BUSINESS_PASSWORD = 'testpassword123';
 const TEST_USER_EMAIL = 'john@example.com';
 const TEST_USER_PASSWORD = 'password123';
 
+// Test admin credentials
+const TEST_ADMIN_EMAIL = 'admin@example.com';
+const TEST_ADMIN_PASSWORD = 'adminpassword123';
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,16 +53,26 @@ function Login() {
     setError(null);
     try {
       console.log('Attempting login with:', email, password, 'Is Business:', isBusiness);
+      let loginResult;
       if (isBusiness) {
         console.log('Starting business login process');
-        const result = await businessLogin(email, password);
-        console.log('Business login result:', result);
+        loginResult = await businessLogin(email, password);
+        console.log('Business login result:', loginResult);
         console.log('Navigating to /business-dashboard');
         navigate('/business-dashboard');
         console.log('Navigation complete');
       } else {
-        await login(email, password);
-        navigate('/profile');
+        loginResult = await login(email, password);
+        console.log('User login result:', loginResult);
+        
+        // Check if the user is an admin
+        if (loginResult && loginResult.email === TEST_ADMIN_EMAIL) {
+          console.log('Admin user detected, navigating to /admin');
+          navigate('/admin');
+        } else {
+          console.log('Regular user, navigating to /profile');
+          navigate('/profile');
+        }
       }
     } catch (err) {
       console.error('Error logging in:', err);
@@ -85,6 +99,12 @@ function Login() {
     setIsBusiness(false);
   };
 
+  const fillTestAdminCredentials = () => {
+    setEmail(TEST_ADMIN_EMAIL);
+    setPassword(TEST_ADMIN_PASSWORD);
+    setIsBusiness(false);
+  };
+
   const createTestBusinessAccount = async () => {
     try {
       const response = await axios.post(`${API_URL}/api/business/create-test-account`);
@@ -101,6 +121,25 @@ function Login() {
     } catch (error) {
       console.error('Error creating/ensuring test business account:', error);
       alert('Error with test business account. Check the console for more details.');
+    }
+  };
+
+  const createTestAdminAccount = async () => {
+    try {
+      const response = await axios.post(`${API_URL}/api/users/create-test-admin`);
+      if (response.status === 201) {
+        alert('Test admin account created successfully. You can now log in with the admin credentials.');
+        fillTestAdminCredentials();
+      } else if (response.status === 200) {
+        alert('Test admin account is ready to use. You can now log in with the admin credentials.');
+        fillTestAdminCredentials();
+      } else {
+        alert('Unexpected response. Please check the console for more details.');
+        console.log('Unexpected response:', response);
+      }
+    } catch (error) {
+      console.error('Error creating/ensuring test admin account:', error);
+      alert('Error with test admin account. Check the console for more details.');
     }
   };
 
@@ -189,8 +228,14 @@ function Login() {
             <button onClick={fillTestBusinessCredentials}>
               Fill Test Business Credentials
             </button>
+            <button onClick={fillTestAdminCredentials}>
+              Fill Test Admin Credentials
+            </button>
             <button onClick={createTestBusinessAccount}>
               Create Test Business Account
+            </button>
+            <button onClick={createTestAdminAccount}>
+              Create Test Admin Account
             </button>
           </div>
         )}

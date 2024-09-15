@@ -24,6 +24,8 @@ import BusinessReports from './components/BusinessReports';
 import BusinessSettings from './components/BusinessSettings';
 import CreateBusinessCampaign from './components/CreateBusinessCampaign';
 import WelcomePage from './components/WelcomePage';
+import OnboardingMailScraper from './components/OnboardingMailScraper';
+import AdminDashboard from './components/AdminDashboard';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -32,6 +34,15 @@ import './styles/global.css';
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" />;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user } = useAuth();
+  console.log('AdminRoute - Current user:', user);
+  // For testing purposes, allow access if the user's email is 'admin@example.com'
+  const isAdmin = user && user.email === 'admin@example.com';
+  console.log('AdminRoute - Is admin:', isAdmin);
+  return isAdmin ? children : <Navigate to="/login" />;
 };
 
 function App() {
@@ -47,6 +58,9 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/organization-signup" element={<OrganizationSignup />} />
               <Route path="/business-signup" element={<BusinessSignup />} />
+              
+              {/* Onboarding route */}
+              <Route path="/onboarding/mail-scraper" element={<ProtectedRoute><OnboardingMailScraper /></ProtectedRoute>} />
               
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
@@ -67,6 +81,9 @@ function App() {
               <Route path="/business-reports" element={<ProtectedRoute><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
               <Route path="/business-settings" element={<ProtectedRoute><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
               <Route path="/create-business-campaign" element={<ProtectedRoute><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
+
+              {/* Admin routes */}
+              <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             </Routes>
           </div>
         </Router>

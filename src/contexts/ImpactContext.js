@@ -157,7 +157,7 @@ export const ImpactProvider = ({ children }) => {
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
       const headers = getAuthHeaders();
-      const validCharities = charities.filter(charity => charity.name && charity.ABN);
+      const validCharities = Array.isArray(charities) ? charities.filter(charity => charity.name && charity.ABN) : [charities].filter(charity => charity.name && charity.ABN);
       
       if (validCharities.length === 0) {
         console.log('No valid charities to save');
@@ -166,8 +166,12 @@ export const ImpactProvider = ({ children }) => {
   
       console.log('Sending payload:', validCharities);
   
-      const response = await axios.post('http://localhost:3002/api/followed-charities', validCharities[0], { headers });
-      console.log('Charity saved successfully:', response.data);
+      const promises = validCharities.map(charity => 
+        axios.post('http://localhost:3002/api/followed-charities', charity, { headers })
+      );
+  
+      const responses = await Promise.all(promises);
+      console.log('Charities saved successfully:', responses.map(res => res.data));
     } catch (error) {
       console.error('Error saving followed charities to database:', error.response ? error.response.data : error.message);
     }
@@ -183,7 +187,7 @@ export const ImpactProvider = ({ children }) => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
         const newCharities = [...prevCharities, charity];
         localStorage.setItem('followed-charities', JSON.stringify(newCharities));
-        saveFollowedCharitiesToDb([charity]);
+        saveFollowedCharitiesToDb(charity);
         return newCharities;
       }
       return prevCharities;
@@ -284,4 +288,3 @@ useEffect(() => {
     </ImpactContext.Provider>
   );
 };
-

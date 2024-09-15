@@ -42,10 +42,17 @@ const SignUp = () => {
       });
 
       console.log('User registered successfully:', response.data);
-      navigate('/login'); // Redirect to login page after successful registration
+      
+      // If the server returns a token, store it
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      
+      // Redirect to the onboarding page
+      navigate('/onboarding/mail-scraper');
     } catch (error) {
-      console.error('Registration error:', error.response.data);
-      setError(error.response.data.error || 'An error occurred during registration');
+      console.error('Registration error:', error.response?.data);
+      setError(error.response?.data?.error || 'An error occurred during registration');
     }
   };
 
