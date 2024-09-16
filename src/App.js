@@ -33,6 +33,18 @@ import './styles/global.css';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
+  const token = localStorage.getItem('token');
+  const justRegistered = localStorage.getItem('justRegistered');
+  
+  // Allow access to onboarding if there's a token or user just registered
+  if (window.location.pathname === '/onboarding/mail-scraper' && (token || justRegistered === 'true')) {
+    // Clear the justRegistered flag after use
+    if (justRegistered) {
+      localStorage.removeItem('justRegistered');
+    }
+    return children;
+  }
+  
   return user ? children : <Navigate to="/login" />;
 };
 

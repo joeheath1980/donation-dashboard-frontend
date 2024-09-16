@@ -71,11 +71,16 @@ export const ImpactProvider = ({ children }) => {
     const headers = getAuthHeaders();
 
     try {
+      console.log('Fetching impact data...');
       const [donationsRes, oneOffRes, volunteerRes] = await Promise.all([
         axios.get('http://localhost:3002/api/donations', { headers }),
         axios.get('http://localhost:3002/api/contributions/one-off', { headers }),
         axios.get('http://localhost:3002/api/volunteerActivities', { headers })
       ]);
+
+      console.log('Donations response:', donationsRes.data);
+      console.log('One-off contributions response:', oneOffRes.data);
+      console.log('Volunteer activities response:', volunteerRes.data);
 
       setDonations(donationsRes.data);
       setOneOffContributions(oneOffRes.data);
@@ -113,8 +118,23 @@ export const ImpactProvider = ({ children }) => {
       setLastYearImpactScore(lastYearScoreResult.totalScore);
 
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to fetch impact data. Please try again later.');
+      console.error('Error fetching impact data:', error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+        setError(`Failed to fetch impact data. Server responded with ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        setError('Failed to fetch impact data. No response received from the server.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        setError(`Failed to fetch impact data. ${error.message}`);
+      }
       setScoreDetails(defaultScoreDetails);
     }
   }, [getAuthHeaders, lastYearImpactScore]);
@@ -217,6 +237,11 @@ export const ImpactProvider = ({ children }) => {
     }
   }, [getAuthHeaders]);
 
+  const clearFollowedCharities = useCallback(() => {
+    localStorage.removeItem('followed-charities');
+    setFollowedCharities([]);
+  }, []);
+
   // Load followed charities from localStorage on component mount
 useEffect(() => {
   const storedCharities = localStorage.getItem('followed-charities');
@@ -227,12 +252,16 @@ useEffect(() => {
   const token = localStorage.getItem('token');
   if (token) {
     setIsAuthenticated(true);
+  } else {
+    setIsAuthenticated(false);
+    clearFollowedCharities();
   }
-}, []);
+}, [clearFollowedCharities]);
 
 // Fetch impact data and sync followed charities when authenticated
 useEffect(() => {
   if (isAuthenticated) {
+    console.log('User is authenticated, fetching impact data...');
     fetchImpactData();
     
     const syncFollowedCharities = async () => {
@@ -241,28 +270,18 @@ useEffect(() => {
         const response = await axios.get('http://localhost:3002/api/followed-charities', { headers });
         const dbCharities = response.data;
         
-        setFollowedCharities(prevCharities => {
-          const mergedCharities = [...new Set([...prevCharities, ...dbCharities])];
-          
-          if (JSON.stringify(mergedCharities) !== JSON.stringify(prevCharities)) {
-            localStorage.setItem('followed-charities', JSON.stringify(mergedCharities));
-            try {
-              saveFollowedCharitiesToDb(mergedCharities);
-            } catch (saveError) {
-              console.error('Error saving merged charities to database:', saveError);
-            }
-            return mergedCharities;
-          }
-          return prevCharities;
-        });
+        setFollowedCharities(dbCharities);
+        localStorage.setItem('followed-charities', JSON.stringify(dbCharities));
       } catch (error) {
         console.error('Error syncing followed charities:', error);
       }
     };
 
     syncFollowedCharities();
+  } else {
+    console.log('User is not authenticated');
   }
-}, [isAuthenticated, fetchImpactData, getAuthHeaders, saveFollowedCharitiesToDb]);
+}, [isAuthenticated, fetchImpactData, getAuthHeaders]);
 
   return (
     <ImpactContext.Provider value={{
@@ -282,7 +301,8 @@ useEffect(() => {
       followedCharities,
       addFollowedCharity,
       removeFollowedCharity,
-      getAuthHeaders
+      getAuthHeaders,
+      clearFollowedCharities
     }}>
       {children}
     </ImpactContext.Provider>

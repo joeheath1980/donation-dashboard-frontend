@@ -13,7 +13,7 @@ const OnboardingMailScraper = () => {
     try {
       const response = await axios.get(`${API_URL}/api/gmail/auth-url`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       // Redirect the user to the Gmail authorization URL
@@ -25,7 +25,8 @@ const OnboardingMailScraper = () => {
   };
 
   const handleSkip = () => {
-    navigate('/dashboard'); // Redirect to the main dashboard if user skips
+    // Navigate to the profile page of the newly created user
+    navigate('/profile');
   };
 
   return (

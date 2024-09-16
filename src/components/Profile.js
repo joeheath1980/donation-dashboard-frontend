@@ -236,10 +236,6 @@ function Profile() {
 
   const hasData = localDonations.length > 0 || localOneOffContributions.length > 0 || volunteerActivities.length > 0;
 
-  if (!hasData) {
-    return <div className={styles.noData}>No impact data available. Start making donations to see your impact!</div>;
-  }
-
   return (
     <div className={styles.profileContainer}>
       <div style={sectionStyle}>
@@ -285,7 +281,7 @@ function Profile() {
                 ))}
               </ul>
             ) : (
-              <p>No regular donations yet.</p>
+              <p>No regular donations yet. Start making a difference today!</p>
             )}
           </div>
           <div className={styles.regularContributionsWrapper}>
@@ -309,7 +305,7 @@ function Profile() {
                 ))}
               </ul>
             ) : (
-              <p>No one-off donations yet.</p>
+              <p>No one-off donations yet. Make your first contribution to a cause you care about!</p>
             )}
           </div>
           <div className={styles.oneOffContributionsWrapper}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import styles from '../Login.module.css';
 import logo from '../assets/download.svg';
 
@@ -16,6 +17,7 @@ const SignUp = () => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,16 +45,41 @@ const SignUp = () => {
 
       console.log('User registered successfully:', response.data);
       
-      // If the server returns a token, store it
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        console.log('Token stored in localStorage');
+        
+        // Set user in AuthContext
+        setUser(response.data.user);
+      } else {
+        console.log('No token received from server');
+        setError('Registration successful, but no token received. Please try logging in.');
+        return;
       }
       
-      // Redirect to the onboarding page
+      // Navigate to the onboarding page
+      console.log('Navigating to onboarding page');
       navigate('/onboarding/mail-scraper');
     } catch (error) {
-      console.error('Registration error:', error.response?.data);
-      setError(error.response?.data?.error || 'An error occurred during registration');
+      console.error('Registration error:', error);
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error data:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+        
+        setError(error.response.data.error || 'An error occurred during registration. Please try again.');
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        setError('No response received from the server. Please check your internet connection and try again.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        setError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 
