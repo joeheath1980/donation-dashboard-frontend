@@ -1,5 +1,6 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
@@ -60,6 +61,8 @@ export const ImpactProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const { user } = useAuth();
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -174,22 +177,23 @@ export const ImpactProvider = ({ children }) => {
       setError('Failed to add contribution. Please try again.');
     }
   };
+
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
       const headers = getAuthHeaders();
       const validCharities = Array.isArray(charities) ? charities.filter(charity => charity.name && charity.ABN) : [charities].filter(charity => charity.name && charity.ABN);
-      
+
       if (validCharities.length === 0) {
         console.log('No valid charities to save');
         return;
       }
-  
+
       console.log('Sending payload:', validCharities);
-  
-      const promises = validCharities.map(charity => 
+
+      const promises = validCharities.map(charity =>
         axios.post('http://localhost:3002/api/followed-charities', charity, { headers })
       );
-  
+
       const responses = await Promise.all(promises);
       console.log('Charities saved successfully:', responses.map(res => res.data));
     } catch (error) {
@@ -202,7 +206,7 @@ export const ImpactProvider = ({ children }) => {
       console.error('Cannot add charity: name and ABN are required');
       return;
     }
-  
+
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
         const newCharities = [...prevCharities, charity];
@@ -221,10 +225,10 @@ export const ImpactProvider = ({ children }) => {
         setFollowedCharities(prevCharities => prevCharities.filter(c => c.ABN));
         return;
       }
-  
+
       const headers = getAuthHeaders();
       const response = await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
-  
+
       if (response.status === 200) {
         setFollowedCharities(prevCharities => {
           const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
@@ -242,46 +246,45 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities([]);
   }, []);
 
-  // Load followed charities from localStorage on component mount
-useEffect(() => {
-  const storedCharities = localStorage.getItem('followed-charities');
-  if (storedCharities) {
-    setFollowedCharities(JSON.parse(storedCharities));
-  }
-  
-  const token = localStorage.getItem('token');
-  if (token) {
-    setIsAuthenticated(true);
-  } else {
-    setIsAuthenticated(false);
-    clearFollowedCharities();
-  }
-}, [clearFollowedCharities]);
+  // Load followed charities from localStorage and check authentication status
+  useEffect(() => {
+    const storedCharities = localStorage.getItem('followed-charities');
+    if (storedCharities) {
+      setFollowedCharities(JSON.parse(storedCharities));
+    }
 
-// Fetch impact data and sync followed charities when authenticated
-useEffect(() => {
-  if (isAuthenticated) {
-    console.log('User is authenticated, fetching impact data...');
-    fetchImpactData();
-    
-    const syncFollowedCharities = async () => {
-      try {
-        const headers = getAuthHeaders();
-        const response = await axios.get('http://localhost:3002/api/followed-charities', { headers });
-        const dbCharities = response.data;
-        
-        setFollowedCharities(dbCharities);
-        localStorage.setItem('followed-charities', JSON.stringify(dbCharities));
-      } catch (error) {
-        console.error('Error syncing followed charities:', error);
-      }
-    };
+    if (user) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      clearFollowedCharities();
+    }
+  }, [user, clearFollowedCharities]);
 
-    syncFollowedCharities();
-  } else {
-    console.log('User is not authenticated');
-  }
-}, [isAuthenticated, fetchImpactData, getAuthHeaders]);
+  // Fetch impact data and sync followed charities when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('User is authenticated, fetching impact data...');
+      fetchImpactData();
+
+      const syncFollowedCharities = async () => {
+        try {
+          const headers = getAuthHeaders();
+          const response = await axios.get('http://localhost:3002/api/followed-charities', { headers });
+          const dbCharities = response.data;
+
+          setFollowedCharities(dbCharities);
+          localStorage.setItem('followed-charities', JSON.stringify(dbCharities));
+        } catch (error) {
+          console.error('Error syncing followed charities:', error);
+        }
+      };
+
+      syncFollowedCharities();
+    } else {
+      console.log('User is not authenticated');
+    }
+  }, [isAuthenticated, fetchImpactData, getAuthHeaders]);
 
   return (
     <ImpactContext.Provider value={{
@@ -302,9 +305,11 @@ useEffect(() => {
       addFollowedCharity,
       removeFollowedCharity,
       getAuthHeaders,
-      clearFollowedCharities
+      clearFollowedCharities,
+      isAuthenticated
     }}>
       {children}
     </ImpactContext.Provider>
   );
 };
+

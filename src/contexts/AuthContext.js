@@ -86,16 +86,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   const socialLogin = async (token) => {
+    console.log('socialLogin called with token:', token);
     try {
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'user');
+      console.log('Token and userType set in localStorage');
+      
       const userResponse = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('User response from /api/users/me:', userResponse.data);
+      
       setUser(userResponse.data);
+      console.log('User state updated:', userResponse.data);
+      
       return userResponse.data;
     } catch (error) {
       console.error('Social login error:', error);
+      console.error('Error response:', error.response);
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
       throw error;
     }
   };

@@ -26,6 +26,7 @@ import CreateBusinessCampaign from './components/CreateBusinessCampaign';
 import WelcomePage from './components/WelcomePage';
 import OnboardingMailScraper from './components/OnboardingMailScraper';
 import AdminDashboard from './components/AdminDashboard';
+import GoogleAuthCallback from './components/GoogleAuthCallback'; // Add this line
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -73,6 +74,9 @@ function App() {
               
               {/* Onboarding route */}
               <Route path="/onboarding/mail-scraper" element={<ProtectedRoute><OnboardingMailScraper /></ProtectedRoute>} />
+              
+              {/* Google Auth Callback route */}
+              <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
               
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
