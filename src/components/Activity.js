@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { Link } from 'react-router-dom';
 import styles from '../Impact.module.css';
 
 function Activity() {
@@ -10,47 +11,21 @@ function Activity() {
   const [error, setError] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [authStatus, setAuthStatus] = useState('');
-  const [serverStatus, setServerStatus] = useState('');
 
   useEffect(() => {
     console.log('Activity component mounted');
-    checkServerStatus();
     // Check if the user was redirected back from Google OAuth
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get('code');
     if (authCode) {
       console.log('Auth code found in URL');
-      setAuthStatus('Authentication successful. You can now scrape Gmail.');
+      setAuthStatus('Authentication successful. You can now search your emails.');
       // Remove the code from the URL
       window.history.replaceState({}, document.title, window.location.pathname);
       // Exchange the auth code for tokens
       exchangeAuthCode(authCode);
     }
   }, []);
-
-  const checkServerStatus = async () => {
-    try {
-      console.log('Checking server status...');
-      const healthResponse = await fetch('http://localhost:3002/api/health', { mode: 'cors' });
-      if (!healthResponse.ok) {
-        throw new Error('Health check failed');
-      }
-      const healthData = await healthResponse.json();
-      console.log('Health check response:', healthData);
-
-      const testResponse = await fetch('http://localhost:3002/api/test', { mode: 'cors' });
-      if (!testResponse.ok) {
-        throw new Error('Test route failed');
-      }
-      const testData = await testResponse.json();
-      console.log('Test route response:', testData);
-
-      setServerStatus('Server is running and accessible');
-    } catch (error) {
-      console.error('Server status check failed:', error);
-      setServerStatus(`Server is not accessible: ${error.message}`);
-    }
-  };
 
   const exchangeAuthCode = async (code) => {
     try {
@@ -60,45 +35,30 @@ function Activity() {
       }
       const data = await response.json();
       console.log('Token exchange successful:', data);
-      setAuthStatus('Authentication completed. You can now scrape Gmail.');
+      setAuthStatus('Authentication completed. You can now search your emails.');
     } catch (error) {
       console.error('Error exchanging auth code:', error);
       setAuthStatus('Authentication failed. Please try again.');
     }
   };
 
-  const handleScrapeGmail = async () => {
-    console.log('handleScrapeGmail called');
+  const handleSearchEmails = async () => {
+    console.log('handleSearchEmails called');
     setLoading(true);
     setError(null);
     setAuthStatus('');
     try {
-      // First, check if the server is running
-      console.log('Performing health check');
-      const healthCheck = await fetch('http://localhost:3002/api/health', { mode: 'cors' })
-        .catch(error => {
-          console.error('Health check fetch error:', error);
-          throw new Error(`Server is not responding (Health check). Error: ${error.message}`);
-        });
-
-      if (!healthCheck.ok) {
-        const errorBody = await healthCheck.text();
-        console.error('Health check failed. Status:', healthCheck.status, 'Body:', errorBody);
-        throw new Error(`Server health check failed. Status: ${healthCheck.status}`);
-      }
-      console.log('Health check passed');
-
-      console.log('Sending request to scrape Gmail');
+      console.log('Sending request to search emails');
       const response = await fetch('http://localhost:3002/api/scrape-gmail', { mode: 'cors' })
         .catch(error => {
-          console.error('Scrape Gmail fetch error:', error);
+          console.error('Search emails fetch error:', error);
           throw new Error(`Failed to connect to the server. Error: ${error.message}`);
         });
 
       console.log('Response received:', response.status, response.statusText);
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error('Scrape Gmail failed. Status:', response.status, 'Body:', errorBody);
+        console.error('Search emails failed. Status:', response.status, 'Body:', errorBody);
         const errorData = errorBody ? JSON.parse(errorBody) : {};
         if (errorData.error === 'Authentication required' || errorData.error === 'Token expired') {
           console.log('Authentication required');
@@ -116,15 +76,15 @@ function Activity() {
             throw new Error('Failed to initiate Google authentication');
           }
         } else {
-          throw new Error(errorData.error || `An error occurred while scraping Gmail. Status: ${response.status}`);
+          throw new Error(errorData.error || `An error occurred while searching emails. Status: ${response.status}`);
         }
       } else {
         const data = await response.json();
-        console.log('Scrape results:', data);
+        console.log('Search results:', data);
         setGmailResults(data);
       }
     } catch (error) {
-      console.error('Error during Gmail scraping:', error);
+      console.error('Error during email search:', error);
       setError(`Error: ${error.message}. Please check the console for more details.`);
     } finally {
       setLoading(false);
@@ -178,24 +138,23 @@ function Activity() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.header}>Activity</h2>
-
-      <div className={styles.serverStatus}>
-        <p>Server Status: {serverStatus}</p>
-        <button onClick={checkServerStatus}>Check Server Status</button>
-      </div>
+      <h1 className={styles.activityHeader}>Discover your donations and start tracking your impact</h1>
 
       <div className={styles.gmailSection}>
-        <h4>Donations from Gmail</h4>
-        <button onClick={handleScrapeGmail} disabled={loading}>
-          {loading ? 'Scraping...' : 'Scrape Gmail for Donations'}
-        </button>
-        {loading && <p className={styles.loading}>Scraping Gmail... Please wait.</p>}
+        <div className={styles.buttonContainer}>
+          <button onClick={handleSearchEmails} disabled={loading} className={styles.scrapeButton}>
+            {loading ? 'Searching...' : 'Search Emails for Donations'}
+          </button>
+          <Link to="/profile" className={styles.toggleButton}>Check Out Your Impact</Link>
+        </div>
+
+        {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
         {error && <p className={styles.error}>{error}</p>}
         {authStatus && <p className={styles.authStatus}>{authStatus}</p>}
         {gmailResults.length > 0 && (
           <div className={styles.resultsContainer}>
-            <h5>Gmail Scrape Results:</h5>
+            <h5>Email Search Results:</h5>
+            <p className={styles.sortMessage}>Sort your donations into regular or one-off contributions:</p>
             <ul className={styles.gmailResultsList}>
               {gmailResults.map((result, index) => (
                 <li key={index} className={styles.gmailResultItem}>
@@ -206,18 +165,19 @@ function Activity() {
                   <select
                     value={selectedTypes[index] || ''}
                     onChange={(event) => handleTypeChange(index, event)}
+                    className={styles.categorySelect}
                   >
                     <option value="">Select Type</option>
                     <option value="regular">Regular Contribution</option>
                     <option value="one-off">One-Off Contribution</option>
                   </select>
-                  <button onClick={() => handleCommit(index)}>
+                  <button onClick={() => handleCommit(index)} className={styles.saveButton}>
                     Commit
                   </button>
                   <button
-                    className={styles.deleteIcon}
+                    className={styles.deleteButton}
                     onClick={() => handleDeleteGmailResult(index)}
-                    aria-label="Delete Gmail Result"
+                    aria-label="Delete Email Result"
                   >
                     &times;
                   </button>

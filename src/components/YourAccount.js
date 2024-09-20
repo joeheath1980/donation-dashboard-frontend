@@ -35,10 +35,10 @@ const YourAccount = () => {
 
           <div className={styles.card}>
             <span className={styles.cardIcon}>📅</span>
-            <h2>Past Activity</h2>
-            <p>Review your donation history and impact over time.</p>
-            <Link to="/activity" className={styles.cardButton}>View Activity</Link>
-            <span className={styles.ctaTip}>See detailed insights in your past activity.</span>
+            <h2>Discover Your Donations</h2>
+            <p>Explore your giving history and see the impact you've made.</p>
+            <Link to="/activity" className={styles.cardButton}>Discover</Link>
+            <span className={styles.ctaTip}>Uncover insights about your charitable contributions.</span>
           </div>
 
           <div className={styles.card}>

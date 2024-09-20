@@ -57,9 +57,8 @@ const SignUp = () => {
         return;
       }
       
-      // Navigate to the onboarding page
-      console.log('Navigating to onboarding page');
-      navigate('/onboarding/mail-scraper');
+      // Navigate to the activity page
+      navigate('/activity');
     } catch (error) {
       console.error('Registration error:', error);
       
