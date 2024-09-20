@@ -8,10 +8,12 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     description: '',
     goalAmount: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
   });
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [updatingCampaign, setUpdatingCampaign] = useState(null);
+  const [tempRaisedAmounts, setTempRaisedAmounts] = useState({}); // Updated state to manage tempRaisedAmount per campaign
 
   useEffect(() => {
     fetchCampaigns();
@@ -22,7 +24,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     try {
       const response = await axios.get(`http://localhost:3002/api/fundraisingCampaigns`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setCampaigns(response.data);
@@ -40,14 +42,24 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:3002/api/fundraisingCampaigns', newCampaign, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
+      const response = await axios.post(
+        'http://localhost:3002/api/fundraisingCampaigns',
+        newCampaign,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       setCampaigns([...campaigns, response.data]);
-      setNewCampaign({ title: '', description: '', goalAmount: '', startDate: '', endDate: '' });
+      setNewCampaign({
+        title: '',
+        description: '',
+        goalAmount: '',
+        startDate: '',
+        endDate: '',
+      });
       setError('');
       setIsCreateModalOpen(false);
     } catch (error) {
@@ -61,10 +73,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     try {
       await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-      setCampaigns(campaigns.filter(campaign => campaign._id !== campaignId));
+      setCampaigns(campaigns.filter((campaign) => campaign._id !== campaignId));
     } catch (error) {
       console.error('Error removing fundraising campaign:', error);
       setError('Failed to remove campaign. Please try again.');
@@ -78,7 +90,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         charity: campaign.title,
         date: new Date().toISOString(),
         amount: campaign.raisedAmount || campaign.goalAmount,
-        subject: `Completed fundraising campaign: ${campaign.description}`
+        subject: `Completed fundraising campaign: ${campaign.description}`,
       };
       console.log('Converted campaign to one-off contribution:', completedCampaign);
       onCompleteCampaign(completedCampaign);
@@ -86,6 +98,54 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     } catch (error) {
       console.error('Error completing campaign:', error);
       setError('Failed to complete campaign. Please try again.');
+    }
+  };
+
+  const handleUpdateAmount = async (campaign) => {
+    if (updatingCampaign === campaign._id) {
+      const tempRaisedAmount = tempRaisedAmounts[campaign._id];
+      const updatedRaisedAmount = parseFloat(tempRaisedAmount);
+      if (isNaN(updatedRaisedAmount)) {
+        setError('Please enter a valid number for the raised amount.');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      try {
+        // Only include the raisedAmount in the update
+        const updatedCampaign = { raisedAmount: updatedRaisedAmount };
+
+        // Using PATCH for partial updates
+        const response = await axios.patch(
+          `http://localhost:3002/api/fundraisingCampaigns/${campaign._id}`,
+          updatedCampaign,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        setCampaigns((prevCampaigns) =>
+          prevCampaigns.map((c) => (c._id === campaign._id ? response.data : c))
+        );
+        setUpdatingCampaign(null);
+        setTempRaisedAmounts((prev) => {
+          const updated = { ...prev };
+          delete updated[campaign._id];
+          return updated;
+        });
+        setError('');
+      } catch (error) {
+        console.error('Error updating campaign amount:', error);
+        setError('Failed to update campaign amount. Please try again.');
+      }
+    } else {
+      setUpdatingCampaign(campaign._id);
+      setTempRaisedAmounts((prev) => ({
+        ...prev,
+        [campaign._id]: campaign.raisedAmount?.toString() ?? '0',
+      }));
     }
   };
 
@@ -210,7 +270,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
       {campaigns.length > 0 ? (
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {campaigns.map(campaign => (
+          {campaigns.map((campaign) => (
             <li key={campaign._id} style={campaignCardStyle}>
               <button
                 onClick={() => handleRemoveCampaign(campaign._id)}
@@ -220,20 +280,50 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
               </button>
               <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>{campaign.title}</h3>
               <p style={{ marginBottom: '10px' }}>{campaign.description}</p>
-              <p><span style={labelStyle}>Goal:</span> <span style={valueStyle}>${campaign.goalAmount}</span></p>
-              <p><span style={labelStyle}>Raised:</span> <span style={valueStyle}>${campaign.raisedAmount || 0}</span></p>
+              <p>
+                <span style={labelStyle}>Goal:</span> <span style={valueStyle}>${campaign.goalAmount}</span>
+              </p>
+              <p>
+                <span style={labelStyle}>Raised:</span>
+                {updatingCampaign === campaign._id ? (
+                  <input
+                    type="number"
+                    value={tempRaisedAmounts[campaign._id] ?? campaign.raisedAmount?.toString() ?? '0'}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      console.log('Input Change:', value); // Debugging line
+                      setTempRaisedAmounts({
+                        ...tempRaisedAmounts,
+                        [campaign._id]: value,
+                      });
+                    }}
+                    style={{ ...inputStyle, width: '100px', marginLeft: '10px', marginRight: '10px' }}
+                  />
+                ) : (
+                  <span style={valueStyle}>${campaign.raisedAmount || 0}</span>
+                )}
+                <button
+                  onClick={() => handleUpdateAmount(campaign)}
+                  style={{ ...buttonStyle, backgroundColor: '#4CAF50', color: 'white', marginLeft: '10px' }}
+                >
+                  {updatingCampaign === campaign._id ? 'Save' : 'Update Amount'}
+                </button>
+              </p>
               <div style={progressBarStyle}>
-                <div 
-                  style={progressFillStyle((campaign.raisedAmount / campaign.goalAmount) * 100)}
-                ></div>
+                <div style={progressFillStyle((campaign.raisedAmount / campaign.goalAmount) * 100)}></div>
               </div>
-              <p><span style={labelStyle}>Start Date:</span> <span style={valueStyle}>{new Date(campaign.startDate).toLocaleDateString()}</span></p>
-              <p><span style={labelStyle}>End Date:</span> <span style={valueStyle}>{new Date(campaign.endDate).toLocaleDateString()}</span></p>
-              <p><span style={labelStyle}>Status:</span> <span style={valueStyle}>{campaign.status}</span></p>
-              <button
-                onClick={() => handleCompleteCampaign(campaign)}
-                style={completeButtonStyle}
-              >
+              <p>
+                <span style={labelStyle}>Start Date:</span>{' '}
+                <span style={valueStyle}>{new Date(campaign.startDate).toLocaleDateString()}</span>
+              </p>
+              <p>
+                <span style={labelStyle}>End Date:</span>{' '}
+                <span style={valueStyle}>{new Date(campaign.endDate).toLocaleDateString()}</span>
+              </p>
+              <p>
+                <span style={labelStyle}>Status:</span> <span style={valueStyle}>{campaign.status}</span>
+              </p>
+              <button onClick={() => handleCompleteCampaign(campaign)} style={completeButtonStyle}>
                 Mark as Completed
               </button>
             </li>
@@ -243,10 +333,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         <p>No fundraising campaigns found.</p>
       )}
 
-      <button 
-        onClick={() => setIsCreateModalOpen(true)} 
-        style={createButtonStyle}
-      >
+      <button onClick={() => setIsCreateModalOpen(true)} style={createButtonStyle}>
         Create Campaign
       </button>
 
@@ -254,55 +341,63 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         <>
           <div style={overlayStyle} onClick={() => setIsCreateModalOpen(false)} />
           <div style={modalStyle}>
-            <h3 style={{...headerStyle, fontSize: '24px'}}>Create New Campaign</h3>
+            <h3 style={{ ...headerStyle, fontSize: '24px' }}>Create New Campaign</h3>
             <form onSubmit={handleSubmit}>
-              <input 
-                type="text" 
-                name="title" 
-                placeholder="Campaign Title" 
-                value={newCampaign.title} 
-                onChange={handleChange} 
-                required 
-                style={inputStyle}
-              />
-              <textarea 
-                name="description" 
-                placeholder="Campaign Description" 
-                value={newCampaign.description} 
-                onChange={handleChange} 
+              <input
+                type="text"
+                name="title"
+                placeholder="Campaign Title"
+                value={newCampaign.title}
+                onChange={handleChange}
                 required
-                style={{...inputStyle, minHeight: '100px'}}
+                style={inputStyle}
+              />
+              <textarea
+                name="description"
+                placeholder="Campaign Description"
+                value={newCampaign.description}
+                onChange={handleChange}
+                required
+                style={{ ...inputStyle, minHeight: '100px' }}
               ></textarea>
-              <input 
-                type="number" 
-                name="goalAmount" 
-                placeholder="Goal Amount" 
-                value={newCampaign.goalAmount} 
-                onChange={handleChange} 
-                required 
+              <input
+                type="number"
+                name="goalAmount"
+                placeholder="Goal Amount"
+                value={newCampaign.goalAmount}
+                onChange={handleChange}
+                required
                 style={inputStyle}
               />
-              <input 
-                type="date" 
-                name="startDate" 
-                placeholder="Start Date" 
-                value={newCampaign.startDate} 
-                onChange={handleChange} 
-                required 
+              <input
+                type="date"
+                name="startDate"
+                placeholder="Start Date"
+                value={newCampaign.startDate}
+                onChange={handleChange}
+                required
                 style={inputStyle}
               />
-              <input 
-                type="date" 
-                name="endDate" 
-                placeholder="End Date" 
-                value={newCampaign.endDate} 
-                onChange={handleChange} 
-                required 
+              <input
+                type="date"
+                name="endDate"
+                placeholder="End Date"
+                value={newCampaign.endDate}
+                onChange={handleChange}
+                required
                 style={inputStyle}
               />
-              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px'}}>
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} style={{...buttonStyle, backgroundColor: '#ccc'}}>Cancel</button>
-                <button type="submit" style={{...buttonStyle, backgroundColor: '#4CAF50', color: 'white'}}>Create Campaign</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  style={{ ...buttonStyle, backgroundColor: '#ccc' }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" style={{ ...buttonStyle, backgroundColor: '#4CAF50', color: 'white' }}>
+                  Create Campaign
+                </button>
               </div>
             </form>
           </div>
@@ -313,3 +408,4 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 }
 
 export default FundraisingCampaignsComponent;
+
