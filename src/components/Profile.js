@@ -24,7 +24,6 @@ function Profile() {
     pointsToNextTier,
     fetchImpactData,
     error: impactError,
-    volunteerActivities
   } = useContext(ImpactContext);
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
@@ -233,8 +232,6 @@ function Profile() {
   if (impactError) {
     return <div className={styles.error}>{impactError}</div>;
   }
-
-  const hasData = localDonations.length > 0 || localOneOffContributions.length > 0 || volunteerActivities.length > 0;
 
   return (
     <div className={styles.profileContainer}>
