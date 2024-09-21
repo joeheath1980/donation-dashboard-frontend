@@ -4,39 +4,47 @@ import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Calculation logic remains the same
+// Updated calculation logic to include fundraising campaigns
 export const calculateComplexImpactScore = (userData, benchmarks) => {
   // Ensure userData and benchmarks are valid objects
   if (!userData || !benchmarks) {
     console.error('Invalid input for calculateComplexImpactScore');
-    return { totalScore: 0, regularDonationScore: 0, oneOffDonationScore: 0, volunteeringScore: 0, engagementBonus: 0 };
+    return { totalScore: 0, regularDonationScore: 0, oneOffDonationScore: 0, volunteeringScore: 0, fundraisingScore: 0, engagementBonus: 0 };
   }
 
   const {
     regularDonations = [],
     oneOffDonations = [],
     volunteeringActivities = [],
+    fundraisingCampaigns = [],
     previousPeriodScore = 0
   } = userData;
 
   const {
     monthlyDonationBenchmark = 100,
-    oneOffDonationBenchmark = 500
+    oneOffDonationBenchmark = 500,
+    fundraisingCampaignBenchmark = 1000
   } = benchmarks;
 
   // Calculate scores using the benchmarks
-  const regularDonationScore = Math.min((regularDonations.reduce((sum, d) => sum + d.amount, 0) / monthlyDonationBenchmark) * 35, 35);
-  const oneOffDonationScore = Math.min((oneOffDonations.reduce((sum, d) => sum + d.amount, 0) / oneOffDonationBenchmark) * 25, 25);
-  const volunteeringScore = Math.min((volunteeringActivities.length / 5) * 30, 30);
+  const regularDonationScore = Math.min((regularDonations.reduce((sum, d) => sum + d.amount, 0) / monthlyDonationBenchmark) * 30, 30);
+  const oneOffDonationScore = Math.min((oneOffDonations.reduce((sum, d) => sum + d.amount, 0) / oneOffDonationBenchmark) * 20, 20);
+  const volunteeringScore = Math.min((volunteeringActivities.length / 5) * 25, 25);
+  
+  // New calculation for fundraising campaigns
+  const totalRaised = fundraisingCampaigns.reduce((sum, campaign) => sum + (campaign.raisedAmount || 0), 0);
+  const fundraisingScore = Math.min((totalRaised / fundraisingCampaignBenchmark) * 15, 15);
+  
   const engagementBonus = previousPeriodScore > 0 ? 10 : 0;
 
-  const totalScore = regularDonationScore + oneOffDonationScore + volunteeringScore + engagementBonus;
+  const totalScore = regularDonationScore + oneOffDonationScore + volunteeringScore + fundraisingScore + engagementBonus;
 
   return {
     totalScore: Math.min(Math.round(totalScore), 100),
     regularDonationScore: Math.round(regularDonationScore),
     oneOffDonationScore: Math.round(oneOffDonationScore),
     volunteeringScore: Math.round(volunteeringScore),
+    fundraisingScore: Math.round(fundraisingScore),
     engagementBonus: Math.round(engagementBonus)
   };
 };
@@ -46,6 +54,7 @@ const defaultScoreDetails = {
   regularDonationScore: 0,
   oneOffDonationScore: 0,
   volunteeringScore: 0,
+  fundraisingScore: 0,
   engagementBonus: 0
 };
 
@@ -58,6 +67,7 @@ export const ImpactProvider = ({ children }) => {
   const [donations, setDonations] = useState([]);
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [volunteerActivities, setVolunteerActivities] = useState([]);
+  const [fundraisingCampaigns, setFundraisingCampaigns] = useState([]); // New state for fundraising campaigns
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,30 +85,35 @@ export const ImpactProvider = ({ children }) => {
 
     try {
       console.log('Fetching impact data...');
-      const [donationsRes, oneOffRes, volunteerRes] = await Promise.all([
+      const [donationsRes, oneOffRes, volunteerRes, fundraisingRes] = await Promise.all([
         axios.get('http://localhost:3002/api/donations', { headers }),
         axios.get('http://localhost:3002/api/contributions/one-off', { headers }),
-        axios.get('http://localhost:3002/api/volunteerActivities', { headers })
+        axios.get('http://localhost:3002/api/volunteerActivities', { headers }),
+        axios.get('http://localhost:3002/api/fundraisingCampaigns', { headers })
       ]);
 
       console.log('Donations response:', donationsRes.data);
       console.log('One-off contributions response:', oneOffRes.data);
       console.log('Volunteer activities response:', volunteerRes.data);
+      console.log('Fundraising campaigns response:', fundraisingRes.data);
 
       setDonations(donationsRes.data);
       setOneOffContributions(oneOffRes.data);
       setVolunteerActivities(volunteerRes.data);
+      setFundraisingCampaigns(fundraisingRes.data);
 
       const userData = {
         regularDonations: donationsRes.data,
         oneOffDonations: oneOffRes.data,
         volunteeringActivities: volunteerRes.data,
+        fundraisingCampaigns: fundraisingRes.data,
         previousPeriodScore: lastYearImpactScore
       };
 
       const benchmarks = {
         monthlyDonationBenchmark: 100,
-        oneOffDonationBenchmark: 500
+        oneOffDonationBenchmark: 500,
+        fundraisingCampaignBenchmark: 1000
       };
 
       const scoreResult = calculateComplexImpactScore(userData, benchmarks);
@@ -115,6 +130,7 @@ export const ImpactProvider = ({ children }) => {
         regularDonations: donationsRes.data.filter(d => new Date(d.date) <= oneYearAgo),
         oneOffDonations: oneOffRes.data.filter(d => new Date(d.date) <= oneYearAgo),
         volunteeringActivities: volunteerRes.data.filter(v => new Date(v.date) <= oneYearAgo),
+        fundraisingCampaigns: fundraisingRes.data.filter(c => new Date(c.startDate) <= oneYearAgo),
         previousPeriodScore: 0
       };
       const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData, benchmarks);
@@ -123,18 +139,14 @@ export const ImpactProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching impact data:', error);
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.error('Error response data:', error.response.data);
         console.error('Error response status:', error.response.status);
         console.error('Error response headers:', error.response.headers);
         setError(`Failed to fetch impact data. Server responded with ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error('Error request:', error.request);
         setError('Failed to fetch impact data. No response received from the server.');
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error('Error message:', error.message);
         setError(`Failed to fetch impact data. ${error.message}`);
       }
@@ -296,6 +308,7 @@ export const ImpactProvider = ({ children }) => {
       donations,
       oneOffContributions,
       volunteerActivities,
+      fundraisingCampaigns,
       fetchImpactData,
       error,
       addDonation,
@@ -312,4 +325,3 @@ export const ImpactProvider = ({ children }) => {
     </ImpactContext.Provider>
   );
 };
-

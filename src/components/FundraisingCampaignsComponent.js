@@ -1,8 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { ImpactContext } from '../contexts/ImpactContext';
 
 function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
-  const [campaigns, setCampaigns] = useState([]);
+  const {
+    fundraisingCampaigns,
+    fetchImpactData,
+    getAuthHeaders,
+    isAuthenticated
+  } = useContext(ImpactContext);
+
   const [newCampaign, setNewCampaign] = useState({
     title: '',
     description: '',
@@ -13,26 +20,13 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [updatingCampaign, setUpdatingCampaign] = useState(null);
-  const [tempRaisedAmounts, setTempRaisedAmounts] = useState({}); // Updated state to manage tempRaisedAmount per campaign
+  const [tempRaisedAmounts, setTempRaisedAmounts] = useState({});
 
   useEffect(() => {
-    fetchCampaigns();
-  }, [userId]);
-
-  const fetchCampaigns = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await axios.get(`http://localhost:3002/api/fundraisingCampaigns`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setCampaigns(response.data);
-    } catch (error) {
-      console.error('Error fetching fundraising campaigns:', error);
-      setError('Failed to fetch campaigns. Please try again later.');
+    if (isAuthenticated) {
+      fetchImpactData();
     }
-  };
+  }, [isAuthenticated, fetchImpactData]);
 
   const handleChange = (e) => {
     setNewCampaign({ ...newCampaign, [e.target.name]: e.target.value });
@@ -40,19 +34,18 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders();
     try {
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:3002/api/fundraisingCampaigns',
         newCampaign,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            ...headers,
             'Content-Type': 'application/json',
           },
         }
       );
-      setCampaigns([...campaigns, response.data]);
       setNewCampaign({
         title: '',
         description: '',
@@ -62,6 +55,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       });
       setError('');
       setIsCreateModalOpen(false);
+      fetchImpactData(); // Refresh impact data after creating a new campaign
     } catch (error) {
       console.error('Error creating fundraising campaign:', error);
       setError('Failed to create campaign. Please try again.');
@@ -69,14 +63,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   };
 
   const handleRemoveCampaign = async (campaignId) => {
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders();
     try {
-      await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setCampaigns(campaigns.filter((campaign) => campaign._id !== campaignId));
+      await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, { headers });
+      fetchImpactData(); // Refresh impact data after removing a campaign
     } catch (error) {
       console.error('Error removing fundraising campaign:', error);
       setError('Failed to remove campaign. Please try again.');
@@ -110,24 +100,19 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         return;
       }
 
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders();
       try {
-        // Only include the raisedAmount in the update
         const updatedCampaign = { raisedAmount: updatedRaisedAmount };
 
-        // Using PATCH for partial updates
-        const response = await axios.patch(
+        await axios.patch(
           `http://localhost:3002/api/fundraisingCampaigns/${campaign._id}`,
           updatedCampaign,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              ...headers,
               'Content-Type': 'application/json',
             },
           }
-        );
-        setCampaigns((prevCampaigns) =>
-          prevCampaigns.map((c) => (c._id === campaign._id ? response.data : c))
         );
         setUpdatingCampaign(null);
         setTempRaisedAmounts((prev) => {
@@ -136,6 +121,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
           return updated;
         });
         setError('');
+        fetchImpactData(); // Refresh impact data after updating campaign amount
       } catch (error) {
         console.error('Error updating campaign amount:', error);
         setError('Failed to update campaign amount. Please try again.');
@@ -268,9 +254,9 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
       {error && <p style={{ color: 'red', marginBottom: '20px' }}>{error}</p>}
 
-      {campaigns.length > 0 ? (
+      {fundraisingCampaigns.length > 0 ? (
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {campaigns.map((campaign) => (
+          {fundraisingCampaigns.map((campaign) => (
             <li key={campaign._id} style={campaignCardStyle}>
               <button
                 onClick={() => handleRemoveCampaign(campaign._id)}
@@ -408,4 +394,3 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 }
 
 export default FundraisingCampaignsComponent;
-
