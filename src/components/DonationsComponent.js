@@ -72,6 +72,12 @@ function DonationsComponent({ displayAll }) {
 
   const handleConfirm = async (editedDonation) => {
     console.log('Saving edited donation:', editedDonation);
+    const amount = parseFloat(editedDonation.amount);
+    if (isNaN(amount)) {
+      alert('Please enter a valid amount.');
+      return;
+    }
+
     try {
       const response = await fetch(`http://localhost:3002/api/donations/${editedDonation._id}`, {
         method: 'PUT',
@@ -79,7 +85,7 @@ function DonationsComponent({ displayAll }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ ...editedDonation, needsValidation: true })
+        body: JSON.stringify({ ...editedDonation, amount, needsValidation: true })
       });
 
       if (response.ok) {
@@ -104,7 +110,7 @@ function DonationsComponent({ displayAll }) {
 
   const handleValidate = (donation) => {
     console.log('Validate button clicked for donation:', donation);
-    setCurrentDonation({...donation, type: 'donation'});
+    setCurrentDonation({ ...donation, type: 'donation' });
     setShowValidationModal(true);
   };
 
@@ -144,7 +150,7 @@ function DonationsComponent({ displayAll }) {
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{donation.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
-                <p className={styles.donationDetail}><strong>Amount:</strong> ${donation.amount}</p>
+                <p className={styles.donationDetail}><strong>Amount:</strong> ${donation.amount.toFixed(2)}</p>
                 <p className={styles.donationDetail}><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                 {donation.subject && (
                   <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>

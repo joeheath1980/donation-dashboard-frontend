@@ -1,22 +1,45 @@
+// src/components/ValidationModal.js
+
 import React, { useState } from 'react';
 import styles from './ValidationModal.module.css';
 
+/**
+ * ValidationModal Component
+ * 
+ * This modal allows users to upload a receipt for their donation or contribution.
+ * It handles file selection, form submission, and communicates with the server to validate the donation/contribution.
+ * 
+ * Props:
+ * - item: The donation or contribution object to be validated.
+ * - onCancel: Function to call when the user cancels the validation.
+ * - onValidate: Function to call when the validation is successful.
+ */
 const ValidationModal = ({ item, onCancel, onValidate }) => {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Handles the file input change event.
+   * @param {Event} e - The change event.
+   */
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
+  /**
+   * Handles the form submission for uploading the receipt.
+   * @param {Event} e - The form submission event.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
-      alert('Please select a file to upload');
+      alert('Please select a file to upload.');
       return;
     }
 
     setIsLoading(true);
+
     const formData = new FormData();
     formData.append('receipt', file);
 
@@ -37,21 +60,31 @@ const ValidationModal = ({ item, onCancel, onValidate }) => {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
+          // Note: When using FormData, you should NOT set the 'Content-Type' header manually.
+          // The browser will set it including the correct boundary.
         },
         body: formData
       });
 
       console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
 
       if (response.ok) {
-        const result = JSON.parse(responseText);
+        const result = await response.json(); // Directly parse JSON
         console.log('Upload result:', result);
         const updatedItem = { ...result, type: item.type };
         onValidate(updatedItem);
       } else {
-        throw new Error(responseText || 'Failed to upload receipt');
+        // Attempt to parse error message from JSON
+        let errorMessage = 'Failed to upload receipt';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (jsonError) {
+          console.error('Error parsing error response:', jsonError);
+          // Fallback to status text if JSON parsing fails
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error uploading receipt:', error);
@@ -71,12 +104,24 @@ const ValidationModal = ({ item, onCancel, onValidate }) => {
         <h2>Upload Receipt</h2>
         <p>Please upload a receipt for your {item.type === 'donation' ? 'donation' : 'contribution'} to {item.charity}.</p>
         <form onSubmit={handleSubmit}>
-          <input type="file" onChange={handleFileChange} accept="image/*,application/pdf" />
+          <div className={styles.formGroup}>
+            <label htmlFor="receipt">Receipt (PDF or Image):</label>
+            <input 
+              type="file" 
+              id="receipt" 
+              name="receipt" 
+              accept="image/*,application/pdf" 
+              onChange={handleFileChange} 
+              required 
+            />
+          </div>
           <div className={styles.buttonGroup}>
-            <button type="submit" disabled={isLoading}>
+            <button type="submit" disabled={isLoading} className={styles.uploadButton}>
               {isLoading ? 'Uploading...' : 'Upload'}
             </button>
-            <button type="button" onClick={onCancel} disabled={isLoading}>Cancel</button>
+            <button type="button" onClick={onCancel} disabled={isLoading} className={styles.cancelButton}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>
