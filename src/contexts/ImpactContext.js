@@ -4,58 +4,180 @@ import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Updated calculation logic to include fundraising campaigns
-export const calculateComplexImpactScore = (userData, benchmarks) => {
-  // Ensure userData and benchmarks are valid objects
-  if (!userData || !benchmarks) {
+// Max points for each component
+const MAX_DONATION_SCORE = 40;
+const MAX_VOLUNTEER_SCORE = 30;
+const MAX_FUNDRAISING_SCORE = 20;
+
+// Donation Score Calculation (Max 40 points)
+const calculateDonationScore = (regularDonations, oneOffDonations) => {
+  const totalDonations = [...regularDonations, ...oneOffDonations];
+  const totalDonationAmount = totalDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
+
+  // Tiered Points with Diminishing Returns
+  let donationScore = 0;
+  let remainingAmount = totalDonationAmount;
+
+  // First $1,000: 1 point per $100 donated => 10 points
+  const firstTierAmount = Math.min(remainingAmount, 1000);
+  donationScore += firstTierAmount / 100;
+  remainingAmount -= firstTierAmount;
+
+  // Next $4,000: 1 point per $200 donated => 20 points
+  if (remainingAmount > 0) {
+    const secondTierAmount = Math.min(remainingAmount, 4000);
+    donationScore += secondTierAmount / 200;
+    remainingAmount -= secondTierAmount;
+  }
+
+  // Above $5,000: 1 point per $500 donated => 10 points
+  if (remainingAmount > 0) {
+    donationScore += remainingAmount / 500;
+  }
+
+  // Regular Giving Multiplier
+  let regularGivingMultiplier = 1;
+  if (regularDonations && regularDonations.length > 0) {
+    const frequencies = regularDonations.map(d => d.frequency);
+    if (frequencies.includes('weekly')) {
+      regularGivingMultiplier = 1.2;
+    } else if (frequencies.includes('monthly')) {
+      regularGivingMultiplier = 1.1;
+    }
+  }
+  donationScore *= regularGivingMultiplier;
+
+  // Cap at MAX_DONATION_SCORE
+  donationScore = Math.min(donationScore, MAX_DONATION_SCORE);
+
+  return Math.round(donationScore);
+};
+
+// Volunteer Score Calculation (Max 30 points)
+const calculateVolunteerScore = (volunteeringActivities) => {
+  const totalVolunteerHours = volunteeringActivities.reduce((sum, v) => sum + (v.hours || 0), 0);
+
+  let volunteerScore = 0;
+  let remainingHours = totalVolunteerHours;
+
+  // First 50 Hours: 0.6 points per hour
+  const firstTierHours = Math.min(remainingHours, 50);
+  volunteerScore += firstTierHours * 0.6;
+  remainingHours -= firstTierHours;
+
+  // Next 150 Hours: 0.4 points per hour
+  if (remainingHours > 0) {
+    const secondTierHours = Math.min(remainingHours, 150);
+    volunteerScore += secondTierHours * 0.4;
+    remainingHours -= secondTierHours;
+  }
+
+  // Above 200 Hours: 0.2 points per hour
+  if (remainingHours > 0) {
+    volunteerScore += remainingHours * 0.2;
+  }
+
+  // Long-Term Commitment Bonus
+  let longTermBonus = 0;
+  let earliestStartDate = new Date();
+  let latestEndDate = new Date(0);
+
+  volunteeringActivities.forEach(activity => {
+    const startDate = new Date(activity.startDate);
+    const endDate = activity.endDate ? new Date(activity.endDate) : new Date();
+    if (startDate < earliestStartDate) earliestStartDate = startDate;
+    if (endDate > latestEndDate) latestEndDate = endDate;
+  });
+
+  const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + (latestEndDate.getMonth() - earliestStartDate.getMonth());
+
+  if (durationInMonths >= 12) {
+    longTermBonus = 5;
+  } else if (durationInMonths >= 6) {
+    longTermBonus = 2.5;
+  }
+
+  volunteerScore += longTermBonus;
+
+  // Cap at MAX_VOLUNTEER_SCORE
+  volunteerScore = Math.min(volunteerScore, MAX_VOLUNTEER_SCORE);
+
+  return Math.round(volunteerScore);
+};
+
+// Fundraising Score Calculation (Max 20 points)
+const calculateFundraisingScore = (fundraisingCampaigns) => {
+  const totalFundsRaised = fundraisingCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
+
+  let fundraisingScore = 0;
+  let remainingAmount = totalFundsRaised;
+
+  // First $2,000: 1 point per $100 raised => 20 points
+  const firstTierAmount = Math.min(remainingAmount, 2000);
+  fundraisingScore += firstTierAmount / 100;
+  remainingAmount -= firstTierAmount;
+
+  // Next $8,000: 1 point per $200 raised => 40 points
+  if (remainingAmount > 0) {
+    const secondTierAmount = Math.min(remainingAmount, 8000);
+    fundraisingScore += secondTierAmount / 200;
+    remainingAmount -= secondTierAmount;
+  }
+
+  // Above $10,000: 1 point per $500 raised => 10 points
+  if (remainingAmount > 0) {
+    fundraisingScore += remainingAmount / 500;
+  }
+
+  // Fundraising Activity Bonus
+  const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
+  const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
+
+  fundraisingScore += totalEventsOrganized * 2; // 2 points per event
+  fundraisingScore += totalOnlineCampaignsInitiated * 1; // 1 point per online campaign
+
+  // Cap at MAX_FUNDRAISING_SCORE
+  fundraisingScore = Math.min(fundraisingScore, MAX_FUNDRAISING_SCORE);
+
+  return Math.round(fundraisingScore);
+};
+
+// Main Impact Score Calculation
+export const calculateComplexImpactScore = (userData) => {
+  if (!userData) {
     console.error('Invalid input for calculateComplexImpactScore');
-    return { totalScore: 0, regularDonationScore: 0, oneOffDonationScore: 0, volunteeringScore: 0, fundraisingScore: 0, engagementBonus: 0 };
+    return { totalScore: 0, donationScore: 0, volunteerScore: 0, fundraisingScore: 0 };
   }
 
   const {
     regularDonations = [],
     oneOffDonations = [],
     volunteeringActivities = [],
-    fundraisingCampaigns = [],
-    previousPeriodScore = 0
+    fundraisingCampaigns = []
   } = userData;
 
-  const {
-    monthlyDonationBenchmark = 100,
-    oneOffDonationBenchmark = 500,
-    fundraisingCampaignBenchmark = 1000
-  } = benchmarks;
+  const donationScore = calculateDonationScore(regularDonations, oneOffDonations);
+  const volunteerScore = calculateVolunteerScore(volunteeringActivities);
+  const fundraisingScore = calculateFundraisingScore(fundraisingCampaigns);
 
-  // Calculate scores using the benchmarks
-  const regularDonationScore = Math.min((regularDonations.reduce((sum, d) => sum + d.amount, 0) / monthlyDonationBenchmark) * 30, 30);
-  const oneOffDonationScore = Math.min((oneOffDonations.reduce((sum, d) => sum + d.amount, 0) / oneOffDonationBenchmark) * 20, 20);
-  const volunteeringScore = Math.min((volunteeringActivities.length / 5) * 25, 25);
-  
-  // New calculation for fundraising campaigns
-  const totalRaised = fundraisingCampaigns.reduce((sum, campaign) => sum + (campaign.raisedAmount || 0), 0);
-  const fundraisingScore = Math.min((totalRaised / fundraisingCampaignBenchmark) * 15, 15);
-  
-  const engagementBonus = previousPeriodScore > 0 ? 10 : 0;
+  const totalScore = donationScore + volunteerScore + fundraisingScore;
 
-  const totalScore = regularDonationScore + oneOffDonationScore + volunteeringScore + fundraisingScore + engagementBonus;
+  // Ensure total score does not exceed 100
+  const finalTotalScore = Math.min(Math.round(totalScore), 100);
 
   return {
-    totalScore: Math.min(Math.round(totalScore), 100),
-    regularDonationScore: Math.round(regularDonationScore),
-    oneOffDonationScore: Math.round(oneOffDonationScore),
-    volunteeringScore: Math.round(volunteeringScore),
-    fundraisingScore: Math.round(fundraisingScore),
-    engagementBonus: Math.round(engagementBonus)
+    totalScore: finalTotalScore,
+    donationScore,
+    volunteerScore,
+    fundraisingScore
   };
 };
 
 const defaultScoreDetails = {
   totalScore: 0,
-  regularDonationScore: 0,
-  oneOffDonationScore: 0,
-  volunteeringScore: 0,
-  fundraisingScore: 0,
-  engagementBonus: 0
+  donationScore: 0,
+  volunteerScore: 0,
+  fundraisingScore: 0
 };
 
 export const ImpactProvider = ({ children }) => {
@@ -67,7 +189,8 @@ export const ImpactProvider = ({ children }) => {
   const [donations, setDonations] = useState([]);
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [volunteerActivities, setVolunteerActivities] = useState([]);
-  const [fundraisingCampaigns, setFundraisingCampaigns] = useState([]); // New state for fundraising campaigns
+  const [fundraisingCampaigns, setFundraisingCampaigns] = useState([]);
+  // Removed badges and milestones
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -85,17 +208,17 @@ export const ImpactProvider = ({ children }) => {
 
     try {
       console.log('Fetching impact data...');
-      const [donationsRes, oneOffRes, volunteerRes, fundraisingRes] = await Promise.all([
+      const [
+        donationsRes,
+        oneOffRes,
+        volunteerRes,
+        fundraisingRes
+      ] = await Promise.all([
         axios.get('http://localhost:3002/api/donations', { headers }),
         axios.get('http://localhost:3002/api/contributions/one-off', { headers }),
         axios.get('http://localhost:3002/api/volunteerActivities', { headers }),
         axios.get('http://localhost:3002/api/fundraisingCampaigns', { headers })
       ]);
-
-      console.log('Donations response:', donationsRes.data);
-      console.log('One-off contributions response:', oneOffRes.data);
-      console.log('Volunteer activities response:', volunteerRes.data);
-      console.log('Fundraising campaigns response:', fundraisingRes.data);
 
       setDonations(donationsRes.data);
       setOneOffContributions(oneOffRes.data);
@@ -106,17 +229,10 @@ export const ImpactProvider = ({ children }) => {
         regularDonations: donationsRes.data,
         oneOffDonations: oneOffRes.data,
         volunteeringActivities: volunteerRes.data,
-        fundraisingCampaigns: fundraisingRes.data,
-        previousPeriodScore: lastYearImpactScore
+        fundraisingCampaigns: fundraisingRes.data
       };
 
-      const benchmarks = {
-        monthlyDonationBenchmark: 100,
-        oneOffDonationBenchmark: 500,
-        fundraisingCampaignBenchmark: 1000
-      };
-
-      const scoreResult = calculateComplexImpactScore(userData, benchmarks);
+      const scoreResult = calculateComplexImpactScore(userData);
       setImpactScore(scoreResult.totalScore);
       setScoreDetails(scoreResult);
 
@@ -124,35 +240,30 @@ export const ImpactProvider = ({ children }) => {
       setTier(currentTier.tier);
       setPointsToNextTier(currentTier.pointsToNextTier);
 
+      // Calculate last year's impact score
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
       const lastYearUserData = {
         regularDonations: donationsRes.data.filter(d => new Date(d.date) <= oneYearAgo),
         oneOffDonations: oneOffRes.data.filter(d => new Date(d.date) <= oneYearAgo),
         volunteeringActivities: volunteerRes.data.filter(v => new Date(v.date) <= oneYearAgo),
-        fundraisingCampaigns: fundraisingRes.data.filter(c => new Date(c.startDate) <= oneYearAgo),
-        previousPeriodScore: 0
+        fundraisingCampaigns: fundraisingRes.data.filter(c => new Date(c.startDate) <= oneYearAgo)
       };
-      const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData, benchmarks);
+      const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData);
       setLastYearImpactScore(lastYearScoreResult.totalScore);
 
     } catch (error) {
       console.error('Error fetching impact data:', error);
       if (error.response) {
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
         setError(`Failed to fetch impact data. Server responded with ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
       } else if (error.request) {
-        console.error('Error request:', error.request);
         setError('Failed to fetch impact data. No response received from the server.');
       } else {
-        console.error('Error message:', error.message);
         setError(`Failed to fetch impact data. ${error.message}`);
       }
       setScoreDetails(defaultScoreDetails);
     }
-  }, [getAuthHeaders, lastYearImpactScore]);
+  }, [getAuthHeaders]);
 
   const getTier = (score) => {
     if (score >= 90) return { tier: "Visionary", nextTier: null, pointsToNextTier: 0 };
@@ -258,7 +369,6 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities([]);
   }, []);
 
-  // Load followed charities from localStorage and check authentication status
   useEffect(() => {
     const storedCharities = localStorage.getItem('followed-charities');
     if (storedCharities) {
@@ -273,7 +383,6 @@ export const ImpactProvider = ({ children }) => {
     }
   }, [user, clearFollowedCharities]);
 
-  // Fetch impact data and sync followed charities when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is authenticated, fetching impact data...');
@@ -309,6 +418,7 @@ export const ImpactProvider = ({ children }) => {
       oneOffContributions,
       volunteerActivities,
       fundraisingCampaigns,
+      // Removed badges and milestones
       fetchImpactData,
       error,
       addDonation,
@@ -325,3 +435,6 @@ export const ImpactProvider = ({ children }) => {
     </ImpactContext.Provider>
   );
 };
+
+
+

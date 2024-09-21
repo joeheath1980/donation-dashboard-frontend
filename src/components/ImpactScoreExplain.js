@@ -1,3 +1,5 @@
+// src/components/ImpactScoreExplanation.js
+
 import React, { useContext } from 'react';
 import styles from '../Profile.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
@@ -10,7 +12,7 @@ const ImpactScoreExplanation = ({ onClose }) => {
     return null; // or return a loading state
   }
 
-  const { regularDonationScore, oneOffDonationScore, volunteeringScore, engagementBonus } = scoreDetails;
+  const { donationScore, volunteerScore, fundraisingScore } = scoreDetails;
 
   const closeButtonStyle = {
     position: 'absolute',
@@ -30,31 +32,24 @@ const ImpactScoreExplanation = ({ onClose }) => {
       </button>
       <h2 className={styles.breakdownTitle}>Impact Score Breakdown</h2>
       <ScoreComponent 
-        title="Regular Donations" 
-        score={regularDonationScore} 
-        maxScore={35} 
-        description="Based on monthly average, streak, and variety of charities."
-      />
-      
-      <ScoreComponent 
-        title="One-off Donations" 
-        score={oneOffDonationScore} 
-        maxScore={25} 
-        description="Based on total amount and number of donations."
+        title="Donations" 
+        score={donationScore} 
+        maxScore={40} 
+        description="Points are awarded based on your total donations, with higher donations earning more points. Regular giving can boost your score."
       />
       
       <ScoreComponent 
         title="Volunteering" 
-        score={volunteeringScore} 
+        score={volunteerScore} 
         maxScore={30} 
-        description="Based on total hours and variety of activities."
+        description="Points are awarded for your volunteering hours, with additional bonuses for long-term commitments."
       />
       
       <ScoreComponent 
-        title="Engagement Bonus" 
-        score={engagementBonus} 
-        maxScore={10} 
-        description="Extra points for consistent involvement and improvement."
+        title="Fundraising" 
+        score={fundraisingScore} 
+        maxScore={20} 
+        description="Points are awarded based on the amount you've raised, with additional bonuses for organizing events and online campaigns."
       />
       
       <div className={styles.breakdownItem}>
@@ -68,6 +63,47 @@ const ImpactScoreExplanation = ({ onClose }) => {
             style={{width: `${impactScore}%`}}
           ></div>
         </div>
+      </div>
+
+      <div className={styles.explanationText}>
+        <h3>How Your Score is Calculated</h3>
+        
+        <h4>Donations (Up to 40 points)</h4>
+        <p>
+          • **First $1,000:** 1 point per $100 donated<br />
+          • **Next $4,000:** 1 point per $200 donated<br />
+          • **Above $5,000:** 1 point per $500 donated<br />
+          • **Regular giving boosts:** 10% for monthly donations, 20% for weekly donations
+        </p>
+        
+        <h4>Volunteering (Up to 30 points)</h4>
+        <p>
+          • **First 50 hours:** 0.6 points per hour<br />
+          • **Next 150 hours:** 0.4 points per hour<br />
+          • **Above 200 hours:** 0.2 points per hour<br />
+          • **Long-term commitment bonus:** 5 points for over a year, 2.5 points for over 6 months
+        </p>
+        
+        <h4>Fundraising (Up to 20 points)</h4>
+        <p>
+          • **First $2,000 raised:** 1 point per $100<br />
+          • **Next $8,000 raised:** 1 point per $200<br />
+          • **Above $10,000 raised:** 1 point per $500<br />
+          • **Activity bonuses:** 2 points per event organized, 1 point per online campaign initiated
+        </p>
+
+        <p>Your total Impact Score is the sum of these three components, capped at 100 points.</p>
+        
+        <h4>Tiers</h4>
+        <ul>
+          <li>Visionary: 90-100 points</li>
+          <li>Champion: 70-89 points</li>
+          <li>Philanthropist: 50-69 points</li>
+          <li>Altruist: 30-49 points</li>
+          <li>Giver: 0-29 points</li>
+        </ul>
+        
+        <p>Keep contributing to increase your score and reach higher tiers!</p>
       </div>
     </div>
   );
