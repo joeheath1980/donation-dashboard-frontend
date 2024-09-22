@@ -24,7 +24,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const [isBusiness, setIsBusiness] = useState(false);
+  const [accountType, setAccountType] = useState('user'); // 'user', 'business', or 'charity'
   const navigate = useNavigate();
   const location = useLocation();
   const { login, socialLogin, businessLogin } = useAuth();
@@ -52,15 +52,22 @@ function Login() {
     e.preventDefault();
     setError(null);
     try {
-      console.log('Attempting login with:', email, password, 'Is Business:', isBusiness);
+      console.log('Attempting login with:', email, password, 'Account Type:', accountType);
       let loginResult;
-      if (isBusiness) {
+      
+      if (accountType === 'business') {
         console.log('Starting business login process');
         loginResult = await businessLogin(email, password);
         console.log('Business login result:', loginResult);
         console.log('Navigating to /business-dashboard');
         navigate('/business-dashboard');
-        console.log('Navigation complete');
+      } else if (accountType === 'charity') {
+        console.log('Starting charity login process');
+        const response = await axios.post(`${API_URL}/api/charity/login`, { contactEmail: email, password });
+        loginResult = response.data;
+        console.log('Charity login result:', loginResult);
+        localStorage.setItem('token', loginResult.token);
+        navigate('/charity-dashboard');
       } else {
         loginResult = await login(email, password);
         console.log('User login result:', loginResult);
@@ -77,7 +84,7 @@ function Login() {
     } catch (err) {
       console.error('Error logging in:', err);
       console.error('Error response:', err.response);
-      setError(err.response?.data?.message || 'Failed to log in. Please try again.');
+      setError(err.response?.data?.msg || 'Failed to log in. Please try again.');
     }
   };
 
@@ -90,19 +97,19 @@ function Login() {
   const fillTestBusinessCredentials = () => {
     setEmail(TEST_BUSINESS_EMAIL);
     setPassword(TEST_BUSINESS_PASSWORD);
-    setIsBusiness(true);
+    setAccountType('business');
   };
 
   const fillTestUserCredentials = () => {
     setEmail(TEST_USER_EMAIL);
     setPassword(TEST_USER_PASSWORD);
-    setIsBusiness(false);
+    setAccountType('user');
   };
 
   const fillTestAdminCredentials = () => {
     setEmail(TEST_ADMIN_EMAIL);
     setPassword(TEST_ADMIN_PASSWORD);
-    setIsBusiness(false);
+    setAccountType('user');
   };
 
   const createTestBusinessAccount = async () => {
@@ -171,19 +178,20 @@ function Login() {
             />
           </div>
           <div className={styles.formGroup}>
-            <label>
-              <input
-                type="checkbox"
-                checked={isBusiness}
-                onChange={(e) => setIsBusiness(e.target.checked)}
-              />
-              Business Account
-            </label>
+            <label>Account Type:</label>
+            <select
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+            >
+              <option value="user">User</option>
+              <option value="business">Business</option>
+              <option value="charity">Charity</option>
+            </select>
           </div>
           <button type="submit">Login</button>
         </form>
 
-        {!isBusiness && (
+        {accountType === 'user' && (
           <div className={styles.socialLogin}>
             <h3>Or login with:</h3>
             <button 

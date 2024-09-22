@@ -18,6 +18,7 @@ import SearchCharities from './components/SearchCharities';
 import Activity from './components/Activity';
 import OrganizationSignup from './components/OrganizationSignup';
 import BusinessSignup from './components/BusinessSignup';
+import CharitySignup from './components/CharitySignup';
 import BusinessDashboard from './components/BusinessDashboard';
 import BusinessDonations from './components/BusinessDonations';
 import BusinessReports from './components/BusinessReports';
@@ -27,7 +28,8 @@ import WelcomePage from './components/WelcomePage';
 import OnboardingMailScraper from './components/OnboardingMailScraper';
 import AdminDashboard from './components/AdminDashboard';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
-import ManagePaymentsComponent from './components/ManagePaymentsComponent'; // Add this line
+import ManagePaymentsComponent from './components/ManagePaymentsComponent';
+import CharityDashboard from './components/CharityDashboard'; // Add this line
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -38,9 +40,7 @@ const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const justRegistered = localStorage.getItem('justRegistered');
   
-  // Allow access to onboarding if there's a token or user just registered
   if (window.location.pathname === '/onboarding/mail-scraper' && (token || justRegistered === 'true')) {
-    // Clear the justRegistered flag after use
     if (justRegistered) {
       localStorage.removeItem('justRegistered');
     }
@@ -53,7 +53,6 @@ const ProtectedRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
   console.log('AdminRoute - Current user:', user);
-  // For testing purposes, allow access if the user's email is 'admin@example.com'
   const isAdmin = user && user.email === 'admin@example.com';
   console.log('AdminRoute - Is admin:', isAdmin);
   return isAdmin ? children : <Navigate to="/login" />;
@@ -72,6 +71,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/organization-signup" element={<OrganizationSignup />} />
               <Route path="/business-signup" element={<BusinessSignup />} />
+              <Route path="/charity-signup" element={<CharitySignup />} />
               
               {/* Onboarding route */}
               <Route path="/onboarding/mail-scraper" element={<ProtectedRoute><OnboardingMailScraper /></ProtectedRoute>} />
@@ -91,7 +91,7 @@ function App() {
               <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
-              <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} /> {/* Add this line */}
+              <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
               
               {/* Business routes */}
               <Route path="/business-dashboard" element={<ProtectedRoute><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
@@ -99,6 +99,9 @@ function App() {
               <Route path="/business-reports" element={<ProtectedRoute><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
               <Route path="/business-settings" element={<ProtectedRoute><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
               <Route path="/create-business-campaign" element={<ProtectedRoute><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
+
+              {/* Charity routes */}
+              <Route path="/charity-dashboard" element={<ProtectedRoute><CharityDashboard /></ProtectedRoute>} />
 
               {/* Admin routes */}
               <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
