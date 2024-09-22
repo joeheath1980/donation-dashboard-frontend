@@ -29,7 +29,7 @@ const YourAccount = () => {
             <span className={styles.cardIcon}>💳</span>
             <h2>Payments</h2>
             <p>View and manage your payment methods and recurring donations.</p>
-            <button className={styles.cardButton}>Manage Payments</button>
+            <Link to="/manage-payments" className={styles.cardButton}>Manage Payments</Link>
             <span className={styles.ctaTip}>Securely manage your payment options here.</span>
           </div>
 

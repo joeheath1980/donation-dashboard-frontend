@@ -26,7 +26,8 @@ import CreateBusinessCampaign from './components/CreateBusinessCampaign';
 import WelcomePage from './components/WelcomePage';
 import OnboardingMailScraper from './components/OnboardingMailScraper';
 import AdminDashboard from './components/AdminDashboard';
-import GoogleAuthCallback from './components/GoogleAuthCallback'; // Add this line
+import GoogleAuthCallback from './components/GoogleAuthCallback';
+import ManagePaymentsComponent from './components/ManagePaymentsComponent'; // Add this line
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -90,6 +91,7 @@ function App() {
               <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
+              <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} /> {/* Add this line */}
               
               {/* Business routes */}
               <Route path="/business-dashboard" element={<ProtectedRoute><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
