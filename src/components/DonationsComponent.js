@@ -150,7 +150,10 @@ function DonationsComponent({ displayAll }) {
               <div className={styles.cardContent}>
                 <h3 className={styles.charityName}>{donation.charity}</h3>
                 <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
-                <p className={styles.donationDetail}><strong>Amount:</strong> ${donation.amount.toFixed(2)}</p>
+                <p className={styles.donationDetail}>
+                  <strong>Amount:</strong> ${donation.amount.toFixed(2)}
+                  {donation.isMonthly && <span className={styles.monthlyTag}> (Monthly)</span>}
+                </p>
                 <p className={styles.donationDetail}><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                 {donation.subject && (
                   <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>

@@ -8,13 +8,14 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
   const [editedDonation, setEditedDonation] = useState({
     ...donation,
     date: donation.date ? format(parseISO(donation.date), 'yyyy-MM-dd') : '', // Ensure date is in 'YYYY-MM-DD' format
+    isMonthly: donation.isMonthly || false,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedDonation(prev => ({ 
-      ...prev, 
-      [name]: name === 'amount' ? parseFloat(value) : value 
+    const { name, value, type, checked } = e.target;
+    setEditedDonation(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : (name === 'amount' ? parseFloat(value) : value)
     }));
   };
 
@@ -83,6 +84,18 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               <option value="Children and Youth">Children and Youth</option>
               <option value="Other">Other</option>
             </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="isMonthly">
+              <input
+                type="checkbox"
+                id="isMonthly"
+                name="isMonthly"
+                checked={editedDonation.isMonthly}
+                onChange={handleChange}
+              />
+              Monthly Donation
+            </label>
           </div>
           {/* Add other form fields as necessary */}
           <div className={styles.buttonGroup}>
