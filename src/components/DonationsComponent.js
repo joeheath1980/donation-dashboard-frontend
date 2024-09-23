@@ -23,15 +23,17 @@ function formatDate(dateString) {
 }
 
 function DonationsComponent({ displayAll }) {
-  const { donations, fetchImpactData } = useContext(ImpactContext);
+  const { donations, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
 
   useEffect(() => {
-    fetchImpactData();
-  }, [fetchImpactData]);
+    if (isAuthenticated) {
+      fetchImpactData();
+    }
+  }, [fetchImpactData, isAuthenticated]);
 
   useEffect(() => {
     setLocalDonations(donations);
@@ -52,7 +54,9 @@ function DonationsComponent({ displayAll }) {
         if (response.ok) {
           console.log('Donation deleted successfully');
           setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
-          fetchImpactData();
+          if (isAuthenticated) {
+            fetchImpactData();
+          }
         } else {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Failed to delete donation');
@@ -97,7 +101,9 @@ function DonationsComponent({ displayAll }) {
           )
         );
         setShowModal(false);
-        fetchImpactData();
+        if (isAuthenticated) {
+          fetchImpactData();
+        }
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update donation');
@@ -124,7 +130,9 @@ function DonationsComponent({ displayAll }) {
       );
       setShowValidationModal(false);
       setCurrentDonation(null);
-      fetchImpactData();
+      if (isAuthenticated) {
+        fetchImpactData();
+      }
     } catch (error) {
       console.error('Error handling validation completion:', error);
       alert(`Failed to handle validation completion: ${error.message}`);
@@ -132,6 +140,10 @@ function DonationsComponent({ displayAll }) {
   };
 
   const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
+
+  if (!isAuthenticated) {
+    return <div className={styles.card}>Please log in to view your donations.</div>;
+  }
 
   return (
     <div className={styles.cardContainer}>

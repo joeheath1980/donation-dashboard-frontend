@@ -5,7 +5,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import styles from '../Login.module.css';
-import logo from '../assets/download.svg';
+import logo from '../assets/logo.png';
 
 // Set a default API URL if the environment variable is not set
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../BusinessLayout.module.css';
-import logo from '../assets/download.svg';
+import logo from '../assets/logo.png';
 
 function BusinessLayout({ children }) {
   const navigate = useNavigate();

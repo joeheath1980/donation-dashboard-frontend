@@ -18,12 +18,15 @@ function ImpactSpace() {
     tier,
     pointsToNextTier,
     fetchImpactData,
-    error: impactError
+    error: impactError,
+    isAuthenticated
   } = useContext(ImpactContext);
 
   useEffect(() => {
-    fetchImpactData();
-  }, [fetchImpactData]);
+    if (isAuthenticated) {
+      fetchImpactData();
+    }
+  }, [fetchImpactData, isAuthenticated]);
 
   const scoreChange = useMemo(() => {
     return impactScore - lastYearImpactScore;
@@ -40,6 +43,10 @@ function ImpactSpace() {
 
   if (impactError) {
     return <div className={combinedStyles.error}>{impactError}</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div className={combinedStyles.card}>Please log in to view your impact data.</div>;
   }
 
   if (!donations.length && !oneOffContributions.length && !volunteerActivities.length) {

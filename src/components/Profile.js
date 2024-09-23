@@ -24,6 +24,7 @@ function Profile() {
     pointsToNextTier,
     fetchImpactData,
     error: impactError,
+    isAuthenticated,
   } = useContext(ImpactContext);
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
@@ -35,9 +36,13 @@ function Profile() {
   const [showTierProgressModal, setShowTierProgressModal] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchImpactData().finally(() => setIsLoading(false));
-  }, [fetchImpactData]);
+    if (isAuthenticated) {
+      setIsLoading(true);
+      fetchImpactData().finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
+  }, [fetchImpactData, isAuthenticated]);
 
   useEffect(() => {
     if (contextDonations) {
@@ -231,6 +236,10 @@ function Profile() {
 
   if (impactError) {
     return <div className={styles.error}>{impactError}</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div className={styles.notAuthenticated}>Please log in to view your profile and impact data.</div>;
   }
 
   return (

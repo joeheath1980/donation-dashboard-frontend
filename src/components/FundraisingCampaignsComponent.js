@@ -34,6 +34,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      setError('Please log in to create a campaign.');
+      return;
+    }
     const headers = getAuthHeaders();
     try {
       await axios.post(
@@ -55,7 +59,9 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       });
       setError('');
       setIsCreateModalOpen(false);
-      fetchImpactData(); // Refresh impact data after creating a new campaign
+      if (isAuthenticated) {
+        fetchImpactData(); // Refresh impact data after creating a new campaign
+      }
     } catch (error) {
       console.error('Error creating fundraising campaign:', error);
       setError('Failed to create campaign. Please try again.');
@@ -63,10 +69,16 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   };
 
   const handleRemoveCampaign = async (campaignId) => {
+    if (!isAuthenticated) {
+      setError('Please log in to remove a campaign.');
+      return;
+    }
     const headers = getAuthHeaders();
     try {
       await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, { headers });
-      fetchImpactData(); // Refresh impact data after removing a campaign
+      if (isAuthenticated) {
+        fetchImpactData(); // Refresh impact data after removing a campaign
+      }
     } catch (error) {
       console.error('Error removing fundraising campaign:', error);
       setError('Failed to remove campaign. Please try again.');
@@ -74,6 +86,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   };
 
   const handleCompleteCampaign = (campaign) => {
+    if (!isAuthenticated) {
+      setError('Please log in to complete a campaign.');
+      return;
+    }
     console.log('Completing campaign:', campaign);
     try {
       const completedCampaign = {
@@ -92,6 +108,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   };
 
   const handleUpdateAmount = async (campaign) => {
+    if (!isAuthenticated) {
+      setError('Please log in to update the campaign amount.');
+      return;
+    }
     if (updatingCampaign === campaign._id) {
       const tempRaisedAmount = tempRaisedAmounts[campaign._id];
       const updatedRaisedAmount = parseFloat(tempRaisedAmount);
@@ -121,7 +141,9 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
           return updated;
         });
         setError('');
-        fetchImpactData(); // Refresh impact data after updating campaign amount
+        if (isAuthenticated) {
+          fetchImpactData(); // Refresh impact data after updating campaign amount
+        }
       } catch (error) {
         console.error('Error updating campaign amount:', error);
         setError('Failed to update campaign amount. Please try again.');
@@ -247,6 +269,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     borderRadius: '5px',
     border: '1px solid #ccc',
   };
+
+  if (!isAuthenticated) {
+    return <div style={containerStyle}>Please log in to view and manage fundraising campaigns.</div>;
+  }
 
   return (
     <div style={containerStyle}>

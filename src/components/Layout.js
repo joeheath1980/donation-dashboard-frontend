@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../Layout.module.css';
-import logo from '../assets/download.svg';
+import logo from '../assets/logo.png';
 import '../NavReset.css';  // Import the new NavReset.css file
 
 function Layout({ children }) {

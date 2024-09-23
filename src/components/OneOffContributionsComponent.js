@@ -23,16 +23,18 @@ function formatDate(dateString) {
 }
 
 function OneOffContributionsComponent({ displayAll }) {
-  const { oneOffContributions, onDeleteContribution, fetchImpactData } = useContext(ImpactContext);
+  const { oneOffContributions, onDeleteContribution, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
-    console.log('Fetching impact data...');
-    fetchImpactData();
-  }, [fetchImpactData]);
+    if (isAuthenticated) {
+      console.log('Fetching impact data...');
+      fetchImpactData();
+    }
+  }, [fetchImpactData, isAuthenticated]);
 
   useEffect(() => {
     console.log('oneOffContributions updated:', oneOffContributions);
@@ -50,7 +52,9 @@ function OneOffContributionsComponent({ displayAll }) {
           console.log('Updated localContributions after deletion:', newContributions);
           return newContributions;
         });
-        fetchImpactData();
+        if (isAuthenticated) {
+          fetchImpactData();
+        }
       } catch (error) {
         console.error('Error deleting contribution:', error);
         alert(`Failed to delete contribution: ${error.message}`);
@@ -88,7 +92,9 @@ function OneOffContributionsComponent({ displayAll }) {
         });
         setShowModal(false);
         setEditingContribution(null);
-        fetchImpactData();
+        if (isAuthenticated) {
+          fetchImpactData();
+        }
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update contribution');
@@ -115,7 +121,9 @@ function OneOffContributionsComponent({ displayAll }) {
       );
       setShowValidationModal(false);
       setEditingContribution(null);
-      fetchImpactData();
+      if (isAuthenticated) {
+        fetchImpactData();
+      }
     } catch (error) {
       console.error('Error handling validation completion:', error);
       alert(`Failed to handle validation completion: ${error.message}`);
@@ -130,6 +138,10 @@ function OneOffContributionsComponent({ displayAll }) {
   });
 
   const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
+
+  if (!isAuthenticated) {
+    return <div className={styles.card}>Please log in to view your one-off contributions.</div>;
+  }
 
   return (
     <div className={styles.cardContainer}>

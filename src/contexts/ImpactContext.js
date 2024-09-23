@@ -194,7 +194,7 @@ export const ImpactProvider = ({ children }) => {
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { user } = useAuth(); // Get user from AuthContext
+  const { user } = useAuth();
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -253,13 +253,7 @@ export const ImpactProvider = ({ children }) => {
 
     } catch (error) {
       console.error('Error fetching impact data:', error);
-      if (error.response) {
-        setError(`Failed to fetch impact data. Server responded with ${error.response.status}: ${error.response.data.message || 'Unknown error'}`);
-      } else if (error.request) {
-        setError('Failed to fetch impact data. No response received from the server.');
-      } else {
-        setError(`Failed to fetch impact data. ${error.message}`);
-      }
+      setError('Failed to fetch impact data.');
       setScoreDetails(defaultScoreDetails);
     }
   }, [getAuthHeaders]);
@@ -407,31 +401,39 @@ export const ImpactProvider = ({ children }) => {
   }, [isAuthenticated, fetchImpactData, getAuthHeaders]);
 
   return (
-    <ImpactContext.Provider value={{
-      impactScore,
-      scoreDetails: scoreDetails || defaultScoreDetails,
-      lastYearImpactScore,
-      tier,
-      pointsToNextTier,
-      donations,
-      oneOffContributions,
-      volunteerActivities,
-      fundraisingCampaigns,
-      error,
-      addDonation,
-      addOneOffContribution,
-      calculateComplexImpactScore,
-      followedCharities,
-      addFollowedCharity,
-      removeFollowedCharity,
-      getAuthHeaders,
-      clearFollowedCharities,
-      isAuthenticated
-    }}>
+    <ImpactContext.Provider
+      value={{
+        impactScore,
+        scoreDetails: scoreDetails || defaultScoreDetails,
+        lastYearImpactScore,
+        tier,
+        pointsToNextTier,
+        donations,
+        oneOffContributions,
+        volunteerActivities,
+        fundraisingCampaigns,
+        error,
+        addDonation,
+        addOneOffContribution,
+        calculateComplexImpactScore,
+        followedCharities,
+        addFollowedCharity,
+        removeFollowedCharity,
+        clearFollowedCharities,
+        fetchImpactData,
+        getAuthHeaders,
+        isAuthenticated,
+        setDonations,
+        setOneOffContributions,
+        setVolunteerActivities,
+        setFundraisingCampaigns,
+        setImpactScore,
+        setIsAuthenticated,
+      }}
+    >
       {children}
     </ImpactContext.Provider>
   );
 };
 
-
-
+export default ImpactProvider;

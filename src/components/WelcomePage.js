@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './WelcomePage.module.css';
-import logoSvg from '../assets/download.svg';
+import logoSvg from '../assets/logo.png';
 import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.png';
 
 const WelcomePage = () => {
