@@ -1,3 +1,5 @@
+// src/components/CreateBusinessCampaign.js
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -8,8 +10,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function CreateBusinessCampaign() {
   const [campaignData, setCampaignData] = useState({
-    campaignType: '',
-    campaignName: '',
+    name: '',
     description: '',
     startDate: '',
     endDate: '',
@@ -32,12 +33,12 @@ function CreateBusinessCampaign() {
     try {
       const headers = getAuthHeaders();
       const response = await axios.post(`${API_URL}/api/business/campaigns`, campaignData, { headers });
-      
+
       if (response.status === 201) {
         navigate('/business-dashboard');
       }
     } catch (err) {
-      setError('Failed to create campaign. Please try again.');
+      setError(err.response?.data?.error || 'Failed to create campaign. Please try again.');
       console.error('Error creating campaign:', err);
     }
   };
@@ -51,27 +52,12 @@ function CreateBusinessCampaign() {
       {error && <p className={styles.error}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
-          <label htmlFor="campaignType">Campaign Type:</label>
-          <select
-            id="campaignType"
-            name="campaignType"
-            value={campaignData.campaignType}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Select campaign type</option>
-            <option value="Employee">Employee</option>
-            <option value="Customer">Customer</option>
-            <option value="All">All</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="campaignName">Campaign Name:</label>
+          <label htmlFor="name">Campaign Name:</label>
           <input
             type="text"
-            id="campaignName"
-            name="campaignName"
-            value={campaignData.campaignName}
+            id="name"
+            name="name"
+            value={campaignData.name}
             onChange={handleInputChange}
             required
           />
@@ -117,6 +103,8 @@ function CreateBusinessCampaign() {
             value={campaignData.goal}
             onChange={handleInputChange}
             required
+            min="0"
+            step="0.01"
           />
         </div>
         <div className={styles.formGroup}>
@@ -128,6 +116,9 @@ function CreateBusinessCampaign() {
             value={campaignData.matchRate}
             onChange={handleInputChange}
             required
+            min="0"
+            max="100"
+            step="0.01"
           />
         </div>
         <button type="submit" className={styles.submitButton}>Create Campaign</button>
@@ -137,3 +128,4 @@ function CreateBusinessCampaign() {
 }
 
 export default CreateBusinessCampaign;
+

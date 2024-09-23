@@ -1,3 +1,5 @@
+// src/components/BusinessDashboard.js
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -8,21 +10,59 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function BusinessDashboard() {
   const { getAuthHeaders } = useAuth();
-  const [businessData, setBusinessData] = useState(null);
+  
+  // Initialize businessData with default values to prevent undefined properties
+  const [businessData, setBusinessData] = useState({
+    companyName: '',
+    contactEmail: '',
+    description: '',
+    preferredCauses: []
+  });
+  
+  // State for loading and error handling for business data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // State for fetched campaigns
+  const [campaigns, setCampaigns] = useState([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
+  const [campaignsError, setCampaignsError] = useState(null);
 
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/business/me`, { headers: getAuthHeaders() });
+        console.log('Fetched Business Data:', response.data); // Logging fetched data for debugging
         setBusinessData(response.data);
-      } catch (error) {
-        console.error('Error fetching business data:', error);
+      } catch (err) {
+        console.error('Error fetching business data:', err);
+        setError('Failed to load business data. Please try again later.');
+      } finally {
+        setLoading(false); // Set loading to false regardless of success or failure
       }
     };
 
     fetchBusinessData();
   }, [getAuthHeaders]);
 
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/business/campaigns`, { headers: getAuthHeaders() });
+        console.log('Fetched Campaigns:', response.data); // Logging fetched campaigns for debugging
+        setCampaigns(response.data);
+      } catch (err) {
+        console.error('Error fetching campaigns:', err);
+        setCampaignsError('Failed to load campaigns. Please try again later.');
+      } finally {
+        setCampaignsLoading(false); // Set loading to false regardless of success or failure
+      }
+    };
+
+    fetchCampaigns();
+  }, [getAuthHeaders]);
+
+  // Dummy data can be removed if not needed. If it's placeholder data, consider fetching real data.
   const dummyData = {
     financialSummary: {
       totalMicroMatches: 1500,
@@ -85,8 +125,17 @@ function BusinessDashboard() {
     }
   };
 
-  if (!businessData) {
+  if (loading || campaignsLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (error || campaignsError) {
+    return (
+      <div className={styles.error}>
+        {error && <p>{error}</p>}
+        {campaignsError && <p>{campaignsError}</p>}
+      </div>
+    );
   }
 
   return (
@@ -97,7 +146,9 @@ function BusinessDashboard() {
         <h2>Business Overview</h2>
         <p>Email: {businessData.contactEmail}</p>
         <p>Description: {businessData.description}</p>
-        <p>Preferred Causes: {businessData.preferredCauses.join(', ')}</p>
+        <p>
+          Preferred Causes: {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
+        </p>
       </section>
 
       <section className={styles.overallFinancialSummary}>
@@ -159,8 +210,31 @@ function BusinessDashboard() {
           </div>
         ))}
       </div>
+
+      {/* New Container for Real Campaigns */}
+      <section className={styles.realCampaigns}>
+        <h2>Your Created Campaigns</h2>
+        {campaigns.length === 0 ? (
+          <p>No campaigns found. <Link to="/create-business-campaign">Create your first campaign</Link>.</p>
+        ) : (
+          <ul className={styles.campaignList}>
+            {campaigns.map(campaign => (
+              <li key={campaign._id} className={styles.campaignItem}>
+                <h3>{campaign.name}</h3>
+                <p><strong>Description:</strong> {campaign.description}</p>
+                <p><strong>Goal:</strong> ${campaign.goal.toFixed(2)}</p>
+                <p><strong>Current Amount:</strong> ${campaign.currentAmount.toFixed(2)}</p>
+                <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
+                {/* Add more fields if necessary */}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
 
 export default BusinessDashboard;
+

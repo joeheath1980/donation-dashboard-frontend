@@ -1,3 +1,5 @@
+// src/components/Login.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,14 +23,17 @@ const TEST_ADMIN_EMAIL = 'admin@example.com';
 const TEST_ADMIN_PASSWORD = 'adminpassword123';
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const [accountType, setAccountType] = useState('user'); // 'user', 'business', or 'charity'
   const navigate = useNavigate();
   const location = useLocation();
   const { login, socialLogin, businessLogin } = useAuth();
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [accountType, setAccountType] = useState('user'); // 'user', 'business', or 'charity'
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Callback to handle social login tokens
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
       await socialLogin(token);
@@ -50,7 +55,16 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError(null); // Reset any previous errors
+
+    // Basic client-side validation
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
+    setLoading(true); // Set loading to true during authentication
+
     try {
       console.log('Attempting login with:', email, password, 'Account Type:', accountType);
       let loginResult;
@@ -84,7 +98,9 @@ function Login() {
     } catch (err) {
       console.error('Error logging in:', err);
       console.error('Error response:', err.response);
-      setError(err.response?.data?.msg || 'Failed to log in. Please try again.');
+      setError(err.response?.data?.message || 'Failed to log in. Please try again.');
+    } finally {
+      setLoading(false); // Set loading to false after authentication attempt
     }
   };
 
@@ -155,7 +171,7 @@ function Login() {
       <div className={styles.loginContainer}>
         <img src={logo} alt="Logo" className={styles.logo} />
         <h2>Login</h2>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>} {/* Display error message */}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email:</label>
@@ -164,7 +180,9 @@ function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
               required
+              aria-describedby="emailError"
             />
           </div>
           <div className={styles.formGroup}>
@@ -174,7 +192,9 @@ function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
               required
+              aria-describedby="passwordError"
             />
           </div>
           <div className={styles.formGroup}>
@@ -188,7 +208,9 @@ function Login() {
               <option value="charity">Charity</option>
             </select>
           </div>
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging In...' : 'Login'}
+          </button>
         </form>
 
         {accountType === 'user' && (
@@ -203,18 +225,24 @@ function Login() {
             <button 
               onClick={() => handleSocialLogin('microsoft')} 
               className={`${styles.socialButton} ${styles.microsoft}`}
+              disabled // Coming Soon
+              title="Microsoft login is coming soon"
             >
               Microsoft (Coming Soon)
             </button>
             <button 
               onClick={() => handleSocialLogin('apple')} 
               className={`${styles.socialButton} ${styles.apple}`}
+              disabled // Coming Soon
+              title="Apple login is coming soon"
             >
               Apple (Coming Soon)
             </button>
             <button 
               onClick={() => handleSocialLogin('facebook')} 
               className={`${styles.socialButton} ${styles.facebook}`}
+              disabled // Coming Soon
+              title="Facebook login is coming soon"
             >
               Facebook (Coming Soon)
             </button>
@@ -225,7 +253,7 @@ function Login() {
           <Link to="/signup">Need an account? Sign Up</Link>
         </p>
         <p className={styles.organizationSignup}>
-          <a href="/organization-signup">Are you a charity or organization? Sign up here</a>
+          <Link to="/organization-signup">Are you a charity or organization? Sign up here</Link>
         </p>
         
         {process.env.NODE_ENV === 'development' && (

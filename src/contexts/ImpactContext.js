@@ -190,12 +190,11 @@ export const ImpactProvider = ({ children }) => {
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [volunteerActivities, setVolunteerActivities] = useState([]);
   const [fundraisingCampaigns, setFundraisingCampaigns] = useState([]);
-  // Removed badges and milestones
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { user } = useAuth();
+  const { user } = useAuth(); // Get user from AuthContext
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -376,7 +375,7 @@ export const ImpactProvider = ({ children }) => {
     }
 
     if (user) {
-      setIsAuthenticated(true);
+      setIsAuthenticated(!user.isBusiness); // Only set authenticated if user is not a business
     } else {
       setIsAuthenticated(false);
       clearFollowedCharities();
@@ -418,8 +417,6 @@ export const ImpactProvider = ({ children }) => {
       oneOffContributions,
       volunteerActivities,
       fundraisingCampaigns,
-      // Removed badges and milestones
-      fetchImpactData,
       error,
       addDonation,
       addOneOffContribution,
