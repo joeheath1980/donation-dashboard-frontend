@@ -13,8 +13,8 @@ function BusinessDashboard() {
   
   // Initialize businessData with default values to prevent undefined properties
   const [businessData, setBusinessData] = useState({
-    companyName: '',
-    contactEmail: '',
+    name: '',
+    email: '',
     description: '',
     preferredCauses: []
   });
@@ -140,11 +140,11 @@ function BusinessDashboard() {
 
   return (
     <div className={styles.dashboard}>
-      <h1>Welcome, {businessData.companyName}</h1>
+      <h1>Welcome, {businessData.name}</h1>
       
       <section className={styles.overview}>
         <h2>Business Overview</h2>
-        <p>Email: {businessData.contactEmail}</p>
+        <p>Email: {businessData.email}</p>
         <p>Description: {businessData.description}</p>
         <p>
           Preferred Causes: {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
@@ -237,4 +237,6 @@ function BusinessDashboard() {
 }
 
 export default BusinessDashboard;
+
+
 

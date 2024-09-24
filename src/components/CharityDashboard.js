@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+import { useAuth } from '../contexts/AuthContext';
 
 function CharityDashboard() {
   const [charityData, setCharityData] = useState(null);
   const [error, setError] = useState(null);
+  const { user, getAuthHeaders, API_URL } = useAuth();
 
   useEffect(() => {
     const fetchCharityData = async () => {
+      if (!user || !user.isCharity) {
+        setError('You must be logged in as a charity to view this dashboard.');
+        return;
+      }
+
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get(`${API_URL}/api/charity/me`, {
+          headers: getAuthHeaders()
         });
         setCharityData(response.data);
       } catch (err) {
@@ -22,7 +26,7 @@ function CharityDashboard() {
     };
 
     fetchCharityData();
-  }, []);
+  }, [user, getAuthHeaders, API_URL]);
 
   if (error) {
     return <div>Error: {error}</div>;

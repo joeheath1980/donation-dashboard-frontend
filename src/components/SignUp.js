@@ -3,27 +3,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import styles from '../SignUp.module.css'; // Renamed to SignUp.module.css for clarity
+import styles from '../SignUp.module.css';
 import logo from '../assets/logo.png';
-
-// Set a default API URL if the environment variable is not set
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth(); // Destructure setUser from AuthContext
+  const { userSignup, API_URL } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState(''); // State to handle signup errors
-  const [loading, setLoading] = useState(false); // State to handle loading status
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Handle input changes for form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -31,7 +27,7 @@ const SignUp = () => {
       [name]: value
     }));
 
-    // Real-time validation (optional)
+    // Real-time validation
     if (name === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
@@ -47,7 +43,6 @@ const SignUp = () => {
     }
   };
 
-  // Validate form data before submission
   const validateForm = () => {
     const { name, email, password, confirmPassword } = formData;
     if (name.trim().length < 2) {
@@ -70,143 +65,49 @@ const SignUp = () => {
     return true;
   };
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Reset any previous errors
+    setError('');
+    setSuccess('');
 
     if (!validateForm()) return;
 
-    setLoading(true); // Set loading to true during signup
+    setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/api/users/register`, {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
-
-      console.log('User registered successfully:', response.data);
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        console.log('Token stored in localStorage');
-        
-        // Fetch user details using the token
-        const userResponse = await axios.get(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${response.data.token}` }
-        });
-        console.log('User response:', userResponse.data);
-        
-        // Set user in AuthContext with isBusiness: false
-        setUser({ ...userResponse.data, isBusiness: false });
-      } else {
-        console.log('No token received from server');
-        setError('Registration successful, but no token received. Please try logging in.');
-        return;
-      }
-      
-      // Navigate to the user dashboard or desired page after successful signup
-      navigate('/profile');
+      const { name, email, password } = formData;
+      console.log('Attempting to sign up user:', { name, email });
+      const result = await userSignup(name, email, password);
+      console.log('Signup successful:', result);
+      setSuccess('Registration successful! Redirecting to your profile...');
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
     } catch (error) {
-      console.error('Registration error:', error);
-      
-      if (error.response) {
-        // Server responded with a status other than 2xx
-        console.error('Error data:', error.response.data);
-        console.error('Error status:', error.response.status);
-        console.error('Error headers:', error.response.headers);
-        
-        setError(error.response.data.message || 'An error occurred during registration. Please try again.');
-      } else if (error.request) {
-        // Request was made but no response received
-        console.error('Error request:', error.request);
-        setError('No response received from the server. Please check your internet connection and try again.');
-      } else {
-        // Something else happened while setting up the request
-        console.error('Error message:', error.message);
-        setError('An unexpected error occurred. Please try again.');
+      console.error('Signup error:', error);
+      let errorMessage = 'An error occurred during registration. Please try again.';
+      if (error.message === 'A user with this email already exists. Please try logging in or use a different email.') {
+        errorMessage = error.message;
+      } else if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
       }
+      setError(`Error: ${errorMessage}`);
+      console.error('Detailed error:', error);
     } finally {
-      setLoading(false); // Set loading to false after signup attempt
+      setLoading(false);
     }
   };
 
-  // Handle social signup (if applicable)
   const handleSocialSignup = (provider) => {
     const url = `${API_URL}/api/auth/${provider}`;
-    console.log('Social signup URL:', url);
+    console.log(`Redirecting to ${provider} signup:`, url);
     window.location.href = url;
-  };
-
-  // Test credentials and account creation (visible only in development)
-  const TEST_BUSINESS_EMAIL = 'testbusiness@example.com';
-  const TEST_BUSINESS_PASSWORD = 'testpassword123';
-
-  const TEST_USER_EMAIL = 'john@example.com';
-  const TEST_USER_PASSWORD = 'password123';
-
-  const TEST_ADMIN_EMAIL = 'admin@example.com';
-  const TEST_ADMIN_PASSWORD = 'adminpassword123';
-
-  const fillTestUserCredentials = () => {
-    setFormData({
-      name: 'Test User',
-      email: TEST_USER_EMAIL,
-      password: TEST_USER_PASSWORD,
-      confirmPassword: TEST_USER_PASSWORD,
-    });
-  };
-
-  const fillTestAdminCredentials = () => {
-    setFormData({
-      name: 'Admin User',
-      email: TEST_ADMIN_EMAIL,
-      password: TEST_ADMIN_PASSWORD,
-      confirmPassword: TEST_ADMIN_PASSWORD,
-    });
-  };
-
-  const createTestBusinessAccount = async () => {
-    try {
-      const response = await axios.post(`${API_URL}/api/business/create-test-account`);
-      if (response.status === 201) {
-        alert('Test business account created successfully. You can now log in with the test credentials.');
-        // Optionally, redirect or inform the user
-      } else if (response.status === 200) {
-        alert('Test business account is ready to use. You can now log in with the test credentials.');
-      } else {
-        alert('Unexpected response. Please check the console for more details.');
-        console.log('Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error creating/ensuring test business account:', error);
-      alert('Error with test business account. Check the console for more details.');
-    }
-  };
-
-  const createTestAdminAccount = async () => {
-    try {
-      const response = await axios.post(`${API_URL}/api/users/create-test-admin`);
-      if (response.status === 201) {
-        alert('Test admin account created successfully. You can now log in with the admin credentials.');
-        fillTestAdminCredentials();
-      } else if (response.status === 200) {
-        alert('Test admin account is ready to use. You can now log in with the admin credentials.');
-        fillTestAdminCredentials();
-      } else {
-        alert('Unexpected response. Please check the console for more details.');
-        console.log('Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error creating/ensuring test admin account:', error);
-      alert('Error with test admin account. Check the console for more details.');
-    }
   };
 
   return (
@@ -214,7 +115,8 @@ const SignUp = () => {
       <div className={styles.signupContainer}>
         <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
         <h2>Create an Account</h2>
-        {error && <p className={styles.error} role="alert">{error}</p>} {/* Display error message */}
+        {error && <p className={styles.error} role="alert">{error}</p>}
+        {success && <p className={styles.success} role="alert">{success}</p>}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="name">Full Name:</label>
@@ -255,7 +157,12 @@ const SignUp = () => {
                 required
                 aria-describedby="passwordError"
               />
-              <button type="button" onClick={togglePasswordVisibility} className={styles.toggleButton} aria-label={showPassword ? "Hide password" : "Show password"}>
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className={styles.toggleButton}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
@@ -289,7 +196,7 @@ const SignUp = () => {
           <button 
             onClick={() => handleSocialSignup('microsoft')} 
             className={`${styles.socialButton} ${styles.microsoft}`}
-            disabled // Coming Soon
+            disabled
             title="Microsoft signup is coming soon"
           >
             Microsoft (Coming Soon)
@@ -297,7 +204,7 @@ const SignUp = () => {
           <button 
             onClick={() => handleSocialSignup('apple')} 
             className={`${styles.socialButton} ${styles.apple}`}
-            disabled // Coming Soon
+            disabled
             title="Apple signup is coming soon"
           >
             Apple (Coming Soon)
@@ -305,7 +212,7 @@ const SignUp = () => {
           <button 
             onClick={() => handleSocialSignup('facebook')} 
             className={`${styles.socialButton} ${styles.facebook}`}
-            disabled // Coming Soon
+            disabled
             title="Facebook signup is coming soon"
           >
             Facebook (Coming Soon)
@@ -315,23 +222,6 @@ const SignUp = () => {
         <p className={styles.toggleText}>
           Already have an account? <Link to="/login">Log in</Link>
         </p>
-        
-        {process.env.NODE_ENV === 'development' && (
-          <div className={styles.testButtons}>
-            <button onClick={fillTestUserCredentials}>
-              Fill Test User Credentials
-            </button>
-            <button onClick={fillTestAdminCredentials}>
-              Fill Test Admin Credentials
-            </button>
-            <button onClick={createTestBusinessAccount}>
-              Create Test Business Account
-            </button>
-            <button onClick={createTestAdminAccount}>
-              Create Test Admin Account
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
