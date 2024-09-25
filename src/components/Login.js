@@ -160,10 +160,8 @@ function Login() {
             <button
               onClick={() => handleSocialLogin('microsoft')}
               className={`${styles.socialButton} ${styles.microsoft}`}
-              disabled
-              title="Microsoft login is coming soon"
             >
-              Microsoft (Coming Soon)
+              Microsoft
             </button>
             <button
               onClick={() => handleSocialLogin('apple')}

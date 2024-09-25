@@ -107,6 +107,10 @@ const SignUp = () => {
   const handleSocialSignup = (provider) => {
     const url = `${API_URL}/api/auth/${provider}`;
     console.log(`Redirecting to ${provider} signup:`, url);
+    // Log the exact URL for Microsoft login
+    if (provider === 'microsoft') {
+      console.log('Microsoft login URL:', url);
+    }
     window.location.href = url;
   };
 
@@ -196,10 +200,8 @@ const SignUp = () => {
           <button 
             onClick={() => handleSocialSignup('microsoft')} 
             className={`${styles.socialButton} ${styles.microsoft}`}
-            disabled
-            title="Microsoft signup is coming soon"
           >
-            Microsoft (Coming Soon)
+            Microsoft
           </button>
           <button 
             onClick={() => handleSocialSignup('apple')} 

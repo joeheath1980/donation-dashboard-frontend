@@ -28,8 +28,9 @@ import WelcomePage from './components/WelcomePage';
 import OnboardingMailScraper from './components/OnboardingMailScraper';
 import AdminDashboard from './components/AdminDashboard';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
+import MicrosoftAuthCallback from './components/MicrosoftAuthCallback';
 import ManagePaymentsComponent from './components/ManagePaymentsComponent';
-import CharityDashboard from './components/CharityDashboard'; // Add this line
+import CharityDashboard from './components/CharityDashboard';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -78,6 +79,9 @@ function App() {
               
               {/* Google Auth Callback route */}
               <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+              
+              {/* Microsoft Auth Callback route */}
+              <Route path="/microsoft-callback" element={<MicrosoftAuthCallback />} />
               
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
