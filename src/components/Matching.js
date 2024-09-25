@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../Matching.module.css';
 import { applyGlobalStyles, globalClasses } from '../utils/styleUtils';
+import GlobalGivingProjects from './GlobalGivingProjects';
 
 const combinedStyles = applyGlobalStyles(styles, globalClasses);
 
@@ -129,6 +130,14 @@ function Matching() {
 
       <div className={combinedStyles.opportunitiesContainer}>
         {renderOpportunityCards()}
+      </div>
+
+      <div className={combinedStyles.globalGivingSection}>
+        <h2 className={combinedStyles.subheader}>Global Giving Projects</h2>
+        <p className={combinedStyles.paragraph}>
+          Discover and support international projects through GlobalGiving. These projects offer unique opportunities to make a global impact.
+        </p>
+        <GlobalGivingProjects />
       </div>
     </div>
   );
