@@ -180,6 +180,23 @@ const defaultScoreDetails = {
   fundraisingScore: 0
 };
 
+// Helper function to extract keywords from text
+const extractKeywords = (text) => {
+  if (!text) return [];
+  const stopwords = new Set([
+    'the', 'and', 'or', 'but', 'if', 'while', 'with', 'a', 'an', 'of', 'to', 'in', 'for', 'on', 'at',
+    'by', 'from', 'up', 'about', 'into', 'over', 'after', 'under', 'above', 'below', 'is', 'are', 'was',
+    'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall',
+    'should', 'can', 'could', 'may', 'might', 'must', 'this', 'that', 'these', 'those'
+  ]);
+
+  // Remove punctuation and convert to lowercase
+  const words = text.replace(/[^\w\s]/gi, '').toLowerCase().split(/\s+/);
+
+  // Filter out stopwords and short words
+  return words.filter(word => word.length > 2 && !stopwords.has(word));
+};
+
 export const ImpactProvider = ({ children }) => {
   const [impactScore, setImpactScore] = useState(0);
   const [scoreDetails, setScoreDetails] = useState(defaultScoreDetails);
@@ -362,6 +379,55 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities([]);
   }, []);
 
+  // === New Function: formPersonalizedSearchQuery ===
+  const formPersonalizedSearchQuery = useCallback(() => {
+    const charityTypes = new Set();
+    const charityNames = new Set();
+    const keywords = new Set();
+
+    // Process donations and contributions
+    [...donations, ...oneOffContributions].forEach(item => {
+      if (item.charityType) charityTypes.add(item.charityType);
+      if (item.charity) charityNames.add(item.charity);
+    });
+
+    // Process volunteer activities
+    volunteerActivities.forEach(activity => {
+      if (activity.organization) charityNames.add(activity.organization);
+      const activityKeywords = extractKeywords(activity.description);
+      activityKeywords.forEach(keyword => keywords.add(keyword));
+    });
+
+    // Process fundraising campaigns
+    fundraisingCampaigns.forEach(campaign => {
+      const campaignKeywords = extractKeywords(campaign.title);
+      campaignKeywords.forEach(keyword => keywords.add(keyword));
+    });
+
+    // Process followed charities
+    followedCharities.forEach(charity => {
+      if (charity.name) charityNames.add(charity.name);
+    });
+
+    // Combine all data into a search query
+    const queryParts = [
+      ...Array.from(charityTypes),
+      ...Array.from(charityNames),
+      ...Array.from(keywords)
+    ];
+
+    // Filter out common words (assuming keywords are already filtered)
+    // Limit the query length to 10 terms
+    const limitedQueryParts = queryParts.slice(0, 10);
+
+    // Join with 'OR' operators
+    const filteredQuery = limitedQueryParts.join(' OR ');
+
+    return filteredQuery;
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, followedCharities]);
+
+  // === End of New Function ===
+
   useEffect(() => {
     const storedCharities = localStorage.getItem('followed-charities');
     if (storedCharities) {
@@ -429,6 +495,9 @@ export const ImpactProvider = ({ children }) => {
         setFundraisingCampaigns,
         setImpactScore,
         setIsAuthenticated,
+        // === Adding the new function to the context value ===
+        formPersonalizedSearchQuery,
+        // === End of addition ===
       }}
     >
       {children}

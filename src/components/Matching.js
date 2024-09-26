@@ -135,7 +135,7 @@ function Matching() {
       <div className={combinedStyles.globalGivingSection}>
         <h2 className={combinedStyles.subheader}>Global Giving Projects</h2>
         <p className={combinedStyles.paragraph}>
-          Discover and support international projects through GlobalGiving. These projects offer unique opportunities to make a global impact.
+          Discover and support international projects through GlobalGiving. These projects offer unique opportunities to make a global impact aligned with your interests and values.
         </p>
         <GlobalGivingProjects />
       </div>
