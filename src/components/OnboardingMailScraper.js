@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../Login.module.css';
 
@@ -10,6 +10,58 @@ const OnboardingMailScraper = () => {
   const [loading, setLoading] = useState(false);
   const [gmailResults, setGmailResults] = useState([]);
   const navigate = useNavigate();
+
+  const exchangeAuthCode = useCallback(async (code) => {
+    const handleScrapeGmail = async () => {
+      console.log('handleScrapeGmail called');
+      setLoading(true);
+      setError(null);
+      setAuthStatus('');
+      try {
+        console.log('Sending request to scrape Gmail');
+        const response = await fetch(`${API_URL}/api/scrape-gmail`, { mode: 'cors' });
+
+        console.log('Response received:', response.status, response.statusText);
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error('Scrape Gmail failed. Status:', response.status, 'Body:', errorBody);
+          const errorData = errorBody ? JSON.parse(errorBody) : {};
+          if (errorData.error === 'Authentication required' || errorData.error === 'Token expired') {
+            console.log('Authentication required');
+            setAuthStatus('Authentication required. Redirecting to Google for authentication...');
+            await handleAuthorize();
+          } else {
+            throw new Error(errorData.error || `An error occurred while scraping Gmail. Status: ${response.status}`);
+          }
+        } else {
+          const data = await response.json();
+          console.log('Scrape results:', data);
+          setGmailResults(data);
+        }
+      } catch (error) {
+        console.error('Error during Gmail scraping:', error);
+        setError(`Error: ${error.message}. Please check the console for more details.`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/api/oauth2callback?code=${code}`, { mode: 'cors' });
+      if (!response.ok) {
+        throw new Error('Failed to exchange auth code for tokens');
+      }
+      const data = await response.json();
+      console.log('Token exchange successful:', data);
+      setAuthStatus('Authentication completed. You can now scrape Gmail.');
+      // After successful authentication, automatically trigger Gmail scraping
+      await handleScrapeGmail();
+    } catch (error) {
+      console.error('Error exchanging auth code:', error);
+      setAuthStatus('Authentication failed. Please try again.');
+      setError(error.message);
+    }
+  }, []);
 
   useEffect(() => {
     // Check if the user was redirected back from Google OAuth
@@ -23,25 +75,7 @@ const OnboardingMailScraper = () => {
       // Exchange the auth code for tokens
       exchangeAuthCode(authCode);
     }
-  }, []);
-
-  const exchangeAuthCode = async (code) => {
-    try {
-      const response = await fetch(`${API_URL}/api/oauth2callback?code=${code}`, { mode: 'cors' });
-      if (!response.ok) {
-        throw new Error('Failed to exchange auth code for tokens');
-      }
-      const data = await response.json();
-      console.log('Token exchange successful:', data);
-      setAuthStatus('Authentication completed. You can now scrape Gmail.');
-      // After successful authentication, automatically trigger Gmail scraping
-      handleScrapeGmail();
-    } catch (error) {
-      console.error('Error exchanging auth code:', error);
-      setAuthStatus('Authentication failed. Please try again.');
-      setError(error.message);
-    }
-  };
+  }, [exchangeAuthCode]);
 
   const handleAuthorize = async () => {
     try {
@@ -60,40 +94,6 @@ const OnboardingMailScraper = () => {
     } catch (error) {
       console.error('Gmail authorization error:', error);
       setError(error.message || 'An error occurred during Gmail authorization');
-    }
-  };
-
-  const handleScrapeGmail = async () => {
-    console.log('handleScrapeGmail called');
-    setLoading(true);
-    setError(null);
-    setAuthStatus('');
-    try {
-      console.log('Sending request to scrape Gmail');
-      const response = await fetch(`${API_URL}/api/scrape-gmail`, { mode: 'cors' });
-
-      console.log('Response received:', response.status, response.statusText);
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error('Scrape Gmail failed. Status:', response.status, 'Body:', errorBody);
-        const errorData = errorBody ? JSON.parse(errorBody) : {};
-        if (errorData.error === 'Authentication required' || errorData.error === 'Token expired') {
-          console.log('Authentication required');
-          setAuthStatus('Authentication required. Redirecting to Google for authentication...');
-          await handleAuthorize();
-        } else {
-          throw new Error(errorData.error || `An error occurred while scraping Gmail. Status: ${response.status}`);
-        }
-      } else {
-        const data = await response.json();
-        console.log('Scrape results:', data);
-        setGmailResults(data);
-      }
-    } catch (error) {
-      console.error('Error during Gmail scraping:', error);
-      setError(`Error: ${error.message}. Please check the console for more details.`);
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -1,36 +1,23 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from '../Impact.module.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
   const navigate = useNavigate();
 
-  const [gmailResults, setGmailResults] = useState([]);
+  const [emailResults, setEmailResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [authStatus, setAuthStatus] = useState('');
 
-  useEffect(() => {
-    console.log('Activity component mounted');
-    // Check if the user was redirected back from Google OAuth
-    const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get('code');
-    if (authCode) {
-      console.log('Auth code found in URL');
-      setAuthStatus('Authentication successful. You can now search your emails.');
-      // Remove the code from the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      // Exchange the auth code for tokens
-      exchangeAuthCode(authCode);
-    }
-  }, []);
-
-  const exchangeAuthCode = async (code) => {
+  const exchangeAuthCode = useCallback(async (code) => {
     try {
-      const response = await fetch('http://localhost:3002/api/oauth2callback?code=' + code, { mode: 'cors' });
+      const response = await fetch(`${API_URL}/api/oauth2callback?code=${code}`, { mode: 'cors' });
       if (!response.ok) {
         throw new Error('Failed to exchange auth code for tokens');
       }
@@ -41,7 +28,22 @@ function Activity() {
       console.error('Error exchanging auth code:', error);
       setAuthStatus('Authentication failed. Please try again.');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    console.log('Activity component mounted');
+    // Check if the user was redirected back from OAuth
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    if (authCode) {
+      console.log('Auth code found in URL');
+      setAuthStatus('Authentication successful. You can now search your emails.');
+      // Remove the code from the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Exchange the auth code for tokens
+      exchangeAuthCode(authCode);
+    }
+  }, [exchangeAuthCode]);
 
   const handleSearchEmails = async () => {
     console.log('handleSearchEmails called');
@@ -50,11 +52,17 @@ function Activity() {
     setAuthStatus('');
     try {
       console.log('Sending request to search emails');
-      const response = await fetch('http://localhost:3002/api/scrape-gmail', { mode: 'cors' })
-        .catch(error => {
-          console.error('Search emails fetch error:', error);
-          throw new Error(`Failed to connect to the server. Error: ${error.message}`);
-        });
+      console.log('API_URL:', API_URL);
+      const response = await fetch(`${API_URL}/api/scrape-gmail`, { 
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch(error => {
+        console.error('Search emails fetch error:', error);
+        throw new Error(`Failed to connect to the server. Error: ${error.message}`);
+      });
 
       console.log('Response received:', response.status, response.statusText);
       if (!response.ok) {
@@ -65,9 +73,13 @@ function Activity() {
           console.log('Authentication required');
           setAuthStatus('Authentication required. Redirecting to Google for authentication...');
           // Make a POST request to initiate OAuth flow
-          const authResponse = await fetch('http://localhost:3002/api/auth/google', {
+          const authResponse = await fetch(`${API_URL}/api/auth/google`, {
             method: 'POST',
             mode: 'cors',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
           const authData = await authResponse.json();
           if (authResponse.ok && authData.authUrl) {
@@ -82,7 +94,7 @@ function Activity() {
       } else {
         const data = await response.json();
         console.log('Search results:', data);
-        setGmailResults(data);
+        setEmailResults(data);
       }
     } catch (error) {
       console.error('Error during email search:', error);
@@ -98,7 +110,7 @@ function Activity() {
   };
 
   const handleCommit = async (index) => {
-    const donation = gmailResults[index];
+    const donation = emailResults[index];
     const selectedType = selectedTypes[index];
 
     console.log('Committing donation:', donation);
@@ -125,13 +137,13 @@ function Activity() {
       }
     }
 
-    handleDeleteGmailResult(index);
+    handleDeleteEmailResult(index);
   };
 
-  const handleDeleteGmailResult = (index) => {
-    console.log('Deleting Gmail result at index:', index);
-    const updatedResults = gmailResults.filter((_, i) => i !== index);
-    setGmailResults(updatedResults);
+  const handleDeleteEmailResult = (index) => {
+    console.log('Deleting email result at index:', index);
+    const updatedResults = emailResults.filter((_, i) => i !== index);
+    setEmailResults(updatedResults);
     const updatedTypes = { ...selectedTypes };
     delete updatedTypes[index];
     setSelectedTypes(updatedTypes);
@@ -146,10 +158,10 @@ function Activity() {
     <div className={styles.container}>
       <h1 className={styles.activityHeader}>Discover your donations and start tracking your impact</h1>
 
-      <div className={styles.gmailSection}>
+      <div className={styles.emailSection}>
         <div className={styles.buttonContainer}>
           <button onClick={handleSearchEmails} disabled={loading} className={styles.scrapeButton}>
-            {loading ? 'Searching...' : 'Search Emails for Donations'}
+            {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
           <Link to="/profile" className={styles.toggleButton}>Check Out Your Impact</Link>
           <button onClick={handleManagePayments} className={styles.toggleButton}>Manage Payments</button>
@@ -158,13 +170,13 @@ function Activity() {
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
         {error && <p className={styles.error}>{error}</p>}
         {authStatus && <p className={styles.authStatus}>{authStatus}</p>}
-        {gmailResults.length > 0 && (
+        {emailResults.length > 0 && (
           <div className={styles.resultsContainer}>
             <h5>Email Search Results:</h5>
             <p className={styles.sortMessage}>Sort your donations into regular or one-off contributions:</p>
-            <ul className={styles.gmailResultsList}>
-              {gmailResults.map((result, index) => (
-                <li key={index} className={styles.gmailResultItem}>
+            <ul className={styles.emailResultsList}>
+              {emailResults.map((result, index) => (
+                <li key={index} className={styles.emailResultItem}>
                   <strong>Charity:</strong> {result.charity}<br />
                   <strong>Date:</strong> {result.date}<br />
                   <strong>Amount:</strong> {result.amount}<br />
@@ -183,7 +195,7 @@ function Activity() {
                   </button>
                   <button
                     className={styles.deleteButton}
-                    onClick={() => handleDeleteGmailResult(index)}
+                    onClick={() => handleDeleteEmailResult(index)}
                     aria-label="Delete Email Result"
                   >
                     &times;
