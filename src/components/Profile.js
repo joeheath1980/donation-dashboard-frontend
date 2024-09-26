@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import styles from '../Profile.module.css';
+import styles from './Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ImpactVisualization from './ImpactVisualization';
 import CarouselComponent from './CarouselComponent';
@@ -46,15 +46,11 @@ function Profile() {
   }, [fetchImpactData, isAuthenticated]);
 
   useEffect(() => {
-    if (contextDonations) {
-      setLocalDonations(contextDonations);
-    }
+    if (contextDonations) setLocalDonations(contextDonations);
   }, [contextDonations]);
 
   useEffect(() => {
-    if (contextOneOffContributions) {
-      setLocalOneOffContributions(contextOneOffContributions);
-    }
+    if (contextOneOffContributions) setLocalOneOffContributions(contextOneOffContributions);
   }, [contextOneOffContributions]);
 
   const getUniqueCharities = useCallback(() => {
@@ -71,21 +67,10 @@ function Profile() {
   const scoreChange = impactScore - lastYearImpactScore;
   const arrow = scoreChange > 0 ? '▲' : scoreChange < 0 ? '▼' : '';
 
-  const toggleRegularContributions = () => {
-    setShowRegularContributions(!showRegularContributions);
-  };
-
-  const toggleOneOffContributions = () => {
-    setShowOneOffContributions(!showOneOffContributions);
-  };
-
-  const toggleFullImpactReport = () => {
-    setShowFullImpactReport(!showFullImpactReport);
-  };
-
-  const toggleTierProgressModal = () => {
-    setShowTierProgressModal(!showTierProgressModal);
-  };
+  const toggleRegularContributions = () => setShowRegularContributions(!showRegularContributions);
+  const toggleOneOffContributions = () => setShowOneOffContributions(!showOneOffContributions);
+  const toggleFullImpactReport = () => setShowFullImpactReport(!showFullImpactReport);
+  const toggleTierProgressModal = () => setShowTierProgressModal(!showTierProgressModal);
 
   const handleCompleteCampaign = useCallback((completedCampaign) => {
     try {
@@ -100,90 +85,6 @@ function Profile() {
       alert(`Failed to add completed campaign: ${error.message}`);
     }
   }, [contextSetOneOffContributions]);
-
-  const sectionStyle = {
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    padding: '24px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    marginBottom: '24px',
-  };
-
-  const columnStyle = {
-    flex: '1 1 30%',
-    backgroundColor: '#f0f8f0',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-    borderTop: '4px solid #4CAF50',
-  };
-
-  const headerStyle = {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '20px',
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const subHeaderStyle = {
-    fontSize: '22px',
-    fontWeight: 'bold',
-    color: '#555',
-    marginBottom: '16px',
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'background-color 0.3s',
-    textDecoration: 'none',
-    display: 'inline-block',
-  };
-
-  const listStyle = {
-    listStyleType: 'none',
-    padding: '0',
-    margin: '0',
-  };
-
-  const listItemStyle = {
-    padding: '8px 0',
-    borderBottom: '1px solid #ccc',
-  };
-
-  const carouselStyle = {
-    ...sectionStyle,
-    padding: '6px 24px',
-    maxHeight: '500px',
-    overflow: 'hidden',
-    marginBottom: '16px',
-  };
-
-  const carouselTitleStyle = {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    textAlign: 'center',
-    marginBottom: '10px',
-  };
-
-  const carouselComponentStyle = {};
-
-  const miniContainerStyle = {
-    backgroundColor: '#e8f5e9',
-    borderRadius: '8px',
-    padding: '15px',
-    marginBottom: '15px',
-  };
 
   const matchingOpportunities = [
     { 
@@ -223,22 +124,13 @@ function Profile() {
     }
   ];
 
-  if (isLoading) {
-    return <div className={styles.loading}>Loading your impact data...</div>;
-  }
-
-  if (impactError) {
-    return <div className={styles.error}>{impactError}</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <div className={styles.notAuthenticated}>Please log in to view your profile and impact data.</div>;
-  }
+  if (isLoading) return <div className={styles.textCenter}>Loading your impact data...</div>;
+  if (impactError) return <div className={styles.textCenter}>{impactError}</div>;
+  if (!isAuthenticated) return <div className={styles.textCenter}>Please log in to view your profile and impact data.</div>;
 
   return (
-    <div className={styles.profileContainer}>
-      <div style={sectionStyle}>
-        <h1 style={headerStyle}>Personal Impact Score</h1>
+    <div className={styles.profileBackground}>
+      <div className={styles.profileContainer}>
         <PersonalImpactScore
           impactScore={impactScore}
           scoreChange={scoreChange}
@@ -249,94 +141,76 @@ function Profile() {
           onSeeProgressClick={toggleTierProgressModal}
         />
         {showFullImpactReport && <ImpactScoreExplain onClose={toggleFullImpactReport} />}
+        
         <ImpactVisualization />
-      </div>
-      
-      <div style={carouselStyle}>
-        <h2 style={carouselTitleStyle}>Matching Opportunities</h2>
-        <CarouselComponent 
-          items={matchingOpportunities.map(opp => ({
-            title: opp.title,
-            description: `${opp.description} Amount: $${opp.amount.toLocaleString()}. Valid until: ${new Date(opp.endDate).toLocaleDateString()}`,
-            link: opp.link
-          }))}
-          style={carouselComponentStyle}
-        />
-      </div>
+        
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
+          <CarouselComponent 
+            items={matchingOpportunities.map(opp => ({
+              title: opp.title,
+              description: `${opp.description} Amount: $${opp.amount.toLocaleString()}. Valid until: ${new Date(opp.endDate).toLocaleDateString()}`,
+              link: opp.link
+            }))}
+          />
+        </section>
 
-      <div style={carouselStyle}>
-        <h2 style={carouselTitleStyle}>Projects to Support</h2>
-        <GlobalGivingProjects />
-      </div>
-      
-      <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>
-        <div style={columnStyle}>
-          <h3 style={subHeaderStyle}><FaRegHandshake style={{marginRight: '10px'}} /> Regular Donations</h3>
-          <div style={miniContainerStyle}>
-            {localDonations && localDonations.length > 0 ? (
-              <ul style={listStyle}>
-                {getUniqueCharities().map((charity, index) => (
-                  <li key={index} style={listItemStyle}>{charity}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No regular donations yet. Start making a difference today!</p>
-            )}
-          </div>
-          <div className={styles.regularContributionsWrapper}>
-            <button style={buttonStyle} onClick={toggleRegularContributions}>
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Projects to Support</h2>
+          <GlobalGivingProjects />
+        </section>
+        
+        <div className={styles.donationsGrid}>
+          <div className={styles.donationCard}>
+            <h3 className={styles.cardTitle}>
+              <FaRegHandshake className={styles.icon} /> Regular Donations
+            </h3>
+            <ul className={styles.list}>
+              {getUniqueCharities().map((charity, index) => (
+                <li key={index} className={styles.listItem}>{charity}</li>
+              ))}
+            </ul>
+            <button className={styles.actionButton} onClick={toggleRegularContributions}>
               {showRegularContributions ? "Hide" : "See more"}
             </button>
-            {showRegularContributions && (
-              <div className={styles.donationsComponentWrapper}>
-                <DonationsComponent displayAll={true} />
-              </div>
-            )}
+            {showRegularContributions && <DonationsComponent displayAll={true} />}
           </div>
-        </div>
-        <div style={columnStyle}>
-          <h3 style={subHeaderStyle}><FaRegCalendarAlt style={{marginRight: '10px'}} /> Recent One-off Donations</h3>
-          <div style={miniContainerStyle}>
-            {localOneOffContributions && localOneOffContributions.length > 0 ? (
-              <ul style={listStyle}>
-                {getRecentOneOffDonations().map((donation, index) => (
-                  <li key={index} style={listItemStyle}>{donation.charity}: ${donation.amount}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No one-off donations yet. Make your first contribution to a cause you care about!</p>
-            )}
-          </div>
-          <div className={styles.oneOffContributionsWrapper}>
-            <button style={buttonStyle} onClick={toggleOneOffContributions}>
+          
+          <div className={styles.donationCard}>
+            <h3 className={styles.cardTitle}>
+              <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
+            </h3>
+            <ul className={styles.list}>
+              {getRecentOneOffDonations().map((donation, index) => (
+                <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
+              ))}
+            </ul>
+            <button className={styles.actionButton} onClick={toggleOneOffContributions}>
               {showOneOffContributions ? "Hide" : "See more"}
             </button>
-            {showOneOffContributions && (
-              <div className={styles.contributionsComponentWrapper}>
-                <OneOffContributionsComponent displayAll={true} />
-              </div>
-            )}
+            {showOneOffContributions && <OneOffContributionsComponent displayAll={true} />}
+          </div>
+          
+          <FollowedCharitiesComponent />
+        </div>
+
+        <div className={styles.activitiesGrid}>
+          <div className={styles.activityCard}>
+            <VolunteerActivitiesComponent />
+          </div>
+          <div className={styles.activityCard}>
+            <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
           </div>
         </div>
-        <FollowedCharitiesComponent />
-      </div>
 
-      <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>
-        <div style={columnStyle}>
-          <VolunteerActivitiesComponent />
-        </div>
-        <div style={columnStyle}>
-          <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
-        </div>
+        {showTierProgressModal && (
+          <TierProgressModal
+            currentTier={tier}
+            impactScore={impactScore}
+            onClose={toggleTierProgressModal}
+          />
+        )}
       </div>
-
-      {showTierProgressModal && (
-        <TierProgressModal
-          currentTier={tier}
-          impactScore={impactScore}
-          onClose={toggleTierProgressModal}
-        />
-      )}
     </div>
   );
 }

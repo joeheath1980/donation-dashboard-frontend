@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import styles from './DonationCards.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
 import ValidationModal from './ValidationModal';
+import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
 
 function formatDate(dateString) {
   let date;
@@ -140,58 +141,64 @@ function OneOffContributionsComponent({ displayAll }) {
   const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
 
   if (!isAuthenticated) {
-    return <div className={styles.card}>Please log in to view your one-off contributions.</div>;
+    return <div className={cleanStyles.card}>Please log in to view your one-off contributions.</div>;
   }
 
   return (
-    <div className={styles.cardContainer}>
+    <div className={cleanStyles.grid}>
       {displayedContributions && displayedContributions.length > 0 ? (
         <>
           {displayedContributions.map((contribution) => (
-            <div key={contribution._id} className={styles.card}>
-              {contribution.needsValidation && (
-                <button 
-                  onClick={() => handleValidate(contribution)} 
-                  className={`${styles.validateButton} ${styles.topRightButton}`}
-                >
-                  Please Validate
-                </button>
-              )}
-              <div className={styles.cardContent}>
-                <h3 className={styles.charityName}>{contribution.charity}</h3>
-                <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                <p className={styles.donationDetail}><strong>Amount:</strong> ${contribution.amount}</p>
+            <div key={contribution._id} className={cleanStyles.card}>
+              <div className={cleanStyles.cardHeader}>
+                <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
+                {contribution.needsValidation && (
+                  <button 
+                    onClick={() => handleValidate(contribution)} 
+                    className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                    aria-label="Validate Contribution"
+                  >
+                    <FaCheckCircle />
+                  </button>
+                )}
+              </div>
+              <div className={cleanStyles.cardContent}>
+                <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                <p><strong>Amount:</strong> ${contribution.amount}</p>
                 {contribution.charityType && (
-                  <p className={styles.donationDetail}><strong>Charity Type:</strong> {contribution.charityType}</p>
+                  <p><strong>Charity Type:</strong> {contribution.charityType}</p>
                 )}
                 {contribution.receiptUrl && (
-                  <p className={styles.donationDetail}>
+                  <p>
                     <strong>Receipt:</strong> 
                     <a 
                       href={`http://localhost:3002${contribution.receiptUrl}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      className={cleanStyles.link}
                     >
                       View Receipt
                     </a>
                   </p>
                 )}
               </div>
-              <div className={styles.cardActions}>
-                <button onClick={() => handleEdit(contribution)} className={styles.editButton}>Edit</button>
+              <div className={cleanStyles.cardActions}>
+                <button onClick={() => handleEdit(contribution)} className={cleanStyles.iconButton} aria-label="Edit Contribution">
+                  <FaEdit />
+                </button>
                 <button
                   onClick={() => handleDelete(contribution._id)}
-                  className={styles.deleteButton}
+                  className={cleanStyles.iconButton}
                   aria-label="Delete Contribution"
                 >
-                  Delete
+                  <FaTrash />
                 </button>
               </div>
             </div>
           ))}
         </>
       ) : (
-        <p className={styles.noDonations}>No one-off contributions found.</p>
+        <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
       )}
       {showModal && (
         <OneOffContributionModal

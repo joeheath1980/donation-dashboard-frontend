@@ -1,104 +1,49 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { FaRegHeart, FaTimes } from 'react-icons/fa';
+import styles from './FollowedCharitiesComponent.module.css';
 
 const FollowedCharitiesComponent = () => {
-  const { followedCharities, removeFollowedCharity } = useContext(ImpactContext);
+  const { followedCharities, removeFollowedCharity, error } = useContext(ImpactContext);
+  const [localError, setLocalError] = useState(null);
 
-  const containerStyle = {
-    backgroundColor: '#e8f5e9',
-    borderRadius: '8px',
-    padding: '15px',
-    marginBottom: '15px',
-  };
-
-  const headerStyle = {
-    fontSize: '22px',
-    fontWeight: 'bold',
-    color: '#555',
-    marginBottom: '16px',
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const miniContainerStyle = {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    padding: '15px',
-    marginBottom: '15px',
-  };
-
-  const listStyle = {
-    listStyleType: 'none',
-    padding: '0',
-    margin: '0',
-  };
-
-  const listItemStyle = {
-    padding: '8px 0',
-    borderBottom: '1px solid #ccc',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    textDecoration: 'none',
-    display: 'inline-block',
-  };
-
-  const deleteButtonStyle = {
-    backgroundColor: 'transparent',
-    color: '#ff4444',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '18px',
-  };
-
-  const handleDelete = (charityABN) => {
+  const handleDelete = async (charityABN) => {
     if (window.confirm('Are you sure you want to unfollow this charity?')) {
-      removeFollowedCharity(charityABN);
+      try {
+        await removeFollowedCharity(charityABN);
+        setLocalError(null); // Clear any previous errors
+      } catch (err) {
+        setLocalError('Failed to remove the charity. Please try again.');
+      }
     }
   };
 
   return (
-    <div style={containerStyle}>
-      <h3 style={headerStyle}>
-        <FaRegHeart style={{ marginRight: '10px' }} /> Charities Following
+    <div className={styles.card}>
+      <h3 className={styles.cardTitle}>
+        <FaRegHeart className={styles.icon} /> Charities Following
       </h3>
-      <div style={miniContainerStyle}>
+      <div className={styles.cardContent}>
         {followedCharities && followedCharities.length > 0 ? (
-          <ul style={listStyle}>
+          <ul className={styles.list}>
             {followedCharities.map((followedCharity, index) => {
               const charity = followedCharity.charity || followedCharity;
               return (
-                <li key={charity.ABN || `empty-${index}`} style={listItemStyle}>
-                  <span>
+                <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
+                  <span className={styles.charityName}>
                     {charity.logo && (
                       <img
                         src={charity.logo}
                         alt={`${charity.name} logo`}
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          marginRight: '10px',
-                          verticalAlign: 'middle',
-                        }}
+                        className={styles.charityLogo}
                       />
                     )}
                     {charity.name || 'Unknown Charity'}
                   </span>
                   <button
                     onClick={() => handleDelete(charity.ABN)}
-                    style={deleteButtonStyle}
+                    className={styles.deleteButton}
                     title="Unfollow Charity"
                   >
                     <FaTimes />
@@ -108,11 +53,14 @@ const FollowedCharitiesComponent = () => {
             })}
           </ul>
         ) : (
-          <p>Not following any charities yet.</p>
+          <p className={styles.emptyMessage}>Not following any charities yet.</p>
+        )}
+        {(error || localError) && (
+          <p className={styles.errorMessage}>{error || localError}</p>
         )}
       </div>
-      <Link to="/search-charities" style={buttonStyle}>
-        Search Charities
+      <Link to="/search-charities" className={styles.actionButton}>
+        See more
       </Link>
     </div>
   );

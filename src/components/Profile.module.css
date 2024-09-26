@@ -1,7 +1,16 @@
+.profileBackground {
+  background-color: #f0f0f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
 .profileContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .section {
@@ -19,14 +28,17 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 60px; /* Increased from 40px to 60px to create more space */
 }
 
-.donationCard, .activityCard {
+.donationCard {
   background-color: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .cardTitle {
@@ -47,6 +59,7 @@
   list-style-type: none;
   padding: 0;
   margin: 0 0 15px 0;
+  flex-grow: 1;
 }
 
 .listItem {
@@ -64,12 +77,15 @@
   background-color: transparent;
   color: #4CAF50;
   text-decoration: none;
-  padding: 8px 16px;
+  padding: 8px 20px;
   border: 2px solid #4CAF50;
   border-radius: 20px;
+  font-size: 14px;
   font-weight: bold;
-  cursor: pointer;
+  text-align: center;
   transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: auto;
 }
 
 .actionButton:hover {
@@ -81,6 +97,13 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+}
+
+.activityCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
 }
 
 .textCenter {
@@ -97,7 +120,12 @@
 }
 
 @media (max-width: 768px) {
-  .donationsGrid, .activitiesGrid {
+  .profileContainer {
+    padding: 20px;
+  }
+
+  .donationsGrid,
+  .activitiesGrid {
     grid-template-columns: 1fr;
   }
 }

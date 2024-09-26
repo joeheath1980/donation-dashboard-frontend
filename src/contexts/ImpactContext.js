@@ -360,17 +360,26 @@ export const ImpactProvider = ({ children }) => {
       }
 
       const headers = getAuthHeaders();
-      const response = await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
+      await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
 
-      if (response.status === 200) {
+      setFollowedCharities(prevCharities => {
+        const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
+        localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+        return newCharities;
+      });
+    } catch (error) {
+      console.error('Error deleting followed charity:', error.response ? error.response.data : error.message);
+      if (error.response && error.response.status === 404) {
+        // If the charity is not found on the server, remove it from the local state
         setFollowedCharities(prevCharities => {
           const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
           localStorage.setItem('followed-charities', JSON.stringify(newCharities));
           return newCharities;
         });
+      } else {
+        // For other errors, you might want to show an error message to the user
+        setError('Failed to remove the charity. Please try again.');
       }
-    } catch (error) {
-      console.error('Error deleting followed charity:', error.response ? error.response.data : error.message);
     }
   }, [getAuthHeaders]);
 

@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import styles from './DonationCards.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationConfirmationModal from './DonationConfirmationModal';
 import ValidationModal from './ValidationModal';
+import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
 
 function formatDate(dateString) {
   let date;
@@ -142,62 +143,68 @@ function DonationsComponent({ displayAll }) {
   const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
 
   if (!isAuthenticated) {
-    return <div className={styles.card}>Please log in to view your donations.</div>;
+    return <div className={cleanStyles.card}>Please log in to view your donations.</div>;
   }
 
   return (
-    <div className={styles.cardContainer}>
+    <div className={cleanStyles.grid}>
       {displayedDonations && displayedDonations.length > 0 ? (
         <>
           {displayedDonations.map((donation) => (
-            <div key={donation._id} className={styles.card}>
-              {donation.needsValidation && (
-                <button 
-                  onClick={() => handleValidate(donation)} 
-                  className={`${styles.validateButton} ${styles.topRightButton}`}
-                >
-                  Please Validate
-                </button>
-              )}
-              <div className={styles.cardContent}>
-                <h3 className={styles.charityName}>{donation.charity}</h3>
-                <p className={styles.donationDetail}><strong>Date:</strong> {formatDate(donation.date)}</p>
-                <p className={styles.donationDetail}>
+            <div key={donation._id} className={cleanStyles.card}>
+              <div className={cleanStyles.cardHeader}>
+                <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
+                {donation.needsValidation && (
+                  <button 
+                    onClick={() => handleValidate(donation)} 
+                    className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                    aria-label="Validate Donation"
+                  >
+                    <FaCheckCircle />
+                  </button>
+                )}
+              </div>
+              <div className={cleanStyles.cardContent}>
+                <p><strong>Date:</strong> {formatDate(donation.date)}</p>
+                <p>
                   <strong>Amount:</strong> ${donation.amount.toFixed(2)}
-                  {donation.isMonthly && <span className={styles.monthlyTag}> (Monthly)</span>}
+                  {donation.isMonthly && <span className={cleanStyles.highlight}> (Monthly)</span>}
                 </p>
-                <p className={styles.donationDetail}><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
+                <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                 {donation.subject && (
-                  <p className={styles.donationDetail}><strong>Subject:</strong> {donation.subject}</p>
+                  <p><strong>Subject:</strong> {donation.subject}</p>
                 )}
                 {donation.receiptUrl && (
-                  <p className={styles.donationDetail}>
+                  <p>
                     <strong>Receipt:</strong> 
                     <a 
                       href={`http://localhost:3002${donation.receiptUrl}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      className={cleanStyles.link}
                     >
                       View Receipt
                     </a>
                   </p>
                 )}
               </div>
-              <div className={styles.cardActions}>
-                <button onClick={() => handleEdit(donation)} className={styles.editButton}>Edit</button>
+              <div className={cleanStyles.cardActions}>
+                <button onClick={() => handleEdit(donation)} className={cleanStyles.iconButton} aria-label="Edit Donation">
+                  <FaEdit />
+                </button>
                 <button
                   onClick={() => handleDelete(donation._id)}
-                  className={styles.deleteButton}
+                  className={cleanStyles.iconButton}
                   aria-label="Delete Donation"
                 >
-                  Delete
+                  <FaTrash />
                 </button>
               </div>
             </div>
           ))}
         </>
       ) : (
-        <p className={styles.noDonations}>No donations to display.</p>
+        <p className={cleanStyles.textCenter}>No donations to display.</p>
       )}
       {showModal && (
         <DonationConfirmationModal

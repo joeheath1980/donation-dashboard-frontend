@@ -1,0 +1,113 @@
+.carouselContainer {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.carouselWrapper {
+  position: relative;
+}
+
+.carouselItemWrapper {
+  padding: 0 10px;
+}
+
+.carouselItem {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemIcon {
+  font-size: 32px;
+  color: #4CAF50;
+  margin-bottom: 15px;
+}
+
+.itemTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.itemDescription {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+  flex-grow: 1;
+}
+
+.readMoreLink {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.readMoreLink:hover {
+  color: #45a049;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.arrow svg {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.arrow:hover {
+  background-color: #4CAF50;
+}
+
+.arrow:hover svg {
+  color: white;
+}
+
+.prevArrow {
+  left: -20px;
+}
+
+.nextArrow {
+  right: -20px;
+}
+
+/* Override slick-carousel default styles */
+:global(.slick-dots) {
+  bottom: -30px;
+}
+
+:global(.slick-dots li button:before) {
+  font-size: 10px;
+  color: #4CAF50;
+}
+
+:global(.slick-dots li.slick-active button:before) {
+  color: #45a049;
+}
+
+:global(.slick-slide > div) {
+  margin: 0 10px;
+}
+
+:global(.slick-list) {
+  margin: 0 -10px;
+}

@@ -3,6 +3,7 @@ import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 import { FaChartBar, FaDownload } from 'react-icons/fa';
+import cleanStyles from './CleanDesign.module.css';
 
 Chart.register(...registerables);
 
@@ -108,7 +109,7 @@ function ImpactVisualization() {
                 display: false
               },
               ticks: {
-                color: '#2E7D32',
+                color: '#4CAF50',
                 maxRotation: 0,
                 autoSkip: true,
                 maxTicksLimit: 6
@@ -121,10 +122,10 @@ function ImpactVisualization() {
               min: 0,
               max: Math.max(impactScore, ...dataPoints.map(point => point.y), 100),
               grid: {
-                color: 'rgba(46, 125, 50, 0.1)',
+                color: 'rgba(76, 175, 80, 0.1)',
               },
               ticks: {
-                color: '#2E7D32',
+                color: '#4CAF50',
                 padding: 5,
                 stepSize: 25,
                 callback: function(value) {
@@ -157,39 +158,20 @@ function ImpactVisualization() {
     }
   };
 
-  const containerStyle = {
-    background: 'linear-gradient(135deg, #f5f5f5, #e0e0e0)',
-    borderRadius: '10px',
-    padding: '20px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    padding: '10px 15px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    margin: '10px 5px',
-    display: 'flex',
-    alignItems: 'center',
-  };
-
   if (!dataPoints || dataPoints.length === 0) {
-    return <div>No data available for visualization</div>;
+    return <div className={cleanStyles.textCenter}>No data available for visualization</div>;
   }
 
   return (
-    <div style={containerStyle}>
-      <h2 style={{ color: '#2E7D32', display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <FaChartBar style={{ marginRight: '10px' }} /> Impact Journey
+    <div className={cleanStyles.container}>
+      <h2 className={cleanStyles.header}>
+        <FaChartBar style={{ marginRight: '10px', color: '#4CAF50' }} /> Impact Journey
       </h2>
       <div style={{ height: '400px', width: '100%', marginBottom: '20px' }}>
         <canvas ref={chartRef} />
       </div>
       <div>
-        <button onClick={handleDownload} style={buttonStyle}>
+        <button onClick={handleDownload} className={cleanStyles.button}>
           <FaDownload style={{ marginRight: '5px' }} /> Export Data
         </button>
       </div>

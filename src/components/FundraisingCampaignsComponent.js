@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
+import cleanStyles from './CleanDesign.module.css';
+import { FaPlus, FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
 
 function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const {
@@ -60,7 +62,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       setError('');
       setIsCreateModalOpen(false);
       if (isAuthenticated) {
-        fetchImpactData(); // Refresh impact data after creating a new campaign
+        fetchImpactData();
       }
     } catch (error) {
       console.error('Error creating fundraising campaign:', error);
@@ -77,7 +79,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     try {
       await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, { headers });
       if (isAuthenticated) {
-        fetchImpactData(); // Refresh impact data after removing a campaign
+        fetchImpactData();
       }
     } catch (error) {
       console.error('Error removing fundraising campaign:', error);
@@ -142,7 +144,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         });
         setError('');
         if (isAuthenticated) {
-          fetchImpactData(); // Refresh impact data after updating campaign amount
+          fetchImpactData();
         }
       } catch (error) {
         console.error('Error updating campaign amount:', error);
@@ -157,263 +159,158 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     }
   };
 
-  const containerStyle = {
-    backgroundColor: '#e6f7e6',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    padding: '30px',
-    marginBottom: '40px',
-  };
-
-  const headerStyle = {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '20px',
-  };
-
-  const campaignCardStyle = {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-    padding: '20px',
-    marginBottom: '20px',
-    position: 'relative',
-  };
-
-  const labelStyle = {
-    fontWeight: 'bold',
-    color: '#555',
-    marginBottom: '5px',
-  };
-
-  const valueStyle = {
-    color: '#333',
-  };
-
-  const buttonStyle = {
-    padding: '10px 20px',
-    borderRadius: '5px',
-    border: 'none',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'background-color 0.3s',
-  };
-
-  const removeButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#ff4d4d',
-    color: 'white',
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
-  };
-
-  const completeButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    marginTop: '10px',
-  };
-
-  const createButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    marginTop: '20px',
-  };
-
-  const progressBarStyle = {
-    width: '100%',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '5px',
-    overflow: 'hidden',
-    marginTop: '10px',
-    marginBottom: '10px',
-  };
-
-  const progressFillStyle = (percentage) => ({
-    width: `${percentage}%`,
-    backgroundColor: '#4CAF50',
-    height: '10px',
-  });
-
-  const modalStyle = {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    backgroundColor: '#fff',
-    padding: '30px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    zIndex: 1000,
-    maxWidth: '500px',
-    width: '90%',
-  };
-
-  const overlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 999,
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '10px',
-    marginBottom: '15px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  };
-
   if (!isAuthenticated) {
-    return <div style={containerStyle}>Please log in to view and manage fundraising campaigns.</div>;
+    return <div className={cleanStyles.container}>Please log in to view and manage fundraising campaigns.</div>;
   }
 
   return (
-    <div style={containerStyle}>
-      <h2 style={headerStyle}>Fundraising Campaigns</h2>
+    <div className={cleanStyles.container}>
+      <h2 className={cleanStyles.header}>Fundraising Campaigns</h2>
 
-      {error && <p style={{ color: 'red', marginBottom: '20px' }}>{error}</p>}
+      {error && <p className={cleanStyles.error}>{error}</p>}
 
       {fundraisingCampaigns.length > 0 ? (
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
+        <div className={cleanStyles.grid}>
           {fundraisingCampaigns.map((campaign) => (
-            <li key={campaign._id} style={campaignCardStyle}>
-              <button
-                onClick={() => handleRemoveCampaign(campaign._id)}
-                style={removeButtonStyle}
-              >
-                Remove
-              </button>
-              <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>{campaign.title}</h3>
-              <p style={{ marginBottom: '10px' }}>{campaign.description}</p>
-              <p>
-                <span style={labelStyle}>Goal:</span> <span style={valueStyle}>${campaign.goalAmount}</span>
-              </p>
-              <p>
-                <span style={labelStyle}>Raised:</span>
-                {updatingCampaign === campaign._id ? (
-                  <input
-                    type="number"
-                    value={tempRaisedAmounts[campaign._id] ?? campaign.raisedAmount?.toString() ?? '0'}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      console.log('Input Change:', value); // Debugging line
-                      setTempRaisedAmounts({
-                        ...tempRaisedAmounts,
-                        [campaign._id]: value,
-                      });
-                    }}
-                    style={{ ...inputStyle, width: '100px', marginLeft: '10px', marginRight: '10px' }}
-                  />
-                ) : (
-                  <span style={valueStyle}>${campaign.raisedAmount || 0}</span>
-                )}
+            <div key={campaign._id} className={cleanStyles.card}>
+              <div className={cleanStyles.cardHeader}>
+                <h3 className={cleanStyles.cardTitle}>{campaign.title}</h3>
                 <button
-                  onClick={() => handleUpdateAmount(campaign)}
-                  style={{ ...buttonStyle, backgroundColor: '#4CAF50', color: 'white', marginLeft: '10px' }}
+                  onClick={() => handleRemoveCampaign(campaign._id)}
+                  className={cleanStyles.iconButton}
+                  aria-label="Remove Campaign"
                 >
-                  {updatingCampaign === campaign._id ? 'Save' : 'Update Amount'}
+                  <FaTrash />
                 </button>
-              </p>
-              <div style={progressBarStyle}>
-                <div style={progressFillStyle((campaign.raisedAmount / campaign.goalAmount) * 100)}></div>
               </div>
-              <p>
-                <span style={labelStyle}>Start Date:</span>{' '}
-                <span style={valueStyle}>{new Date(campaign.startDate).toLocaleDateString()}</span>
-              </p>
-              <p>
-                <span style={labelStyle}>End Date:</span>{' '}
-                <span style={valueStyle}>{new Date(campaign.endDate).toLocaleDateString()}</span>
-              </p>
-              <p>
-                <span style={labelStyle}>Status:</span> <span style={valueStyle}>{campaign.status}</span>
-              </p>
-              <button onClick={() => handleCompleteCampaign(campaign)} style={completeButtonStyle}>
-                Mark as Completed
-              </button>
-            </li>
+              <div className={cleanStyles.cardContent}>
+                <p>{campaign.description}</p>
+                <p><strong>Goal:</strong> ${campaign.goalAmount}</p>
+                <p>
+                  <strong>Raised:</strong>
+                  {updatingCampaign === campaign._id ? (
+                    <input
+                      type="number"
+                      value={tempRaisedAmounts[campaign._id] ?? campaign.raisedAmount?.toString() ?? '0'}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setTempRaisedAmounts({
+                          ...tempRaisedAmounts,
+                          [campaign._id]: value,
+                        });
+                      }}
+                      className={cleanStyles.input}
+                      style={{width: '100px', marginLeft: '10px', marginRight: '10px'}}
+                    />
+                  ) : (
+                    <span>${campaign.raisedAmount || 0}</span>
+                  )}
+                  <button
+                    onClick={() => handleUpdateAmount(campaign)}
+                    className={cleanStyles.iconButton}
+                    aria-label={updatingCampaign === campaign._id ? "Save Amount" : "Update Amount"}
+                  >
+                    {updatingCampaign === campaign._id ? <FaCheck /> : <FaEdit />}
+                  </button>
+                </p>
+                <div className={cleanStyles.progressBar}>
+                  <div 
+                    className={cleanStyles.progressFill} 
+                    style={{width: `${(campaign.raisedAmount / campaign.goalAmount) * 100}%`}}
+                  ></div>
+                </div>
+                <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
+                <p><strong>Status:</strong> {campaign.status}</p>
+                <button onClick={() => handleCompleteCampaign(campaign)} className={cleanStyles.button}>
+                  Mark as Completed
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p>No fundraising campaigns found.</p>
+        <p className={cleanStyles.textCenter}>No fundraising campaigns found.</p>
       )}
 
-      <button onClick={() => setIsCreateModalOpen(true)} style={createButtonStyle}>
-        Create Campaign
+      <button onClick={() => setIsCreateModalOpen(true)} className={`${cleanStyles.button} ${cleanStyles.mt-10}`}>
+        <FaPlus /> Create Campaign
       </button>
 
       {isCreateModalOpen && (
-        <>
-          <div style={overlayStyle} onClick={() => setIsCreateModalOpen(false)} />
-          <div style={modalStyle}>
-            <h3 style={{ ...headerStyle, fontSize: '24px' }}>Create New Campaign</h3>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="title"
-                placeholder="Campaign Title"
-                value={newCampaign.title}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-              <textarea
-                name="description"
-                placeholder="Campaign Description"
-                value={newCampaign.description}
-                onChange={handleChange}
-                required
-                style={{ ...inputStyle, minHeight: '100px' }}
-              ></textarea>
-              <input
-                type="number"
-                name="goalAmount"
-                placeholder="Goal Amount"
-                value={newCampaign.goalAmount}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-              <input
-                type="date"
-                name="startDate"
-                placeholder="Start Date"
-                value={newCampaign.startDate}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-              <input
-                type="date"
-                name="endDate"
-                placeholder="End Date"
-                value={newCampaign.endDate}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <div className={cleanStyles.modal}>
+          <div className={cleanStyles.modalContent}>
+            <h3 className={cleanStyles.modalHeader}>Create New Campaign</h3>
+            <form onSubmit={handleSubmit} className={cleanStyles.form}>
+              <div className={cleanStyles.formGroup}>
+                <label className={cleanStyles.label}>Campaign Title:</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={newCampaign.title}
+                  onChange={handleChange}
+                  required
+                  className={cleanStyles.input}
+                />
+              </div>
+              <div className={cleanStyles.formGroup}>
+                <label className={cleanStyles.label}>Campaign Description:</label>
+                <textarea
+                  name="description"
+                  value={newCampaign.description}
+                  onChange={handleChange}
+                  required
+                  className={cleanStyles.textarea}
+                ></textarea>
+              </div>
+              <div className={cleanStyles.formGroup}>
+                <label className={cleanStyles.label}>Goal Amount:</label>
+                <input
+                  type="number"
+                  name="goalAmount"
+                  value={newCampaign.goalAmount}
+                  onChange={handleChange}
+                  required
+                  className={cleanStyles.input}
+                />
+              </div>
+              <div className={cleanStyles.formGroup}>
+                <label className={cleanStyles.label}>Start Date:</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={newCampaign.startDate}
+                  onChange={handleChange}
+                  required
+                  className={cleanStyles.input}
+                />
+              </div>
+              <div className={cleanStyles.formGroup}>
+                <label className={cleanStyles.label}>End Date:</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={newCampaign.endDate}
+                  onChange={handleChange}
+                  required
+                  className={cleanStyles.input}
+                />
+              </div>
+              <div className={cleanStyles.modalActions}>
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  style={{ ...buttonStyle, backgroundColor: '#ccc' }}
+                  className={cleanStyles.buttonSecondary}
                 >
                   Cancel
                 </button>
-                <button type="submit" style={{ ...buttonStyle, backgroundColor: '#4CAF50', color: 'white' }}>
+                <button type="submit" className={cleanStyles.button}>
                   Create Campaign
                 </button>
               </div>
             </form>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

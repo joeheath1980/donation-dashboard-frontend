@@ -1,0 +1,105 @@
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  margin-right: 10px;
+  color: #4CAF50;
+}
+
+.cardContent {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.charityName {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.charityLogo {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 14px;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.deleteButton:hover {
+  color: #f44336;
+}
+
+.emptyMessage {
+  color: #666;
+  font-style: italic;
+}
+
+.errorMessage {
+  color: #f44336;
+  margin-top: 10px;
+}
+
+.actionButton {
+  display: inline-block;
+  background-color: transparent;
+  color: #4CAF50;
+  text-decoration: none;
+  padding: 8px 20px;
+  border: 2px solid #4CAF50;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.actionButton:hover {
+  background-color: #4CAF50;
+  color: white;
+}

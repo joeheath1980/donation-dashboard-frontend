@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { FaArrowUp, FaTrophy, FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaInfoCircle, FaStar, FaAward, FaHandsHelping, FaHeart, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaTimes } from 'react-icons/fa';
-import ImpactScoreExplain from './ImpactScoreExplain';
+import React, { useState, useContext, useMemo } from 'react';
+import { FaArrowUp, FaTimes, FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaStar } from 'react-icons/fa';
+import styles from './PersonalImpactScore.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 
 const allBadges = [
@@ -17,8 +17,8 @@ const allBadges = [
   { icon: FaUtensils, title: 'Hunger Fighter', color: '#F39C12', description: 'Combating hunger and malnutrition' },
   { icon: FaHome, title: 'Housing Hero', color: '#8E44AD', description: 'Providing shelter and housing support' },
   { icon: FaSeedling, title: 'Community Grower', color: '#2ECC71', description: 'Nurturing community development' },
-  { icon: FaHandsHelping, title: 'Disaster Relief Ally', color: '#D35400', description: 'Supporting disaster relief efforts' },
-  { icon: FaHeart, title: 'Child Welfare Protector', color: '#C0392B', description: 'Safeguarding children\'s rights' },
+  { icon: FaHandHoldingHeart, title: 'Disaster Relief Ally', color: '#D35400', description: 'Supporting disaster relief efforts' },
+  { icon: FaHeartbeat, title: 'Child Welfare Protector', color: '#C0392B', description: 'Safeguarding children\'s rights' },
   { icon: FaStar, title: 'Arts and Culture Patron', color: '#1ABC9C', description: 'Supporting arts and cultural initiatives' },
   { icon: FaGlobeAmericas, title: 'Climate Action Advocate', color: '#16A085', description: 'Fighting climate change' },
   { icon: FaBook, title: 'STEM Education Booster', color: '#2980B9', description: 'Advancing STEM education' },
@@ -26,32 +26,11 @@ const allBadges = [
   { icon: FaLeaf, title: 'Conservation Champion', color: '#27AE60', description: 'Preserving biodiversity' },
 ];
 
-const tierBadges = [
-  { icon: FaStar, title: 'Visionary', color: '#FFD700', description: 'Achieved 90+ impact points' },
-  { icon: FaAward, title: 'Champion', color: '#C0C0C0', description: 'Achieved 70-89 impact points' },
-  { icon: FaTrophy, title: 'Philanthropist', color: '#CD7F32', description: 'Achieved 50-69 impact points' },
-  { icon: FaHandsHelping, title: 'Altruist', color: '#2ECC71', description: 'Achieved 30-49 impact points' },
-  { icon: FaHeart, title: 'Giver', color: '#E74C3C', description: 'Achieved 0-29 impact points' },
-];
-
-const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNextTier, onSeeProgressClick }) => {
-  const [animatedScore, setAnimatedScore] = useState(0);
-  const [showTooltip, setShowTooltip] = useState(null);
+const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, onFullReportClick, onSeeProgressClick }) => {
   const [showAllBadges, setShowAllBadges] = useState(false);
-  const [showFullReport, setShowFullReport] = useState(false);
-  const [collectedBadges, setCollectedBadges] = useState([]);
-
   const { donations, oneOffContributions } = useContext(ImpactContext);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimatedScore(impactScore);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [impactScore]);
-
-  useEffect(() => {
-    // Count donations for each charity type
+  const collectedBadges = useMemo(() => {
     const allContributions = [...donations, ...oneOffContributions];
     const charityTypeCounts = {};
 
@@ -62,335 +41,86 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
       }
     });
 
-    // Award badges for charity types with 3 or more donations
-    const earnedBadges = [];
-    for (const [charityType, count] of Object.entries(charityTypeCounts)) {
+    return Object.entries(charityTypeCounts).reduce((acc, [charityType, count]) => {
       if (count >= 3) {
-        switch (charityType) {
-          case 'health':
-            earnedBadges.push(allBadges.find(b => b.title === 'Healthcare Hero'));
-            break;
-          case 'education':
-            earnedBadges.push(allBadges.find(b => b.title === 'Education Champion'));
-            break;
-          case 'environment':
-            earnedBadges.push(allBadges.find(b => b.title === 'Environmental Guardian'));
-            break;
-          case 'humanitarian':
-            earnedBadges.push(allBadges.find(b => b.title === 'Humanitarian Helper'));
-            break;
-          case 'international':
-            earnedBadges.push(allBadges.find(b => b.title === 'Global Impact'));
-            break;
-          case 'water':
-            earnedBadges.push(allBadges.find(b => b.title === 'Clean Water Advocate'));
-            break;
-          case 'literacy':
-            earnedBadges.push(allBadges.find(b => b.title === 'Literacy Promoter'));
-            break;
-          case 'animal':
-            earnedBadges.push(allBadges.find(b => b.title === 'Animal Welfare Champion'));
-            break;
-          case 'sustainability':
-            earnedBadges.push(allBadges.find(b => b.title === 'Sustainability Steward'));
-            break;
-          case 'medical':
-            earnedBadges.push(allBadges.find(b => b.title === 'Medical Research Supporter'));
-            break;
-          case 'hunger':
-            earnedBadges.push(allBadges.find(b => b.title === 'Hunger Fighter'));
-            break;
-          case 'housing':
-            earnedBadges.push(allBadges.find(b => b.title === 'Housing Hero'));
-            break;
-          case 'community':
-            earnedBadges.push(allBadges.find(b => b.title === 'Community Grower'));
-            break;
-          case 'disaster':
-            earnedBadges.push(allBadges.find(b => b.title === 'Disaster Relief Ally'));
-            break;
-          case 'children':
-            earnedBadges.push(allBadges.find(b => b.title === 'Child Welfare Protector'));
-            break;
-          case 'arts':
-            earnedBadges.push(allBadges.find(b => b.title === 'Arts and Culture Patron'));
-            break;
-          case 'climate':
-            earnedBadges.push(allBadges.find(b => b.title === 'Climate Action Advocate'));
-            break;
-          case 'stem':
-            earnedBadges.push(allBadges.find(b => b.title === 'STEM Education Booster'));
-            break;
-          case 'elderly':
-            earnedBadges.push(allBadges.find(b => b.title === 'Elder Care Supporter'));
-            break;
-          case 'conservation':
-            earnedBadges.push(allBadges.find(b => b.title === 'Conservation Champion'));
-            break;
-          default:
-            break;
-        }
+        const badge = allBadges.find(b => b.title.toLowerCase().includes(charityType));
+        if (badge) acc.push(badge);
       }
-    }
-
-    setCollectedBadges(earnedBadges.filter(Boolean));
+      return acc;
+    }, []);
   }, [donations, oneOffContributions]);
 
-  const containerStyle = {
-    background: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
-    borderRadius: '10px',
-    padding: '20px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'stretch',
-    position: 'relative',
-  };
-
-  const columnStyle = {
-    flex: '1',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '20px',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: '8px',
-    margin: '0 10px',
-  };
-
-  const badgesGridStyle = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: '10px',
-  };
-
-  const badgeStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    transition: 'transform 0.2s',
-  };
-
-  const scoreNumberStyle = {
-    fontSize: '4rem',
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: '10px',
-  };
-
-  const scoreChangeStyle = {
-    color: '#2E7D32',
-    fontSize: '1rem',
-  };
-
-  const progressBarContainerStyle = {
-    width: '100%',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '10px',
-    height: '10px',
-    marginTop: '10px',
-    marginBottom: '15px',
-    overflow: 'hidden',
-  };
-
-  const progressBarStyle = {
-    width: `${(100 - pointsToNextTier) / 100 * 100}%`,
-    background: 'linear-gradient(90deg, #4CAF50, #81C784)',
-    height: '100%',
-    borderRadius: '10px',
-    transition: 'width 0.5s ease-in-out',
-  };
-
-  const tooltipStyle = {
-    position: 'absolute',
-    bottom: '100%',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    color: 'white',
-    padding: '5px 10px',
-    borderRadius: '5px',
-    fontSize: '0.8rem',
-    whiteSpace: 'nowrap',
-    zIndex: 1000,
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    padding: '10px 15px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    marginTop: '10px',
-    fontSize: '0.9rem',
-    transition: 'background-color 0.3s',
-  };
-
-  const modalStyle = {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    backgroundColor: 'white',
-    padding: '30px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-    zIndex: 1000,
-    width: '80%',
-    maxWidth: '800px',
-    maxHeight: '80%',
-    overflow: 'auto',
-  };
-
-  const modalHeaderStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
-  };
-
-  const modalGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-    gap: '20px',
-    justifyContent: 'center',
-  };
-
-  const modalBadgeStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '15px',
-    borderRadius: '10px',
-    backgroundColor: '#f0f0f0',
-    transition: 'transform 0.2s',
-  };
-
-  const overlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 999,
-  };
-
-  const closeButtonStyle = {
-    backgroundColor: 'transparent',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    color: '#333',
-  };
-
-  const currentTierBadge = tierBadges.find(badge => badge.title === tier);
+  const BadgeIcon = collectedBadges.length > 0 ? collectedBadges[0].icon : null;
 
   return (
-    <div style={containerStyle}>
-      <div style={columnStyle}>
-        <h3 style={{ marginBottom: '10px', color: '#2E7D32' }}>Your Badges</h3>
-        <div style={badgesGridStyle}>
-          {collectedBadges.map((badge, index) => (
-            <div
-              key={index}
-              style={{
-                ...badgeStyle,
-                backgroundColor: badge.color,
-              }}
-              onMouseEnter={() => setShowTooltip(index)}
-              onMouseLeave={() => setShowTooltip(null)}
-            >
-              <badge.icon size={25} color="white" />
-              {showTooltip === index && (
-                <div style={tooltipStyle}>{badge.title}</div>
-              )}
-            </div>
-          ))}
+    <div className={styles.container}>
+      <div className={styles.badgesSection}>
+        <h2 className={styles.sectionTitle}>Your Badges</h2>
+        <div className={styles.badgeCircle}>
+          {BadgeIcon ? (
+            <BadgeIcon size={30} color="white" />
+          ) : (
+            <span role="img" aria-label="No badges">🏅</span>
+          )}
         </div>
-        <button
-          style={{...buttonStyle, marginTop: '15px'}}
-          onClick={() => setShowAllBadges(true)}
-        >
+        <button className={styles.seeMoreButton} onClick={() => setShowAllBadges(true)}>
           All Badges
         </button>
       </div>
 
-      <div style={columnStyle}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '15px', color: '#2E7D32' }}>Personal Impact Score</h2>
-        <div style={scoreNumberStyle}>{animatedScore}</div>
-        <div style={scoreChangeStyle}>
-          <FaArrowUp style={{ marginRight: '5px' }} /> +{Math.abs(scoreChange)} since last year
+      <div className={styles.scoreSection}>
+        <h2 className={styles.sectionTitle}>Personal Impact Score</h2>
+        <div className={styles.scoreValue}>{impactScore}</div>
+        <div className={styles.scoreChange}>
+          <FaArrowUp /> +{scoreChange} since last year
         </div>
-        <button style={buttonStyle} onClick={() => setShowFullReport(true)}>
-          See Your Full Impact Report <FaInfoCircle style={{ marginLeft: '5px' }} />
+        <button className={styles.seeMoreButton} onClick={onFullReportClick}>
+          Impact Score Breakdown
         </button>
       </div>
 
-      <div style={columnStyle}>
-        <h3 style={{ marginBottom: '10px', color: '#2E7D32' }}>Current Tier</h3>
-        {currentTierBadge && (
-          <div style={{...badgeStyle, width: '80px', height: '80px'}}>
-            <currentTierBadge.icon size={40} color={currentTierBadge.color} />
-            <span style={{ fontWeight: 'bold', color: '#1B5E20', marginTop: '5px' }}>{currentTierBadge.title}</span>
-          </div>
-        )}
-        <p style={{ color: '#2E7D32', margin: '10px 0', fontSize: '1rem' }}>
-          Points to next tier: <span>{pointsToNextTier}</span>
-        </p>
-        <div style={progressBarContainerStyle}>
-          <div style={progressBarStyle}></div>
+      <div className={styles.tierSection}>
+        <h2 className={styles.sectionTitle}>Current Tier</h2>
+        <div className={styles.tierIcon}>
+          <FaHandHoldingHeart size={40} color="#4CAF50" />
         </div>
-        <button style={buttonStyle} onClick={onSeeProgressClick}>
-          See Progress Details
+        <div className={styles.tierName}>{tier}</div>
+        <div className={styles.pointsToNext}>
+          Points to next tier: {pointsToNextTier}
+        </div>
+        <div className={styles.progressBar}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${(100 - pointsToNextTier) / 100 * 100}%` }}
+          ></div>
+        </div>
+        <button className={styles.seeMoreButton} onClick={onSeeProgressClick}>
+          Check Progress
         </button>
       </div>
 
       {showAllBadges && (
-        <>
-          <div style={overlayStyle} onClick={() => setShowAllBadges(false)} />
-          <div style={modalStyle}>
-            <div style={modalHeaderStyle}>
-              <h2>All Badges</h2>
-              <button style={closeButtonStyle} onClick={() => setShowAllBadges(false)}>
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>All Badges</h2>
+              <button className={styles.closeButton} onClick={() => setShowAllBadges(false)}>
                 <FaTimes />
               </button>
             </div>
-            <div style={modalGridStyle}>
+            <div className={styles.badgesGrid}>
               {allBadges.map((badge, index) => (
                 <div
                   key={index}
-                  style={{
-                    ...modalBadgeStyle,
-                    backgroundColor: collectedBadges.some(b => b.title === badge.title) ? badge.color : '#f0f0f0',
-                    opacity: collectedBadges.some(b => b.title === badge.title) ? 1 : 0.5,
-                  }}
+                  className={`${styles.badgeItem} ${collectedBadges.some(b => b.title === badge.title) ? styles.collected : ''}`}
                 >
-                  <badge.icon size={40} color={collectedBadges.some(b => b.title === badge.title) ? 'white' : '#999'} />
-                  <div style={{ marginTop: '10px', fontSize: '0.9rem', textAlign: 'center', color: collectedBadges.some(b => b.title === badge.title) ? 'white' : '#666' }}>{badge.title}</div>
+                  <badge.icon size={40} color={collectedBadges.some(b => b.title === badge.title) ? badge.color : '#ccc'} />
+                  <div className={styles.badgeTitle}>{badge.title}</div>
                 </div>
               ))}
             </div>
           </div>
-        </>
-      )}
-
-      {showFullReport && (
-        <>
-          <div style={overlayStyle} onClick={() => setShowFullReport(false)} />
-          <div style={modalStyle}>
-            <ImpactScoreExplain onClose={() => setShowFullReport(false)} />
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
