@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaArrowUp, FaTrophy, FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaInfoCircle, FaStar, FaAward, FaHandsHelping, FaHeart, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaTimes } from 'react-icons/fa';
 import ImpactScoreExplain from './ImpactScoreExplain';
+import { ImpactContext } from '../contexts/ImpactContext';
 
 const allBadges = [
   { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', description: 'Impact in the health sector' },
@@ -38,9 +39,9 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
   const [showTooltip, setShowTooltip] = useState(null);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showFullReport, setShowFullReport] = useState(false);
+  const [collectedBadges, setCollectedBadges] = useState([]);
 
-  // Simulate collected badges (first 5 for this example)
-  const collectedBadges = allBadges.slice(0, 5);
+  const { donations, oneOffContributions } = useContext(ImpactContext);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,6 +49,92 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
     }, 500);
     return () => clearTimeout(timer);
   }, [impactScore]);
+
+  useEffect(() => {
+    // Count donations for each charity type
+    const allContributions = [...donations, ...oneOffContributions];
+    const charityTypeCounts = {};
+
+    allContributions.forEach(contribution => {
+      const charityType = contribution.charityType?.toLowerCase();
+      if (charityType) {
+        charityTypeCounts[charityType] = (charityTypeCounts[charityType] || 0) + 1;
+      }
+    });
+
+    // Award badges for charity types with 3 or more donations
+    const earnedBadges = [];
+    for (const [charityType, count] of Object.entries(charityTypeCounts)) {
+      if (count >= 3) {
+        switch (charityType) {
+          case 'health':
+            earnedBadges.push(allBadges.find(b => b.title === 'Healthcare Hero'));
+            break;
+          case 'education':
+            earnedBadges.push(allBadges.find(b => b.title === 'Education Champion'));
+            break;
+          case 'environment':
+            earnedBadges.push(allBadges.find(b => b.title === 'Environmental Guardian'));
+            break;
+          case 'humanitarian':
+            earnedBadges.push(allBadges.find(b => b.title === 'Humanitarian Helper'));
+            break;
+          case 'international':
+            earnedBadges.push(allBadges.find(b => b.title === 'Global Impact'));
+            break;
+          case 'water':
+            earnedBadges.push(allBadges.find(b => b.title === 'Clean Water Advocate'));
+            break;
+          case 'literacy':
+            earnedBadges.push(allBadges.find(b => b.title === 'Literacy Promoter'));
+            break;
+          case 'animal':
+            earnedBadges.push(allBadges.find(b => b.title === 'Animal Welfare Champion'));
+            break;
+          case 'sustainability':
+            earnedBadges.push(allBadges.find(b => b.title === 'Sustainability Steward'));
+            break;
+          case 'medical':
+            earnedBadges.push(allBadges.find(b => b.title === 'Medical Research Supporter'));
+            break;
+          case 'hunger':
+            earnedBadges.push(allBadges.find(b => b.title === 'Hunger Fighter'));
+            break;
+          case 'housing':
+            earnedBadges.push(allBadges.find(b => b.title === 'Housing Hero'));
+            break;
+          case 'community':
+            earnedBadges.push(allBadges.find(b => b.title === 'Community Grower'));
+            break;
+          case 'disaster':
+            earnedBadges.push(allBadges.find(b => b.title === 'Disaster Relief Ally'));
+            break;
+          case 'children':
+            earnedBadges.push(allBadges.find(b => b.title === 'Child Welfare Protector'));
+            break;
+          case 'arts':
+            earnedBadges.push(allBadges.find(b => b.title === 'Arts and Culture Patron'));
+            break;
+          case 'climate':
+            earnedBadges.push(allBadges.find(b => b.title === 'Climate Action Advocate'));
+            break;
+          case 'stem':
+            earnedBadges.push(allBadges.find(b => b.title === 'STEM Education Booster'));
+            break;
+          case 'elderly':
+            earnedBadges.push(allBadges.find(b => b.title === 'Elder Care Supporter'));
+            break;
+          case 'conservation':
+            earnedBadges.push(allBadges.find(b => b.title === 'Conservation Champion'));
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    setCollectedBadges(earnedBadges.filter(Boolean));
+  }, [donations, oneOffContributions]);
 
   const containerStyle = {
     background: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
@@ -264,7 +351,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
           <div style={progressBarStyle}></div>
         </div>
         <button style={buttonStyle} onClick={onSeeProgressClick}>
-          See Progress
+          See Progress Details
         </button>
       </div>
 
@@ -273,7 +360,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
           <div style={overlayStyle} onClick={() => setShowAllBadges(false)} />
           <div style={modalStyle}>
             <div style={modalHeaderStyle}>
-              <h2>All Impact Badges</h2>
+              <h2>All Badges</h2>
               <button style={closeButtonStyle} onClick={() => setShowAllBadges(false)}>
                 <FaTimes />
               </button>
@@ -284,12 +371,12 @@ const PersonalImpactScore = ({ impactScore, scoreChange, arrow, tier, pointsToNe
                   key={index}
                   style={{
                     ...modalBadgeStyle,
-                    backgroundColor: index < collectedBadges.length ? badge.color : '#f0f0f0',
-                    opacity: index < collectedBadges.length ? 1 : 0.5,
+                    backgroundColor: collectedBadges.some(b => b.title === badge.title) ? badge.color : '#f0f0f0',
+                    opacity: collectedBadges.some(b => b.title === badge.title) ? 1 : 0.5,
                   }}
                 >
-                  <badge.icon size={40} color={index < collectedBadges.length ? 'white' : '#999'} />
-                  <div style={{ marginTop: '10px', fontSize: '0.9rem', textAlign: 'center', color: index < collectedBadges.length ? 'white' : '#666' }}>{badge.title}</div>
+                  <badge.icon size={40} color={collectedBadges.some(b => b.title === badge.title) ? 'white' : '#999'} />
+                  <div style={{ marginTop: '10px', fontSize: '0.9rem', textAlign: 'center', color: collectedBadges.some(b => b.title === badge.title) ? 'white' : '#666' }}>{badge.title}</div>
                 </div>
               ))}
             </div>

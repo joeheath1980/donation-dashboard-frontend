@@ -1,13 +1,12 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styles from '../Impact.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
-  const navigate = useNavigate();
 
   const [emailResults, setEmailResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -149,11 +148,6 @@ function Activity() {
     setSelectedTypes(updatedTypes);
   };
 
-  const handleManagePayments = () => {
-    console.log('Manage Payments button clicked');
-    navigate('/manage-payments');
-  };
-
   return (
     <div className={styles.container}>
       <h1 className={styles.activityHeader}>Discover your donations and start tracking your impact</h1>
@@ -164,7 +158,6 @@ function Activity() {
             {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
           <Link to="/profile" className={styles.toggleButton}>Check Out Your Impact</Link>
-          <button onClick={handleManagePayments} className={styles.toggleButton}>Manage Payments</button>
         </div>
 
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}

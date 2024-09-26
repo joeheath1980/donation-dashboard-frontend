@@ -25,7 +25,6 @@ import BusinessReports from './components/BusinessReports';
 import BusinessSettings from './components/BusinessSettings';
 import CreateBusinessCampaign from './components/CreateBusinessCampaign';
 import WelcomePage from './components/WelcomePage';
-import OnboardingMailScraper from './components/OnboardingMailScraper';
 import AdminDashboard from './components/AdminDashboard';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
 import MicrosoftAuthCallback from './components/MicrosoftAuthCallback';
@@ -73,9 +72,6 @@ function App() {
               <Route path="/organization-signup" element={<OrganizationSignup />} />
               <Route path="/business-signup" element={<BusinessSignup />} />
               <Route path="/charity-signup" element={<CharitySignup />} />
-              
-              {/* Onboarding route */}
-              <Route path="/onboarding/mail-scraper" element={<ProtectedRoute><OnboardingMailScraper /></ProtectedRoute>} />
               
               {/* Google Auth Callback route */}
               <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />

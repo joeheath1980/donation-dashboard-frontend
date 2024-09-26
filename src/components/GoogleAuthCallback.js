@@ -31,8 +31,8 @@ const GoogleAuthCallback = () => {
 
           // Redirect based on isNewUser flag
           if (isNewUser) {
-            console.log('Navigating to OnboardingMailScraper');
-            navigate('/onboarding/mail-scraper');
+            console.log('Navigating to Activity');
+            navigate('/activity');
           } else {
             console.log('Navigating to dashboard');
             navigate('/dashboard');

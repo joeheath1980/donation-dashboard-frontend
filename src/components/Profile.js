@@ -11,6 +11,7 @@ import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import ImpactScoreExplain from './ImpactScoreExplain';
 import TierProgressModal from './TierProgressModal';
 import FollowedCharitiesComponent from './FollowedCharitiesComponent';
+import GlobalGivingProjects from './GlobalGivingProjects';
 import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
 
 function Profile() {
@@ -222,14 +223,6 @@ function Profile() {
     }
   ];
 
-  const projectsToSupport = [
-    { title: "Support Healthcare", description: "Provide essential medical supplies to underserved communities. Your donation can help save lives.", link: "#" },
-    { title: "Education Initiative", description: "Help underprivileged children access quality education. Support our program to build schools and provide learning materials.", link: "#" },
-    { title: "Clean Water Project", description: "Bring clean water to remote villages. Your contribution can help install water purification systems and wells.", link: "#" },
-    { title: "Hunger Relief", description: "Support food banks and meal programs. Help us fight hunger in local communities and disaster-struck areas.", link: "#" },
-    { title: "Environmental Conservation", description: "Protect endangered species and their habitats. Join our efforts to preserve biodiversity and combat climate change.", link: "#" }
-  ];
-
   if (isLoading) {
     return <div className={styles.loading}>Loading your impact data...</div>;
   }
@@ -273,7 +266,7 @@ function Profile() {
 
       <div style={carouselStyle}>
         <h2 style={carouselTitleStyle}>Projects to Support</h2>
-        <CarouselComponent items={projectsToSupport} style={carouselComponentStyle} />
+        <GlobalGivingProjects />
       </div>
       
       <div style={{...sectionStyle, display: 'flex', justifyContent: 'space-between', gap: '24px'}}>

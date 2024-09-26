@@ -1,7 +1,7 @@
 // src/components/DonationConfirmationModal.js
 
 import React, { useState } from 'react';
-import styles from './DonationConfirmationModal.module.css';
+import styles from './ModalStyles.module.css';
 import { format, parseISO } from 'date-fns';
 
 const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
@@ -25,10 +25,11 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
   };
 
   return (
-    <div className={styles.modal}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2>Confirm Donation</h2>
-        <form onSubmit={handleSubmit}>
+        <button className={styles.closeButton} onClick={onCancel}>&times;</button>
+        <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="charity">Charity:</label>
             <input
@@ -97,10 +98,9 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
               Monthly Donation
             </label>
           </div>
-          {/* Add other form fields as necessary */}
           <div className={styles.buttonGroup}>
-            <button type="submit" className={styles.confirmButton}>Confirm</button>
-            <button type="button" onClick={onCancel} className={styles.cancelButton}>Cancel</button>
+            <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Confirm</button>
+            <button type="button" onClick={onCancel} className={`${styles.button} ${styles.cancelButton}`}>Cancel</button>
           </div>
         </form>
       </div>

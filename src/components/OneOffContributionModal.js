@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './OneOffContributionModal.module.css';
+import styles from './ModalStyles.module.css';
 
 const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
   const [editedContribution, setEditedContribution] = useState(contribution);
@@ -15,11 +15,12 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
   };
 
   return (
-    <div className={styles.modal}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2>Edit One-Off Contribution</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
+        <button className={styles.closeButton} onClick={onCancel}>&times;</button>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
             <label htmlFor="charity">Charity:</label>
             <input
               type="text"
@@ -30,7 +31,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               required
             />
           </div>
-          <div>
+          <div className={styles.formGroup}>
             <label htmlFor="amount">Amount:</label>
             <input
               type="number"
@@ -41,7 +42,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               required
             />
           </div>
-          <div>
+          <div className={styles.formGroup}>
             <label htmlFor="date">Date:</label>
             <input
               type="date"
@@ -52,7 +53,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               required
             />
           </div>
-          <div>
+          <div className={styles.formGroup}>
             <label htmlFor="charityType">Charity Type:</label>
             <select
               id="charityType"
@@ -73,7 +74,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
             </select>
           </div>
           {editedContribution.subject && (
-            <div>
+            <div className={styles.formGroup}>
               <label htmlFor="subject">Subject:</label>
               <input
                 type="text"
@@ -85,8 +86,8 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
             </div>
           )}
           <div className={styles.buttonGroup}>
-            <button type="submit">Confirm</button>
-            <button type="button" onClick={onCancel}>Cancel</button>
+            <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Confirm</button>
+            <button type="button" onClick={onCancel} className={`${styles.button} ${styles.cancelButton}`}>Cancel</button>
           </div>
         </form>
       </div>
