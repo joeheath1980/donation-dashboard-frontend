@@ -36,19 +36,20 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './styles/global.css';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedUserTypes }) => {
   const { user } = useAuth();
   const token = localStorage.getItem('token');
-  const justRegistered = localStorage.getItem('justRegistered');
+  const userType = localStorage.getItem('userType');
   
-  if (window.location.pathname === '/onboarding/mail-scraper' && (token || justRegistered === 'true')) {
-    if (justRegistered) {
-      localStorage.removeItem('justRegistered');
-    }
-    return children;
+  if (!token) {
+    return <Navigate to="/login" />;
   }
   
-  return user ? children : <Navigate to="/login" />;
+  if (allowedUserTypes && !allowedUserTypes.includes(userType)) {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return children;
 };
 
 const AdminRoute = ({ children }) => {
@@ -94,14 +95,14 @@ function App() {
               <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
               
               {/* Business routes */}
-              <Route path="/business-dashboard" element={<ProtectedRoute><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-donations" element={<ProtectedRoute><BusinessLayout><BusinessDonations /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-reports" element={<ProtectedRoute><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-settings" element={<ProtectedRoute><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/create-business-campaign" element={<ProtectedRoute><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-donations" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessDonations /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-reports" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-settings" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
 
               {/* Charity routes */}
-              <Route path="/charity-dashboard" element={<ProtectedRoute><CharityDashboard /></ProtectedRoute>} />
+              <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><CharityDashboard /></ProtectedRoute>} />
 
               {/* Admin routes */}
               <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
