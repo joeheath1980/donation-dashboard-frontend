@@ -28,6 +28,7 @@ import WelcomePage from './components/WelcomePage';
 import AdminDashboard from './components/AdminDashboard';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
 import MicrosoftAuthCallback from './components/MicrosoftAuthCallback';
+import AuthCallback from './components/AuthCallback';
 import ManagePaymentsComponent from './components/ManagePaymentsComponent';
 import CharityDashboard from './components/CharityDashboard';
 import { starbucks } from './data/partnerData';
@@ -73,10 +74,9 @@ function App() {
               <Route path="/business-signup" element={<BusinessSignup />} />
               <Route path="/charity-signup" element={<CharitySignup />} />
               
-              {/* Google Auth Callback route */}
+              {/* Auth Callback routes */}
+              <Route path="/auth-callback" element={<AuthCallback />} />
               <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
-              
-              {/* Microsoft Auth Callback route */}
               <Route path="/microsoft-callback" element={<MicrosoftAuthCallback />} />
               
               {/* Protected routes */}
