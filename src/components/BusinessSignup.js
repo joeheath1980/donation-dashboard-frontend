@@ -9,8 +9,8 @@ function BusinessSignup() {
   const navigate = useNavigate();
   const { businessSignup } = useAuth(); // Destructure businessSignup from AuthContext
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    companyName: '',
+    contactEmail: '',
     password: '',
     description: '',
     preferredCauses: [],
@@ -59,16 +59,16 @@ function BusinessSignup() {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          name="name"
-          value={formData.name}
+          name="companyName"
+          value={formData.companyName}
           onChange={handleInputChange}
           placeholder="Company Name"
           required
         />
         <input
           type="email"
-          name="email"
-          value={formData.email}
+          name="contactEmail"
+          value={formData.contactEmail}
           onChange={handleInputChange}
           placeholder="Contact Email"
           required
@@ -109,4 +109,3 @@ function BusinessSignup() {
 }
 
 export default BusinessSignup;
-
