@@ -1,6 +1,6 @@
 // src/components/Login.js
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../Login.module.css';
@@ -9,7 +9,7 @@ import logo from '../assets/logo.png';
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, socialLogin, businessLogin, charityLogin, API_URL } = useAuth();
+  const { login, businessLogin, charityLogin, socialLogin, API_URL } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,28 +17,30 @@ function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Callback to handle social login tokens
-  const handleSocialLoginCallback = useCallback(
-    async (token) => {
-      try {
-        await socialLogin(token);
-        navigate('/profile');
-      } catch (err) {
-        console.error('Error handling social login callback:', err);
-        setError('Failed to complete social login. Please try again.');
-      }
-    },
-    [socialLogin, navigate]
-  );
-
   useEffect(() => {
-    // Check for token in URL after social login redirect
+    // Check for error message in URL after failed authentication
     const params = new URLSearchParams(location.search);
+    const errorMessage = params.get('error');
+    if (errorMessage) {
+      setError(decodeURIComponent(errorMessage));
+    }
+
+    // Check for token in URL after successful social authentication
     const token = params.get('token');
     if (token) {
       handleSocialLoginCallback(token);
     }
-  }, [location, handleSocialLoginCallback]);
+  }, [location]);
+
+  const handleSocialLoginCallback = async (token) => {
+    try {
+      await socialLogin(token);
+      navigate('/profile');
+    } catch (err) {
+      console.error('Error handling social login callback:', err);
+      setError('Failed to complete social login. Please try again.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

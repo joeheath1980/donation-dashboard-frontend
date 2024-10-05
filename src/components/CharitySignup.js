@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth
 import styles from '../BusinessSignup.module.css';
 
 function CharitySignup() {
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // Get setUser from AuthContext
   const [formData, setFormData] = useState({
     charityName: '',
     contactEmail: '',
@@ -15,6 +17,7 @@ function CharitySignup() {
     category: '',
   });
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +27,26 @@ function CharitySignup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     try {
       const response = await axios.post('http://localhost:3002/api/charity/signup', formData);
       if (response.data && response.data.token) {
         console.log('Charity registered successfully');
         localStorage.setItem('token', response.data.token);
-        navigate('/dashboard');
+        localStorage.setItem('userType', 'charity');
+        setSuccessMessage(response.data.message || 'Charity registered successfully');
+
+        // Set the user in the AuthContext
+        setUser({
+          charityName: formData.charityName,
+          contactEmail: formData.contactEmail,
+          isCharity: true
+        });
+
+        // Redirect after a short delay to allow the user to see the success message
+        setTimeout(() => {
+          navigate('/charity-dashboard');
+        }, 2000);
       } else {
         setError('Signup successful, but no token received. Please try logging in.');
       }
@@ -49,6 +66,7 @@ function CharitySignup() {
     <div className={styles.container}>
       <h2>Charity Signup</h2>
       {error && <div className={styles.error}>{error}</div>}
+      {successMessage && <div className={styles.success}>{successMessage}</div>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
