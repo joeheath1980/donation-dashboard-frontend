@@ -4,7 +4,7 @@ import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
 import ValidationModal from './ValidationModal';
-import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 
 function formatDate(dateString) {
@@ -71,27 +71,49 @@ function OneOffContributionsComponent({ displayAll }) {
   };
 
   const handleSave = async (editedContribution) => {
-    console.log('Saving edited contribution:', editedContribution);
+    console.log('Saving contribution:', editedContribution);
     try {
-      const response = await fetch(`http://localhost:3002/api/contributions/one-off/${editedContribution._id}`, {
-        method: 'PUT',
+      let url = 'http://localhost:3002/api/contributions/one-off';
+      let method = 'POST';
+
+      if (editingContribution && editingContribution._id) {
+        url += `/${editingContribution._id}`;
+        method = 'PUT';
+      }
+
+      const formData = new FormData();
+      for (const key in editedContribution) {
+        if (key === 'receipt' && editedContribution.receipt instanceof File) {
+          formData.append('receipt', editedContribution.receipt);
+        } else if (key === 'amount') {
+          formData.append(key, parseFloat(editedContribution.amount));
+        } else {
+          formData.append(key, editedContribution[key]);
+        }
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ ...editedContribution, needsValidation: true })
+        body: formData
       });
 
       if (response.ok) {
         const updatedContribution = await response.json();
         console.log('Server response:', updatedContribution);
-        setLocalContributions(prevContributions => {
-          const newContributions = prevContributions.map(contribution =>
-            contribution._id === updatedContribution._id ? updatedContribution : contribution
-          );
-          console.log('Updated localContributions after edit:', newContributions);
-          return newContributions;
-        });
+        if (editingContribution && editingContribution._id) {
+          setLocalContributions(prevContributions => {
+            const newContributions = prevContributions.map(contribution =>
+              contribution._id === updatedContribution._id ? updatedContribution : contribution
+            );
+            console.log('Updated localContributions after edit:', newContributions);
+            return newContributions;
+          });
+        } else {
+          setLocalContributions(prevContributions => [...prevContributions, updatedContribution]);
+        }
         setShowModal(false);
         setEditingContribution(null);
         if (isAuthenticated) {
@@ -132,6 +154,11 @@ function OneOffContributionsComponent({ displayAll }) {
     }
   };
 
+  const handleAddNew = () => {
+    setEditingContribution(null);
+    setShowModal(true);
+  };
+
   console.log('Rendering component. Current state:', {
     showModal,
     editingContribution,
@@ -147,23 +174,30 @@ function OneOffContributionsComponent({ displayAll }) {
 
   return (
     <div className={cleanStyles.grid}>
+      <div className={cleanStyles.card}>
+        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary}`}>
+          <FaPlus /> Add New One-Off Contribution
+        </button>
+      </div>
       {displayedContributions && displayedContributions.length > 0 ? (
         <>
           {displayedContributions.map((contribution) => (
             <div key={contribution._id} className={cleanStyles.card}>
               <div className={cleanStyles.cardHeader}>
                 <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
-                {contribution.needsValidation && (
-                  <InstantTooltip text={contribution.isValidated ? "Contribution validated" : "Upload receipt for validation"}>
-                    <button 
-                      onClick={() => handleValidate(contribution)} 
-                      className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
-                      aria-label="Validate Contribution"
-                    >
-                      <FaCheckCircle style={{ color: contribution.isValidated ? 'green' : 'gray' }} />
-                    </button>
-                  </InstantTooltip>
-                )}
+                <div className={cleanStyles.validationButton}>
+                  {contribution.needsValidation && (
+                    <InstantTooltip text={contribution.isValidated ? "Contribution validated" : "Upload receipt for validation"}>
+                      <button 
+                        onClick={() => handleValidate(contribution)} 
+                        className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                        aria-label="Validate Contribution"
+                      >
+                        <FaCheckCircle style={{ color: contribution.isValidated ? 'green' : 'gray' }} />
+                      </button>
+                    </InstantTooltip>
+                  )}
+                </div>
               </div>
               <div className={cleanStyles.cardContent}>
                 <p><strong>Date:</strong> {formatDate(contribution.date)}</p>

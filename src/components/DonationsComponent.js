@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
-import DonationConfirmationModal from './DonationConfirmationModal';
+import DonationModal from './DonationModal';
 import ValidationModal from './ValidationModal';
-import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 
 function formatDate(dateString) {
@@ -77,31 +77,48 @@ function DonationsComponent({ displayAll }) {
   };
 
   const handleConfirm = async (editedDonation) => {
-    console.log('Saving edited donation:', editedDonation);
-    const amount = parseFloat(editedDonation.amount);
-    if (isNaN(amount)) {
-      alert('Please enter a valid amount.');
-      return;
-    }
+    console.log('Saving donation:', editedDonation);
 
     try {
-      const response = await fetch(`http://localhost:3002/api/donations/${editedDonation._id}`, {
-        method: 'PUT',
+      let url = 'http://localhost:3002/api/donations';
+      let method = 'POST';
+
+      if (currentDonation && currentDonation._id) {
+        url += `/${currentDonation._id}`;
+        method = 'PUT';
+      }
+
+      const formData = new FormData();
+      for (const key in editedDonation) {
+        if (key === 'receipt' && editedDonation.receipt instanceof File) {
+          formData.append('receipt', editedDonation.receipt);
+        } else if (key === 'amount') {
+          formData.append(key, parseFloat(editedDonation.amount));
+        } else {
+          formData.append(key, editedDonation[key]);
+        }
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ ...editedDonation, amount, needsValidation: true })
+        body: formData
       });
 
       if (response.ok) {
         const updatedDonation = await response.json();
         console.log('Server response:', updatedDonation);
-        setLocalDonations(prevDonations =>
-          prevDonations.map(donation =>
-            donation._id === updatedDonation._id ? updatedDonation : donation
-          )
-        );
+        if (currentDonation && currentDonation._id) {
+          setLocalDonations(prevDonations =>
+            prevDonations.map(donation =>
+              donation._id === updatedDonation._id ? updatedDonation : donation
+            )
+          );
+        } else {
+          setLocalDonations(prevDonations => [...prevDonations, updatedDonation]);
+        }
         setShowModal(false);
         if (isAuthenticated) {
           fetchImpactData();
@@ -141,6 +158,11 @@ function DonationsComponent({ displayAll }) {
     }
   };
 
+  const handleAddNew = () => {
+    setCurrentDonation(null);
+    setShowModal(true);
+  };
+
   const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
 
   if (!isAuthenticated) {
@@ -149,23 +171,30 @@ function DonationsComponent({ displayAll }) {
 
   return (
     <div className={cleanStyles.grid}>
+      <div className={cleanStyles.card}>
+        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary}`}>
+          <FaPlus /> Add New Donation
+        </button>
+      </div>
       {displayedDonations && displayedDonations.length > 0 ? (
         <>
           {displayedDonations.map((donation) => (
             <div key={donation._id} className={cleanStyles.card}>
               <div className={cleanStyles.cardHeader}>
                 <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
-                {donation.needsValidation && (
-                  <InstantTooltip text={donation.isValidated ? "Donation validated" : "Upload receipt for validation"}>
-                    <button 
-                      onClick={() => handleValidate(donation)} 
-                      className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
-                      aria-label="Validate Donation"
-                    >
-                      <FaCheckCircle style={{ color: donation.isValidated ? 'green' : 'gray' }} />
-                    </button>
-                  </InstantTooltip>
-                )}
+                <div className={cleanStyles.validationButton}>
+                  {donation.needsValidation && (
+                    <InstantTooltip text={donation.isValidated ? "Donation validated" : "Upload receipt for validation"}>
+                      <button 
+                        onClick={() => handleValidate(donation)} 
+                        className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                        aria-label="Validate Donation"
+                      >
+                        <FaCheckCircle style={{ color: donation.isValidated ? 'green' : 'gray' }} />
+                      </button>
+                    </InstantTooltip>
+                  )}
+                </div>
               </div>
               <div className={cleanStyles.cardContent}>
                 <p><strong>Date:</strong> {formatDate(donation.date)}</p>
@@ -174,9 +203,6 @@ function DonationsComponent({ displayAll }) {
                   {donation.isMonthly && <span className={cleanStyles.highlight}> (Monthly)</span>}
                 </p>
                 <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
-                {donation.subject && (
-                  <p><strong>Subject:</strong> {donation.subject}</p>
-                )}
                 {donation.receiptUrl && (
                   <p>
                     <strong>Receipt:</strong> 
@@ -214,7 +240,7 @@ function DonationsComponent({ displayAll }) {
         <p className={cleanStyles.textCenter}>No donations to display.</p>
       )}
       {showModal && (
-        <DonationConfirmationModal
+        <DonationModal
           donation={currentDonation}
           onConfirm={handleConfirm}
           onCancel={() => setShowModal(false)}

@@ -60,7 +60,7 @@ const FollowedCharitiesComponent = () => {
         )}
       </div>
       <Link to="/search-charities" className={styles.actionButton}>
-        See more
+        Find more
       </Link>
     </div>
   );

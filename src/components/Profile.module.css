@@ -68,6 +68,8 @@
 }
 
 .listItem:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
   border-bottom: none;
 }
 

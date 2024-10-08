@@ -69,19 +69,25 @@
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  position: relative;
+  min-height: 120px; /* Ensure minimum height for the card */
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 12px;
+  min-height: 40px; /* Ensure minimum height for the header */
 }
 
 .cardTitle {
   font-size: 18px;
   font-weight: 500;
   color: #333;
+  padding-right: 40px; /* Add space for the validation button */
+  word-break: break-word;
+  flex: 1; /* Allow title to take up remaining space */
 }
 
 .cardContent {
@@ -89,9 +95,16 @@
   color: #666;
 }
 
+.validationButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1; /* Ensure button is always on top */
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
@@ -116,4 +129,32 @@
 
 .textCenter {
   text-align: center;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.cardActions .iconButton {
+  margin-left: 8px;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    min-height: 100px; /* Adjust minimum height for smaller screens */
+  }
+  
+  .cardHeader {
+    min-height: 30px; /* Adjust minimum height for smaller screens */
+  }
+  
+  .cardTitle {
+    font-size: 16px; /* Slightly smaller font size for mobile */
+  }
 }
