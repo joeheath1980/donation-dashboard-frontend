@@ -1,31 +1,35 @@
 import React, { useState } from 'react';
 import styles from './ModalStyles.module.css';
 
-const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
-  const [editedContribution, setEditedContribution] = useState(contribution || {
+const DonationModal = ({ donation, onConfirm, onCancel }) => {
+  const [editedDonation, setEditedDonation] = useState(donation || {
     charity: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0],
+    date: '',
     charityType: '',
+    isMonthly: false,
+    receipt: null
   });
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    setEditedContribution(prev => ({ 
-      ...prev, 
-      [name]: type === 'file' ? files[0] : value 
+    const { name, value, type, checked, files } = e.target;
+    setEditedDonation(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : 
+               type === 'file' ? files[0] :
+               value
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onConfirm(editedContribution);
+    onConfirm(editedDonation);
   };
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>{contribution ? 'Edit One-Off Contribution' : 'Add New One-Off Contribution'}</h2>
+        <h2>{donation ? 'Edit Donation' : 'Add New Donation'}</h2>
         <button className={styles.closeButton} onClick={onCancel}>&times;</button>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
@@ -34,7 +38,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               type="text"
               id="charity"
               name="charity"
-              value={editedContribution.charity}
+              value={editedDonation.charity}
               onChange={handleChange}
               required
             />
@@ -45,9 +49,11 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               type="number"
               id="amount"
               name="amount"
-              value={editedContribution.amount}
+              value={editedDonation.amount}
               onChange={handleChange}
               required
+              min="0"
+              step="0.01"
             />
           </div>
           <div className={styles.formGroup}>
@@ -56,7 +62,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               type="date"
               id="date"
               name="date"
-              value={editedContribution.date.split('T')[0]}
+              value={editedDonation.date}
               onChange={handleChange}
               required
             />
@@ -66,11 +72,11 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
             <select
               id="charityType"
               name="charityType"
-              value={editedContribution.charityType}
+              value={editedDonation.charityType}
               onChange={handleChange}
               required
             >
-              <option value="">Select a charity type</option>
+              <option value="" disabled>Select Charity Type</option>
               <option value="Health">Health</option>
               <option value="Education">Education</option>
               <option value="Environment">Environment</option>
@@ -83,7 +89,19 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="receipt">Upload Receipt (optional):</label>
+            <label htmlFor="isMonthly">
+              <input
+                type="checkbox"
+                id="isMonthly"
+                name="isMonthly"
+                checked={editedDonation.isMonthly}
+                onChange={handleChange}
+              />
+              Monthly Donation
+            </label>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="receipt">Upload Receipt:</label>
             <input
               type="file"
               id="receipt"
@@ -102,4 +120,4 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
   );
 };
 
-export default OneOffContributionModal;
+export default DonationModal;

@@ -171,7 +171,7 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleRegularContributions}>
-              {showRegularContributions ? "Hide" : "See more"}
+              {showRegularContributions ? "Hide" : "Find more"}
             </button>
             {showRegularContributions && <DonationsComponent displayAll={true} />}
           </div>
@@ -186,7 +186,7 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleOneOffContributions}>
-              {showOneOffContributions ? "Hide" : "See more"}
+              {showOneOffContributions ? "Hide" : "Find more"}
             </button>
             {showOneOffContributions && <OneOffContributionsComponent displayAll={true} />}
           </div>
