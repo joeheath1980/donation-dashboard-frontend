@@ -5,6 +5,7 @@ import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
 import ValidationModal from './ValidationModal';
 import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import InstantTooltip from './InstantTooltip';
 
 function formatDate(dateString) {
   let date;
@@ -153,13 +154,15 @@ function OneOffContributionsComponent({ displayAll }) {
               <div className={cleanStyles.cardHeader}>
                 <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
                 {contribution.needsValidation && (
-                  <button 
-                    onClick={() => handleValidate(contribution)} 
-                    className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
-                    aria-label="Validate Contribution"
-                  >
-                    <FaCheckCircle />
-                  </button>
+                  <InstantTooltip text={contribution.isValidated ? "Contribution validated" : "Upload receipt for validation"}>
+                    <button 
+                      onClick={() => handleValidate(contribution)} 
+                      className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                      aria-label="Validate Contribution"
+                    >
+                      <FaCheckCircle style={{ color: contribution.isValidated ? 'green' : 'gray' }} />
+                    </button>
+                  </InstantTooltip>
                 )}
               </div>
               <div className={cleanStyles.cardContent}>
@@ -183,16 +186,20 @@ function OneOffContributionsComponent({ displayAll }) {
                 )}
               </div>
               <div className={cleanStyles.cardActions}>
-                <button onClick={() => handleEdit(contribution)} className={cleanStyles.iconButton} aria-label="Edit Contribution">
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDelete(contribution._id)}
-                  className={cleanStyles.iconButton}
-                  aria-label="Delete Contribution"
-                >
-                  <FaTrash />
-                </button>
+                <InstantTooltip text="Edit contribution">
+                  <button onClick={() => handleEdit(contribution)} className={cleanStyles.iconButton} aria-label="Edit Contribution">
+                    <FaEdit />
+                  </button>
+                </InstantTooltip>
+                <InstantTooltip text="Delete contribution">
+                  <button
+                    onClick={() => handleDelete(contribution._id)}
+                    className={cleanStyles.iconButton}
+                    aria-label="Delete Contribution"
+                  >
+                    <FaTrash />
+                  </button>
+                </InstantTooltip>
               </div>
             </div>
           ))}

@@ -5,6 +5,7 @@ import { format, parseISO, parse } from 'date-fns';
 import DonationConfirmationModal from './DonationConfirmationModal';
 import ValidationModal from './ValidationModal';
 import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import InstantTooltip from './InstantTooltip';
 
 function formatDate(dateString) {
   let date;
@@ -155,13 +156,15 @@ function DonationsComponent({ displayAll }) {
               <div className={cleanStyles.cardHeader}>
                 <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
                 {donation.needsValidation && (
-                  <button 
-                    onClick={() => handleValidate(donation)} 
-                    className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
-                    aria-label="Validate Donation"
-                  >
-                    <FaCheckCircle />
-                  </button>
+                  <InstantTooltip text={donation.isValidated ? "Donation validated" : "Upload receipt for validation"}>
+                    <button 
+                      onClick={() => handleValidate(donation)} 
+                      className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
+                      aria-label="Validate Donation"
+                    >
+                      <FaCheckCircle style={{ color: donation.isValidated ? 'green' : 'gray' }} />
+                    </button>
+                  </InstantTooltip>
                 )}
               </div>
               <div className={cleanStyles.cardContent}>
@@ -189,16 +192,20 @@ function DonationsComponent({ displayAll }) {
                 )}
               </div>
               <div className={cleanStyles.cardActions}>
-                <button onClick={() => handleEdit(donation)} className={cleanStyles.iconButton} aria-label="Edit Donation">
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDelete(donation._id)}
-                  className={cleanStyles.iconButton}
-                  aria-label="Delete Donation"
-                >
-                  <FaTrash />
-                </button>
+                <InstantTooltip text="Edit donation">
+                  <button onClick={() => handleEdit(donation)} className={cleanStyles.iconButton} aria-label="Edit Donation">
+                    <FaEdit />
+                  </button>
+                </InstantTooltip>
+                <InstantTooltip text="Delete donation">
+                  <button
+                    onClick={() => handleDelete(donation._id)}
+                    className={cleanStyles.iconButton}
+                    aria-label="Delete Donation"
+                  >
+                    <FaTrash />
+                  </button>
+                </InstantTooltip>
               </div>
             </div>
           ))}
