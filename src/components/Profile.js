@@ -1,9 +1,11 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import styles from './Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ImpactVisualization from './ImpactVisualization';
 import CarouselComponent from './CarouselComponent';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { useAuth } from '../contexts/AuthContext';
 import DonationsComponent from './DonationsComponent';
 import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
@@ -13,6 +15,26 @@ import TierProgressModal from './TierProgressModal';
 import FollowedCharitiesComponent from './FollowedCharitiesComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
 import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaApple, FaAmazon, FaMicrosoft, FaGoogle, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { SiTesla, SiNike, SiAdidas, SiCocacola, SiMcdonalds, SiBurgerking, SiNetflix, SiSpotify } from 'react-icons/si';
+
+const iconMap = {
+  'Apple': FaApple,
+  'Amazon': FaAmazon,
+  'Microsoft': FaMicrosoft,
+  'Google': FaGoogle,
+  'Facebook': FaFacebook,
+  'Twitter': FaTwitter,
+  'LinkedIn': FaLinkedin,
+  'Tesla': SiTesla,
+  'Nike': SiNike,
+  'Adidas': SiAdidas,
+  'Coca-Cola': SiCocacola,
+  'McDonald\'s': SiMcdonalds,
+  'Burger King': SiBurgerking,
+  'Netflix': SiNetflix,
+  'Spotify': SiSpotify
+};
 
 function Profile() {
   const { 
@@ -28,6 +50,8 @@ function Profile() {
     isAuthenticated,
   } = useContext(ImpactContext);
 
+  const { getAuthHeaders } = useAuth();
+
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
   const [localOneOffContributions, setLocalOneOffContributions] = useState(contextOneOffContributions || []);
   const [showRegularContributions, setShowRegularContributions] = useState(false);
@@ -35,6 +59,7 @@ function Profile() {
   const [showFullImpactReport, setShowFullImpactReport] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showTierProgressModal, setShowTierProgressModal] = useState(false);
+  const [matchingOpportunities, setMatchingOpportunities] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -52,6 +77,22 @@ function Profile() {
   useEffect(() => {
     if (contextOneOffContributions) setLocalOneOffContributions(contextOneOffContributions);
   }, [contextOneOffContributions]);
+
+  useEffect(() => {
+    const fetchMatchingOpportunities = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const headers = getAuthHeaders();
+        const response = await axios.get('http://localhost:3002/api/matchingOpportunities', { headers });
+        setMatchingOpportunities(response.data);
+      } catch (err) {
+        console.error('Error fetching matching opportunities:', err);
+      }
+    };
+
+    fetchMatchingOpportunities();
+  }, [isAuthenticated, getAuthHeaders]);
 
   const getUniqueCharities = useCallback(() => {
     const regularDonationCharities = localDonations.map(d => d.charity);
@@ -86,43 +127,20 @@ function Profile() {
     }
   }, [contextSetOneOffContributions]);
 
-  const matchingOpportunities = [
-    { 
-      title: "Double Your Impact with TechCorp", 
-      description: "TechCorp is matching donations up to $10,000 for STEM education programs. Donate now to double your contribution!", 
-      amount: 10000,
-      endDate: "2023-12-31",
-      link: "#" 
-    },
-    { 
-      title: "GreenEarth Foundation 2x Match", 
-      description: "Help us combat climate change. All donations to GreenEarth Foundation are being matched 2:1 this month.", 
-      amount: 5000,
-      endDate: "2023-11-30",
-      link: "#" 
-    },
-    { 
-      title: "Healthcare Heroes Support", 
-      description: "Your donation to support healthcare workers will be matched 100% by MediCare Inc. Let's show our appreciation!", 
-      amount: 7500,
-      endDate: "2023-12-15",
-      link: "#" 
-    },
-    { 
-      title: "Education for All: 3x Match", 
-      description: "Triple your impact! Every dollar donated to our Education for All program will be matched 3:1 by an anonymous donor.", 
-      amount: 15000,
-      endDate: "2024-01-31",
-      link: "#" 
-    },
-    { 
-      title: "Animal Shelter Emergency Fund", 
-      description: "Help us reach our goal of $50,000 for emergency animal care. PetLove Co. will match every donation.", 
-      amount: 50000,
-      endDate: "2023-12-31",
-      link: "#" 
+  const handleMatch = async (opportunityId) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.post(`http://localhost:3002/api/matchingOpportunities/${opportunityId}/accept`, {}, { headers });
+      setMatchingOpportunities(prevOpportunities =>
+        prevOpportunities.map(opp =>
+          opp._id === opportunityId ? { ...opp, accepted: true } : opp
+        )
+      );
+    } catch (err) {
+      console.error('Error accepting matching opportunity:', err);
+      alert('Failed to accept the matching opportunity. Please try again.');
     }
-  ];
+  };
 
   if (isLoading) return <div className={styles.textCenter}>Loading your impact data...</div>;
   if (impactError) return <div className={styles.textCenter}>{impactError}</div>;
@@ -147,11 +165,38 @@ function Profile() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
           <CarouselComponent 
-            items={matchingOpportunities.map(opp => ({
-              title: opp.title,
-              description: `${opp.description} Amount: $${opp.amount.toLocaleString()}. Valid until: ${new Date(opp.endDate).toLocaleDateString()}`,
-              link: opp.link
-            }))}
+            items={matchingOpportunities.map(opportunity => {
+              const IconComponent = iconMap[opportunity.brand] || null;
+              return {
+                content: (
+                  <div className={styles.card} style={{ height: '220px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div className={styles.cardHeader} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px' }}>
+                      {IconComponent && <IconComponent style={{ width: '24px', height: '24px', marginRight: '8px' }} />}
+                      <h3 className={styles.cardTitle} style={{ fontSize: '16px' }}>{opportunity.brand}</h3>
+                    </div>
+                    <div className={styles.cardContent} style={{ flexGrow: 1, overflow: 'auto', padding: '0 12px' }}>
+                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1', fontWeight: 'bold', marginBottom: '4px' }}>{opportunity.description.split('!')[0] + '!'}</p>
+                      <p className={`${styles.text} ${styles.highlight}`} style={{ margin: '0', lineHeight: '1.1', marginBottom: '4px' }}><strong>Cause:</strong> {opportunity.cause}</p>
+                      <div className={`${styles.flexColumn}`}>
+                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Your Contribution:</strong> ${opportunity.donationAmount}</p>
+                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Multiplier:</strong> x2</p>
+                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
+                      </div>
+                      <p className={`${styles.text}`} style={{ margin: '0', lineHeight: '1.1', marginTop: '4px' }}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className={styles.cardActions} style={{ padding: '8px 12px' }}>
+                      <button
+                        onClick={() => handleMatch(opportunity._id)}
+                        className={styles.button}
+                        disabled={opportunity.accepted}
+                      >
+                        {opportunity.accepted ? 'Matched' : 'Match'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              };
+            })}
           />
         </section>
 

@@ -5,14 +5,6 @@ import 'slick-carousel/slick/slick-theme.css';
 import styles from './CarouselComponent.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-const getIcon = (title) => {
-  if (title.toLowerCase().includes('health')) return 'heart';
-  if (title.toLowerCase().includes('education')) return 'book';
-  if (title.toLowerCase().includes('environment')) return 'tree';
-  if (title.toLowerCase().includes('humanitarian')) return 'hands-helping';
-  return 'globe';
-};
-
 const NextArrow = (props) => {
   const { className, style, onClick } = props;
   return (
@@ -31,7 +23,7 @@ const PrevArrow = (props) => {
   );
 };
 
-const CarouselComponent = ({ title, items }) => {
+const CarouselComponent = ({ items }) => {
   const settings = {
     dots: true,
     infinite: false,
@@ -62,19 +54,13 @@ const CarouselComponent = ({ title, items }) => {
     <div className={styles.carouselContainer}>
       <div className={styles.carouselWrapper}>
         <Slider {...settings}>
-          {items.map((item, index) => {
-            const iconName = getIcon(item.title);
-            return (
-              <div key={index} className={styles.carouselItemWrapper}>
-                <div className={styles.carouselItem}>
-                  <i className={`fas fa-${iconName} ${styles.itemIcon}`}></i>
-                  <h3 className={styles.itemTitle}>{item.title}</h3>
-                  <p className={styles.itemDescription}>{item.description.split(' ').slice(0, 15).join(' ')}...</p>
-                  <a href={item.link} className={styles.readMoreLink}>Learn More</a>
-                </div>
+          {items.map((item, index) => (
+            <div key={index} className={styles.carouselItemWrapper}>
+              <div className={styles.carouselItem}>
+                {item.content}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </Slider>
       </div>
     </div>

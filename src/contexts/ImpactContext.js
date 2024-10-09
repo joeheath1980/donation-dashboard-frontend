@@ -311,6 +311,20 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
+  // === New Function: onDeleteContribution ===
+  const onDeleteContribution = async (contributionId) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
+      setOneOffContributions(prevContributions => prevContributions.filter(c => c._id !== contributionId));
+      fetchImpactData();
+    } catch (error) {
+      console.error('Error deleting contribution:', error);
+      throw new Error('Failed to delete contribution. Please try again.');
+    }
+  };
+  // === End of onDeleteContribution ===
+
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
       const headers = getAuthHeaders();
@@ -434,7 +448,6 @@ export const ImpactProvider = ({ children }) => {
 
     return filteredQuery;
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, followedCharities]);
-
   // === End of New Function ===
 
   useEffect(() => {
@@ -504,8 +517,9 @@ export const ImpactProvider = ({ children }) => {
         setFundraisingCampaigns,
         setImpactScore,
         setIsAuthenticated,
-        // === Adding the new function to the context value ===
+        // === Adding the new functions to the context value ===
         formPersonalizedSearchQuery,
+        onDeleteContribution,
         // === End of addition ===
       }}
     >

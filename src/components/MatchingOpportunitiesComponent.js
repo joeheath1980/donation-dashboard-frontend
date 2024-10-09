@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { ImpactContext } from '../contexts/ImpactContext';
 
 function MatchingOpportunitiesComponent({ userId }) {
   const [opportunities, setOpportunities] = useState([]);
   const [error, setError] = useState(null);
+  const { isAuthenticated } = useContext(ImpactContext);
 
   useEffect(() => {
     const fetchOpportunities = async () => {
@@ -11,36 +13,32 @@ function MatchingOpportunitiesComponent({ userId }) {
       try {
         console.log('Fetching matching opportunities...');
         console.log('User ID:', userId);
-        console.log('Token:', token);
         const response = await axios.get('http://localhost:3002/api/matchingOpportunities', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        console.log('Response:', response);
-        console.log('Response data:', response.data);
-        const fetchedOpportunities = response.data || [];
-        console.log('Fetched opportunities:', fetchedOpportunities);
-        setOpportunities(fetchedOpportunities);
+        console.log('Fetched opportunities:', response.data);
+        setOpportunities(response.data);
         setError(null);
       } catch (error) {
         console.error('Error fetching matching opportunities:', error);
-        if (error.response) {
-          console.error('Error response:', error.response.data);
-          console.error('Error status:', error.response.status);
-        }
         setOpportunities([]);
         setError('Failed to fetch matching opportunities. Please try again later.');
       }
     };
 
-    if (userId) {
+    if (isAuthenticated && userId) {
       fetchOpportunities();
     } else {
-      console.log('No user ID provided');
+      console.log('User is not authenticated or no user ID provided');
     }
-  }, [userId]);
+  }, [isAuthenticated, userId]);
+
+  if (!isAuthenticated) {
+    return <div>Please log in to view matching opportunities.</div>;
+  }
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -52,12 +50,14 @@ function MatchingOpportunitiesComponent({ userId }) {
       {opportunities && opportunities.length > 0 ? (
         <ul>
           {opportunities.map(opportunity => (
-            <li key={opportunity._id}>
-              <p><strong>Brand:</strong> {opportunity.brand}</p>
-              <p><strong>Conditions:</strong> {opportunity.conditions}</p>
-              <p><strong>Match Amount:</strong> ${opportunity.amount}</p>
-              <p><strong>Start Date:</strong> {new Date(opportunity.startDate).toLocaleDateString()}</p>
+            <li key={opportunity._id || opportunity.id}>
+              <h4>{opportunity.brand}</h4>
+              <p>{opportunity.description}</p>
+              <p><strong>Your Donation:</strong> ${opportunity.donationAmount}</p>
+              <p><strong>Matching Amount:</strong> ${opportunity.matchingAmount}</p>
+              <p><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
               <p><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+              <p><strong>Cause:</strong> {opportunity.cause}</p>
               <button>Participate</button>
             </li>
           ))}
