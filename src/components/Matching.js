@@ -1,11 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import styles from '../Matching.module.css';
-import { applyGlobalStyles, globalClasses } from '../utils/styleUtils';
+import styles from './CleanDesign.module.css';
 import GlobalGivingProjects from './GlobalGivingProjects';
+import { FaApple, FaAmazon, FaMicrosoft, FaGoogle, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { SiTesla, SiNike, SiAdidas, SiCocacola, SiMcdonalds, SiBurgerking, SiNetflix, SiSpotify } from 'react-icons/si';
 
-const combinedStyles = applyGlobalStyles(styles, globalClasses);
+const iconMap = {
+  'Apple': FaApple,
+  'Amazon': FaAmazon,
+  'Microsoft': FaMicrosoft,
+  'Google': FaGoogle,
+  'Facebook': FaFacebook,
+  'Twitter': FaTwitter,
+  'LinkedIn': FaLinkedin,
+  'Tesla': SiTesla,
+  'Nike': SiNike,
+  'Adidas': SiAdidas,
+  'Coca-Cola': SiCocacola,
+  'McDonald\'s': SiMcdonalds,
+  'Burger King': SiBurgerking,
+  'Netflix': SiNetflix,
+  'Spotify': SiSpotify
+};
+
+const cardStyle = {
+  height: '220px',
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const cardContentStyle = {
+  flexGrow: 1,
+  overflow: 'auto',
+  padding: '0 12px',
+};
+
+const compactTextStyle = {
+  margin: '0',
+  lineHeight: '1.1',
+};
+
+const logoStyle = {
+  width: '24px',
+  height: '24px',
+  marginRight: '8px',
+};
 
 function Matching() {
   const { user, getAuthHeaders } = useAuth();
@@ -62,44 +103,49 @@ function Matching() {
   };
 
   const renderOpportunityCards = () => {
-    const cards = [];
-    for (let i = 0; i < 15; i++) {
-      const opportunity = filteredOpportunities[i] || { _id: `placeholder-${i}`, placeholder: true };
-      cards.push(
-        <div key={opportunity._id} className={`${combinedStyles.card} ${combinedStyles.opportunityCard} ${opportunity.placeholder ? combinedStyles.placeholderCard : ''}`}>
-          {!opportunity.placeholder ? (
-            <>
-              <h3 className={combinedStyles.subheader}>{opportunity.brand}</h3>
-              <p className={combinedStyles.paragraph}><strong>Conditions:</strong> {opportunity.conditions}</p>
-              <p className={combinedStyles.paragraph}><strong>Amount:</strong> ${opportunity.amount}</p>
-              <p className={combinedStyles.paragraph}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
-              <button
-                onClick={() => handleMatch(opportunity._id)}
-                className={opportunity.accepted ? combinedStyles.secondaryButton : combinedStyles.primaryButton}
-                disabled={opportunity.accepted}
-              >
-                {opportunity.accepted ? 'Matched' : 'Match'}
-              </button>
-            </>
-          ) : (
-            <p className={combinedStyles.paragraph}>Future matching opportunity</p>
-          )}
+    return filteredOpportunities.map(opportunity => {
+      const IconComponent = iconMap[opportunity.brand] || null;
+
+      return (
+        <div key={opportunity._id} className={styles.card} style={cardStyle}>
+          <div className={styles.cardHeader} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px' }}>
+            {IconComponent && <IconComponent style={logoStyle} />}
+            <h3 className={styles.cardTitle} style={{ fontSize: '16px' }}>{opportunity.brand}</h3>
+          </div>
+          <div className={styles.cardContent} style={cardContentStyle}>
+            <p className={styles.text} style={{...compactTextStyle, fontWeight: 'bold', marginBottom: '4px'}}>{opportunity.description.split('!')[0] + '!'}</p>
+            <p className={`${styles.text} ${styles.highlight}`} style={{...compactTextStyle, marginBottom: '4px'}}><strong>Cause:</strong> {opportunity.cause}</p>
+            <div className={`${styles.flexColumn}`}>
+              <p className={styles.text} style={compactTextStyle}><strong>Your Contribution:</strong> ${opportunity.donationAmount}</p>
+              <p className={styles.text} style={compactTextStyle}><strong>Multiplier:</strong> x2</p>
+              <p className={styles.text} style={compactTextStyle}><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
+            </div>
+            <p className={`${styles.text}`} style={{ ...compactTextStyle, marginTop: '4px' }}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+          </div>
+          <div className={styles.cardActions} style={{ padding: '8px 12px' }}>
+            <button
+              onClick={() => handleMatch(opportunity._id)}
+              className={styles.button}
+              disabled={opportunity.accepted}
+            >
+              {opportunity.accepted ? 'Matched' : 'Match'}
+            </button>
+          </div>
         </div>
       );
-    }
-    return cards;
+    });
   };
 
   if (isLoading) {
-    return <div className={combinedStyles.loadingContainer}>Loading matching opportunities...</div>;
+    return <div className={styles.container}>Loading matching opportunities...</div>;
   }
 
   if (error) {
     return (
-      <div className={combinedStyles.errorContainer}>
-        <h2 className={combinedStyles.subheader}>Error</h2>
-        <p className={combinedStyles.error}>{error}</p>
-        <button onClick={() => window.location.reload()} className={combinedStyles.primaryButton}>
+      <div className={styles.container}>
+        <h2 className={styles.subHeader}>Error</h2>
+        <p className={styles.text}>{error}</p>
+        <button onClick={() => window.location.reload()} className={styles.button}>
           Retry
         </button>
       </div>
@@ -107,19 +153,19 @@ function Matching() {
   }
 
   return (
-    <div className={combinedStyles.profileContainer}>
-      <div className={combinedStyles.matchingHeader}>
-        <h1 className={combinedStyles.header}>Matching Opportunities</h1>
-        <p className={combinedStyles.paragraph}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1>Matching Opportunities</h1>
+        <p className={styles.text}>
           Explore curated donation matches tailored to your interests. Find matches for your favorite charities, discover new causes, or leverage partner offers. Use filters to navigate easily. Make your giving go further with the perfect match!
         </p>
       </div>
       
-      <div className={combinedStyles.filterContainer}>
+      <div className={`${styles.flexBetween} ${styles.mb10}`}>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className={combinedStyles.select}
+          className={styles.button}
         >
           <option value="all">All Opportunities</option>
           <option value="yourCharities">Your Charities</option>
@@ -128,13 +174,13 @@ function Matching() {
         </select>
       </div>
 
-      <div className={combinedStyles.opportunitiesContainer}>
+      <div className={styles.grid}>
         {renderOpportunityCards()}
       </div>
 
-      <div className={combinedStyles.globalGivingSection}>
-        <h2 className={combinedStyles.subheader}>Global Giving Projects</h2>
-        <p className={combinedStyles.paragraph}>
+      <div className={`${styles.container} ${styles.mt10}`}>
+        <h2 className={styles.subHeader}>Global Giving Projects</h2>
+        <p className={styles.text}>
           Discover and support international projects through GlobalGiving. These projects offer unique opportunities to make a global impact aligned with your interests and values.
         </p>
         <GlobalGivingProjects />

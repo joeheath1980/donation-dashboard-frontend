@@ -111,3 +111,18 @@
 :global(.slick-list) {
   margin: 0 -10px;
 }
+
+/* Remove shadow duplicate */
+:global(.slick-slide) {
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+:global(.slick-center) {
+  transform: scale(1);
+}
+
+:global(.slick-track) {
+  display: flex;
+  align-items: center;
+}
