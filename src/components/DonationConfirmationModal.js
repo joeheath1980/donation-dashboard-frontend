@@ -1,5 +1,3 @@
-// src/components/DonationConfirmationModal.js
-
 import React, { useState } from 'react';
 import styles from './ModalStyles.module.css';
 import { format, parseISO } from 'date-fns';
@@ -7,15 +5,14 @@ import { format, parseISO } from 'date-fns';
 const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
   const [editedDonation, setEditedDonation] = useState({
     ...donation,
-    date: donation.date ? format(parseISO(donation.date), 'yyyy-MM-dd') : '', // Ensure date is in 'YYYY-MM-DD' format
-    isMonthly: donation.isMonthly || false,
+    date: donation.date ? format(parseISO(donation.date), 'yyyy-MM-dd') : '',
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setEditedDonation(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (name === 'amount' ? parseFloat(value) : value)
+    const { name, value, type, files } = e.target;
+    setEditedDonation(prev => ({ 
+      ...prev, 
+      [name]: type === 'file' ? files[0] : (name === 'amount' ? parseFloat(value) : value)
     }));
   };
 
@@ -87,16 +84,14 @@ const DonationConfirmationModal = ({ donation, onConfirm, onCancel }) => {
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="isMonthly">
-              <input
-                type="checkbox"
-                id="isMonthly"
-                name="isMonthly"
-                checked={editedDonation.isMonthly}
-                onChange={handleChange}
-              />
-              Monthly Donation
-            </label>
+            <label htmlFor="receipt">Upload Receipt (optional):</label>
+            <input
+              type="file"
+              id="receipt"
+              name="receipt"
+              onChange={handleChange}
+              accept="image/*,.pdf"
+            />
           </div>
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Confirm</button>
