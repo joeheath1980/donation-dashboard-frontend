@@ -31,13 +31,13 @@ import MicrosoftAuthCallback from './components/MicrosoftAuthCallback';
 import AuthCallback from './components/AuthCallback';
 import ManagePaymentsComponent from './components/ManagePaymentsComponent';
 import CharityDashboard from './components/CharityDashboard';
+import YourImpact from './components/YourImpact';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './styles/global.css';
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
-  const { user } = useAuth();
   const token = localStorage.getItem('token');
   const userType = localStorage.getItem('userType');
   
@@ -93,6 +93,7 @@ function App() {
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
               <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
+              <Route path="/your-impact" element={<ProtectedRoute><Layout><YourImpact /></Layout></ProtectedRoute>} />
               
               {/* Business routes */}
               <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />

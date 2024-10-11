@@ -225,7 +225,7 @@ function Activity() {
           <button onClick={handleSearchOutlookEmails} disabled={loading} className={styles.scrapeButton}>
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
-          <Link to="/profile" className={styles.toggleButton}>Check Out Your Impact</Link>
+          <Link to="/your-impact" className={styles.toggleButton}>Check Out Your Impact</Link>
         </div>
 
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
