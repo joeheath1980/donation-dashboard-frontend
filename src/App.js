@@ -5,7 +5,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import BusinessLayout from './components/BusinessLayout';
 import Profile from './components/Profile';
-import Matching from './components/Matching';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import YourAccount from './components/YourAccount';
@@ -83,7 +82,6 @@ function App() {
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
               <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/matching" element={<ProtectedRoute><Layout><Matching /></Layout></ProtectedRoute>} />
               <Route path="/YourAccount" element={<ProtectedRoute><Layout><YourAccount /></Layout></ProtectedRoute>} />
               <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
               <Route path="/your-perks" element={<ProtectedRoute><Layout><YourPerks /></Layout></ProtectedRoute>} />

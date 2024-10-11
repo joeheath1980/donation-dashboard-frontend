@@ -21,11 +21,6 @@ function NavBar() {
             Profile/Settings
           </NavLink>
         </li>
-        <li>
-          <NavLink to="/matching" className={styles.navLink} activeClassName={styles.active}>
-            Matching
-          </NavLink>
-        </li>
       </ul>
     </nav>
   );

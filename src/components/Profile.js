@@ -13,26 +13,6 @@ import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import FollowedCharitiesComponent from './FollowedCharitiesComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
 import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
-import { FaApple, FaAmazon, FaMicrosoft, FaGoogle, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
-import { SiTesla, SiNike, SiAdidas, SiCocacola, SiMcdonalds, SiBurgerking, SiNetflix, SiSpotify } from 'react-icons/si';
-
-const iconMap = {
-  'Apple': FaApple,
-  'Amazon': FaAmazon,
-  'Microsoft': FaMicrosoft,
-  'Google': FaGoogle,
-  'Facebook': FaFacebook,
-  'Twitter': FaTwitter,
-  'LinkedIn': FaLinkedin,
-  'Tesla': SiTesla,
-  'Nike': SiNike,
-  'Adidas': SiAdidas,
-  'Coca-Cola': SiCocacola,
-  'McDonald\'s': SiMcdonalds,
-  'Burger King': SiBurgerking,
-  'Netflix': SiNetflix,
-  'Spotify': SiSpotify
-};
 
 function Profile() {
   const { 
@@ -162,38 +142,33 @@ function Profile() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
           <CarouselComponent 
-            items={matchingOpportunities.map(opportunity => {
-              const IconComponent = iconMap[opportunity.brand] || null;
-              return {
-                content: (
-                  <div className={styles.card} style={{ height: '220px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <div className={styles.cardHeader} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px' }}>
-                      {IconComponent && <IconComponent style={{ width: '24px', height: '24px', marginRight: '8px' }} />}
-                      <h3 className={styles.cardTitle} style={{ fontSize: '16px' }}>{opportunity.brand}</h3>
-                    </div>
-                    <div className={styles.cardContent} style={{ flexGrow: 1, overflow: 'auto', padding: '0 12px' }}>
-                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1', fontWeight: 'bold', marginBottom: '4px' }}>{opportunity.description.split('!')[0] + '!'}</p>
-                      <p className={`${styles.text} ${styles.highlight}`} style={{ margin: '0', lineHeight: '1.1', marginBottom: '4px' }}><strong>Cause:</strong> {opportunity.cause}</p>
-                      <div className={`${styles.flexColumn}`}>
-                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Your Contribution:</strong> ${opportunity.donationAmount}</p>
-                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Multiplier:</strong> x2</p>
-                        <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
-                      </div>
-                      <p className={`${styles.text}`} style={{ margin: '0', lineHeight: '1.1', marginTop: '4px' }}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
-                    </div>
-                    <div className={styles.cardActions} style={{ padding: '8px 12px' }}>
-                      <button
-                        onClick={() => handleMatch(opportunity._id)}
-                        className={styles.button}
-                        disabled={opportunity.accepted}
-                      >
-                        {opportunity.accepted ? 'Matched' : 'Match'}
-                      </button>
-                    </div>
+            items={matchingOpportunities.map(opportunity => ({
+              content: (
+                <div className={styles.card} style={{ height: '220px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{opportunity.message}</h3>
                   </div>
-                )
-              };
-            })}
+                  <div className={styles.cardContent} style={{ flexGrow: 1, overflow: 'auto', padding: '0 12px' }}>
+                    <p className={`${styles.text} ${styles.highlight}`} style={{ margin: '0', lineHeight: '1.1', marginBottom: '4px' }}><strong>Charity:</strong> {opportunity.charity}</p>
+                    <div className={`${styles.flexColumn}`}>
+                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Your Contribution:</strong> ${opportunity.donationAmount}</p>
+                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Multiplier:</strong> x2</p>
+                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
+                    </div>
+                    <p className={`${styles.text}`} style={{ margin: '0', lineHeight: '1.1', marginTop: '4px' }}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className={styles.cardActions} style={{ padding: '8px 12px' }}>
+                    <button
+                      onClick={() => handleMatch(opportunity._id)}
+                      className={styles.button}
+                      disabled={opportunity.accepted}
+                    >
+                      {opportunity.accepted ? 'Matched' : 'Match'}
+                    </button>
+                  </div>
+                </div>
+              )
+            }))}
           />
         </section>
 

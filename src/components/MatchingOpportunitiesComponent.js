@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
+import styles from './CleanDesign.module.css';
 
 function MatchingOpportunitiesComponent({ userId }) {
   const [opportunities, setOpportunities] = useState([]);
@@ -36,34 +37,66 @@ function MatchingOpportunitiesComponent({ userId }) {
     }
   }, [isAuthenticated, userId]);
 
+  const handleMatch = async (opportunityId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://localhost:3002/api/matchingOpportunities/${opportunityId}/accept`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setOpportunities(prevOpportunities =>
+        prevOpportunities.map(opp =>
+          opp._id === opportunityId ? { ...opp, accepted: true } : opp
+        )
+      );
+    } catch (err) {
+      console.error('Error accepting matching opportunity:', err);
+      setError('Failed to accept the matching opportunity. Please try again.');
+    }
+  };
+
   if (!isAuthenticated) {
-    return <div>Please log in to view matching opportunities.</div>;
+    return <div className={styles.container}>Please log in to view matching opportunities.</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className={styles.container}>Error: {error}</div>;
   }
 
   return (
-    <div>
-      <h3>Matching Opportunities</h3>
+    <div className={styles.container}>
+      <h3 className={styles.header}>Matching Opportunities</h3>
       {opportunities && opportunities.length > 0 ? (
-        <ul>
+        <div className={styles.grid}>
           {opportunities.map(opportunity => (
-            <li key={opportunity._id || opportunity.id}>
-              <h4>{opportunity.brand}</h4>
-              <p>{opportunity.description}</p>
-              <p><strong>Your Donation:</strong> ${opportunity.donationAmount}</p>
-              <p><strong>Matching Amount:</strong> ${opportunity.matchingAmount}</p>
-              <p><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
-              <p><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
-              <p><strong>Cause:</strong> {opportunity.cause}</p>
-              <button>Participate</button>
-            </li>
+            <div key={opportunity._id || opportunity.id} className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h4 className={styles.cardTitle}>
+                  {opportunity.message}
+                </h4>
+              </div>
+              <div className={styles.cardContent}>
+                <p><span className={styles.highlight}>Charity:</span> {opportunity.charity}</p>
+                <p><span className={styles.highlight}>Your Contribution:</span> ${opportunity.donationAmount}</p>
+                <p><span className={styles.highlight}>Multiplier:</span> 2x</p>
+                <p><span className={styles.highlight}>Total Impact:</span> ${opportunity.totalAmount}</p>
+                <p><span className={styles.highlight}>Valid Until:</span> {new Date(opportunity.endDate).toLocaleDateString()}</p>
+              </div>
+              <div className={styles.cardActions}>
+                <button 
+                  className={styles.button}
+                  onClick={() => handleMatch(opportunity._id)}
+                  disabled={opportunity.accepted}
+                >
+                  {opportunity.accepted ? 'Matched' : 'Match'}
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p>No matching opportunities available at the moment. (Total: {opportunities.length})</p>
+        <p className={styles.text}>No matching opportunities available at the moment.</p>
       )}
     </div>
   );
