@@ -1,54 +1,31 @@
-// src/components/ValidationModal.js
-
 import React, { useState } from 'react';
-import styles from './ValidationModal.module.css';
+import styles from './ModalStyles.module.css';
 
-/**
- * ValidationModal Component
- * 
- * This modal allows users to upload a receipt for their donation or contribution.
- * It handles file selection, form submission, and communicates with the server to validate the donation/contribution.
- * 
- * Props:
- * - item: The donation or contribution object to be validated.
- * - onCancel: Function to call when the user cancels the validation.
- * - onValidate: Function to call when the validation is successful.
- */
-const ValidationModal = ({ item, onCancel, onValidate }) => {
-  const [file, setFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+const ValidationModal = ({ item, onConfirm, onCancel }) => {
+  const [editedItem, setEditedItem] = useState({
+    ...item,
+    date: item.date ? new Date(item.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+  });
 
-  /**
-   * Handles the file input change event.
-   * @param {Event} e - The change event.
-   */
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+    setEditedItem(prev => ({ 
+      ...prev, 
+      [name]: type === 'file' ? files[0] : value 
+    }));
   };
 
-  /**
-   * Handles the form submission for uploading the receipt.
-   * @param {Event} e - The form submission event.
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!file) {
-      alert('Please select a file to upload.');
-      return;
-    }
-
-    setIsLoading(true);
-
     const formData = new FormData();
-    formData.append('receipt', file);
-
-    console.log('Submitting form with data:', {
-      itemId: item._id,
-      itemType: item.type,
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size
+    
+    // Append all form fields to formData
+    Object.keys(editedItem).forEach(key => {
+      if (key === 'receipt' && editedItem[key] instanceof File) {
+        formData.append(key, editedItem[key]);
+      } else {
+        formData.append(key, editedItem[key]);
+      }
     });
 
     try {
@@ -60,68 +37,96 @@ const ValidationModal = ({ item, onCancel, onValidate }) => {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-          // Note: When using FormData, you should NOT set the 'Content-Type' header manually.
-          // The browser will set it including the correct boundary.
         },
         body: formData
       });
 
-      console.log('Response status:', response.status);
-
       if (response.ok) {
-        const result = await response.json(); // Directly parse JSON
-        console.log('Upload result:', result);
-        const updatedItem = { ...result, type: item.type };
-        onValidate(updatedItem);
+        const result = await response.json();
+        onConfirm(result);
       } else {
-        // Attempt to parse error message from JSON
-        let errorMessage = 'Failed to upload receipt';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (jsonError) {
-          console.error('Error parsing error response:', jsonError);
-          // Fallback to status text if JSON parsing fails
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
+        throw new Error('Failed to validate item');
       }
     } catch (error) {
-      console.error('Error uploading receipt:', error);
-      alert(`Failed to upload receipt: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      console.error('Error validating item:', error);
+      alert(`Failed to validate item: ${error.message}`);
     }
   };
-
-  if (!item) {
-    return null;
-  }
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>Upload Receipt</h2>
-        <p>Please upload a receipt for your {item.type === 'donation' ? 'donation' : 'contribution'} to {item.charity}.</p>
-        <form onSubmit={handleSubmit}>
+        <h2>Validate {item.type === 'donation' ? 'Donation' : 'Contribution'}</h2>
+        <button className={styles.closeButton} onClick={onCancel}>&times;</button>
+        <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="receipt">Receipt (PDF or Image):</label>
-            <input 
-              type="file" 
-              id="receipt" 
-              name="receipt" 
-              accept="image/*,application/pdf" 
-              onChange={handleFileChange} 
-              required 
+            <label htmlFor="charity">Charity:</label>
+            <input
+              type="text"
+              id="charity"
+              name="charity"
+              value={editedItem.charity}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="amount">Amount:</label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              value={editedItem.amount}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="date">Date:</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={editedItem.date}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="charityType">Charity Type:</label>
+            <select
+              id="charityType"
+              name="charityType"
+              value={editedItem.charityType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a charity type</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Environment">Environment</option>
+              <option value="Humanitarian">Humanitarian</option>
+              <option value="Arts and Culture">Arts and Culture</option>
+              <option value="Religious">Religious</option>
+              <option value="Human Rights">Human Rights</option>
+              <option value="Children and Youth">Children and Youth</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="receipt">Upload Receipt:</label>
+            <input
+              type="file"
+              id="receipt"
+              name="receipt"
+              onChange={handleChange}
+              accept="image/*,.pdf"
+              required
             />
           </div>
           <div className={styles.buttonGroup}>
-            <button type="submit" disabled={isLoading} className={styles.uploadButton}>
-              {isLoading ? 'Uploading...' : 'Upload'}
-            </button>
-            <button type="button" onClick={onCancel} disabled={isLoading} className={styles.cancelButton}>
-              Cancel
-            </button>
+            <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Validate</button>
+            <button type="button" onClick={onCancel} className={`${styles.button} ${styles.cancelButton}`}>Cancel</button>
           </div>
         </form>
       </div>
