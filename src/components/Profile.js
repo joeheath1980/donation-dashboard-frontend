@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styles from './Profile.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
-import ImpactVisualization from './ImpactVisualization';
+import ScrollableImpactSection from './ScrollableImpactSection';
 import CarouselComponent from './CarouselComponent';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,8 +10,6 @@ import DonationsComponent from './DonationsComponent';
 import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
-import ImpactScoreExplain from './ImpactScoreExplain';
-import TierProgressModal from './TierProgressModal';
 import FollowedCharitiesComponent from './FollowedCharitiesComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
 import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
@@ -48,6 +46,7 @@ function Profile() {
     fetchImpactData,
     error: impactError,
     isAuthenticated,
+    scoreDetails,
   } = useContext(ImpactContext);
 
   const { getAuthHeaders } = useAuth();
@@ -56,9 +55,7 @@ function Profile() {
   const [localOneOffContributions, setLocalOneOffContributions] = useState(contextOneOffContributions || []);
   const [showRegularContributions, setShowRegularContributions] = useState(false);
   const [showOneOffContributions, setShowOneOffContributions] = useState(false);
-  const [showFullImpactReport, setShowFullImpactReport] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showTierProgressModal, setShowTierProgressModal] = useState(false);
   const [matchingOpportunities, setMatchingOpportunities] = useState([]);
 
   useEffect(() => {
@@ -110,8 +107,6 @@ function Profile() {
 
   const toggleRegularContributions = () => setShowRegularContributions(!showRegularContributions);
   const toggleOneOffContributions = () => setShowOneOffContributions(!showOneOffContributions);
-  const toggleFullImpactReport = () => setShowFullImpactReport(!showFullImpactReport);
-  const toggleTierProgressModal = () => setShowTierProgressModal(!showTierProgressModal);
 
   const handleCompleteCampaign = useCallback((completedCampaign) => {
     try {
@@ -155,12 +150,14 @@ function Profile() {
           arrow={arrow}
           tier={tier}
           pointsToNextTier={pointsToNextTier}
-          onFullReportClick={toggleFullImpactReport}
-          onSeeProgressClick={toggleTierProgressModal}
         />
-        {showFullImpactReport && <ImpactScoreExplain onClose={toggleFullImpactReport} />}
         
-        <ImpactVisualization />
+        <ScrollableImpactSection 
+          impactScore={impactScore}
+          scoreDetails={scoreDetails}
+          tier={tier}
+          pointsToNextTier={pointsToNextTier}
+        />
         
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
@@ -247,14 +244,6 @@ function Profile() {
             <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
           </div>
         </div>
-
-        {showTierProgressModal && (
-          <TierProgressModal
-            currentTier={tier}
-            impactScore={impactScore}
-            onClose={toggleTierProgressModal}
-          />
-        )}
       </div>
     </div>
   );

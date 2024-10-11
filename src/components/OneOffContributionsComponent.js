@@ -47,21 +47,8 @@ function OneOffContributionsComponent({ displayAll }) {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
         console.log('Deleting contribution:', contributionId);
-        if (typeof onDeleteContribution === 'function') {
-          await onDeleteContribution(contributionId);
-          console.log('Contribution deleted successfully');
-          setLocalContributions(prevContributions => {
-            const newContributions = prevContributions.filter(contribution => contribution._id !== contributionId);
-            console.log('Updated localContributions after deletion:', newContributions);
-            return newContributions;
-          });
-          if (isAuthenticated) {
-            fetchImpactData();
-          }
-        } else {
-          console.error('onDeleteContribution is not a function');
-          throw new Error('Delete function is not available');
-        }
+        await onDeleteContribution(contributionId);
+        console.log('Contribution deleted successfully');
       } catch (error) {
         console.error('Error deleting contribution:', error);
         alert(`Failed to delete contribution: ${error.message}`);

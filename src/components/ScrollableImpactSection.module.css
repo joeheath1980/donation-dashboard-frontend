@@ -1,0 +1,98 @@
+.scrollableImpactSection {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Swiper styles */
+:global(.swiper-container) {
+  width: 100%;
+  height: 100%;
+}
+
+:global(.swiper-slide) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:global(.swiper-button-next),
+:global(.swiper-button-prev) {
+  color: #4CAF50;
+}
+
+:global(.swiper-pagination-bullet-active) {
+  background-color: #4CAF50;
+}
+
+/* Ensure content inside slides is visible */
+:global(.swiper-slide > div) {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Style for ImpactVisualization */
+.impactVisualization {
+  width: 100%;
+  height: 100%;
+}
+
+/* Style for ImpactScoreExplain */
+.impactScoreExplain {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Style for TierProgressModal */
+.tierProgressModal {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Badges Display Styles */
+.badgesContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.badgesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.badgeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.badgeItem.collected {
+  background-color: #e8f5e9;
+}
+
+.badgeItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.badgeTitle {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
