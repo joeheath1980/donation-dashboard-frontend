@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
@@ -28,6 +28,8 @@ function DonationsComponent({ displayAll }) {
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const donationListRef = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -38,6 +40,27 @@ function DonationsComponent({ displayAll }) {
   useEffect(() => {
     setLocalDonations(donations);
   }, [donations]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (donationListRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = donationListRef.current;
+        setShowScrollIndicator(scrollTop === 0 && scrollHeight > clientHeight);
+      }
+    };
+
+    const listElement = donationListRef.current;
+    if (listElement) {
+      listElement.addEventListener('scroll', handleScroll);
+      handleScroll(); // Check initial scroll state
+    }
+
+    return () => {
+      if (listElement) {
+        listElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
 
   const handleDelete = async (donationId) => {
     console.log('Attempting to delete donation with ID:', donationId);
@@ -149,7 +172,7 @@ function DonationsComponent({ displayAll }) {
           <FaPlus /> Add New Donation
         </button>
       </div>
-      <div className={cleanStyles.donationList}>
+      <div className={cleanStyles.donationList} ref={donationListRef}>
         {displayedDonations && displayedDonations.length > 0 ? (
           <>
             {displayedDonations.map((donation) => (
@@ -212,6 +235,7 @@ function DonationsComponent({ displayAll }) {
         ) : (
           <p className={cleanStyles.textCenter}>No donations to display.</p>
         )}
+        {showScrollIndicator && <div className={cleanStyles.scrollIndicator} />}
       </div>
       <div className={cleanStyles.findMoreContainer}>
         {!displayAll && localDonations.length > 5 && (

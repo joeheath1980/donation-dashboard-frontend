@@ -145,12 +145,65 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 .donationList, .contributionList {
   flex-grow: 1;
   overflow-y: auto;
   max-height: calc(100vh - 200px); /* Adjust based on your layout */
+  padding-right: 10px; /* Add some padding for the scrollbar */
+  margin-right: -10px; /* Offset the padding to maintain alignment */
+}
+
+/* Customizing the scrollbar */
+.donationList::-webkit-scrollbar, .contributionList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.donationList::-webkit-scrollbar-track, .contributionList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.donationList::-webkit-scrollbar-thumb, .contributionList::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 4px;
+}
+
+.donationList::-webkit-scrollbar-thumb:hover, .contributionList::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
+}
+
+/* Scroll indicator */
+.scrollIndicator {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 30px;
+  height: 50px;
+  border: 2px solid #4CAF50;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.scrollIndicator::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  animation: scrollAnimation 1.5s infinite;
+}
+
+@keyframes scrollAnimation {
+  0% { transform: translateY(5px); }
+  50% { transform: translateY(20px); }
+  100% { transform: translateY(5px); }
 }
 
 .findMoreContainer {
