@@ -141,6 +141,23 @@
   margin-left: 8px;
 }
 
+.donationSection, .contributionSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.donationList, .contributionList {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px); /* Adjust based on your layout */
+}
+
+.findMoreContainer {
+  margin-top: 16px;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .grid {
     grid-template-columns: 1fr;

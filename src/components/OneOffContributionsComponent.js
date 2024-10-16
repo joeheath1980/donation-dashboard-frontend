@@ -3,7 +3,6 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
-import ValidationModal from './ValidationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 
@@ -29,7 +28,6 @@ function OneOffContributionsComponent({ displayAll }) {
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -56,8 +54,8 @@ function OneOffContributionsComponent({ displayAll }) {
     }
   };
 
-  const handleEdit = (contribution) => {
-    console.log('Edit button clicked for contribution:', contribution);
+  const handleEditOrValidate = (contribution) => {
+    console.log('Edit/Validate button clicked for contribution:', contribution);
     setEditingContribution(contribution);
     setShowModal(true);
   };
@@ -121,31 +119,6 @@ function OneOffContributionsComponent({ displayAll }) {
     }
   };
 
-  const handleValidate = (contribution) => {
-    console.log('Validate button clicked for contribution:', contribution);
-    setEditingContribution({...contribution, type: 'contribution'});
-    setShowValidationModal(true);
-  };
-
-  const handleValidationComplete = async (validatedContribution) => {
-    console.log('Validation complete for contribution:', validatedContribution);
-    try {
-      setLocalContributions(prevContributions =>
-        prevContributions.map(contribution =>
-          contribution._id === validatedContribution._id ? validatedContribution : contribution
-        )
-      );
-      setShowValidationModal(false);
-      setEditingContribution(null);
-      if (isAuthenticated) {
-        fetchImpactData();
-      }
-    } catch (error) {
-      console.error('Error handling validation completion:', error);
-      alert(`Failed to handle validation completion: ${error.message}`);
-    }
-  };
-
   const handleAddNew = () => {
     setEditingContribution(null);
     setShowModal(true);
@@ -165,74 +138,82 @@ function OneOffContributionsComponent({ displayAll }) {
   }
 
   return (
-    <div className={cleanStyles.grid}>
+    <div className={`${cleanStyles.grid} ${cleanStyles.contributionSection}`}>
       <div className={cleanStyles.card}>
         <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary}`}>
           <FaPlus /> Add New One-Off Contribution
         </button>
       </div>
-      {displayedContributions && displayedContributions.length > 0 ? (
-        <>
-          {displayedContributions.map((contribution) => (
-            <div key={contribution._id} className={cleanStyles.card}>
-              <div className={cleanStyles.cardHeader}>
-                <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
-                <div className={cleanStyles.validationButton}>
-                  {contribution.needsValidation && (
-                    <InstantTooltip text={contribution.isValidated ? "Contribution validated" : "Upload receipt for validation"}>
-                      <button 
-                        onClick={() => handleValidate(contribution)} 
-                        className={`${cleanStyles.iconButton} ${cleanStyles.highlight}`}
-                        aria-label="Validate Contribution"
+      <div className={cleanStyles.contributionList}>
+        {displayedContributions && displayedContributions.length > 0 ? (
+          <>
+            {displayedContributions.map((contribution) => (
+              <div key={contribution._id} className={cleanStyles.card}>
+                <div className={cleanStyles.cardHeader}>
+                  <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
+                  <div className={cleanStyles.validationButton}>
+                    {contribution.needsValidation && !contribution.isValidated && (
+                      <InstantTooltip text="Receipt required for validation">
+                        <FaCheckCircle style={{ color: 'gray' }} />
+                      </InstantTooltip>
+                    )}
+                    {contribution.isValidated && (
+                      <InstantTooltip text="Contribution validated">
+                        <FaCheckCircle style={{ color: 'green' }} />
+                      </InstantTooltip>
+                    )}
+                  </div>
+                </div>
+                <div className={cleanStyles.cardContent}>
+                  <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                  <p><strong>Amount:</strong> ${contribution.amount}</p>
+                  {contribution.charityType && (
+                    <p><strong>Charity Type:</strong> {contribution.charityType}</p>
+                  )}
+                  {contribution.receiptUrl && (
+                    <p>
+                      <strong>Receipt:</strong> 
+                      <a 
+                        href={`http://localhost:3002${contribution.receiptUrl}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={cleanStyles.link}
                       >
-                        <FaCheckCircle style={{ color: contribution.isValidated ? 'green' : 'gray' }} />
-                      </button>
-                    </InstantTooltip>
+                        View Receipt
+                      </a>
+                    </p>
                   )}
                 </div>
-              </div>
-              <div className={cleanStyles.cardContent}>
-                <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                <p><strong>Amount:</strong> ${contribution.amount}</p>
-                {contribution.charityType && (
-                  <p><strong>Charity Type:</strong> {contribution.charityType}</p>
-                )}
-                {contribution.receiptUrl && (
-                  <p>
-                    <strong>Receipt:</strong> 
-                    <a 
-                      href={`http://localhost:3002${contribution.receiptUrl}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={cleanStyles.link}
+                <div className={cleanStyles.cardActions}>
+                  <InstantTooltip text={contribution.needsValidation && !contribution.isValidated ? "Edit or Validate contribution" : "Edit contribution"}>
+                    <button onClick={() => handleEditOrValidate(contribution)} className={cleanStyles.iconButton} aria-label="Edit or Validate Contribution">
+                      <FaEdit />
+                    </button>
+                  </InstantTooltip>
+                  <InstantTooltip text="Delete contribution">
+                    <button
+                      onClick={() => handleDelete(contribution._id)}
+                      className={cleanStyles.iconButton}
+                      aria-label="Delete Contribution"
                     >
-                      View Receipt
-                    </a>
-                  </p>
-                )}
+                      <FaTrash />
+                    </button>
+                  </InstantTooltip>
+                </div>
               </div>
-              <div className={cleanStyles.cardActions}>
-                <InstantTooltip text="Edit contribution">
-                  <button onClick={() => handleEdit(contribution)} className={cleanStyles.iconButton} aria-label="Edit Contribution">
-                    <FaEdit />
-                  </button>
-                </InstantTooltip>
-                <InstantTooltip text="Delete contribution">
-                  <button
-                    onClick={() => handleDelete(contribution._id)}
-                    className={cleanStyles.iconButton}
-                    aria-label="Delete Contribution"
-                  >
-                    <FaTrash />
-                  </button>
-                </InstantTooltip>
-              </div>
-            </div>
-          ))}
-        </>
-      ) : (
-        <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
-      )}
+            ))}
+          </>
+        ) : (
+          <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
+        )}
+      </div>
+      <div className={cleanStyles.findMoreContainer}>
+        {!displayAll && localContributions.length > 5 && (
+          <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+            Find More
+          </button>
+        )}
+      </div>
       {showModal && (
         <OneOffContributionModal
           contribution={editingContribution}
@@ -240,17 +221,6 @@ function OneOffContributionsComponent({ displayAll }) {
           onCancel={() => {
             console.log('Modal closed');
             setShowModal(false);
-            setEditingContribution(null);
-          }}
-        />
-      )}
-      {showValidationModal && editingContribution && (
-        <ValidationModal
-          item={editingContribution}
-          onValidate={handleValidationComplete}
-          onCancel={() => {
-            console.log('Validation modal closed');
-            setShowValidationModal(false);
             setEditingContribution(null);
           }}
         />
