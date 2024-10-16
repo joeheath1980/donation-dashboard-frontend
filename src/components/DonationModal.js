@@ -5,7 +5,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
   const [editedDonation, setEditedDonation] = useState(donation || {
     charity: '',
     amount: '',
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     charityType: '',
     isMonthly: false,
     receipt: null
@@ -62,7 +62,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               type="date"
               id="date"
               name="date"
-              value={editedDonation.date}
+              value={editedDonation.date.split('T')[0]}
               onChange={handleChange}
               required
             />
@@ -76,7 +76,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               onChange={handleChange}
               required
             >
-              <option value="" disabled>Select Charity Type</option>
+              <option value="">Select a charity type</option>
               <option value="Health">Health</option>
               <option value="Education">Education</option>
               <option value="Environment">Environment</option>
@@ -101,7 +101,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
             </label>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="receipt">Upload Receipt:</label>
+            <label htmlFor="receipt">Upload Receipt (optional):</label>
             <input
               type="file"
               id="receipt"
