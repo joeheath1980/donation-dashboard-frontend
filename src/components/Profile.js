@@ -10,15 +10,17 @@ import DonationsComponent from './DonationsComponent';
 import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
-import FollowedCharitiesComponent from './FollowedCharitiesComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
-import { FaRegHandshake, FaRegCalendarAlt, FaChevronRight } from 'react-icons/fa';
+import { FaRegHandshake, FaRegCalendarAlt, FaChevronRight, FaRegHeart, FaTimes, FaPlus } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 function Profile() {
   const { 
     donations: contextDonations, 
     oneOffContributions: contextOneOffContributions,
     setOneOffContributions: contextSetOneOffContributions,
+    followedCharities: contextFollowedCharities,
+    removeFollowedCharity,
     impactScore,
     lastYearImpactScore,
     tier,
@@ -33,8 +35,10 @@ function Profile() {
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
   const [localOneOffContributions, setLocalOneOffContributions] = useState(contextOneOffContributions || []);
+  const [localFollowedCharities, setLocalFollowedCharities] = useState(contextFollowedCharities || []);
   const [showRegularContributions, setShowRegularContributions] = useState(false);
   const [showOneOffContributions, setShowOneOffContributions] = useState(false);
+  const [showAllFollowedCharities, setShowAllFollowedCharities] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [matchingOpportunities, setMatchingOpportunities] = useState([]);
   const [activeImpactSection, setActiveImpactSection] = useState(0);
@@ -64,6 +68,10 @@ function Profile() {
   }, [contextOneOffContributions]);
 
   useEffect(() => {
+    if (contextFollowedCharities) setLocalFollowedCharities(contextFollowedCharities);
+  }, [contextFollowedCharities]);
+
+  useEffect(() => {
     const fetchMatchingOpportunities = async () => {
       if (!isAuthenticated) return;
       
@@ -90,11 +98,16 @@ function Profile() {
       .slice(0, 3);
   }, [localOneOffContributions]);
 
+  const getDisplayedFollowedCharities = useCallback(() => {
+    return showAllFollowedCharities ? localFollowedCharities : localFollowedCharities.slice(0, 3);
+  }, [localFollowedCharities, showAllFollowedCharities]);
+
   const scoreChange = impactScore - lastYearImpactScore;
   const arrow = scoreChange > 0 ? '▲' : scoreChange < 0 ? '▼' : '';
 
   const toggleRegularContributions = () => setShowRegularContributions(!showRegularContributions);
   const toggleOneOffContributions = () => setShowOneOffContributions(!showOneOffContributions);
+  const toggleFollowedCharities = () => setShowAllFollowedCharities(!showAllFollowedCharities);
 
   const handleCompleteCampaign = useCallback((completedCampaign) => {
     try {
@@ -122,6 +135,18 @@ function Profile() {
     } catch (err) {
       console.error('Error accepting matching opportunity:', err);
       alert('Failed to accept the matching opportunity. Please try again.');
+    }
+  };
+
+  const handleUnfollowCharity = async (charityABN) => {
+    if (window.confirm('Are you sure you want to unfollow this charity?')) {
+      try {
+        await removeFollowedCharity(charityABN);
+        setLocalFollowedCharities(prevCharities => prevCharities.filter(charity => charity.ABN !== charityABN));
+      } catch (err) {
+        console.error('Failed to remove the charity:', err);
+        alert('Failed to unfollow the charity. Please try again.');
+      }
     }
   };
 
@@ -153,7 +178,7 @@ function Profile() {
         
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
+            <h2 className={`${styles.sectionTitle} ${styles.gradientTitle}`}>Matching Opportunities</h2>
             <div className={styles.sectionTitleUnderline}></div>
           </div>
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
@@ -173,7 +198,7 @@ function Profile() {
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Projects to Support</h2>
+            <h2 className={`${styles.sectionTitle} ${styles.gradientTitle}`}>Projects to Support</h2>
             <div className={styles.sectionTitleUnderline}></div>
           </div>
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
@@ -182,7 +207,7 @@ function Profile() {
         
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Your Impact</h2>
+            <h2 className={`${styles.sectionTitle} ${styles.gradientTitle}`}>Your Impact</h2>
             <div className={styles.sectionTitleUnderline}></div>
           </div>
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
@@ -199,7 +224,7 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleRegularContributions}>
-              {showRegularContributions ? "Hide" : "Find more"} <FaChevronRight className={styles.buttonIcon} />
+              {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showRegularContributions && <DonationsComponent displayAll={true} />}
           </div>
@@ -214,12 +239,38 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleOneOffContributions}>
-              {showOneOffContributions ? "Hide" : "Find more"} <FaChevronRight className={styles.buttonIcon} />
+              {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showOneOffContributions && <OneOffContributionsComponent displayAll={true} />}
           </div>
           
-          <FollowedCharitiesComponent />
+          <div className={styles.donationCard}>
+            <h3 className={styles.cardTitle}>
+              <FaRegHeart className={styles.icon} /> Charities Following
+            </h3>
+            <Link to="/search-charities" className={`${styles.button} ${styles.primary} ${styles.fullWidth}`}>
+              <FaPlus /> Follow New Charity
+            </Link>
+            <ul className={styles.list}>
+              {getDisplayedFollowedCharities().map((charity, index) => (
+                <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
+                  <span>{charity.name || 'Unknown Charity'}</span>
+                  <button
+                    onClick={() => handleUnfollowCharity(charity.ABN)}
+                    className={styles.deleteButton}
+                    aria-label="Unfollow Charity"
+                  >
+                    <FaTimes />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {localFollowedCharities.length > 3 && (
+              <button className={styles.actionButton} onClick={toggleFollowedCharities}>
+                {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className={styles.activitiesGrid}>

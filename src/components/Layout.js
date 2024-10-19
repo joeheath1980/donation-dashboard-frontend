@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import styles from '../Layout.module.css';
+import styles from '../NavBar.module.css';
+import layoutStyles from '../Layout.module.css';
 import logo from '../assets/logo.png';
-import '../NavReset.css';  // Import the new NavReset.css file
+import '../NavReset.css';
 
 function Layout({ children }) {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
@@ -24,28 +25,26 @@ function Layout({ children }) {
   };
 
   return (
-    <div className={styles.layoutContainer}>
-      <nav className={styles.navbar}>
-        <div className={styles.navbarContent}>
-          <div className={styles.logoContainer} onClick={handleLogoClick}>
-            <img src={logo} alt="DonateSpace Logo" className={styles.logo} />
-          </div>
-          <button 
-            className={styles.hamburger}
-            onClick={() => setIsNavExpanded(!isNavExpanded)}
-          >
-            ☰
-          </button>
-          <ul className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
-            <li><NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}>Dashboard</NavLink></li>
-            <li><NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}>Your Perks</NavLink></li>
-            <li><NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}>Your Account</NavLink></li>
-            <li><NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}>About</NavLink></li>
-            <li><button onClick={handleLogout} className={styles.logoutButton}>Logout</button></li>
-          </ul>
+    <div className={layoutStyles.layoutContainer}>
+      <nav className={styles.navBar}>
+        <div className={layoutStyles.logoContainer} onClick={handleLogoClick}>
+          <img src={logo} alt="DonateSpace Logo" className={layoutStyles.logo} />
+        </div>
+        <button 
+          className={layoutStyles.hamburger}
+          onClick={() => setIsNavExpanded(!isNavExpanded)}
+        >
+          ☰
+        </button>
+        <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
+          <NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Dashboard</NavLink>
+          <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
+          <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
+          <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
+          <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>
       </nav>
-      <div className={styles.content}>
+      <div className={layoutStyles.content}>
         {children}
       </div>
     </div>

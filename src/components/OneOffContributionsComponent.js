@@ -210,7 +210,7 @@ function OneOffContributionsComponent({ displayAll }) {
       <div className={cleanStyles.findMoreContainer}>
         {!displayAll && localContributions.length > 5 && (
           <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
-            Find More
+            See All
           </button>
         )}
       </div>

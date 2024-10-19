@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
-import { FaChartBar, FaDownload } from 'react-icons/fa';
-import cleanStyles from './CleanDesign.module.css';
+import { FaChartBar } from 'react-icons/fa';
+import styles from './ImpactVisualization.module.css';
 
 Chart.register(...registerables);
 
@@ -59,6 +59,8 @@ function ImpactVisualization({ hideTitle = false }) {
     [donations, oneOffContributions, volunteerActivities]
   );
 
+  console.log('DataPoints:', dataPoints); // Debug log
+
   useEffect(() => {
     if (chartRef.current && dataPoints && dataPoints.length > 0) {
       const ctx = chartRef.current.getContext('2d');
@@ -66,15 +68,36 @@ function ImpactVisualization({ hideTitle = false }) {
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
-  
+
+      const maxScore = Math.max(impactScore, ...dataPoints.map(point => point.y));
+      let yAxisMax, stepSize;
+
+      if (maxScore <= 25) {
+        yAxisMax = 25;
+        stepSize = 5;
+      } else if (maxScore <= 50) {
+        yAxisMax = 50;
+        stepSize = 10;
+      } else if (maxScore <= 75) {
+        yAxisMax = 75;
+        stepSize = 15;
+      } else {
+        yAxisMax = Math.ceil(maxScore / 25) * 25;
+        stepSize = yAxisMax / 5;
+      }
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, '#5ecfb6');
+      gradient.addColorStop(1, '#2d8f7b');
+
       chartInstance.current = new Chart(ctx, {
         type: 'line',
         data: {
           datasets: [{
             label: 'Personal Impact Score',
             data: dataPoints,
-            borderColor: '#4CAF50',
-            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            borderColor: gradient,
+            backgroundColor: 'rgba(94, 207, 182, 0.1)',
             borderWidth: 3,
             tension: 0.1,
             fill: true
@@ -90,55 +113,50 @@ function ImpactVisualization({ hideTitle = false }) {
             tooltip: {
               enabled: false,
               external: function(context) {
-                // Tooltip Element
                 let tooltipEl = document.getElementById('chartjs-tooltip');
 
-                // Create element on first render
                 if (!tooltipEl) {
                     tooltipEl = document.createElement('div');
                     tooltipEl.id = 'chartjs-tooltip';
                     document.body.appendChild(tooltipEl);
                 }
 
-                // Hide if no tooltip
                 const tooltipModel = context.tooltip;
                 if (tooltipModel.opacity === 0) {
                     tooltipEl.style.opacity = 0;
                     return;
                 }
 
-                // Set Text
                 if (tooltipModel.body) {
                     const titleLines = tooltipModel.title || [];
-
                     const dataPoint = dataPoints[context.tooltip.dataPoints[0].dataIndex];
                     const activity = dataPoint.activity;
 
                     tooltipEl.innerHTML = `
-                      <div class="tooltip-content">
-                        <div class="tooltip-header">
-                          <span class="tooltip-date"><i class="fa fa-calendar-alt"></i> ${titleLines[0]}</span>
+                      <div class="${styles.tooltipContent}">
+                        <div class="${styles.tooltipHeader}">
+                          <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${titleLines[0]}</span>
                         </div>
-                        <div class="tooltip-body">
-                          <div class="tooltip-row">
-                            <span class="tooltip-label"><i class="fa fa-hand-holding-heart"></i> Type:</span>
-                            <span class="tooltip-value">${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}</span>
+                        <div class="${styles.tooltipBody}">
+                          <div class="${styles.tooltipRow}">
+                            <span class="${styles.tooltipLabel}">Type:</span>
+                            <span class="${styles.tooltipValue}">${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}</span>
                           </div>
-                          <div class="tooltip-row">
-                            <span class="tooltip-label"><i class="fa fa-gift"></i> Contribution:</span>
-                            <span class="tooltip-value">${activity.details}</span>
+                          <div class="${styles.tooltipRow}">
+                            <span class="${styles.tooltipLabel}">Contribution:</span>
+                            <span class="${styles.tooltipValue}">${activity.details}</span>
                           </div>
-                          <div class="tooltip-row">
-                            <span class="tooltip-label"><i class="fa fa-user-friends"></i> Recipient:</span>
-                            <span class="tooltip-value">${activity.recipient}</span>
+                          <div class="${styles.tooltipRow}">
+                            <span class="${styles.tooltipLabel}">Recipient:</span>
+                            <span class="${styles.tooltipValue}">${activity.recipient}</span>
                           </div>
-                          <div class="tooltip-row">
-                            <span class="tooltip-label"><i class="fa fa-star"></i> Points Earned:</span>
-                            <span class="tooltip-value">${activity.pointsEarned.toFixed(2)}</span>
+                          <div class="${styles.tooltipRow}">
+                            <span class="${styles.tooltipLabel}">Points Earned:</span>
+                            <span class="${styles.tooltipValue}">${activity.pointsEarned.toFixed(2)}</span>
                           </div>
-                          <div class="tooltip-row total-score">
-                            <span class="tooltip-label"><i class="fa fa-trophy"></i> Total Impact Score:</span>
-                            <span class="tooltip-value">${dataPoint.y.toFixed(2)}</span>
+                          <div class="${styles.tooltipRow} ${styles.totalScore}">
+                            <span class="${styles.tooltipLabel}">Total Impact Score:</span>
+                            <span class="${styles.tooltipValue}">${dataPoint.y.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
@@ -146,26 +164,11 @@ function ImpactVisualization({ hideTitle = false }) {
                 }
 
                 const position = context.chart.canvas.getBoundingClientRect();
-
-                // Display, position, and set styles for font
                 tooltipEl.style.opacity = 1;
                 tooltipEl.style.position = 'absolute';
                 tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
                 tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
                 tooltipEl.style.pointerEvents = 'none';
-                
-                // Apply modern styles
-                tooltipEl.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-                tooltipEl.style.backdropFilter = 'blur(5px)';
-                tooltipEl.style.color = '#333';
-                tooltipEl.style.borderRadius = '8px';
-                tooltipEl.style.fontSize = '14px';
-                tooltipEl.style.fontFamily = "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-                tooltipEl.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)';
-                tooltipEl.style.padding = '12px 16px';
-                tooltipEl.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-                tooltipEl.style.transition = 'all 0.3s ease';
-                tooltipEl.style.zIndex = 1000;
               },
             }
           },
@@ -185,7 +188,7 @@ function ImpactVisualization({ hideTitle = false }) {
                 display: false
               },
               ticks: {
-                color: '#4CAF50',
+                color: '#2d8f7b',
                 maxRotation: 0,
                 autoSkip: true,
                 maxTicksLimit: 6
@@ -196,14 +199,14 @@ function ImpactVisualization({ hideTitle = false }) {
                 display: false
               },
               min: 0,
-              max: Math.max(impactScore, ...dataPoints.map(point => point.y), 100),
+              max: yAxisMax,
               grid: {
-                color: 'rgba(76, 175, 80, 0.1)',
+                color: 'rgba(94, 207, 182, 0.1)',
               },
               ticks: {
-                color: '#4CAF50',
+                color: '#2d8f7b',
                 padding: 5,
-                stepSize: 25,
+                stepSize: stepSize,
                 callback: function(value) {
                   return value;
                 }
@@ -216,6 +219,8 @@ function ImpactVisualization({ hideTitle = false }) {
           }
         }
       });
+
+      console.log('Chart instance created:', chartInstance.current); // Debug log
     }
   
     return () => {
@@ -225,72 +230,23 @@ function ImpactVisualization({ hideTitle = false }) {
     };
   }, [dataPoints, impactScore]);
 
-  const handleDownload = () => {
-    if (dataPoints && dataPoints.length > 0) {
-      const link = document.createElement('a');
-      link.download = 'impact_data.json';
-      link.href = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(dataPoints))}`;
-      link.click();
-    }
-  };
+  console.log('Rendering ImpactVisualization'); // Debug log
 
   if (!dataPoints || dataPoints.length === 0) {
-    return <div className={cleanStyles.textCenter}>No data available for visualization</div>;
+    console.log('No data available for visualization'); // Debug log
+    return <div className={styles.textCenter}>No data available for visualization</div>;
   }
 
   return (
-    <div className={cleanStyles.container}>
+    <div className={styles.container}>
       {!hideTitle && (
-        <h2 className={cleanStyles.header}>
-          <FaChartBar style={{ marginRight: '10px', color: '#4CAF50' }} /> Impact Journey
+        <h2 className={styles.header}>
+          <FaChartBar style={{ marginRight: '10px', color: '#2d8f7b' }} /> Impact Journey
         </h2>
       )}
       <div style={{ height: '400px', width: '100%', marginBottom: '20px', position: 'relative' }}>
         <canvas ref={chartRef} />
       </div>
-      <div>
-        <button onClick={handleDownload} className={cleanStyles.button}>
-          <FaDownload style={{ marginRight: '5px' }} /> Export Data
-        </button>
-      </div>
-      <style jsx>{`
-        .tooltip-content {
-          display: flex;
-          flex-direction: column;
-        }
-        .tooltip-header {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 8px;
-          color: #4CAF50;
-        }
-        .tooltip-body {
-          display: flex;
-          flex-direction: column;
-        }
-        .tooltip-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
-        }
-        .tooltip-label {
-          font-weight: 500;
-          margin-right: 8px;
-        }
-        .tooltip-value {
-          font-weight: 600;
-        }
-        .total-score {
-          margin-top: 8px;
-          padding-top: 8px;
-          border-top: 1px solid rgba(0, 0, 0, 0.1);
-          font-size: 16px;
-          color: #4CAF50;
-        }
-        i {
-          margin-right: 5px;
-        }
-      `}</style>
     </div>
   );
 }

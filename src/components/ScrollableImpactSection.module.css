@@ -116,11 +116,11 @@
 }
 
 .impactSectionNavButton:hover {
-  background-color: rgba(76, 175, 80, 0.1);
+  background-color: rgba(94, 207, 182, 0.1);
 }
 
 .impactSectionNavButton.active {
-  background-color: #4CAF50;
+  background: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
   color: white;
 }
 
@@ -132,14 +132,17 @@
 .arrowButton {
   background-color: transparent;
   border: none;
-  color: #4CAF50;
-  font-size: 20px;
   cursor: pointer;
   padding: 5px;
   margin: 0 5px;
   transition: all 0.3s ease;
 }
 
-.arrowButton:hover {
-  color: #45a049;
+.chevronIcon {
+  font-size: 20px;
+  color: #2d8f7b;
+}
+
+.arrowButton:hover .chevronIcon {
+  color: #5ecfb6;
 }

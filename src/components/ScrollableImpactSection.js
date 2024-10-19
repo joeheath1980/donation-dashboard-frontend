@@ -103,10 +103,10 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
         ))}
         <div className={styles.arrowNavigation}>
           <button onClick={() => navigateSection('prev')} className={styles.arrowButton}>
-            <FaChevronLeft />
+            <FaChevronLeft className={styles.chevronIcon} />
           </button>
           <button onClick={() => navigateSection('next')} className={styles.arrowButton}>
-            <FaChevronRight />
+            <FaChevronRight className={styles.chevronIcon} />
           </button>
         </div>
       </div>

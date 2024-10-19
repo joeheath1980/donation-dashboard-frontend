@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import cleanStyles from './CleanDesign.module.css';
+import styles from './VolunteerActivities.module.css';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 function VolunteerActivitiesComponent({ userId }) {
@@ -16,7 +17,17 @@ function VolunteerActivitiesComponent({ userId }) {
 
   useEffect(() => {
     fetchActivities();
-  }, [userId]);
+    
+    if (isAddActivityModalOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [userId, isAddActivityModalOpen]);
 
   const fetchActivities = async () => {
     const token = localStorage.getItem('token');
@@ -73,30 +84,30 @@ function VolunteerActivitiesComponent({ userId }) {
   };
 
   return (
-    <div className={cleanStyles.container}>
-      <h2 className={cleanStyles.header}>Volunteer Activities</h2>
+    <div className={styles.volunteerContainer}>
+      <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
 
-      {error && <p className={cleanStyles.error}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
 
       {activities.length > 0 ? (
-        <div className={cleanStyles.grid}>
+        <div className={styles.activitiesGrid}>
           {activities.map(activity => (
-            <div key={activity._id} className={cleanStyles.card}>
-              <div className={cleanStyles.cardHeader}>
-                <h3 className={cleanStyles.cardTitle}>{activity.organization}</h3>
-                <span className={`${cleanStyles.badge} ${activity.status === 'active' ? cleanStyles.badgeSuccess : cleanStyles.badgeWarning}`}>
+            <div key={activity._id} className={styles.activityCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>{activity.organization}</h3>
+                <span className={`${styles.badge} ${activity.status === 'active' ? styles.badgeSuccess : styles.badgeWarning}`}>
                   {activity.status}
                 </span>
               </div>
-              <div className={cleanStyles.cardContent}>
+              <div className={styles.cardContent}>
                 <p><strong>Hours:</strong> {activity.hours}</p>
                 <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
                 <p><strong>Description:</strong> {activity.description}</p>
               </div>
-              <div className={cleanStyles.cardActions}>
+              <div className={styles.cardActions}>
                 <button 
                   onClick={() => handleDeleteActivity(activity._id)} 
-                  className={cleanStyles.iconButton}
+                  className={styles.iconButton}
                   aria-label="Delete Activity"
                 >
                   <FaTrash />
@@ -106,65 +117,65 @@ function VolunteerActivitiesComponent({ userId }) {
           ))}
         </div>
       ) : (
-        <p className={cleanStyles.textCenter}>No volunteer activities found.</p>
+        <p className={styles.textCenter}>No volunteer activities found.</p>
       )}
 
       <button 
         onClick={() => setIsAddActivityModalOpen(true)} 
-        className={`${cleanStyles.button} ${cleanStyles.mt-10}`}
+        className={`${cleanStyles.button} ${styles.addButton}`}
       >
         <FaPlus /> Add Activity
       </button>
 
       {isAddActivityModalOpen && (
-        <div className={cleanStyles.modal}>
-          <div className={cleanStyles.modalContent}>
-            <h3 className={cleanStyles.modalHeader}>Add New Activity</h3>
-            <form onSubmit={handleSubmit} className={cleanStyles.form}>
-              <div className={cleanStyles.formGroup}>
-                <label className={cleanStyles.label}>Organization:</label>
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h3 className={styles.modalHeader}>Add New Activity</h3>
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Organization:</label>
                 <input 
                   type="text" 
                   name="organization" 
                   value={newActivity.organization} 
                   onChange={handleChange} 
                   required 
-                  className={cleanStyles.input}
+                  className={styles.input}
                 />
               </div>
-              <div className={cleanStyles.formGroup}>
-                <label className={cleanStyles.label}>Hours:</label>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Hours:</label>
                 <input 
                   type="number" 
                   name="hours" 
                   value={newActivity.hours} 
                   onChange={handleChange} 
                   required 
-                  className={cleanStyles.input}
+                  className={styles.input}
                 />
               </div>
-              <div className={cleanStyles.formGroup}>
-                <label className={cleanStyles.label}>Date:</label>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Date:</label>
                 <input 
                   type="date" 
                   name="date" 
                   value={newActivity.date} 
                   onChange={handleChange} 
                   required 
-                  className={cleanStyles.input}
+                  className={styles.input}
                 />
               </div>
-              <div className={cleanStyles.formGroup}>
-                <label className={cleanStyles.label}>Description:</label>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Description:</label>
                 <textarea 
                   name="description" 
                   value={newActivity.description} 
                   onChange={handleChange}
-                  className={cleanStyles.textarea}
+                  className={styles.textarea}
                 />
               </div>
-              <div className={cleanStyles.modalActions}>
-                <button type="button" onClick={() => setIsAddActivityModalOpen(false)} className={cleanStyles.buttonSecondary}>Cancel</button>
+              <div className={styles.modalActions}>
+                <button type="button" onClick={() => setIsAddActivityModalOpen(false)} className={styles.buttonSecondary}>Cancel</button>
                 <button type="submit" className={cleanStyles.button}>Add Activity</button>
               </div>
             </form>

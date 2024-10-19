@@ -1,14 +1,14 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaRegHeart, FaTimes } from 'react-icons/fa';
-import styles from './FollowedCharitiesComponent.module.css';
+import { FaRegHeart, FaTimes, FaChevronRight, FaPlus } from 'react-icons/fa';
+import cleanStyles from './CleanDesign.module.css';
 
-const FollowedCharitiesComponent = () => {
-  const { followedCharities, removeFollowedCharity, error } = useContext(ImpactContext);
+const FollowedCharitiesComponent = ({ displayAll }) => {
+  const { followedCharities, removeFollowedCharity, error: contextError } = useContext(ImpactContext);
   const [localError, setLocalError] = useState(null);
 
-  const handleDelete = async (charityABN) => {
+  const handleDelete = useCallback(async (charityABN) => {
     if (window.confirm('Are you sure you want to unfollow this charity?')) {
       try {
         await removeFollowedCharity(charityABN);
@@ -17,51 +17,47 @@ const FollowedCharitiesComponent = () => {
         setLocalError('Failed to remove the charity. Please try again.');
       }
     }
-  };
+  }, [removeFollowedCharity]);
+
+  const displayedCharities = displayAll ? followedCharities : followedCharities.slice(0, 3);
 
   return (
-    <div className={styles.card}>
-      <h3 className={styles.cardTitle}>
-        <FaRegHeart className={styles.icon} /> Charities Following
+    <div className={cleanStyles.contributionSection}>
+      <h3 className={cleanStyles.sectionTitle}>
+        <FaRegHeart className={cleanStyles.titleIcon} /> Charities Following
       </h3>
-      <div className={styles.cardContent}>
-        {followedCharities && followedCharities.length > 0 ? (
-          <ul className={styles.list}>
-            {followedCharities.map((followedCharity, index) => {
-              const charity = followedCharity.charity || followedCharity;
-              return (
-                <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
-                  <span className={styles.charityName}>
-                    {charity.logo && (
-                      <img
-                        src={charity.logo}
-                        alt={`${charity.name} logo`}
-                        className={styles.charityLogo}
-                      />
-                    )}
-                    {charity.name || 'Unknown Charity'}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(charity.ABN)}
-                    className={styles.deleteButton}
-                    title="Unfollow Charity"
-                  >
-                    <FaTimes />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+      <Link to="/search-charities" className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.fullWidth}`}>
+        <FaPlus /> Follow New Charity
+      </Link>
+      <div className={cleanStyles.charitiesList}>
+        {displayedCharities && displayedCharities.length > 0 ? (
+          displayedCharities.map((followedCharity, index) => {
+            const charity = followedCharity.charity || followedCharity;
+            return (
+              <div key={charity.ABN || `empty-${index}`} className={cleanStyles.charityCard}>
+                <span className={cleanStyles.charityName}>{charity.name || 'Unknown Charity'}</span>
+                <button
+                  onClick={() => handleDelete(charity.ABN)}
+                  className={cleanStyles.deleteButton}
+                  aria-label="Unfollow Charity"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            );
+          })
         ) : (
-          <p className={styles.emptyMessage}>Not following any charities yet.</p>
-        )}
-        {(error || localError) && (
-          <p className={styles.errorMessage}>{error || localError}</p>
+          <p className={cleanStyles.emptyMessage}>Not following any charities yet.</p>
         )}
       </div>
-      <Link to="/search-charities" className={styles.actionButton}>
-        Find more
-      </Link>
+      {(contextError || localError) && (
+        <p className={cleanStyles.errorMessage}>{contextError || localError}</p>
+      )}
+      {!displayAll && followedCharities.length > 3 && (
+        <Link to="/followed-charities" className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+          See All <FaChevronRight />
+        </Link>
+      )}
     </div>
   );
 };

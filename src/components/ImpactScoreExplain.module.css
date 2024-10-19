@@ -16,13 +16,18 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
+  color: #2d8f7b;
+  transition: color 0.3s ease;
+}
+
+.closeButton:hover {
+  color: #5ecfb6;
 }
 
 .breakdownTitle {
   font-size: 24px;
   font-weight: bold;
-  color: #333;
+  color: #2d8f7b;
   margin-bottom: 20px;
 }
 
@@ -35,6 +40,7 @@
   justify-content: space-between;
   margin-bottom: 5px;
   font-weight: bold;
+  color: #2d8f7b;
 }
 
 .breakdownProgressBar {
@@ -47,7 +53,7 @@
 
 .breakdownProgress {
   height: 100%;
-  background-color: #4CAF50;
+  background: linear-gradient(to right, #5ecfb6, #2d8f7b);
   transition: width 0.3s ease-in-out;
 }
 
@@ -57,13 +63,13 @@
 
 .explanationText h3 {
   font-size: 20px;
-  color: #333;
+  color: #2d8f7b;
   margin-bottom: 15px;
 }
 
 .explanationText h4 {
   font-size: 18px;
-  color: #4CAF50;
+  color: #5ecfb6;
   margin-top: 20px;
   margin-bottom: 10px;
 }
@@ -71,7 +77,7 @@
 .explanationText p, .explanationText ul {
   font-size: 14px;
   line-height: 1.6;
-  color: #666;
+  color: #333;
 }
 
 .explanationText ul {
@@ -81,4 +87,10 @@
 
 .explanationText li {
   margin-bottom: 5px;
+}
+
+/* Add a subtle hover effect to list items */
+.explanationText li:hover {
+  color: #2d8f7b;
+  transition: color 0.3s ease;
 }
