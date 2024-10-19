@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
-import styles from './CleanDesign.module.css';
+import styles from './MatchingOpportunitiesComponent.module.css';
+import CarouselComponent from './CarouselComponent';
 
 function MatchingOpportunitiesComponent({ userId }) {
   const [opportunities, setOpportunities] = useState([]);
@@ -64,37 +65,22 @@ function MatchingOpportunitiesComponent({ userId }) {
     return <div className={styles.container}>Error: {error}</div>;
   }
 
+  const carouselItems = opportunities.map(opportunity => ({
+    title: opportunity.message,
+    charity: opportunity.charity,
+    contribution: `$${opportunity.donationAmount}`,
+    multiplier: '2x',
+    validUntil: new Date(opportunity.endDate).toLocaleDateString(),
+    id: opportunity._id,
+    accepted: opportunity.accepted,
+    onMatch: () => handleMatch(opportunity._id)
+  }));
+
   return (
     <div className={styles.container}>
-      <h3 className={styles.header}>Matching Opportunities</h3>
+      <h2 className={styles.header}>Matching Opportunities</h2>
       {opportunities && opportunities.length > 0 ? (
-        <div className={styles.grid}>
-          {opportunities.map(opportunity => (
-            <div key={opportunity._id || opportunity.id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h4 className={styles.cardTitle}>
-                  {opportunity.message}
-                </h4>
-              </div>
-              <div className={styles.cardContent}>
-                <p><span className={styles.highlight}>Charity:</span> {opportunity.charity}</p>
-                <p><span className={styles.highlight}>Your Contribution:</span> ${opportunity.donationAmount}</p>
-                <p><span className={styles.highlight}>Multiplier:</span> 2x</p>
-                <p><span className={styles.highlight}>Total Impact:</span> ${opportunity.totalAmount}</p>
-                <p><span className={styles.highlight}>Valid Until:</span> {new Date(opportunity.endDate).toLocaleDateString()}</p>
-              </div>
-              <div className={styles.cardActions}>
-                <button 
-                  className={styles.button}
-                  onClick={() => handleMatch(opportunity._id)}
-                  disabled={opportunity.accepted}
-                >
-                  {opportunity.accepted ? 'Matched' : 'Match'}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <CarouselComponent items={carouselItems} />
       ) : (
         <p className={styles.text}>No matching opportunities available at the moment.</p>
       )}

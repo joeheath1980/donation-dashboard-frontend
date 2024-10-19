@@ -33,16 +33,23 @@ function processData(donations, oneOffContributions, volunteerActivities) {
     };
 
     const scoreResult = calculateComplexImpactScore(currentData, benchmarks);
+    const pointsEarned = scoreResult.totalScore - cumulativeScore;
     cumulativeScore = scoreResult.totalScore;
 
     return {
       x: activity.date,
-      y: cumulativeScore
+      y: cumulativeScore,
+      activity: {
+        type: activity.type,
+        details: activity.type === 'volunteer' ? `${activity.hours} hours` : `$${activity.amount}`,
+        recipient: activity.organization || activity.charity,
+        pointsEarned: pointsEarned
+      }
     };
   });
 }
 
-function ImpactVisualization() {
+function ImpactVisualization({ hideTitle = false }) {
   const { donations, oneOffContributions, volunteerActivities, impactScore } = useContext(ImpactContext);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -81,16 +88,85 @@ function ImpactVisualization() {
               display: false
             },
             tooltip: {
-              mode: 'index',
-              intersect: false,
-              callbacks: {
-                title: function(tooltipItems) {
-                  return new Date(tooltipItems[0].parsed.x).toLocaleDateString();
-                },
-                label: function(context) {
-                  return `Personal Impact Score: ${context.parsed.y}`;
+              enabled: false,
+              external: function(context) {
+                // Tooltip Element
+                let tooltipEl = document.getElementById('chartjs-tooltip');
+
+                // Create element on first render
+                if (!tooltipEl) {
+                    tooltipEl = document.createElement('div');
+                    tooltipEl.id = 'chartjs-tooltip';
+                    document.body.appendChild(tooltipEl);
                 }
-              }
+
+                // Hide if no tooltip
+                const tooltipModel = context.tooltip;
+                if (tooltipModel.opacity === 0) {
+                    tooltipEl.style.opacity = 0;
+                    return;
+                }
+
+                // Set Text
+                if (tooltipModel.body) {
+                    const titleLines = tooltipModel.title || [];
+
+                    const dataPoint = dataPoints[context.tooltip.dataPoints[0].dataIndex];
+                    const activity = dataPoint.activity;
+
+                    tooltipEl.innerHTML = `
+                      <div class="tooltip-content">
+                        <div class="tooltip-header">
+                          <span class="tooltip-date"><i class="fa fa-calendar-alt"></i> ${titleLines[0]}</span>
+                        </div>
+                        <div class="tooltip-body">
+                          <div class="tooltip-row">
+                            <span class="tooltip-label"><i class="fa fa-hand-holding-heart"></i> Type:</span>
+                            <span class="tooltip-value">${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}</span>
+                          </div>
+                          <div class="tooltip-row">
+                            <span class="tooltip-label"><i class="fa fa-gift"></i> Contribution:</span>
+                            <span class="tooltip-value">${activity.details}</span>
+                          </div>
+                          <div class="tooltip-row">
+                            <span class="tooltip-label"><i class="fa fa-user-friends"></i> Recipient:</span>
+                            <span class="tooltip-value">${activity.recipient}</span>
+                          </div>
+                          <div class="tooltip-row">
+                            <span class="tooltip-label"><i class="fa fa-star"></i> Points Earned:</span>
+                            <span class="tooltip-value">${activity.pointsEarned.toFixed(2)}</span>
+                          </div>
+                          <div class="tooltip-row total-score">
+                            <span class="tooltip-label"><i class="fa fa-trophy"></i> Total Impact Score:</span>
+                            <span class="tooltip-value">${dataPoint.y.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                }
+
+                const position = context.chart.canvas.getBoundingClientRect();
+
+                // Display, position, and set styles for font
+                tooltipEl.style.opacity = 1;
+                tooltipEl.style.position = 'absolute';
+                tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+                tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+                tooltipEl.style.pointerEvents = 'none';
+                
+                // Apply modern styles
+                tooltipEl.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                tooltipEl.style.backdropFilter = 'blur(5px)';
+                tooltipEl.style.color = '#333';
+                tooltipEl.style.borderRadius = '8px';
+                tooltipEl.style.fontSize = '14px';
+                tooltipEl.style.fontFamily = "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+                tooltipEl.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)';
+                tooltipEl.style.padding = '12px 16px';
+                tooltipEl.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                tooltipEl.style.transition = 'all 0.3s ease';
+                tooltipEl.style.zIndex = 1000;
+              },
             }
           },
           scales: {
@@ -164,10 +240,12 @@ function ImpactVisualization() {
 
   return (
     <div className={cleanStyles.container}>
-      <h2 className={cleanStyles.header}>
-        <FaChartBar style={{ marginRight: '10px', color: '#4CAF50' }} /> Impact Journey
-      </h2>
-      <div style={{ height: '400px', width: '100%', marginBottom: '20px' }}>
+      {!hideTitle && (
+        <h2 className={cleanStyles.header}>
+          <FaChartBar style={{ marginRight: '10px', color: '#4CAF50' }} /> Impact Journey
+        </h2>
+      )}
+      <div style={{ height: '400px', width: '100%', marginBottom: '20px', position: 'relative' }}>
         <canvas ref={chartRef} />
       </div>
       <div>
@@ -175,6 +253,44 @@ function ImpactVisualization() {
           <FaDownload style={{ marginRight: '5px' }} /> Export Data
         </button>
       </div>
+      <style jsx>{`
+        .tooltip-content {
+          display: flex;
+          flex-direction: column;
+        }
+        .tooltip-header {
+          font-size: 16px;
+          font-weight: bold;
+          margin-bottom: 8px;
+          color: #4CAF50;
+        }
+        .tooltip-body {
+          display: flex;
+          flex-direction: column;
+        }
+        .tooltip-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 4px;
+        }
+        .tooltip-label {
+          font-weight: 500;
+          margin-right: 8px;
+        }
+        .tooltip-value {
+          font-weight: 600;
+        }
+        .total-score {
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
+          font-size: 16px;
+          color: #4CAF50;
+        }
+        i {
+          margin-right: 5px;
+        }
+      `}</style>
     </div>
   );
 }

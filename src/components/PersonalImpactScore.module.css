@@ -1,6 +1,48 @@
 .mainContent {
   display: flex;
+  align-items: center;
   justify-content: center;
+  width: 100%;
+  background: linear-gradient(to right, #f0f0f0, #ffffff);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.impactScoreTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 64px;
+  text-transform: uppercase;
+  text-align: left;
+  letter-spacing: 2px;
+  margin-left: 30px;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.impactWord {
+  font-weight: 900;
+  color: #1a5f7a;
+}
+
+.scoreWord {
+  font-weight: 700;
+  color: #159895;
+}
+
+.impactScoreTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1a5f7a, #159895);
+  transition: width 0.3s ease;
+}
+
+.impactScoreTitle:hover::after {
   width: 100%;
 }
 
@@ -43,9 +85,10 @@
 .scoreValue {
   font-size: 72px;
   font-weight: bold;
-  background: linear-gradient(45deg, #4CAF50, #45a049);
+  background: linear-gradient(45deg, #1a5f7a, #159895);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   margin: 0;
   padding: 0;
   line-height: 1;
@@ -57,7 +100,7 @@
 
 .scoreChangeIcon {
   font-size: 28px;
-  color: #4CAF50;
+  color: #159895;
   margin-left: 10px;
 }
 
@@ -73,6 +116,7 @@
   padding: 0;
   line-height: 1;
   font-weight: bold;
+  color: #1a5f7a;
 }
 
 /* Tooltip styles */

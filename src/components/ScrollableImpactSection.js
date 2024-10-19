@@ -1,14 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 import ImpactVisualization from './ImpactVisualization';
 import ImpactScoreExplain from './ImpactScoreExplain';
 import TierProgressModal from './TierProgressModal';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaStar } from 'react-icons/fa';
+import { FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaStar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from './ScrollableImpactSection.module.css';
 
 const allBadges = [
@@ -58,44 +55,78 @@ const BadgesDisplay = () => {
   }, [donations, oneOffContributions]);
 
   return (
-    <div className={styles.badgesContainer}>
-      <h2>Your Badges</h2>
-      <div className={styles.badgesGrid}>
-        {allBadges.map((badge, index) => (
-          <div
-            key={index}
-            className={`${styles.badgeItem} ${collectedBadges.some(b => b.title === badge.title) ? styles.collected : ''}`}
-          >
-            <badge.icon size={40} color={collectedBadges.some(b => b.title === badge.title) ? badge.color : '#ccc'} />
-            <div className={styles.badgeTitle}>{badge.title}</div>
-          </div>
-        ))}
-      </div>
+    <div className={styles.badgesGrid}>
+      {allBadges.map((badge, index) => (
+        <div
+          key={index}
+          className={`${styles.badgeItem} ${collectedBadges.some(b => b.title === badge.title) ? styles.collected : ''}`}
+        >
+          <badge.icon size={30} color={collectedBadges.some(b => b.title === badge.title) ? badge.color : '#ccc'} />
+          <div className={styles.badgeTitle}>{badge.title}</div>
+        </div>
+      ))}
     </div>
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles }) => {
+  const swiperRef = useRef(null);
+
+  useEffect(() => {
+    if (swiperRef.current && swiperRef.current.swiper) {
+      swiperRef.current.swiper.slideTo(activeSection);
+    }
+  }, [activeSection]);
+
+  const handleSlideChange = (swiper) => {
+    setActiveSection(swiper.activeIndex);
+  };
+
+  const navigateSection = (direction) => {
+    const newIndex = direction === 'next' 
+      ? (activeSection + 1) % totalSections 
+      : (activeSection - 1 + totalSections) % totalSections;
+    setActiveSection(newIndex);
+  };
+
   return (
     <div className={styles.scrollableImpactSection}>
+      <div className={styles.impactSectionNav}>
+        {sectionTitles.map((title, index) => (
+          <button
+            key={index}
+            className={`${styles.impactSectionNavButton} ${activeSection === index ? styles.active : ''}`}
+            onClick={() => setActiveSection(index)}
+          >
+            {title}
+          </button>
+        ))}
+        <div className={styles.arrowNavigation}>
+          <button onClick={() => navigateSection('prev')} className={styles.arrowButton}>
+            <FaChevronLeft />
+          </button>
+          <button onClick={() => navigateSection('next')} className={styles.arrowButton}>
+            <FaChevronRight />
+          </button>
+        </div>
+      </div>
       <Swiper
-        modules={[Navigation, Pagination]}
+        ref={swiperRef}
         spaceBetween={30}
         slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
+        onSlideChange={handleSlideChange}
       >
         <SwiperSlide>
-          <ImpactVisualization />
+          <ImpactVisualization hideTitle={true} />
         </SwiperSlide>
         <SwiperSlide>
-          <ImpactScoreExplain onClose={() => {}} />
+          <ImpactScoreExplain hideTitle={true} />
         </SwiperSlide>
         <SwiperSlide>
           <TierProgressModal 
             currentTier={tier} 
-            impactScore={impactScore} 
-            onClose={() => {}}
+            impactScore={impactScore}
+            hideTitle={true}
           />
         </SwiperSlide>
         <SwiperSlide>

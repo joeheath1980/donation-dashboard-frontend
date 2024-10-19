@@ -103,7 +103,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
 };
 
 const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier }) => {
-  const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' }; // Default color if tier not found
+  const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
 
   return (
     <div className={styles.mainContent}>
@@ -115,6 +115,10 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier 
           scoreChange={scoreChange}
           color={tierColor}
         />
+      </div>
+      <div className={styles.impactScoreTitle}>
+        <span className={styles.impactWord} data-text="IMPACT">IMPACT</span>
+        <span className={styles.scoreWord} data-text="SCORE">SCORE</span>
       </div>
     </div>
   );
