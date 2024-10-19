@@ -12,7 +12,7 @@ import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import FollowedCharitiesComponent from './FollowedCharitiesComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
-import { FaRegHandshake, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaRegHandshake, FaRegCalendarAlt, FaChevronRight } from 'react-icons/fa';
 
 function Profile() {
   const { 
@@ -37,6 +37,14 @@ function Profile() {
   const [showOneOffContributions, setShowOneOffContributions] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [matchingOpportunities, setMatchingOpportunities] = useState([]);
+  const [activeImpactSection, setActiveImpactSection] = useState(0);
+
+  const impactSections = [
+    { title: 'Impact Journey', component: 'ImpactVisualization' },
+    { title: 'Impact Score Breakdown', component: 'ImpactScoreExplain' },
+    { title: 'Tier Progress', component: 'TierProgress' },
+    { title: 'Your Badges', component: 'BadgesDisplay' },
+  ];
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -137,46 +145,49 @@ function Profile() {
           scoreDetails={scoreDetails}
           tier={tier}
           pointsToNextTier={pointsToNextTier}
+          activeSection={activeImpactSection}
+          setActiveSection={setActiveImpactSection}
+          totalSections={impactSections.length}
+          sectionTitles={impactSections.map(section => section.title)}
         />
         
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Matching Opportunities</h2>
+            <div className={styles.sectionTitleUnderline}></div>
+          </div>
+          <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           <CarouselComponent 
             items={matchingOpportunities.map(opportunity => ({
-              content: (
-                <div className={styles.card} style={{ height: '220px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  <div className={styles.cardHeader}>
-                    <h3 className={styles.cardTitle}>{opportunity.message}</h3>
-                  </div>
-                  <div className={styles.cardContent} style={{ flexGrow: 1, overflow: 'auto', padding: '0 12px' }}>
-                    <p className={`${styles.text} ${styles.highlight}`} style={{ margin: '0', lineHeight: '1.1', marginBottom: '4px' }}><strong>Charity:</strong> {opportunity.charity}</p>
-                    <div className={`${styles.flexColumn}`}>
-                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Your Contribution:</strong> ${opportunity.donationAmount}</p>
-                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Multiplier:</strong> x2</p>
-                      <p className={styles.text} style={{ margin: '0', lineHeight: '1.1' }}><strong>Total Impact:</strong> ${opportunity.totalAmount}</p>
-                    </div>
-                    <p className={`${styles.text}`} style={{ margin: '0', lineHeight: '1.1', marginTop: '4px' }}><strong>Valid Until:</strong> {new Date(opportunity.endDate).toLocaleDateString()}</p>
-                  </div>
-                  <div className={styles.cardActions} style={{ padding: '8px 12px' }}>
-                    <button
-                      onClick={() => handleMatch(opportunity._id)}
-                      className={styles.button}
-                      disabled={opportunity.accepted}
-                    >
-                      {opportunity.accepted ? 'Matched' : 'Match'}
-                    </button>
-                  </div>
-                </div>
-              )
+              title: opportunity.message,
+              charity: opportunity.charity,
+              contribution: `$${opportunity.donationAmount}`,
+              multiplier: '2x',
+              validUntil: new Date(opportunity.endDate).toLocaleDateString(),
+              id: opportunity._id,
+              accepted: opportunity.accepted,
+              onMatch: () => handleMatch(opportunity._id)
             }))}
           />
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Projects to Support</h2>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Projects to Support</h2>
+            <div className={styles.sectionTitleUnderline}></div>
+          </div>
+          <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
           <GlobalGivingProjects />
         </section>
         
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Your Impact</h2>
+            <div className={styles.sectionTitleUnderline}></div>
+          </div>
+          <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
+        </section>
+
         <div className={styles.donationsGrid}>
           <div className={styles.donationCard}>
             <h3 className={styles.cardTitle}>
@@ -188,7 +199,7 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleRegularContributions}>
-              {showRegularContributions ? "Hide" : "Find more"}
+              {showRegularContributions ? "Hide" : "Find more"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showRegularContributions && <DonationsComponent displayAll={true} />}
           </div>
@@ -203,7 +214,7 @@ function Profile() {
               ))}
             </ul>
             <button className={styles.actionButton} onClick={toggleOneOffContributions}>
-              {showOneOffContributions ? "Hide" : "Find more"}
+              {showOneOffContributions ? "Hide" : "Find more"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showOneOffContributions && <OneOffContributionsComponent displayAll={true} />}
           </div>

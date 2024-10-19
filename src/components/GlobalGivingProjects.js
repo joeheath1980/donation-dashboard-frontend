@@ -1,11 +1,11 @@
-// src/components/GlobalGivingProjects.js
-
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { ImpactContext } from '../contexts/ImpactContext';
-import CarouselComponent from './CarouselComponent';
 import styles from './GlobalGivingProjects.module.css';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const GlobalGivingProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -80,25 +80,77 @@ const GlobalGivingProjects = () => {
     );
   }
 
-  const carouselItems = projects.map(project => ({
-    content: (
-      <div className={styles.projectCard}>
-        <h3 className={styles.projectTitle}>{project.title}</h3>
-        <p className={styles.projectSummary}>{project.summary.substring(0, 100)}...</p>
-        <p className={styles.projectGoal}>Goal: ${project.goal.toLocaleString()}</p>
-        <a href={project.projectLink} className={styles.learnMoreButton} target="_blank" rel="noopener noreferrer">Learn More</a>
-      </div>
-    )
-  }));
+  const settings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow />,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1
+        }
+      }
+    ]
+  };
 
   return (
     <div className={styles.container}>
       {projects.length === 0 ? (
         <p className={styles.noProjects}>No personalized projects available at the moment. Please try again later.</p>
       ) : (
-        <CarouselComponent items={carouselItems} />
+        <Slider {...settings}>
+          {projects.map((project, index) => (
+            <div key={index} className={styles.carouselItemWrapper}>
+              <div className={styles.carouselItem}>
+                <h3 className={styles.itemTitle}>{project.title}</h3>
+                <div className={styles.itemContent}>
+                  <p className={styles.projectSummary}>{project.summary.substring(0, 100)}...</p>
+                  <p className={styles.projectGoal}>Goal: ${project.goal.toLocaleString()}</p>
+                </div>
+                <div className={styles.buttonWrapper}>
+                  <a href={project.projectLink} className={styles.learnMoreButton} target="_blank" rel="noopener noreferrer">Donate now</a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </Slider>
       )}
     </div>
+  );
+};
+
+const PrevArrow = (props) => {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
+      style={{ ...style, display: 'block' }}
+      onClick={onClick}
+    />
+  );
+};
+
+const NextArrow = (props) => {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
+      style={{ ...style, display: 'block' }}
+      onClick={onClick}
+    />
   );
 };
 

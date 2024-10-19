@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import styles from './ImpactScoreExplain.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaTimes } from 'react-icons/fa';
 
-const ImpactScoreExplain = ({ onClose }) => {
+const ImpactScoreExplain = ({ hideTitle = false }) => {
   const { impactScore, scoreDetails } = useContext(ImpactContext);
 
   if (!scoreDetails) {
@@ -14,10 +13,7 @@ const ImpactScoreExplain = ({ onClose }) => {
 
   return (
     <div className={styles.breakdownContainer}>
-      <button onClick={onClose} className={styles.closeButton}>
-        <FaTimes />
-      </button>
-      <h2 className={styles.breakdownTitle}>Impact Score Breakdown</h2>
+      {!hideTitle && <h2 className={styles.breakdownTitle}>Impact Score Breakdown</h2>}
       <ScoreComponent 
         title="Donations" 
         score={donationScore} 

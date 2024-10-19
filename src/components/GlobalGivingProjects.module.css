@@ -37,48 +37,169 @@
   margin: 20px 0;
 }
 
-.projectCard {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.carouselItemWrapper {
+  padding: 0 15px;
+}
+
+.carouselItem {
+  background-color: #f8f8f8;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.projectTitle {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
+.carouselItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.projectSummary {
-  font-size: 14px;
-  color: #666;
+.itemTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A237E;
   margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.itemContent {
   flex-grow: 1;
 }
 
-.projectGoal {
+.projectSummary {
   font-size: 16px;
-  font-weight: bold;
-  color: #4CAF50;
-  margin-bottom: 15px;
+  color: #424242;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.projectGoal {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2E7D32;
+  margin-bottom: 20px;
+}
+
+.buttonWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .learnMoreButton {
   display: inline-block;
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #4CAF50;
   text-decoration: none;
-  border-radius: 4px;
+  border: 2px solid #4CAF50;
+  border-radius: 50px;
   font-weight: bold;
-  transition: background-color 0.3s ease;
+  font-size: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .learnMoreButton:hover {
-  background-color: #45a049;
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Custom arrow styles */
+.slickArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.slickArrow::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid #4CAF50;
+  border-right: 2px solid #4CAF50;
+}
+
+.slickPrev {
+  left: -40px;
+}
+
+.slickNext {
+  right: -40px;
+}
+
+.slickPrev::before {
+  transform: rotate(-135deg);
+}
+
+.slickNext::before {
+  transform: rotate(45deg);
+}
+
+/* Override slick-carousel default styles */
+:global(.slick-prev),
+:global(.slick-next) {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  transform: translate(0, -50%);
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+:global(.slick-dots) {
+  bottom: -35px;
+}
+
+:global(.slick-dots li button:before) {
+  font-size: 12px;
+  color: #9E9E9E;
+}
+
+:global(.slick-dots li.slick-active button:before) {
+  color: #2E7D32;
+}
+
+:global(.slick-slide > div) {
+  margin: 0 15px;
+}
+
+:global(.slick-list) {
+  margin: 0 -15px;
+}
+
+:global(.slick-slide) {
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+:global(.slick-center) {
+  transform: scale(1);
+}
+
+:global(.slick-track) {
+  display: flex;
+  align-items: center;
 }

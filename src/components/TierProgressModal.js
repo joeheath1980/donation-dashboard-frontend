@@ -10,14 +10,14 @@ const tiers = [
   { name: 'Giver', minScore: 0, icon: FaHeart, color: '#E74C3C' }
 ];
 
-const TierProgressModal = ({ currentTier, impactScore }) => {
+const TierProgressModal = ({ currentTier, impactScore, hideTitle = false }) => {
   const currentTierIndex = tiers.findIndex(tier => tier.name === currentTier);
   const nextTier = tiers[currentTierIndex - 1]; // Note: tiers are in descending order
   const pointsToNextTier = nextTier ? nextTier.minScore - impactScore : 0;
 
   return (
     <div className={styles.modalContent}>
-      <h2>Your Current Tier: {currentTier}</h2>
+      {!hideTitle && <h2>Your Current Tier: {currentTier}</h2>}
       <div className={styles.tierProgress}>
         {tiers.map((tier, index) => {
           const Icon = tier.icon;

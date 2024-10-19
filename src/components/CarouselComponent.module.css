@@ -8,111 +8,168 @@
 }
 
 .carouselItemWrapper {
-  padding: 0 10px;
+  padding: 0 15px;
 }
 
 .carouselItem {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f8f8f8;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.carouselItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .itemIcon {
-  font-size: 32px;
-  color: #4CAF50;
-  margin-bottom: 15px;
+  font-size: 36px;
+  color: #2E7D32;
+  margin-bottom: 20px;
 }
 
 .itemTitle {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A237E;
+  margin-bottom: 15px;
+  line-height: 1.3;
 }
 
 .itemDescription {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 15px;
+  font-size: 16px;
+  color: #424242;
+  margin-bottom: 20px;
   flex-grow: 1;
+  line-height: 1.6;
 }
 
 .readMoreLink {
-  color: #4CAF50;
+  color: #2E7D32;
   text-decoration: none;
   font-weight: bold;
   transition: color 0.3s ease;
+  font-size: 16px;
 }
 
 .readMoreLink:hover {
-  color: #45a049;
+  color: #1B5E20;
 }
 
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
+.buttonWrapper {
+  width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  z-index: 1;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
-.arrow svg {
-  font-size: 20px;
+.matchButton,
+.learnMoreButton {
+  display: inline-block;
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #4CAF50;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  background-color: transparent;
   color: #4CAF50;
 }
 
-.arrow:hover {
+.matchButton:hover,
+.learnMoreButton:hover {
   background-color: #4CAF50;
-}
-
-.arrow:hover svg {
   color: white;
 }
 
-.prevArrow {
-  left: -20px;
+/* Custom arrow styles */
+.slickArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  cursor: pointer;
 }
 
-.nextArrow {
-  right: -20px;
+.slickArrow::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid #4CAF50;
+  border-right: 2px solid #4CAF50;
+}
+
+.slickPrev {
+  left: -40px;
+}
+
+.slickNext {
+  right: -40px;
+}
+
+.slickPrev::before {
+  transform: rotate(-135deg);
+}
+
+.slickNext::before {
+  transform: rotate(45deg);
 }
 
 /* Override slick-carousel default styles */
+:global(.slick-prev),
+:global(.slick-next) {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  transform: translate(0, -50%);
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
 :global(.slick-dots) {
-  bottom: -30px;
+  bottom: -35px;
 }
 
 :global(.slick-dots li button:before) {
-  font-size: 10px;
-  color: #4CAF50;
+  font-size: 12px;
+  color: #9E9E9E;
 }
 
 :global(.slick-dots li.slick-active button:before) {
-  color: #45a049;
+  color: #2E7D32;
 }
 
 :global(.slick-slide > div) {
-  margin: 0 10px;
+  margin: 0 15px;
 }
 
 :global(.slick-list) {
-  margin: 0 -10px;
+  margin: 0 -15px;
 }
 
-/* Remove shadow duplicate */
 :global(.slick-slide) {
   transform: scale(0.95);
   transition: transform 0.3s ease;
@@ -125,4 +182,28 @@
 :global(.slick-track) {
   display: flex;
   align-items: center;
+}
+
+.charityLabel,
+.contributionLabel,
+.multiplierLabel,
+.validUntilLabel {
+  font-size: 14px;
+  color: #757575;
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.charityName,
+.contributionAmount,
+.multiplierValue,
+.validUntilDate {
+  font-size: 18px;
+  color: #212121;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.contributionAmount {
+  color: #2E7D32;
 }

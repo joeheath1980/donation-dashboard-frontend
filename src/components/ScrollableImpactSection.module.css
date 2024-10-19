@@ -8,7 +8,7 @@
 /* Swiper styles */
 :global(.swiper-container) {
   width: 100%;
-  height: 100%;
+  height: 400px; /* Set a fixed height to match ImpactVisualization */
 }
 
 :global(.swiper-slide) {
@@ -19,11 +19,11 @@
 
 :global(.swiper-button-next),
 :global(.swiper-button-prev) {
-  color: #4CAF50;
+  display: none; /* Hide the chevron navigation */
 }
 
-:global(.swiper-pagination-bullet-active) {
-  background-color: #4CAF50;
+:global(.swiper-pagination) {
+  display: none; /* Hide the default pagination */
 }
 
 /* Ensure content inside slides is visible */
@@ -34,39 +34,33 @@
   padding: 20px;
 }
 
-/* Style for ImpactVisualization */
-.impactVisualization {
-  width: 100%;
-  height: 100%;
-}
-
-/* Style for ImpactScoreExplain */
-.impactScoreExplain {
+/* Common styles for all components */
+.impactVisualization,
+.impactScoreExplain,
+.tierProgressModal,
+.badgesGrid {
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
-/* Style for TierProgressModal */
-.tierProgressModal {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
+/* Remove headings from individual components */
+.impactVisualization h2,
+.impactScoreExplain h2,
+.tierProgressModal h2 {
+  display: none;
 }
 
 /* Badges Display Styles */
-.badgesContainer {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 20px;
-}
-
 .badgesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: repeat(5, 1fr); /* 5 columns of badges */
+  gap: 15px;
+  padding: 15px;
 }
 
 .badgeItem {
@@ -75,8 +69,8 @@
   align-items: center;
   justify-content: center;
   background-color: #f0f0f0;
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 10px;
   text-align: center;
   transition: all 0.3s ease;
 }
@@ -86,13 +80,66 @@
 }
 
 .badgeItem:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .badgeTitle {
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: 8px;
+  font-size: 12px;
   font-weight: bold;
   color: #333;
+}
+
+/* Navigation styles for the key legend */
+.impactSectionNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #f8f8f8;
+  border-radius: 30px;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.impactSectionNavButton {
+  background-color: transparent;
+  border: none;
+  color: #333;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 25px;
+}
+
+.impactSectionNavButton:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.impactSectionNavButton.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.arrowNavigation {
+  display: flex;
+  align-items: center;
+}
+
+.arrowButton {
+  background-color: transparent;
+  border: none;
+  color: #4CAF50;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+
+.arrowButton:hover {
+  color: #45a049;
 }
