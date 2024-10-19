@@ -1,50 +1,104 @@
 .navBar {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
     background-color: #ffffff;
-    padding: 10px 0;
-    box-shadow: none !important;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
 }
   
 .navItem {
-    color: #4CAF50;
+    color: #2d8f7b;
     text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 10px 15px;
-    transition: color 0.3s;
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: none !important;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    background: none;
+    position: relative;
+    cursor: pointer;
 }
   
 .navItem:hover {
-    color: #3a7e3a;
+    color: #5ecfb6;
+}
+
+.navItem::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: -5px;
+    left: 50%;
+    background: linear-gradient(to right, #5ecfb6, #2d8f7b);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navItem:hover::after {
+    width: 100%;
 }
   
 .active {
-    color: #3a7e3a;
+    color: #5ecfb6;
     font-weight: 700;
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: none !important;
+}
+
+.active::after {
+    width: 100%;
 }
 
 .navItem:focus,
 .navItem:active {
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: none !important;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    background: none;
+}
+
+.logoutButton {
+    background: none;
+    border: none;
+    margin-left: 20px;
+}
+
+@media (max-width: 768px) {
+    .navBar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navLinks {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .navItem {
+        width: 100%;
+        text-align: left;
+        padding: 15px 0;
+    }
+
+    .logoutButton {
+        margin-left: 0;
+        margin-top: 15px;
+    }
 }
 
 :global(.NavBar_navItem__asN14),
 :global(.NavBar_active__asN14) {
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: none !important;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    background: none;
 }

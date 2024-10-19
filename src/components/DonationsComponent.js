@@ -187,7 +187,7 @@ function DonationsComponent({ displayAll }) {
                     )}
                     {donation.isValidated && (
                       <InstantTooltip text="Donation validated">
-                        <FaCheckCircle style={{ color: 'green' }} />
+                        <FaCheckCircle style={{ color: '#2d8f7b' }} />
                       </InstantTooltip>
                     )}
                   </div>
@@ -240,7 +240,7 @@ function DonationsComponent({ displayAll }) {
       <div className={cleanStyles.findMoreContainer}>
         {!displayAll && localDonations.length > 5 && (
           <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
-            Find More
+            See All
           </button>
         )}
       </div>

@@ -116,7 +116,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier 
           color={tierColor}
         />
       </div>
-      <div className={styles.impactScoreTitle}>
+      <div className={`${styles.impactScoreTitle} ${styles.gradientTitle}`}>
         <span className={styles.impactWord} data-text="IMPACT">IMPACT</span>
         <span className={styles.scoreWord} data-text="SCORE">SCORE</span>
       </div>

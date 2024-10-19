@@ -26,14 +26,21 @@
 .sectionTitle {
   font-size: 32px;
   font-weight: 800;
-  color: #1A237E;
   margin-right: 15px;
+}
+
+.gradientTitle {
+  font-weight: bold;
+  background: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .sectionTitleUnderline {
   flex-grow: 1;
   height: 3px;
-  background-color: #4CAF50;
+  background-color: #2d8f7b;
   opacity: 0.5;
 }
 
@@ -71,7 +78,7 @@
 .cardTitle {
   font-size: 22px;
   font-weight: bold;
-  color: #1A237E;
+  color: #236e61;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -79,7 +86,7 @@
 
 .icon {
   margin-right: 15px;
-  color: #4CAF50;
+  color: #2d8f7b;
   font-size: 24px;
 }
 
@@ -91,6 +98,9 @@
 }
 
 .listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e0e0e0;
@@ -109,10 +119,10 @@
   align-items: center;
   justify-content: center;
   background-color: transparent;
-  color: #4CAF50;
+  color: #2d8f7b;
   text-decoration: none;
   padding: 12px 25px;
-  border: 2px solid #4CAF50;
+  border: 2px solid #2d8f7b;
   border-radius: 25px;
   font-size: 16px;
   font-weight: bold;
@@ -123,7 +133,7 @@
 }
 
 .actionButton:hover {
-  background-color: #4CAF50;
+  background-color: #2d8f7b;
   color: white;
 }
 
@@ -191,12 +201,38 @@
 }
 
 .impactSectionNavButton:hover {
-  background-color: rgba(76, 175, 80, 0.1);
+  background-color: rgba(94, 207, 182, 0.1);
 }
 
 .impactSectionNavButton.active {
-  background-color: #4CAF50;
+  background: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
   color: white;
+}
+
+/* New styles for the delete button */
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #236e61;
+  font-size: 18px;
+  padding: 5px;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteButton:hover {
+  background-color: #236e61;
+  color: white;
+}
+
+.fullWidth {
+  width: 100%;
 }
 
 @media (max-width: 1024px) {

@@ -1,111 +1,130 @@
 /* CleanDesign.module.css */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-gradient: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
+  --hover-color: #236e61;
+}
+
 .container {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  margin-bottom: 30px;
 }
 
 .header {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 20px;
 }
 
 .subHeader {
-  font-size: 18px;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 12px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #424242;
+  margin-bottom: 15px;
 }
 
 .text {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.5;
+  font-size: 16px;
+  color: #757575;
+  line-height: 1.6;
 }
 
 .highlight {
-  color: #4CAF50;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
 .button {
-  background-color: #ffffff;
-  color: #4CAF50;
-  border: 1px solid #4CAF50;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .button:hover {
-  background-color: #4CAF50;
+  background: var(--primary-gradient);
   color: #ffffff;
+  border-color: transparent;
 }
 
 .iconButton {
   background: none;
   border: none;
-  color: #4CAF50;
+  color: var(--primary-color);
   cursor: pointer;
   font-size: 18px;
-  padding: 4px;
-  transition: color 0.3s ease;
+  padding: 5px;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .iconButton:hover {
-  color: #45a049;
+  background-color: var(--hover-color);
+  color: #ffffff;
 }
 
 .card {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 20px;
   position: relative;
-  min-height: 120px; /* Ensure minimum height for the card */
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
-  min-height: 40px; /* Ensure minimum height for the header */
+  margin-bottom: 15px;
 }
 
 .cardTitle {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-  padding-right: 40px; /* Add space for the validation button */
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--primary-color);
+  padding-right: 40px;
   word-break: break-word;
-  flex: 1; /* Allow title to take up remaining space */
+  flex: 1;
 }
 
 .cardContent {
-  font-size: 14px;
-  color: #666;
+  font-size: 16px;
+  color: #424242;
 }
 
 .validationButton {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 1; /* Ensure button is always on top */
+  top: 20px;
+  right: 20px;
+  z-index: 1;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
 }
 
 .flexBetween {
@@ -134,11 +153,11 @@
 .cardActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 15px;
 }
 
 .cardActions .iconButton {
-  margin-left: 8px;
+  margin-left: 10px;
 }
 
 .donationSection, .contributionSection {
@@ -151,9 +170,9 @@
 .donationList, .contributionList {
   flex-grow: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 200px); /* Adjust based on your layout */
-  padding-right: 10px; /* Add some padding for the scrollbar */
-  margin-right: -10px; /* Offset the padding to maintain alignment */
+  max-height: calc(100vh - 200px);
+  padding-right: 10px;
+  margin-right: -10px;
 }
 
 /* Customizing the scrollbar */
@@ -162,17 +181,17 @@
 }
 
 .donationList::-webkit-scrollbar-track, .contributionList::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f5f7fa;
   border-radius: 4px;
 }
 
 .donationList::-webkit-scrollbar-thumb, .contributionList::-webkit-scrollbar-thumb {
-  background: #4CAF50;
+  background: var(--primary-color);
   border-radius: 4px;
 }
 
 .donationList::-webkit-scrollbar-thumb:hover, .contributionList::-webkit-scrollbar-thumb:hover {
-  background: #45a049;
+  background: var(--hover-color);
 }
 
 /* Scroll indicator */
@@ -182,7 +201,7 @@
   right: 10px;
   width: 30px;
   height: 50px;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--primary-color);
   border-radius: 15px;
   display: flex;
   justify-content: center;
@@ -195,7 +214,7 @@
   content: '';
   width: 6px;
   height: 6px;
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   border-radius: 50%;
   animation: scrollAnimation 1.5s infinite;
 }
@@ -207,24 +226,46 @@
 }
 
 .findMoreContainer {
-  margin-top: 16px;
+  margin-top: 20px;
   text-align: center;
 }
 
-@media (max-width: 480px) {
+.gradientTitle {
+  font-weight: bold;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .header {
+    font-size: 28px;
+  }
+
+  .subHeader {
+    font-size: 20px;
+  }
+
   .grid {
     grid-template-columns: 1fr;
   }
-  
+
   .card {
-    min-height: 100px; /* Adjust minimum height for smaller screens */
+    padding: 20px;
   }
-  
-  .cardHeader {
-    min-height: 30px; /* Adjust minimum height for smaller screens */
-  }
-  
+
   .cardTitle {
-    font-size: 16px; /* Slightly smaller font size for mobile */
+    font-size: 20px;
   }
 }
