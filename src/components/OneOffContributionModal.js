@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './ModalStyles.module.css';
+import cleanStyles from './CleanDesign.module.css';
 
 const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
   const [editedContribution, setEditedContribution] = useState(contribution || {
@@ -24,8 +25,8 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>{contribution ? 'Edit One-Off Contribution' : 'Add New One-Off Contribution'}</h2>
+      <div className={`${styles.modalContent} ${cleanStyles.card}`}>
+        <h2 className={cleanStyles.gradientTitle}>{contribution ? 'Edit One-Off Contribution' : 'Add New One-Off Contribution'}</h2>
         <button className={styles.closeButton} onClick={onCancel}>&times;</button>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
@@ -37,6 +38,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               value={editedContribution.charity}
               onChange={handleChange}
               required
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -48,6 +50,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               value={editedContribution.amount}
               onChange={handleChange}
               required
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -59,6 +62,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               value={editedContribution.date.split('T')[0]}
               onChange={handleChange}
               required
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -69,6 +73,7 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               value={editedContribution.charityType}
               onChange={handleChange}
               required
+              className={cleanStyles.select}
             >
               <option value="">Select a charity type</option>
               <option value="Health">Health</option>
@@ -90,11 +95,12 @@ const OneOffContributionModal = ({ contribution, onConfirm, onCancel }) => {
               name="receipt"
               onChange={handleChange}
               accept="image/*,.pdf"
+              className={cleanStyles.fileInput}
             />
           </div>
           <div className={styles.buttonGroup}>
-            <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Confirm</button>
-            <button type="button" onClick={onCancel} className={`${styles.button} ${styles.cancelButton}`}>Cancel</button>
+            <button type="submit" className={`${cleanStyles.button} ${cleanStyles.primaryButton}`}>Confirm</button>
+            <button type="button" onClick={onCancel} className={`${cleanStyles.button} ${cleanStyles.secondaryButton}`}>Cancel</button>
           </div>
         </form>
       </div>

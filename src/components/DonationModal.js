@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './ModalStyles.module.css';
+import cleanStyles from './CleanDesign.module.css';
 
 const DonationModal = ({ donation, onConfirm, onCancel }) => {
   const [editedDonation, setEditedDonation] = useState(donation || {
@@ -28,8 +29,8 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>{donation ? 'Edit Donation' : 'Add New Donation'}</h2>
+      <div className={`${styles.modalContent} ${cleanStyles.card}`}>
+        <h2 className={cleanStyles.gradientTitle}>{donation ? 'Edit Donation' : 'Add New Donation'}</h2>
         <button className={styles.closeButton} onClick={onCancel}>&times;</button>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
@@ -41,6 +42,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               value={editedDonation.charity}
               onChange={handleChange}
               required
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -54,6 +56,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               required
               min="0"
               step="0.01"
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -65,6 +68,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               value={editedDonation.date.split('T')[0]}
               onChange={handleChange}
               required
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -75,6 +79,7 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               value={editedDonation.charityType}
               onChange={handleChange}
               required
+              className={cleanStyles.select}
             >
               <option value="">Select a charity type</option>
               <option value="Health">Health</option>
@@ -89,13 +94,14 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="isMonthly">
+            <label htmlFor="isMonthly" className={cleanStyles.checkboxLabel}>
               <input
                 type="checkbox"
                 id="isMonthly"
                 name="isMonthly"
                 checked={editedDonation.isMonthly}
                 onChange={handleChange}
+                className={cleanStyles.checkbox}
               />
               Monthly Donation
             </label>
@@ -108,11 +114,12 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               name="receipt"
               onChange={handleChange}
               accept="image/*,.pdf"
+              className={cleanStyles.fileInput}
             />
           </div>
           <div className={styles.buttonGroup}>
-            <button type="submit" className={`${styles.button} ${styles.confirmButton}`}>Confirm</button>
-            <button type="button" onClick={onCancel} className={`${styles.button} ${styles.cancelButton}`}>Cancel</button>
+            <button type="submit" className={`${cleanStyles.button} ${cleanStyles.primaryButton}`}>Confirm</button>
+            <button type="button" onClick={onCancel} className={`${cleanStyles.button} ${cleanStyles.secondaryButton}`}>Cancel</button>
           </div>
         </form>
       </div>

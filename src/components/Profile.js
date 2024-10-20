@@ -212,7 +212,7 @@ function Profile() {
           </div>
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
         </section>
-
+        
         <div className={styles.donationsGrid}>
           <div className={styles.donationCard}>
             <h3 className={styles.cardTitle}>
@@ -248,9 +248,6 @@ function Profile() {
             <h3 className={styles.cardTitle}>
               <FaRegHeart className={styles.icon} /> Charities Following
             </h3>
-            <Link to="/search-charities" className={`${styles.button} ${styles.primary} ${styles.fullWidth}`}>
-              <FaPlus /> Follow New Charity
-            </Link>
             <ul className={styles.list}>
               {getDisplayedFollowedCharities().map((charity, index) => (
                 <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
@@ -270,6 +267,9 @@ function Profile() {
                 {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
               </button>
             )}
+            <Link to="/search-charities" className={`${styles.followNewButton} ${styles.fullWidth}`}>
+              <FaPlus /> Follow New Charity
+            </Link>
           </div>
         </div>
 
