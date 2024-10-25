@@ -68,7 +68,9 @@
   flex-direction: column;
   transition: all 0.3s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  height: 100%; /* Ensure all cards have the same height */
+  max-height: 400px;
+  overflow: hidden;
+  position: relative;
 }
 
 .donationCard:hover {
@@ -83,6 +85,7 @@
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .icon {
@@ -94,10 +97,10 @@
 .list {
   list-style-type: none;
   padding: 0;
-  margin: 0 0 25px 0;
+  margin: 0;
   flex-grow: 1;
-  overflow-y: auto; /* Allow scrolling if content exceeds available space */
-  max-height: 200px; /* Set a maximum height for the list */
+  overflow-y: auto;
+  max-height: 180px;
 }
 
 .listItem {
@@ -118,10 +121,10 @@
 }
 
 .cardActions {
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: auto;
 }
 
 .actionButton {
@@ -139,7 +142,9 @@
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
-  margin-top: 10px; /* Add some space above the button */
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .actionButton:hover {
@@ -171,16 +176,14 @@
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
-  margin-top: 20px; /* Add some space between the list and the button */
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .followNewButton:hover {
   background-color: #2d8f7b;
   color: white;
-}
-
-.fullWidth {
-  width: 100%;
 }
 
 .activitiesGrid {
@@ -214,7 +217,6 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* New styles for the impact section navigation */
 .impactSectionNav {
   display: flex;
   justify-content: center;
@@ -246,7 +248,6 @@
   color: white;
 }
 
-/* New styles for the delete button */
 .deleteButton {
   background: none;
   border: none;
@@ -261,7 +262,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0; /* Prevent the button from shrinking */
+  flex-shrink: 0;
 }
 
 .deleteButton:hover {
