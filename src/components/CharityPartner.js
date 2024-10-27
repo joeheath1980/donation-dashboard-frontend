@@ -29,15 +29,11 @@ function CharityPartner() {
         }
       });
 
-      console.log('Charity API Response:', response.data);
-
-      if (response.data && response.data.success && response.data.result && response.data.result.records && response.data.result.records.length > 0) {
+      if (response.data?.success && response.data.result?.records?.length > 0) {
         const charityData = response.data.result.records[0];
         setCharity(charityData);
 
-        // Fetch programs data
         try {
-          console.log('Fetching programs for ABN:', charityData.ABN);
           const programsResponse = await axios.get(API_BASE_URL, {
             params: {
               resource_id: PROGRAMS_RESOURCE_ID,
@@ -45,20 +41,14 @@ function CharityPartner() {
             }
           });
 
-          console.log('Programs API Response:', programsResponse.data);
-
-          if (programsResponse.data && programsResponse.data.success && programsResponse.data.result && programsResponse.data.result.records) {
+          if (programsResponse.data?.success && programsResponse.data.result?.records) {
             const fetchedPrograms = programsResponse.data.result.records;
             console.log('Fetched programs:', fetchedPrograms);
-            // You can process or store the programs data here if needed
-          } else {
-            console.warn('Unexpected programs data structure:', programsResponse.data);
           }
         } catch (programError) {
           console.error('Error fetching programs:', programError);
         }
       } else {
-        console.warn('Unexpected API response structure:', response.data);
         setError('Charity not found or API returned unexpected data');
       }
     } catch (err) {
@@ -81,11 +71,10 @@ function CharityPartner() {
         addFollowedCharity({
           ABN: charity.ABN,
           name: charity.Charity_Legal_Name,
-          logo: charity.logo // Assuming there's a logo field, adjust if necessary
+          logo: charity.logo
         });
       }
       setIsFollowed(!isFollowed);
-      console.log(`Charity ${isFollowed ? 'unfollowed' : 'followed'}: ${charity.Charity_Legal_Name}`);
     }
   };
 
@@ -142,8 +131,12 @@ function CharityPartner() {
           <button onClick={handleFollow} className={styles.primaryButton}>
             {isFollowed ? 'Unfollow' : 'Follow'}
           </button>
-          <button onClick={() => handleMatch(charity.ABN)} className={styles.secondaryButton}>Match</button>
-          <button onClick={() => handleDonate(charity.ABN)} className={styles.primaryButton}>Donate</button>
+          <button onClick={() => handleMatch(charity.ABN)} className={styles.secondaryButton}>
+            Match
+          </button>
+          <button onClick={() => handleDonate(charity.ABN)} className={styles.primaryButton}>
+            Donate
+          </button>
         </div>
       </div>
     </div>
