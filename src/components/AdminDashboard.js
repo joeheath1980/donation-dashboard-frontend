@@ -7,6 +7,7 @@ import AdminCampaignManagement from './AdminCampaignManagement';
 import AdminBusinessPartnerManagement from './AdminBusinessPartnerManagement';
 import AdminAnalyticsReporting from './AdminAnalyticsReporting';
 import AdminContentManagement from './AdminContentManagement';
+import AdminCharityManagement from './AdminCharityManagement';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
@@ -30,6 +31,7 @@ const AdminDashboard = () => {
           <li className={styles.navItem}><Link to="/admin/donations" className={styles.navLink}>Donation Management</Link></li>
           <li className={styles.navItem}><Link to="/admin/campaigns" className={styles.navLink}>Campaign Management</Link></li>
           <li className={styles.navItem}><Link to="/admin/businesses" className={styles.navLink}>Business Partner Management</Link></li>
+          <li className={styles.navItem}><Link to="/admin/charities" className={styles.navLink}>Charity Management</Link></li>
           <li className={styles.navItem}><Link to="/admin/reports" className={styles.navLink}>Analytics and Reporting</Link></li>
           <li className={styles.navItem}><Link to="/admin/content" className={styles.navLink}>Content Management</Link></li>
         </ul>
@@ -40,6 +42,7 @@ const AdminDashboard = () => {
           <Route path="donations" element={<AdminDonationManagement />} />
           <Route path="campaigns" element={<AdminCampaignManagement />} />
           <Route path="businesses" element={<AdminBusinessPartnerManagement />} />
+          <Route path="charities" element={<AdminCharityManagement />} />
           <Route path="reports" element={<AdminAnalyticsReporting />} />
           <Route path="content" element={<AdminContentManagement />} />
         </Routes>

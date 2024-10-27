@@ -1,5 +1,3 @@
-// src/contexts/AuthContext.js
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
@@ -10,6 +8,15 @@ export const useAuth = () => useContext(AuthContext);
 // Set a default API URL if the environment variable is not set
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
+// Set up axios defaults
+const setupAxiosDefaults = (token) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,22 +26,17 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       const userType = localStorage.getItem('userType');
       if (token && userType) {
+        setupAxiosDefaults(token);
         try {
           let response;
           if (userType === 'business') {
-            response = await axios.get(`${API_URL}/api/business/me`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            response = await axios.get(`${API_URL}/api/business/me`);
             setUser({ ...response.data, isBusiness: true, isCharity: false });
           } else if (userType === 'charity') {
-            response = await axios.get(`${API_URL}/api/charity/me`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            response = await axios.get(`${API_URL}/api/charity/me`);
             setUser({ ...response.data, isBusiness: false, isCharity: true });
           } else {
-            response = await axios.get(`${API_URL}/api/users/me`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            response = await axios.get(`${API_URL}/api/users/me`);
             setUser({ ...response.data, isBusiness: false, isCharity: false });
           }
         } catch (error) {
@@ -45,11 +47,13 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('userType');
             localStorage.removeItem('businessId');
             localStorage.removeItem('charityId');
+            setupAxiosDefaults(null);
           }
           setUser(null);
         }
       } else {
         setUser(null);
+        setupAxiosDefaults(null);
       }
       setLoading(false);
     };
@@ -63,9 +67,8 @@ export const AuthProvider = ({ children }) => {
       const { token } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'user');
-      const userResponse = await axios.get(`${API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      setupAxiosDefaults(token);
+      const userResponse = await axios.get(`${API_URL}/api/users/me`);
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
       return userResponse.data;
     } catch (error) {
@@ -85,10 +88,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userType', 'user');
         console.log('Token stored in localStorage');
+        setupAxiosDefaults(response.data.token);
 
-        const validatedUser = await axios.get(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${response.data.token}` },
-        });
+        const validatedUser = await axios.get(`${API_URL}/api/users/me`);
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
       } else {
@@ -125,9 +127,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'business');
       localStorage.setItem('businessId', businessId);
-      const businessResponse = await axios.get(`${API_URL}/api/business/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      setupAxiosDefaults(token);
+      const businessResponse = await axios.get(`${API_URL}/api/business/me`);
       setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
       return businessResponse.data;
     } catch (error) {
@@ -145,9 +146,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', token);
         localStorage.setItem('userType', 'business');
         localStorage.setItem('businessId', businessId);
-        const businessResponse = await axios.get(`${API_URL}/api/business/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        setupAxiosDefaults(token);
+        const businessResponse = await axios.get(`${API_URL}/api/business/me`);
         setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
         return businessResponse.data;
       }
@@ -168,9 +168,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'charity');
       localStorage.setItem('charityId', charity.id);
-      const charityResponse = await axios.get(`${API_URL}/api/charity/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      setupAxiosDefaults(token);
+      const charityResponse = await axios.get(`${API_URL}/api/charity/me`);
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
       return charityResponse.data;
     } catch (error) {
@@ -187,9 +186,8 @@ export const AuthProvider = ({ children }) => {
         const { token } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('userType', 'charity');
-        const charityResponse = await axios.get(`${API_URL}/api/charity/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        setupAxiosDefaults(token);
+        const charityResponse = await axios.get(`${API_URL}/api/charity/me`);
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
         return charityResponse.data;
       }
@@ -206,11 +204,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'user');
       console.log('Social login: Token and userType set in localStorage');
+      setupAxiosDefaults(token);
 
       console.log('Social login: Fetching user data from API');
-      const userResponse = await axios.get(`${API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const userResponse = await axios.get(`${API_URL}/api/users/me`);
       console.log('Social login: User data received', userResponse.data);
 
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
@@ -224,6 +221,7 @@ export const AuthProvider = ({ children }) => {
       }
       localStorage.removeItem('token');
       localStorage.removeItem('userType');
+      setupAxiosDefaults(null);
       throw error;
     }
   };
@@ -234,6 +232,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userType');
     localStorage.removeItem('businessId');
     localStorage.removeItem('charityId');
+    setupAxiosDefaults(null);
     setUser(null);
   };
 

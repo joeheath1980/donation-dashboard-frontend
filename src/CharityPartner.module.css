@@ -1,109 +1,133 @@
-/* CharityPartner.module.css */
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
+}
+
+.searchSection {
+  position: relative;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.searchingIndicator {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.searchResultItem {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.searchResultItem:hover {
+  background-color: #f5f5f5;
+}
+
+.searchResultItem h3 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.searchResultItem p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .header {
+  font-size: 2em;
   color: #333;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 10px;
   margin-bottom: 20px;
 }
 
 .card {
-  background-color: #f9f9f9;
-  border-radius: 8px;
+  background: white;
+  border-radius: 10px;
   padding: 20px;
-  margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .sectionHeader {
+  font-size: 1.5em;
   color: #444;
-  margin-top: 20px;
   margin-bottom: 15px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 5px;
 }
 
 .paragraph {
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
-
-.programCard {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-.programHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
-
-.programName {
-  color: #333;
-  margin: 0;
-}
-
-.chevron {
-  font-size: 20px;
-  transition: transform 0.3s ease;
-}
-
-.chevron.open {
-  transform: rotate(180deg);
-}
-
-.programDetails {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.programDetails.open {
-  max-height: 1000px; /* Adjust this value based on your content */
+  margin: 10px 0;
+  line-height: 1.6;
 }
 
 .buttonContainer {
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
   margin-top: 20px;
 }
 
-.button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
 .primaryButton {
-  composes: button;
-  background-color: #4CAF50;
+  background: #007bff;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .primaryButton:hover {
-  background-color: #45a049;
+  background: #0056b3;
 }
 
 .secondaryButton {
-  composes: button;
-  background-color: #008CBA;
+  background: #6c757d;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .secondaryButton:hover {
-  background-color: #007B9E;
+  background: #5a6268;
 }
