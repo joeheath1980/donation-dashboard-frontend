@@ -5,6 +5,7 @@ import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
+import { createPortal } from 'react-dom';
 
 function formatDate(dateString) {
   let date;
@@ -165,93 +166,97 @@ function DonationsComponent({ displayAll }) {
     return <div className={cleanStyles.card}>Please log in to view your donations.</div>;
   }
 
+  const modalContent = showModal && (
+    <DonationModal
+      donation={currentDonation}
+      onConfirm={handleConfirm}
+      onCancel={() => setShowModal(false)}
+    />
+  );
+
   return (
-    <div className={`${cleanStyles.grid} ${cleanStyles.donationSection}`}>
-      <div className={cleanStyles.card}>
-        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary}`}>
-          <FaPlus /> Add New Donation
-        </button>
-      </div>
-      <div className={cleanStyles.donationList} ref={donationListRef}>
-        {displayedDonations && displayedDonations.length > 0 ? (
-          <>
-            {displayedDonations.map((donation) => (
-              <div key={donation._id} className={cleanStyles.card}>
-                <div className={cleanStyles.cardHeader}>
-                  <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
-                  <div className={cleanStyles.validationButton}>
-                    {donation.needsValidation && !donation.isValidated && (
-                      <InstantTooltip text="Receipt required for validation">
-                        <FaCheckCircle style={{ color: 'gray' }} />
-                      </InstantTooltip>
-                    )}
-                    {donation.isValidated && (
-                      <InstantTooltip text="Donation validated">
-                        <FaCheckCircle style={{ color: '#2d8f7b' }} />
-                      </InstantTooltip>
+    <>
+      <div className={`${cleanStyles.grid} ${cleanStyles.donationSection}`}>
+        <div className={cleanStyles.addButtonContainer}>
+          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
+            <FaPlus /> Add New Donation
+          </button>
+        </div>
+        <div className={cleanStyles.donationList} ref={donationListRef}>
+          {displayedDonations && displayedDonations.length > 0 ? (
+            <>
+              {displayedDonations.map((donation) => (
+                <div key={donation._id} className={cleanStyles.card}>
+                  <div className={cleanStyles.cardHeader}>
+                    <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
+                    <div className={cleanStyles.validationButton}>
+                      {donation.needsValidation && !donation.isValidated && (
+                        <InstantTooltip text="Receipt required for validation">
+                          <FaCheckCircle style={{ color: 'gray' }} />
+                        </InstantTooltip>
+                      )}
+                      {donation.isValidated && (
+                        <InstantTooltip text="Donation validated">
+                          <FaCheckCircle style={{ color: '#2d8f7b' }} />
+                        </InstantTooltip>
+                      )}
+                    </div>
+                  </div>
+                  <div className={cleanStyles.cardContent}>
+                    <p><strong>Date:</strong> {formatDate(donation.date)}</p>
+                    <p>
+                      <strong>Amount:</strong> ${donation.amount.toFixed(2)}
+                      {donation.isMonthly && <span className={cleanStyles.highlight}> (Monthly)</span>}
+                    </p>
+                    <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
+                    {donation.receiptUrl && (
+                      <p>
+                        <strong>Receipt:</strong> 
+                        <a 
+                          href={`http://localhost:3002${donation.receiptUrl}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className={cleanStyles.link}
+                        >
+                          View Receipt
+                        </a>
+                      </p>
                     )}
                   </div>
-                </div>
-                <div className={cleanStyles.cardContent}>
-                  <p><strong>Date:</strong> {formatDate(donation.date)}</p>
-                  <p>
-                    <strong>Amount:</strong> ${donation.amount.toFixed(2)}
-                    {donation.isMonthly && <span className={cleanStyles.highlight}> (Monthly)</span>}
-                  </p>
-                  <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
-                  {donation.receiptUrl && (
-                    <p>
-                      <strong>Receipt:</strong> 
-                      <a 
-                        href={`http://localhost:3002${donation.receiptUrl}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={cleanStyles.link}
+                  <div className={cleanStyles.cardActions}>
+                    <InstantTooltip text={donation.needsValidation && !donation.isValidated ? "Edit or Validate donation" : "Edit donation"}>
+                      <button onClick={() => handleEditOrValidate(donation)} className={cleanStyles.iconButton} aria-label="Edit or Validate Donation">
+                        <FaEdit />
+                      </button>
+                    </InstantTooltip>
+                    <InstantTooltip text="Delete donation">
+                      <button
+                        onClick={() => handleDelete(donation._id)}
+                        className={cleanStyles.iconButton}
+                        aria-label="Delete Donation"
                       >
-                        View Receipt
-                      </a>
-                    </p>
-                  )}
+                        <FaTrash />
+                      </button>
+                    </InstantTooltip>
+                  </div>
                 </div>
-                <div className={cleanStyles.cardActions}>
-                  <InstantTooltip text={donation.needsValidation && !donation.isValidated ? "Edit or Validate donation" : "Edit donation"}>
-                    <button onClick={() => handleEditOrValidate(donation)} className={cleanStyles.iconButton} aria-label="Edit or Validate Donation">
-                      <FaEdit />
-                    </button>
-                  </InstantTooltip>
-                  <InstantTooltip text="Delete donation">
-                    <button
-                      onClick={() => handleDelete(donation._id)}
-                      className={cleanStyles.iconButton}
-                      aria-label="Delete Donation"
-                    >
-                      <FaTrash />
-                    </button>
-                  </InstantTooltip>
-                </div>
-              </div>
-            ))}
-          </>
-        ) : (
-          <p className={cleanStyles.textCenter}>No donations to display.</p>
-        )}
-        {showScrollIndicator && <div className={cleanStyles.scrollIndicator} />}
+              ))}
+            </>
+          ) : (
+            <p className={cleanStyles.textCenter}>No donations to display.</p>
+          )}
+          {showScrollIndicator && <div className={cleanStyles.scrollIndicator} />}
+        </div>
+        <div className={cleanStyles.findMoreContainer}>
+          {!displayAll && localDonations.length > 5 && (
+            <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+              See All
+            </button>
+          )}
+        </div>
       </div>
-      <div className={cleanStyles.findMoreContainer}>
-        {!displayAll && localDonations.length > 5 && (
-          <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
-            See All
-          </button>
-        )}
-      </div>
-      {showModal && (
-        <DonationModal
-          donation={currentDonation}
-          onConfirm={handleConfirm}
-          onCancel={() => setShowModal(false)}
-        />
-      )}
-    </div>
+      {createPortal(modalContent, document.body)}
+    </>
   );
 }
 

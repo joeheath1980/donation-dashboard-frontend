@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
-import OneOffContributionModal from './OneOffContributionModal';
+import DonationModal from './DonationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 
@@ -124,13 +124,6 @@ function OneOffContributionsComponent({ displayAll }) {
     setShowModal(true);
   };
 
-  console.log('Rendering component. Current state:', {
-    showModal,
-    editingContribution,
-    localContributionsCount: localContributions.length,
-    displayAll
-  });
-
   const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
 
   if (!isAuthenticated) {
@@ -139,8 +132,8 @@ function OneOffContributionsComponent({ displayAll }) {
 
   return (
     <div className={`${cleanStyles.grid} ${cleanStyles.contributionSection}`}>
-      <div className={cleanStyles.card}>
-        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary}`}>
+      <div className={cleanStyles.addButtonContainer}>
+        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.compact}`}>
           <FaPlus /> Add New One-Off Contribution
         </button>
       </div>
@@ -215,14 +208,15 @@ function OneOffContributionsComponent({ displayAll }) {
         )}
       </div>
       {showModal && (
-        <OneOffContributionModal
-          contribution={editingContribution}
+        <DonationModal
+          donation={editingContribution}
           onConfirm={handleSave}
           onCancel={() => {
             console.log('Modal closed');
             setShowModal(false);
             setEditingContribution(null);
           }}
+          type="one-off"
         />
       )}
     </div>
