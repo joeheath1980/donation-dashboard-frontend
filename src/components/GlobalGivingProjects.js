@@ -35,9 +35,14 @@ const GlobalGivingProjects = () => {
       });
 
       console.log('API Response:', response.data);
-      if (Array.isArray(response.data)) {
-        setProjects(response.data);
+      
+      // Check if response.data is an array (direct response) or if it's nested
+      const projectsData = Array.isArray(response.data) ? response.data : response.data.projects;
+      
+      if (Array.isArray(projectsData)) {
+        setProjects(projectsData);
       } else {
+        console.error('Unexpected response format:', response.data);
         throw new Error('Invalid response format');
       }
     } catch (err) {

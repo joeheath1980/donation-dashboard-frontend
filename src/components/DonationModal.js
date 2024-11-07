@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ModalStyles.module.css';
 import cleanStyles from './CleanDesign.module.css';
 
-const DonationModal = ({ donation, onConfirm, onCancel }) => {
+const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
   const [editedDonation, setEditedDonation] = useState(donation || {
     charity: '',
     amount: '',
@@ -27,10 +28,13 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
     onConfirm(editedDonation);
   };
 
-  return (
+  const modalContent = (
     <div className={styles.modalOverlay}>
       <div className={`${styles.modalContent} ${cleanStyles.card}`}>
-        <h2 className={cleanStyles.gradientTitle}>{donation ? 'Edit Donation' : 'Add New Donation'}</h2>
+        <h2 className={cleanStyles.gradientTitle}>
+          {donation ? `Edit ${type === 'regular' ? 'Donation' : 'One-Off Contribution'}` : 
+                     `Add New ${type === 'regular' ? 'Donation' : 'One-Off Contribution'}`}
+        </h2>
         <button className={styles.closeButton} onClick={onCancel}>&times;</button>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
@@ -93,19 +97,21 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
               <option value="Other">Other</option>
             </select>
           </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="isMonthly" className={cleanStyles.checkboxLabel}>
-              <input
-                type="checkbox"
-                id="isMonthly"
-                name="isMonthly"
-                checked={editedDonation.isMonthly}
-                onChange={handleChange}
-                className={cleanStyles.checkbox}
-              />
-              Monthly Donation
-            </label>
-          </div>
+          {type === 'regular' && (
+            <div className={styles.formGroup}>
+              <label htmlFor="isMonthly" className={cleanStyles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  id="isMonthly"
+                  name="isMonthly"
+                  checked={editedDonation.isMonthly}
+                  onChange={handleChange}
+                  className={cleanStyles.checkbox}
+                />
+                Monthly Donation
+              </label>
+            </div>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="receipt">Upload Receipt (optional):</label>
             <input
@@ -125,6 +131,8 @@ const DonationModal = ({ donation, onConfirm, onCancel }) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default DonationModal;
