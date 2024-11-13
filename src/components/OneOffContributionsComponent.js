@@ -131,81 +131,83 @@ function OneOffContributionsComponent({ displayAll }) {
   }
 
   return (
-    <div className={`${cleanStyles.grid} ${cleanStyles.contributionSection}`}>
-      <div className={cleanStyles.addButtonContainer}>
-        <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.compact}`}>
-          <FaPlus /> Add New One-Off Contribution
-        </button>
-      </div>
-      <div className={cleanStyles.contributionList}>
-        {displayedContributions && displayedContributions.length > 0 ? (
-          <>
-            {displayedContributions.map((contribution) => (
-              <div key={contribution._id} className={cleanStyles.card}>
-                <div className={cleanStyles.cardHeader}>
-                  <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
-                  <div className={cleanStyles.validationButton}>
-                    {contribution.needsValidation && !contribution.isValidated && (
-                      <InstantTooltip text="Receipt required for validation">
-                        <FaCheckCircle style={{ color: 'gray' }} />
-                      </InstantTooltip>
+    <div className={cleanStyles.donationComponentContainer}>
+      <div className={`${cleanStyles.grid} ${cleanStyles.contributionSection}`}>
+        <div className={cleanStyles.addButtonContainer}>
+          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.compact}`}>
+            <FaPlus /> Add New One-Off Contribution
+          </button>
+        </div>
+        <div className={cleanStyles.contributionList}>
+          {displayedContributions && displayedContributions.length > 0 ? (
+            <>
+              {displayedContributions.map((contribution) => (
+                <div key={contribution._id} className={cleanStyles.card}>
+                  <div className={cleanStyles.cardHeader}>
+                    <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
+                    <div className={cleanStyles.validationButton}>
+                      {contribution.needsValidation && !contribution.isValidated && (
+                        <InstantTooltip text="Receipt required for validation">
+                          <FaCheckCircle style={{ color: 'gray' }} />
+                        </InstantTooltip>
+                      )}
+                      {contribution.isValidated && (
+                        <InstantTooltip text="Contribution validated">
+                          <FaCheckCircle style={{ color: '#2d8f7b' }} />
+                        </InstantTooltip>
+                      )}
+                    </div>
+                  </div>
+                  <div className={cleanStyles.cardContent}>
+                    <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                    <p><strong>Amount:</strong> ${contribution.amount}</p>
+                    {contribution.charityType && (
+                      <p><strong>Charity Type:</strong> {contribution.charityType}</p>
                     )}
-                    {contribution.isValidated && (
-                      <InstantTooltip text="Contribution validated">
-                        <FaCheckCircle style={{ color: '#2d8f7b' }} />
-                      </InstantTooltip>
+                    {contribution.receiptUrl && (
+                      <p>
+                        <strong>Receipt:</strong> 
+                        <a 
+                          href={`http://localhost:3002${contribution.receiptUrl}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className={cleanStyles.link}
+                        >
+                          View Receipt
+                        </a>
+                      </p>
                     )}
                   </div>
-                </div>
-                <div className={cleanStyles.cardContent}>
-                  <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                  <p><strong>Amount:</strong> ${contribution.amount}</p>
-                  {contribution.charityType && (
-                    <p><strong>Charity Type:</strong> {contribution.charityType}</p>
-                  )}
-                  {contribution.receiptUrl && (
-                    <p>
-                      <strong>Receipt:</strong> 
-                      <a 
-                        href={`http://localhost:3002${contribution.receiptUrl}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={cleanStyles.link}
+                  <div className={cleanStyles.cardActions}>
+                    <InstantTooltip text={contribution.needsValidation && !contribution.isValidated ? "Edit or Validate contribution" : "Edit contribution"}>
+                      <button onClick={() => handleEditOrValidate(contribution)} className={cleanStyles.iconButton} aria-label="Edit or Validate Contribution">
+                        <FaEdit />
+                      </button>
+                    </InstantTooltip>
+                    <InstantTooltip text="Delete contribution">
+                      <button
+                        onClick={() => handleDelete(contribution._id)}
+                        className={cleanStyles.iconButton}
+                        aria-label="Delete Contribution"
                       >
-                        View Receipt
-                      </a>
-                    </p>
-                  )}
+                        <FaTrash />
+                      </button>
+                    </InstantTooltip>
+                  </div>
                 </div>
-                <div className={cleanStyles.cardActions}>
-                  <InstantTooltip text={contribution.needsValidation && !contribution.isValidated ? "Edit or Validate contribution" : "Edit contribution"}>
-                    <button onClick={() => handleEditOrValidate(contribution)} className={cleanStyles.iconButton} aria-label="Edit or Validate Contribution">
-                      <FaEdit />
-                    </button>
-                  </InstantTooltip>
-                  <InstantTooltip text="Delete contribution">
-                    <button
-                      onClick={() => handleDelete(contribution._id)}
-                      className={cleanStyles.iconButton}
-                      aria-label="Delete Contribution"
-                    >
-                      <FaTrash />
-                    </button>
-                  </InstantTooltip>
-                </div>
-              </div>
-            ))}
-          </>
-        ) : (
-          <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
-        )}
-      </div>
-      <div className={cleanStyles.findMoreContainer}>
-        {!displayAll && localContributions.length > 5 && (
-          <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
-            See All
-          </button>
-        )}
+              ))}
+            </>
+          ) : (
+            <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
+          )}
+        </div>
+        <div className={cleanStyles.findMoreContainer}>
+          {!displayAll && localContributions.length > 5 && (
+            <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+              See All
+            </button>
+          )}
+        </div>
       </div>
       {showModal && (
         <DonationModal

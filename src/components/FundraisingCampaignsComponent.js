@@ -5,7 +5,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
 import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
-import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign } from 'react-icons/fa';
 
 function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const {
@@ -21,6 +21,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     goalAmount: '',
     startDate: '',
     endDate: '',
+    justGivingLink: ''
   });
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -37,12 +38,23 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     setNewCampaign({ ...newCampaign, [e.target.name]: e.target.value });
   };
 
+  const validateJustGivingLink = (link) => {
+    if (!link) return true;
+    return link.startsWith('https://www.justgiving.com/');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
       setError('Please log in to create a campaign.');
       return;
     }
+
+    if (newCampaign.justGivingLink && !validateJustGivingLink(newCampaign.justGivingLink)) {
+      setError('JustGiving link must start with https://www.justgiving.com/');
+      return;
+    }
+
     const headers = getAuthHeaders();
     try {
       await axios.post(
@@ -61,6 +73,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         goalAmount: '',
         startDate: '',
         endDate: '',
+        justGivingLink: ''
       });
       setError('');
       setIsCreateModalOpen(false);
@@ -73,9 +86,9 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     }
   };
 
-  const handleRemoveCampaign = async (campaignId) => {
+  const handleDeleteCampaign = async (campaignId) => {
     if (!isAuthenticated) {
-      setError('Please log in to remove a campaign.');
+      setError('Please log in to delete a campaign.');
       return;
     }
     const headers = getAuthHeaders();
@@ -85,17 +98,36 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         fetchImpactData();
       }
     } catch (error) {
-      console.error('Error removing fundraising campaign:', error);
-      setError('Failed to remove campaign. Please try again.');
+      console.error('Error deleting fundraising campaign:', error);
+      setError('Failed to delete campaign. Please try again.');
     }
   };
 
-  const handleCompleteCampaign = (campaign) => {
+  const handleCompleteCampaign = async (campaign) => {
     if (!isAuthenticated) {
       setError('Please log in to complete a campaign.');
       return;
     }
     try {
+      const headers = getAuthHeaders();
+      const updatedCampaign = {
+        ...campaign,
+        status: 'archived',
+        completedDate: new Date().toISOString()
+      };
+
+      await axios.patch(
+        `http://localhost:3002/api/fundraisingCampaigns/${campaign._id}`,
+        updatedCampaign,
+        {
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // Add to impact score but don't delete the campaign
       const completedCampaign = {
         charity: campaign.title,
         date: new Date().toISOString(),
@@ -103,7 +135,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         subject: `Completed fundraising campaign: ${campaign.description}`,
       };
       onCompleteCampaign(completedCampaign);
-      handleRemoveCampaign(campaign._id);
+
+      if (isAuthenticated) {
+        fetchImpactData();
+      }
     } catch (error) {
       console.error('Error completing campaign:', error);
       setError('Failed to complete campaign. Please try again.');
@@ -159,6 +194,9 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       }));
     }
   };
+
+  const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'active');
+  const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
 
   if (!isAuthenticated) {
     return <div className={styles.container}>Please log in to view and manage fundraising campaigns.</div>;
@@ -225,6 +263,16 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
               required
             />
           </div>
+          <div className={modalStyles.formGroup}>
+            <label>JustGiving Link (Optional)</label>
+            <input
+              type="url"
+              name="justGivingLink"
+              value={newCampaign.justGivingLink}
+              onChange={handleChange}
+              placeholder="https://www.justgiving.com/..."
+            />
+          </div>
           <div className={modalStyles.buttonGroup}>
             <button
               type="button"
@@ -249,19 +297,12 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
         {error && <p className={styles.error}>{error}</p>}
 
-        {fundraisingCampaigns.length > 0 ? (
-          <div className={styles.campaignsGrid}>
-            {fundraisingCampaigns.map((campaign) => (
+        <div className={styles.campaignsGrid}>
+          {activeCampaigns.length > 0 ? (
+            activeCampaigns.map((campaign) => (
               <div key={campaign._id} className={styles.campaignCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>{campaign.title}</h3>
-                  <button
-                    onClick={() => handleRemoveCampaign(campaign._id)}
-                    className={styles.iconButton}
-                    aria-label="Remove Campaign"
-                  >
-                    <FaTrash />
-                  </button>
                 </div>
                 <div className={styles.cardContent}>
                   <p>{campaign.description}</p>
@@ -301,15 +342,61 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
                   <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
                   <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
                   <p><strong>Status:</strong> {campaign.status}</p>
+                  {campaign.justGivingLink && (
+                    <a 
+                      href={campaign.justGivingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.justGivingLink}
+                    >
+                      <FaLink /> View on JustGiving
+                    </a>
+                  )}
                   <button onClick={() => handleCompleteCampaign(campaign)} className={styles.tealButton}>
                     Mark as Completed
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className={styles.textCenter}>No fundraising campaigns found.</p>
+            ))
+          ) : (
+            <p className={styles.textCenter}>No active fundraising campaigns found.</p>
+          )}
+        </div>
+
+        {archivedCampaigns.length > 0 && (
+          <>
+            <h3 className={styles.sectionHeader}>Archived Campaigns</h3>
+            <div className={styles.campaignsGrid}>
+              {archivedCampaigns.map((campaign) => (
+                <div key={campaign._id} className={styles.archivedCard}>
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.cardTitle}>{campaign.title}</h3>
+                    <div className={styles.archivedInfo}>
+                      <span><FaDollarSign /> Raised: ${campaign.raisedAmount || 0}</span>
+                      <span><FaCalendar /> Completed: {new Date(campaign.completedDate).toLocaleDateString()}</span>
+                      {campaign.justGivingLink && (
+                        <a 
+                          href={campaign.justGivingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.justGivingLink}
+                        >
+                          <FaLink /> View on JustGiving
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleDeleteCampaign(campaign._id)}
+                        className={styles.iconButton}
+                        aria-label="Delete Campaign"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>

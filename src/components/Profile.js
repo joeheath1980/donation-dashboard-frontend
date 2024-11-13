@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styles from './Profile.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ScrollableImpactSection from './ScrollableImpactSection';
 import CarouselComponent from './CarouselComponent';
@@ -226,7 +227,11 @@ function Profile() {
             <button className={styles.actionButton} onClick={toggleRegularContributions}>
               {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
-            {showRegularContributions && <DonationsComponent displayAll={true} />}
+            {showRegularContributions && (
+              <div className={cleanStyles.container}>
+                <DonationsComponent displayAll={true} />
+              </div>
+            )}
           </div>
           
           <div className={styles.donationCard}>
@@ -241,7 +246,11 @@ function Profile() {
             <button className={styles.actionButton} onClick={toggleOneOffContributions}>
               {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
-            {showOneOffContributions && <OneOffContributionsComponent displayAll={true} />}
+            {showOneOffContributions && (
+              <div className={cleanStyles.container}>
+                <OneOffContributionsComponent displayAll={true} />
+              </div>
+            )}
           </div>
           
           <div className={styles.donationCard}>
