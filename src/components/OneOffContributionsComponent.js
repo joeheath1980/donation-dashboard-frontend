@@ -152,7 +152,7 @@ function OneOffContributionsComponent({ displayAll }) {
                     )}
                     {contribution.isValidated && (
                       <InstantTooltip text="Contribution validated">
-                        <FaCheckCircle style={{ color: 'green' }} />
+                        <FaCheckCircle style={{ color: '#2d8f7b' }} />
                       </InstantTooltip>
                     )}
                   </div>

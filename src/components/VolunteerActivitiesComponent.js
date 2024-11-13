@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import cleanStyles from './CleanDesign.module.css';
 import styles from './VolunteerActivities.module.css';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import modalStyles from './ModalStyles.module.css';
+import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 
 function VolunteerActivitiesComponent({ userId }) {
   const [activities, setActivities] = useState([]);
@@ -17,17 +19,7 @@ function VolunteerActivitiesComponent({ userId }) {
 
   useEffect(() => {
     fetchActivities();
-    
-    if (isAddActivityModalOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, [userId, isAddActivityModalOpen]);
+  }, [userId]);
 
   const fetchActivities = async () => {
     const token = localStorage.getItem('token');
@@ -83,106 +75,123 @@ function VolunteerActivitiesComponent({ userId }) {
     }
   };
 
-  return (
-    <div className={styles.volunteerContainer}>
-      <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
-
-      {error && <p className={styles.error}>{error}</p>}
-
-      {activities.length > 0 ? (
-        <div className={styles.activitiesGrid}>
-          {activities.map(activity => (
-            <div key={activity._id} className={styles.activityCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>{activity.organization}</h3>
-                <span className={`${styles.badge} ${activity.status === 'active' ? styles.badgeSuccess : styles.badgeWarning}`}>
-                  {activity.status}
-                </span>
-              </div>
-              <div className={styles.cardContent}>
-                <p><strong>Hours:</strong> {activity.hours}</p>
-                <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
-                <p><strong>Description:</strong> {activity.description}</p>
-              </div>
-              <div className={styles.cardActions}>
-                <button 
-                  onClick={() => handleDeleteActivity(activity._id)} 
-                  className={styles.iconButton}
-                  aria-label="Delete Activity"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className={styles.textCenter}>No volunteer activities found.</p>
-      )}
-
-      <button 
-        onClick={() => setIsAddActivityModalOpen(true)} 
-        className={`${cleanStyles.button} ${styles.addButton}`}
-      >
-        <FaPlus /> Add Activity
-      </button>
-
-      {isAddActivityModalOpen && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <h3 className={styles.modalHeader}>Add New Activity</h3>
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Organization:</label>
-                <input 
-                  type="text" 
-                  name="organization" 
-                  value={newActivity.organization} 
-                  onChange={handleChange} 
-                  required 
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Hours:</label>
-                <input 
-                  type="number" 
-                  name="hours" 
-                  value={newActivity.hours} 
-                  onChange={handleChange} 
-                  required 
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Date:</label>
-                <input 
-                  type="date" 
-                  name="date" 
-                  value={newActivity.date} 
-                  onChange={handleChange} 
-                  required 
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Description:</label>
-                <textarea 
-                  name="description" 
-                  value={newActivity.description} 
-                  onChange={handleChange}
-                  className={styles.textarea}
-                />
-              </div>
-              <div className={styles.modalActions}>
-                <button type="button" onClick={() => setIsAddActivityModalOpen(false)} className={styles.buttonSecondary}>Cancel</button>
-                <button type="submit" className={cleanStyles.button}>Add Activity</button>
-              </div>
-            </form>
+  const modalContent = isAddActivityModalOpen && (
+    <div className={modalStyles.modalOverlay}>
+      <div className={modalStyles.modalContent}>
+        <button
+          onClick={() => setIsAddActivityModalOpen(false)}
+          className={modalStyles.closeButton}
+          aria-label="Close modal"
+        >
+          <FaTimes />
+        </button>
+        <h3 className={modalStyles.modalHeader}>Add New Activity</h3>
+        <form onSubmit={handleSubmit} className={modalStyles.form}>
+          <div className={modalStyles.formGroup}>
+            <label>Organization</label>
+            <input 
+              type="text" 
+              name="organization" 
+              value={newActivity.organization} 
+              onChange={handleChange} 
+              required 
+            />
           </div>
-        </div>
-      )}
+          <div className={modalStyles.formGroup}>
+            <label>Hours</label>
+            <input 
+              type="number" 
+              name="hours" 
+              value={newActivity.hours} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Date</label>
+            <input 
+              type="date" 
+              name="date" 
+              value={newActivity.date} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Description</label>
+            <textarea 
+              name="description" 
+              value={newActivity.description} 
+              onChange={handleChange}
+            />
+          </div>
+          <div className={modalStyles.buttonGroup}>
+            <button 
+              type="button" 
+              onClick={() => setIsAddActivityModalOpen(false)} 
+              className={`${modalStyles.button} ${modalStyles.cancelButton}`}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className={`${modalStyles.button} ${modalStyles.confirmButton}`}
+            >
+              Add Activity
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  );
+
+  return (
+    <>
+      <div className={styles.container}>
+        <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
+
+        {error && <p className={styles.error}>{error}</p>}
+
+        {activities.length > 0 ? (
+          <div className={styles.activitiesGrid}>
+            {activities.map(activity => (
+              <div key={activity._id} className={styles.activityCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>{activity.organization}</h3>
+                  <span className={`${styles.status} ${activity.status === 'active' ? styles.active : styles.pending}`}>
+                    {activity.status}
+                  </span>
+                </div>
+                <div className={styles.cardContent}>
+                  <p><strong>Hours:</strong> {activity.hours}</p>
+                  <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
+                  <p><strong>Description:</strong> {activity.description}</p>
+                </div>
+                <div className={styles.cardActions}>
+                  <button 
+                    onClick={() => handleDeleteActivity(activity._id)} 
+                    className={styles.iconButton}
+                    aria-label="Delete Activity"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.textCenter}>No volunteer activities found.</p>
+        )}
+
+        <button 
+          onClick={() => setIsAddActivityModalOpen(true)} 
+          className={styles.createButton}
+        >
+          <FaPlus /> Add Activity
+        </button>
+      </div>
+      {createPortal(modalContent, document.body)}
+    </>
   );
 }
 
