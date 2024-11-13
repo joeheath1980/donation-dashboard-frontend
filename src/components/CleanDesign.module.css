@@ -25,13 +25,13 @@
 .subHeader {
   font-size: 22px;
   font-weight: 600;
-  color: #424242;
+  color: var(--primary-color);
   margin-bottom: 15px;
 }
 
 .text {
   font-size: 16px;
-  color: #757575;
+  color: var(--primary-color);
   line-height: 1.6;
 }
 
@@ -93,13 +93,16 @@
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 15px;
+  padding: 12px;
+  margin-bottom: 10px;
   position: relative;
   transition: all 0.3s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  height: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card:hover {
@@ -111,40 +114,49 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  color: var(--primary-dark);
-  padding-right: 35px;
+  color: var(--primary-color);
+  padding-right: 30px;
   word-break: break-word;
   flex: 1;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .cardContent {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--primary-color);
   flex-grow: 1;
-  line-height: 1.5;
+  line-height: 1.2;
+}
+
+.cardContent p {
+  margin: 4px 0;
+  color: var(--primary-color);
 }
 
 .cardContent strong {
-  color: #424242;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-right: 4px;
 }
 
 .validationButton {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
   z-index: 1;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 15px;
 }
 
 .flexBetween {
@@ -168,13 +180,14 @@
 
 .textCenter {
   text-align: center;
+  color: var(--primary-color);
 }
 
 .cardActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  gap: 8px;
+  margin-top: 6px;
+  gap: 6px;
 }
 
 .donationSection, .contributionSection {
@@ -204,9 +217,9 @@
   position: relative;
   height: calc(100vh - 250px);
   min-height: 400px;
+  padding-bottom: 150px;
 }
 
-/* Customizing the scrollbar */
 .donationList::-webkit-scrollbar, .contributionList::-webkit-scrollbar {
   width: 6px;
 }
@@ -223,37 +236,6 @@
 
 .donationList::-webkit-scrollbar-thumb:hover, .contributionList::-webkit-scrollbar-thumb:hover {
   background: var(--hover-color);
-}
-
-/* Scroll indicator */
-.scrollIndicator {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 24px;
-  height: 40px;
-  border: 2px solid var(--primary-color);
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-
-.scrollIndicator::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background-color: var(--primary-color);
-  border-radius: 50%;
-  animation: scrollAnimation 1.5s infinite;
-}
-
-@keyframes scrollAnimation {
-  0% { transform: translateY(5px); }
-  50% { transform: translateY(15px); }
-  100% { transform: translateY(5px); }
 }
 
 .findMoreContainer {
@@ -278,6 +260,7 @@
   color: var(--primary-color);
   text-decoration: none;
   transition: color 0.3s ease;
+  margin-left: 4px;
 }
 
 .link:hover {
@@ -309,11 +292,15 @@
   }
 
   .card {
-    padding: 15px;
+    padding: 10px;
   }
 
   .cardTitle {
-    font-size: 15px;
+    font-size: 13px;
+  }
+
+  .cardContent {
+    font-size: 12px;
   }
 
   .button {
