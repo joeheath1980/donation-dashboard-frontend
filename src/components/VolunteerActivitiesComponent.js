@@ -4,7 +4,7 @@ import axios from 'axios';
 import cleanStyles from './CleanDesign.module.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
-import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile } from 'react-icons/fa';
 
 function VolunteerActivitiesComponent({ userId }) {
   const [activities, setActivities] = useState([]);
@@ -14,6 +14,7 @@ function VolunteerActivitiesComponent({ userId }) {
     date: '',
     description: ''
   });
+  const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [isAddActivityModalOpen, setIsAddActivityModalOpen] = useState(false);
 
@@ -40,18 +41,45 @@ function VolunteerActivitiesComponent({ userId }) {
     setNewActivity({ ...newActivity, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
+      if (file.size <= 5 * 1024 * 1024) { // 5MB limit
+        setSelectedFile(file);
+        setError('');
+      } else {
+        setError('File size must be less than 5MB');
+      }
+    } else {
+      setError('Please select an image or PDF file');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedFile) {
+      setError('Please upload evidence for your volunteer activity');
+      return;
+    }
+
     const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('organization', newActivity.organization);
+    formData.append('hours', newActivity.hours);
+    formData.append('date', newActivity.date);
+    formData.append('description', newActivity.description);
+    formData.append('evidence', selectedFile);
+
     try {
-      const response = await axios.post('http://localhost:3002/api/volunteerActivities', newActivity, {
+      const response = await axios.post('http://localhost:3002/api/volunteerActivities', formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'multipart/form-data'
         },
       });
       setActivities([...activities, response.data]);
       setNewActivity({ organization: '', hours: '', date: '', description: '' });
+      setSelectedFile(null);
       setError('');
       setIsAddActivityModalOpen(false);
     } catch (error) {
@@ -123,7 +151,29 @@ function VolunteerActivitiesComponent({ userId }) {
               name="description" 
               value={newActivity.description} 
               onChange={handleChange}
+              required
             />
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Evidence (Image or PDF, max 5MB)</label>
+            <div className={styles.fileUploadContainer}>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange}
+                className={styles.fileInput}
+                id="evidence-upload"
+                required
+              />
+              <label htmlFor="evidence-upload" className={styles.fileUploadButton}>
+                <FaUpload /> Upload Evidence
+              </label>
+              {selectedFile && (
+                <span className={styles.fileName}>
+                  <FaFile /> {selectedFile.name}
+                </span>
+              )}
+            </div>
           </div>
           <div className={modalStyles.buttonGroup}>
             <button 
@@ -166,6 +216,16 @@ function VolunteerActivitiesComponent({ userId }) {
                   <p><strong>Hours:</strong> {activity.hours}</p>
                   <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
                   <p><strong>Description:</strong> {activity.description}</p>
+                  {activity.evidence && (
+                    <a 
+                      href={`http://localhost:3002/api/volunteerActivities/evidence/${activity.evidence.split('/').pop()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.evidenceLink}
+                    >
+                      <FaFile /> View Evidence
+                    </a>
+                  )}
                 </div>
                 <div className={styles.cardActions}>
                   <button 

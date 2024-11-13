@@ -18,6 +18,15 @@
   margin-bottom: 32px;
 }
 
+.sectionHeader {
+  font-size: 24px;
+  font-weight: 500;
+  color: #2d8f7b;
+  margin: 32px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(45, 143, 123, 0.1);
+}
+
 .campaignsGrid {
   display: flex;
   flex-direction: column;
@@ -42,6 +51,45 @@
   box-sizing: border-box;
   position: relative;
   margin-bottom: 16px;
+}
+
+.archivedCard {
+  composes: campaignCard;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border: 1px solid rgba(45, 143, 123, 0.08);
+}
+
+.archivedCard .cardContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.archivedCard .cardTitle {
+  font-size: 16px;
+  margin-bottom: 0;
+}
+
+.archivedInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #2d8f7b;
+  font-size: 14px;
+}
+
+.archivedInfo span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.archivedDate {
+  color: #666;
+  font-size: 12px;
 }
 
 .campaignCard:hover {
@@ -246,6 +294,30 @@
   border-color: rgba(45, 143, 123, 0.5);
 }
 
+.justGivingLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2d8f7b;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: rgba(45, 143, 123, 0.04);
+  transition: all 0.2s ease;
+  margin-top: 16px;
+  width: fit-content;
+}
+
+.justGivingLink:hover {
+  background-color: rgba(45, 143, 123, 0.08);
+  text-decoration: none;
+}
+
+.justGivingLink svg {
+  font-size: 16px;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 16px;
@@ -258,8 +330,17 @@
     margin-bottom: 24px;
   }
 
+  .sectionHeader {
+    font-size: 20px;
+    margin: 24px 0 12px;
+  }
+
   .campaignCard {
     padding: 20px;
+  }
+
+  .archivedCard {
+    padding: 12px;
   }
 
   .cardTitle {
@@ -273,5 +354,15 @@
   .createButton {
     font-size: 13px;
     padding: 6px 12px;
+  }
+
+  .justGivingLink {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .archivedInfo {
+    font-size: 13px;
+    flex-wrap: wrap;
   }
 }

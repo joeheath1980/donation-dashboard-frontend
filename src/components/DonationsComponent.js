@@ -175,7 +175,7 @@ function DonationsComponent({ displayAll }) {
   );
 
   return (
-    <>
+    <div className={cleanStyles.donationComponentContainer}>
       <div className={`${cleanStyles.grid} ${cleanStyles.donationSection}`}>
         <div className={cleanStyles.addButtonContainer}>
           <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
@@ -256,7 +256,7 @@ function DonationsComponent({ displayAll }) {
         </div>
       </div>
       {createPortal(modalContent, document.body)}
-    </>
+    </div>
   );
 }
 
