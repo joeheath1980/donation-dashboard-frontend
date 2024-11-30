@@ -34,7 +34,7 @@
 }
 
 .buttonGroup button[type="submit"] {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
 }
 

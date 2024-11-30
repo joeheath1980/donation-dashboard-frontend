@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
+import oneOffStyles from './OneOffContributions.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
@@ -131,36 +132,36 @@ function OneOffContributionsComponent({ displayAll }) {
   }
 
   return (
-    <div className={cleanStyles.donationComponentContainer}>
-      <div className={`${cleanStyles.grid} ${cleanStyles.contributionSection}`}>
-        <div className={cleanStyles.addButtonContainer}>
-          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.compact}`}>
+    <div className={oneOffStyles.oneOffComponentContainer}>
+      <div className={oneOffStyles.oneOffSection}>
+        <div className={cleanStyles.flexBetween}>
+          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
             <FaPlus /> Add New One-Off Contribution
           </button>
         </div>
-        <div className={cleanStyles.contributionList}>
+        <div className={oneOffStyles.oneOffList}>
           {displayedContributions && displayedContributions.length > 0 ? (
             <>
               {displayedContributions.map((contribution) => (
-                <div key={contribution._id} className={cleanStyles.card}>
+                <div key={contribution._id} className={oneOffStyles.oneOffCard}>
                   <div className={cleanStyles.cardHeader}>
                     <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
                     <div className={cleanStyles.validationButton}>
                       {contribution.needsValidation && !contribution.isValidated && (
                         <InstantTooltip text="Receipt required for validation">
-                          <FaCheckCircle style={{ color: 'gray' }} />
+                          <FaCheckCircle className={oneOffStyles.validationIconPending} />
                         </InstantTooltip>
                       )}
                       {contribution.isValidated && (
                         <InstantTooltip text="Contribution validated">
-                          <FaCheckCircle style={{ color: '#2d8f7b' }} />
+                          <FaCheckCircle className={oneOffStyles.validationIcon} />
                         </InstantTooltip>
                       )}
                     </div>
                   </div>
-                  <div className={cleanStyles.cardContent}>
+                  <div className={oneOffStyles.oneOffContent}>
                     <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                    <p><strong>Amount:</strong> ${contribution.amount}</p>
+                    <p><strong>Amount:</strong> ${contribution.amount.toFixed(2)}</p>
                     {contribution.charityType && (
                       <p><strong>Charity Type:</strong> {contribution.charityType}</p>
                     )}
@@ -178,7 +179,7 @@ function OneOffContributionsComponent({ displayAll }) {
                       </p>
                     )}
                   </div>
-                  <div className={cleanStyles.cardActions}>
+                  <div className={oneOffStyles.cardActions}>
                     <InstantTooltip text={contribution.needsValidation && !contribution.isValidated ? "Edit or Validate contribution" : "Edit contribution"}>
                       <button onClick={() => handleEditOrValidate(contribution)} className={cleanStyles.iconButton} aria-label="Edit or Validate Contribution">
                         <FaEdit />
@@ -201,7 +202,7 @@ function OneOffContributionsComponent({ displayAll }) {
             <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
           )}
         </div>
-        <div className={cleanStyles.findMoreContainer}>
+        <div className={cleanStyles.flexBetween}>
           {!displayAll && localContributions.length > 5 && (
             <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
               See All

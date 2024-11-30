@@ -34,7 +34,7 @@ import YourImpact from './components/YourImpact';
 import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import './styles/global.css';
+import styles from './components/CleanDesign.module.css';
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
   const token = localStorage.getItem('token');
@@ -64,7 +64,7 @@ function App() {
     <AuthProvider>
       <ImpactProvider>
         <Router>
-          <div className="app">
+          <div className={styles.app}>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<WelcomePage />} />

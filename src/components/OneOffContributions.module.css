@@ -1,0 +1,141 @@
+/* OneOffContributions.module.css */
+.oneOffComponentContainer {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.oneOffSection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.oneOffList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Style for the contribution card */
+.oneOffCard {
+  background-color: white;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.oneOffCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure text colors are consistent */
+.oneOffContent {
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.oneOffContent p {
+  margin: 8px 0;
+  color: var(--text-primary);
+}
+
+.oneOffContent strong {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.oneOffContent a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.oneOffContent a:hover {
+  color: var(--primary-light);
+}
+
+/* Card title styles */
+.oneOffCard h3 {
+  color: var(--primary-color);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+/* Validation icon colors */
+.validationIcon {
+  color: var(--primary-color);
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.validationIconPending {
+  color: var(--text-secondary);
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+/* Scrollbar styles */
+.oneOffList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.oneOffList::-webkit-scrollbar-track {
+  background: var(--background-light);
+  border-radius: 4px;
+}
+
+.oneOffList::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+/* Card actions */
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+@media (max-width: 768px) {
+  .oneOffList {
+    grid-template-columns: 1fr;
+    max-height: 500px;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .oneOffCard {
+    padding: 15px;
+  }
+
+  .oneOffContent {
+    font-size: 13px;
+  }
+}
