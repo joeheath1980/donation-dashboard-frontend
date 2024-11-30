@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import cleanStyles from './CleanDesign.module.css';
+import donationStyles from './DonationsComponent.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
@@ -53,7 +54,7 @@ function DonationsComponent({ displayAll }) {
     const listElement = donationListRef.current;
     if (listElement) {
       listElement.addEventListener('scroll', handleScroll);
-      handleScroll(); // Check initial scroll state
+      handleScroll();
     }
 
     return () => {
@@ -64,7 +65,6 @@ function DonationsComponent({ displayAll }) {
   }, []);
 
   const handleDelete = async (donationId) => {
-    console.log('Attempting to delete donation with ID:', donationId);
     if (window.confirm('Are you sure you want to delete this donation?')) {
       try {
         const response = await fetch(`http://localhost:3002/api/donations/${donationId}`, {
@@ -76,7 +76,6 @@ function DonationsComponent({ displayAll }) {
         });
 
         if (response.ok) {
-          console.log('Donation deleted successfully');
           setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
           if (isAuthenticated) {
             fetchImpactData();
@@ -93,14 +92,11 @@ function DonationsComponent({ displayAll }) {
   };
 
   const handleEditOrValidate = (donation) => {
-    console.log('Edit or Validate button clicked for donation:', donation);
     setCurrentDonation(donation);
     setShowModal(true);
   };
 
   const handleConfirm = async (editedDonation) => {
-    console.log('Saving donation:', editedDonation);
-
     try {
       let url = 'http://localhost:3002/api/donations';
       let method = 'POST';
@@ -131,7 +127,6 @@ function DonationsComponent({ displayAll }) {
 
       if (response.ok) {
         const updatedDonation = await response.json();
-        console.log('Server response:', updatedDonation);
         if (currentDonation && currentDonation._id) {
           setLocalDonations(prevDonations =>
             prevDonations.map(donation =>
@@ -175,34 +170,34 @@ function DonationsComponent({ displayAll }) {
   );
 
   return (
-    <div className={cleanStyles.donationComponentContainer}>
-      <div className={`${cleanStyles.grid} ${cleanStyles.donationSection}`}>
-        <div className={cleanStyles.addButtonContainer}>
+    <div className={`${cleanStyles.container} ${donationStyles.donationComponentContainer}`}>
+      <div className={donationStyles.donationSection}>
+        <div className={cleanStyles.flexBetween}>
           <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
             <FaPlus /> Add New Donation
           </button>
         </div>
-        <div className={cleanStyles.donationList} ref={donationListRef}>
+        <div className={donationStyles.donationList} ref={donationListRef}>
           {displayedDonations && displayedDonations.length > 0 ? (
             <>
               {displayedDonations.map((donation) => (
-                <div key={donation._id} className={cleanStyles.card}>
+                <div key={donation._id} className={donationStyles.donationCard}>
                   <div className={cleanStyles.cardHeader}>
                     <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
                     <div className={cleanStyles.validationButton}>
                       {donation.needsValidation && !donation.isValidated && (
                         <InstantTooltip text="Receipt required for validation">
-                          <FaCheckCircle style={{ color: 'gray' }} />
+                          <FaCheckCircle className={donationStyles.validationIconPending} />
                         </InstantTooltip>
                       )}
                       {donation.isValidated && (
                         <InstantTooltip text="Donation validated">
-                          <FaCheckCircle style={{ color: '#2d8f7b' }} />
+                          <FaCheckCircle className={donationStyles.validationIcon} />
                         </InstantTooltip>
                       )}
                     </div>
                   </div>
-                  <div className={cleanStyles.cardContent}>
+                  <div className={donationStyles.donationContent}>
                     <p><strong>Date:</strong> {formatDate(donation.date)}</p>
                     <p>
                       <strong>Amount:</strong> ${donation.amount.toFixed(2)}
@@ -247,7 +242,7 @@ function DonationsComponent({ displayAll }) {
           )}
           {showScrollIndicator && <div className={cleanStyles.scrollIndicator} />}
         </div>
-        <div className={cleanStyles.findMoreContainer}>
+        <div className={cleanStyles.flexBetween}>
           {!displayAll && localDonations.length > 5 && (
             <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
               See All

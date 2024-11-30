@@ -151,9 +151,9 @@ function Profile() {
     }
   };
 
-  if (isLoading) return <div className={styles.textCenter}>Loading your impact data...</div>;
-  if (impactError) return <div className={styles.textCenter}>{impactError}</div>;
-  if (!isAuthenticated) return <div className={styles.textCenter}>Please log in to view your profile and impact data.</div>;
+  if (isLoading) return <div className={cleanStyles.textCenter}>Loading your impact data...</div>;
+  if (impactError) return <div className={cleanStyles.textCenter}>{impactError}</div>;
+  if (!isAuthenticated) return <div className={cleanStyles.textCenter}>Please log in to view your profile and impact data.</div>;
 
   return (
     <div className={styles.profileBackground}>
@@ -228,7 +228,7 @@ function Profile() {
               {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showRegularContributions && (
-              <div className={cleanStyles.container}>
+              <div className={styles.expandedContent}>
                 <DonationsComponent displayAll={true} />
               </div>
             )}
@@ -247,7 +247,7 @@ function Profile() {
               {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
             </button>
             {showOneOffContributions && (
-              <div className={cleanStyles.container}>
+              <div className={styles.expandedContent}>
                 <OneOffContributionsComponent displayAll={true} />
               </div>
             )}
