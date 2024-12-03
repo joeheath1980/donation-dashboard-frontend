@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+/* About.module.css */
 
 .aboutContainer {
   font-family: 'Roboto', sans-serif;
@@ -6,29 +6,24 @@
   margin: 0 auto;
   padding: 2rem;
   background: linear-gradient(to bottom, #f0f8ff, #ffffff);
-  color: #333;
+  color: var(--text-primary);
   line-height: 1.6;
-}
-
-.logo {
-  display: block;
-  width: 150px;
-  margin: 0 auto 2rem;
 }
 
 .heading {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #4CAF50;
-  text-align: center;
+  color: #000000;
+  text-align: left;
   margin-bottom: 1rem;
+  padding-left: 2rem;
 }
 
 .separator {
   width: 100px;
   height: 3px;
-  background-color: #4CAF50;
-  margin: 0 auto 2rem;
+  background: var(--primary-gradient);
+  margin: 0 0 2rem 2rem;
 }
 
 .contentColumns {
@@ -49,72 +44,116 @@ p {
 }
 
 strong {
-  color: #4CAF50;
+  color: var(--primary-color);
 }
 
 .quoteBox {
-  background-color: #e8f5e9;
+  background-color: var(--background-light);
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.quoteBox span {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.5rem;
+  display: inline-flex;
+  vertical-align: middle;
 }
 
 blockquote {
   font-style: italic;
-  margin: 0 0 1rem 0;
+  margin: 0.5rem 0 1rem 0;
+  color: var(--text-primary);
 }
 
 cite {
   display: block;
   text-align: right;
   font-weight: bold;
+  color: var(--primary-color);
 }
 
 .impactStats {
-  background-color: #f1f8e9;
+  background-color: var(--background-light);
   padding: 1.5rem;
   border-radius: 8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .impactStats h3 {
-  margin-top: 0;
-  color: #4CAF50;
+  margin: 0;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.impactStats span {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
 }
 
 .impactStats ul {
   list-style-type: none;
   padding: 0;
+  margin-top: 1rem;
 }
 
 .impactStats li {
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 .highlightBox {
-  background-color: #e8f5e9;
+  background-color: var(--background-light);
   padding: 1.5rem;
   border-radius: 8px;
   margin: 2rem 0;
   text-align: center;
   font-size: 1.1rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.highlightBox span {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
 }
 
 .ctaButton {
-  display: block;
-  width: 200px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+  min-width: 200px;
   margin: 2rem auto;
-  padding: 1rem;
-  background-color: #4CAF50;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
   color: white;
   text-align: center;
   text-decoration: none;
   font-weight: bold;
   border-radius: 30px;
-  transition: background-color 0.3s ease;
+  transition: var(--transition-standard);
+}
+
+.ctaButton span {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
 }
 
 .ctaButton:hover {
-  background-color: #45a049;
+  background: var(--primary-gradient);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 768px) {
@@ -122,12 +161,13 @@ cite {
     flex-direction: column;
   }
 
-  .logo {
-    width: 100px;
-  }
-
   .heading {
     font-size: 2rem;
+    padding-left: 1rem;
+  }
+
+  .separator {
+    margin: 0 0 2rem 1rem;
   }
 
   .ctaButton {

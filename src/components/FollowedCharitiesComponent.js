@@ -12,7 +12,7 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
     if (window.confirm('Are you sure you want to unfollow this charity?')) {
       try {
         await removeFollowedCharity(charityABN);
-        setLocalError(null); // Clear any previous errors
+        setLocalError(null);
       } catch (err) {
         setLocalError('Failed to remove the charity. Please try again.');
       }
@@ -20,6 +20,21 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
   }, [removeFollowedCharity]);
 
   const displayedCharities = displayAll ? followedCharities : followedCharities.slice(0, 3);
+
+  const getCharityName = (followedCharity) => {
+    // Handle different data structures that might come from the API
+    if (typeof followedCharity === 'string') return followedCharity;
+    if (followedCharity?.name) return followedCharity.name;
+    if (followedCharity?.charity?.name) return followedCharity.charity.name;
+    return 'Unknown Charity';
+  };
+
+  const getCharityABN = (followedCharity) => {
+    // Handle different data structures that might come from the API
+    if (followedCharity?.ABN) return followedCharity.ABN;
+    if (followedCharity?.charity?.ABN) return followedCharity.charity.ABN;
+    return null;
+  };
 
   return (
     <div className={cleanStyles.contributionSection}>
@@ -32,17 +47,21 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
       <div className={cleanStyles.charitiesList}>
         {displayedCharities && displayedCharities.length > 0 ? (
           displayedCharities.map((followedCharity, index) => {
-            const charity = followedCharity.charity || followedCharity;
+            const charityName = getCharityName(followedCharity);
+            const charityABN = getCharityABN(followedCharity);
+            
             return (
-              <div key={charity.ABN || `empty-${index}`} className={cleanStyles.charityCard}>
-                <span className={cleanStyles.charityName}>{charity.name || 'Unknown Charity'}</span>
-                <button
-                  onClick={() => handleDelete(charity.ABN)}
-                  className={cleanStyles.deleteButton}
-                  aria-label="Unfollow Charity"
-                >
-                  <FaTimes />
-                </button>
+              <div key={charityABN || `charity-${index}`} className={cleanStyles.charityCard}>
+                <span className={cleanStyles.charityName}>{charityName}</span>
+                {charityABN && (
+                  <button
+                    onClick={() => handleDelete(charityABN)}
+                    className={cleanStyles.deleteButton}
+                    aria-label="Unfollow Charity"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
               </div>
             );
           })

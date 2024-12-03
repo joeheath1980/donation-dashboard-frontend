@@ -185,16 +185,9 @@ function DonationsComponent({ displayAll }) {
                   <div className={cleanStyles.cardHeader}>
                     <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
                     <div className={cleanStyles.validationButton}>
-                      {donation.needsValidation && !donation.isValidated && (
-                        <InstantTooltip text="Receipt required for validation">
-                          <FaCheckCircle className={donationStyles.validationIconPending} />
-                        </InstantTooltip>
-                      )}
-                      {donation.isValidated && (
-                        <InstantTooltip text="Donation validated">
-                          <FaCheckCircle className={donationStyles.validationIcon} />
-                        </InstantTooltip>
-                      )}
+                      <InstantTooltip text={donation.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
+                        <FaCheckCircle className={donation.receiptUrl ? donationStyles.validationIcon : donationStyles.validationIconPending} />
+                      </InstantTooltip>
                     </div>
                   </div>
                   <div className={donationStyles.donationContent}>
@@ -219,8 +212,8 @@ function DonationsComponent({ displayAll }) {
                     )}
                   </div>
                   <div className={cleanStyles.cardActions}>
-                    <InstantTooltip text={donation.needsValidation && !donation.isValidated ? "Edit or Validate donation" : "Edit donation"}>
-                      <button onClick={() => handleEditOrValidate(donation)} className={cleanStyles.iconButton} aria-label="Edit or Validate Donation">
+                    <InstantTooltip text="Edit donation">
+                      <button onClick={() => handleEditOrValidate(donation)} className={cleanStyles.iconButton} aria-label="Edit Donation">
                         <FaEdit />
                       </button>
                     </InstantTooltip>

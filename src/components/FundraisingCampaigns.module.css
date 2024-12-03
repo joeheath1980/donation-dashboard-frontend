@@ -9,6 +9,7 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  min-height: fit-content;
 }
 
 .header {
@@ -37,6 +38,10 @@
   max-height: calc(100vh - 300px);
 }
 
+.campaignsGrid:empty {
+  padding-bottom: 20px;
+}
+
 .campaignCard {
   background-color: #ffffff;
   border: 1px solid rgba(45, 143, 123, 0.12);
@@ -58,33 +63,43 @@
   padding: 16px;
   background-color: #f8f9fa;
   border: 1px solid rgba(45, 143, 123, 0.08);
+  margin-bottom: 8px;
 }
 
 .archivedCard .cardContent {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  width: 100%;
 }
 
 .archivedCard .cardTitle {
   font-size: 16px;
   margin-bottom: 0;
+  max-width: calc(100% - 100px);
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
 }
 
 .archivedInfo {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   color: #2d8f7b;
   font-size: 14px;
+  max-width: 100%;
 }
 
 .archivedInfo span {
   display: flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .archivedDate {
@@ -345,6 +360,7 @@
 
   .cardTitle {
     font-size: 16px;
+    max-width: 100%;
   }
 
   .cardContent {
@@ -364,5 +380,15 @@
   .archivedInfo {
     font-size: 13px;
     flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .archivedCard .cardContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .archivedCard .cardTitle {
+    max-width: calc(100% - 30px);
   }
 }

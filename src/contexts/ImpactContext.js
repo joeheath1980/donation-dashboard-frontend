@@ -10,8 +10,14 @@ const MAX_VOLUNTEER_SCORE = 30;
 const MAX_FUNDRAISING_SCORE = 20;
 
 // Donation Score Calculation (Max 40 points)
-const calculateDonationScore = (regularDonations, oneOffDonations) => {
-  const totalDonations = [...regularDonations, ...oneOffDonations];
+const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampaigns = []) => {
+  // Convert archived campaigns to donation format
+  const archivedDonations = archivedCampaigns.map(campaign => ({
+    amount: campaign.raisedAmount || campaign.goalAmount,
+    date: campaign.completedDate
+  }));
+
+  const totalDonations = [...regularDonations, ...oneOffDonations, ...archivedDonations];
   const totalDonationAmount = totalDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
   // Tiered Points with Diminishing Returns
@@ -107,7 +113,10 @@ const calculateVolunteerScore = (volunteeringActivities) => {
 
 // Fundraising Score Calculation (Max 20 points)
 const calculateFundraisingScore = (fundraisingCampaigns) => {
-  const totalFundsRaised = fundraisingCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
+  // Only consider active campaigns
+  const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status !== 'archived');
+  
+  const totalFundsRaised = activeCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
 
   let fundraisingScore = 0;
   let remainingAmount = totalFundsRaised;
@@ -130,8 +139,8 @@ const calculateFundraisingScore = (fundraisingCampaigns) => {
   }
 
   // Fundraising Activity Bonus
-  const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
-  const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
+  const totalEventsOrganized = activeCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
+  const totalOnlineCampaignsInitiated = activeCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
 
   fundraisingScore += totalEventsOrganized * 2; // 2 points per event
   fundraisingScore += totalOnlineCampaignsInitiated * 1; // 1 point per online campaign
@@ -156,9 +165,13 @@ export const calculateComplexImpactScore = (userData) => {
     fundraisingCampaigns = []
   } = userData;
 
-  const donationScore = calculateDonationScore(regularDonations, oneOffDonations);
+  // Separate archived campaigns
+  const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
+  const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status !== 'archived');
+
+  const donationScore = calculateDonationScore(regularDonations, oneOffDonations, archivedCampaigns);
   const volunteerScore = calculateVolunteerScore(volunteeringActivities);
-  const fundraisingScore = calculateFundraisingScore(fundraisingCampaigns);
+  const fundraisingScore = calculateFundraisingScore(activeCampaigns);
 
   const totalScore = donationScore + volunteerScore + fundraisingScore;
 
@@ -311,7 +324,6 @@ export const ImpactProvider = ({ children }) => {
     }
   };
 
-  // === New Function: onDeleteContribution ===
   const onDeleteContribution = async (contributionId) => {
     try {
       const headers = getAuthHeaders();
@@ -323,7 +335,6 @@ export const ImpactProvider = ({ children }) => {
       throw new Error('Failed to delete contribution. Please try again.');
     }
   };
-  // === End of onDeleteContribution ===
 
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
@@ -384,14 +395,12 @@ export const ImpactProvider = ({ children }) => {
     } catch (error) {
       console.error('Error deleting followed charity:', error.response ? error.response.data : error.message);
       if (error.response && error.response.status === 404) {
-        // If the charity is not found on the server, remove it from the local state
         setFollowedCharities(prevCharities => {
           const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
           localStorage.setItem('followed-charities', JSON.stringify(newCharities));
           return newCharities;
         });
       } else {
-        // For other errors, you might want to show an error message to the user
         setError('Failed to remove the charity. Please try again.');
       }
     }
@@ -402,53 +411,43 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities([]);
   }, []);
 
-  // === New Function: formPersonalizedSearchQuery ===
   const formPersonalizedSearchQuery = useCallback(() => {
     const charityTypes = new Set();
     const charityNames = new Set();
     const keywords = new Set();
 
-    // Process donations and contributions
     [...donations, ...oneOffContributions].forEach(item => {
       if (item.charityType) charityTypes.add(item.charityType);
       if (item.charity) charityNames.add(item.charity);
     });
 
-    // Process volunteer activities
     volunteerActivities.forEach(activity => {
       if (activity.organization) charityNames.add(activity.organization);
+      if (activity.charityType) charityTypes.add(activity.charityType);
       const activityKeywords = extractKeywords(activity.description);
       activityKeywords.forEach(keyword => keywords.add(keyword));
     });
 
-    // Process fundraising campaigns
     fundraisingCampaigns.forEach(campaign => {
       const campaignKeywords = extractKeywords(campaign.title);
       campaignKeywords.forEach(keyword => keywords.add(keyword));
     });
 
-    // Process followed charities
     followedCharities.forEach(charity => {
       if (charity.name) charityNames.add(charity.name);
     });
 
-    // Combine all data into a search query
     const queryParts = [
       ...Array.from(charityTypes),
       ...Array.from(charityNames),
       ...Array.from(keywords)
     ];
 
-    // Filter out common words (assuming keywords are already filtered)
-    // Limit the query length to 10 terms
     const limitedQueryParts = queryParts.slice(0, 10);
-
-    // Join with 'OR' operators
     const filteredQuery = limitedQueryParts.join(' OR ');
 
     return filteredQuery;
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, followedCharities]);
-  // === End of New Function ===
 
   useEffect(() => {
     const storedCharities = localStorage.getItem('followed-charities');
@@ -457,7 +456,7 @@ export const ImpactProvider = ({ children }) => {
     }
 
     if (user) {
-      setIsAuthenticated(!user.isBusiness); // Only set authenticated if user is not a business
+      setIsAuthenticated(!user.isBusiness);
     } else {
       setIsAuthenticated(false);
       clearFollowedCharities();
@@ -517,10 +516,8 @@ export const ImpactProvider = ({ children }) => {
         setFundraisingCampaigns,
         setImpactScore,
         setIsAuthenticated,
-        // === Adding the new functions to the context value ===
         formPersonalizedSearchQuery,
-        onDeleteContribution,
-        // === End of addition ===
+        onDeleteContribution
       }}
     >
       {children}

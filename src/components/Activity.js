@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { Link, useLocation } from 'react-router-dom';
-import styles from '../Impact.module.css';
+import styles from './Activity.module.css';
+import cleanStyles from './CleanDesign.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
@@ -25,11 +26,11 @@ function Activity() {
       if (data.authenticated) {
         setAuthStatus('Authenticated');
       } else {
-        setAuthStatus('Not authenticated');
+        setAuthStatus('');
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
-      setAuthStatus('Error checking authentication status');
+      setAuthStatus('');
     }
   }, []);
 
@@ -178,12 +179,12 @@ function Activity() {
   };
 
   const renderEmailResults = (results, isOutlook = false) => (
-    <div className={styles.resultsContainer}>
-      <h5>{isOutlook ? 'Outlook' : 'Gmail'} Search Results:</h5>
+    <div className={`${styles.resultsContainer} ${cleanStyles.container}`}>
+      <h5 className={cleanStyles.heading}>{isOutlook ? 'Outlook' : 'Gmail'} Search Results:</h5>
       <p className={styles.sortMessage}>Sort your donations into regular or one-off contributions:</p>
       <ul className={styles.emailResultsList}>
         {results.map((result, index) => (
-          <li key={index} className={styles.emailResultItem}>
+          <li key={index} className={`${styles.emailResultItem} ${cleanStyles.card}`}>
             <strong>Charity:</strong> {result.charity}<br />
             <strong>Date:</strong> {result.date}<br />
             <strong>Amount:</strong> {result.amount}<br />
@@ -197,7 +198,7 @@ function Activity() {
               <option value="regular">Regular Contribution</option>
               <option value="one-off">One-Off Contribution</option>
             </select>
-            <button onClick={() => handleCommit(index, isOutlook)} className={styles.saveButton}>
+            <button onClick={() => handleCommit(index, isOutlook)} className={`${styles.saveButton} ${cleanStyles.button}`}>
               Commit
             </button>
             <button
@@ -214,23 +215,23 @@ function Activity() {
   );
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.activityHeader}>Discover your donations and start tracking your impact</h1>
+    <div className={`${styles.container} ${cleanStyles.container}`}>
+      <h1 className={`${styles.activityHeader} ${cleanStyles.heading}`}>Discover your donations and start tracking your impact</h1>
 
-      <div className={styles.emailSection}>
+      <div className={`${styles.emailSection} ${cleanStyles.card}`}>
         <div className={styles.buttonContainer}>
-          <button onClick={handleSearchEmails} disabled={loading} className={styles.scrapeButton}>
+          <button onClick={handleSearchEmails} disabled={loading} className={`${styles.scrapeButton} ${cleanStyles.button}`}>
             {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
-          <button onClick={handleSearchOutlookEmails} disabled={loading} className={styles.scrapeButton}>
+          <button onClick={handleSearchOutlookEmails} disabled={loading} className={`${styles.scrapeButton} ${cleanStyles.button}`}>
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
-          <Link to="/your-impact" className={styles.toggleButton}>Check Out Your Impact</Link>
+          <Link to="/your-impact" className={`${styles.toggleButton} ${cleanStyles.button}`}>Check Out Your Impact</Link>
         </div>
 
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
         {error && <p className={styles.error}>{error}</p>}
-        {authStatus && <p className={styles.authStatus}>{authStatus}</p>}
+        {authStatus === 'Authenticated' && <p className={styles.authStatus}>{authStatus}</p>}
         {emailResults.length > 0 && renderEmailResults(emailResults)}
         {outlookResults.length > 0 && renderEmailResults(outlookResults, true)}
       </div>

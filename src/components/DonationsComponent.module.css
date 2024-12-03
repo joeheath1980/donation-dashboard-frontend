@@ -87,13 +87,13 @@
 
 /* Validation icon colors */
 .validationIcon {
-  color: var(--primary-color);
+  color: #4CAF50;
   font-size: 18px;
   transition: color 0.3s ease;
 }
 
 .validationIconPending {
-  color: var(--text-secondary);
+  color: #9E9E9E;
   font-size: 18px;
   transition: color 0.3s ease;
 }
