@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import DropIn from 'braintree-web-drop-in-react';
+import cleanStyles from './CleanDesign.module.css';
+import styles from './PaymentStyles.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
 
-console.log('API_URL:', API_URL);
-console.log('PayPal Client ID:', PAYPAL_CLIENT_ID);
-
-// Error Boundary Component
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -26,9 +24,8 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      return <h3>Sorry, there was a problem loading the PayPal button.</h3>;
+      return <h3 className={cleanStyles.error}>Sorry, there was a problem loading the PayPal button.</h3>;
     }
-
     return this.props.children;
   }
 }
@@ -47,7 +44,7 @@ const ManagePaymentsComponent = () => {
       try {
         const [tokenResponse, charitiesResponse] = await Promise.all([
           axios.get(`${API_URL}/api/braintree/client_token`),
-          axios.get(`${API_URL}/api/charity`) // Updated from '/api/charities' to '/api/charity'
+          axios.get(`${API_URL}/api/charity`)
         ]);
         setClientToken(tokenResponse.data.clientToken);
         setCharities(charitiesResponse.data);
@@ -73,7 +70,6 @@ const ManagePaymentsComponent = () => {
         });
         if (response.data.success) {
           alert('Payment successful!');
-          // Handle successful payment (e.g., update UI, clear form)
         } else {
           alert('Payment failed. Please try again.');
         }
@@ -93,37 +89,29 @@ const ManagePaymentsComponent = () => {
   };
 
   const createOrder = (data, actions) => {
-    console.log('Creating PayPal order');
     const validAmount = validateAndFormatAmount(amount);
     if (!validAmount) {
-      console.error('Invalid amount:', amount);
       return Promise.reject(new Error('Invalid amount'));
     }
     return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: validAmount,
-          },
+      purchase_units: [{
+        amount: {
+          value: validAmount,
         },
-      ],
+      }],
     });
   };
 
   const onApprove = async (data, actions) => {
-    console.log('PayPal payment approved');
     try {
-      const details = await actions.order.capture();
-      console.log('Order captured:', details);
+      await actions.order.capture();
       const response = await axios.post(`${API_URL}/api/paypal/capture-order`, {
         orderId: data.orderID,
         charityId: selectedCharity
       });
       if (response.data.success) {
         alert('Payment successful!');
-        // Handle successful payment (e.g., update UI, clear form)
       } else {
-        console.error('Backend reported payment failure:', response.data);
         alert('Payment failed. Please try again.');
       }
     } catch (error) {
@@ -133,15 +121,15 @@ const ManagePaymentsComponent = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className={styles.loadingContainer}>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className={cleanStyles.error}>{error}</div>;
   }
 
   if (charities.length === 0) {
-    return <div>No charities available. Please check back later.</div>;
+    return <div className={styles.message}>No charities available. Please check back later.</div>;
   }
 
   const paypalOptions = {
@@ -153,77 +141,101 @@ const ManagePaymentsComponent = () => {
   const isAmountValid = validateAndFormatAmount(amount) !== null;
 
   return (
-    <div>
-      <h2>Manage Payments</h2>
-      <div>
-        <label htmlFor="amount">Amount: </label>
-        <input
-          type="number"
-          id="amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount"
-          step="0.01"
-          min="0.01"
-        />
-      </div>
-      <div>
-        <label htmlFor="charity">Select Charity: </label>
-        <select
-          id="charity"
-          value={selectedCharity}
-          onChange={(e) => setSelectedCharity(e.target.value)}
-        >
-          <option value="">Select a charity</option>
-          {charities.map((charity) => (
-            <option key={charity.id} value={charity.id}>
-              {charity.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <h3>Pay with Credit Card</h3>
-      {clientToken ? (
-        <DropIn
-          options={{
-            authorization: clientToken,
-            paypal: false
-          }}
-          onInstance={(dropinInstance) => setInstance(dropinInstance)}
-        />
-      ) : (
-        <div>Loading payment options...</div>
-      )}
-      <button onClick={handleBraintreePayment} disabled={!instance || !isAmountValid || !selectedCharity}>
-        Pay with Credit Card
-      </button>
-      <h3>Pay with PayPal</h3>
-      {PAYPAL_CLIENT_ID ? (
-        <ErrorBoundary>
-          <PayPalScriptProvider options={paypalOptions}>
-            <PayPalButtons 
-              createOrder={createOrder} 
-              onApprove={onApprove} 
-              disabled={!isAmountValid || !selectedCharity}
-              style={{ layout: "horizontal" }}
+    <div className={cleanStyles.container}>
+      <h1 className={cleanStyles.heading}>Make a Donation</h1>
+      
+      <div className={`${cleanStyles.card} ${styles.formLayout}`}>
+        <div className={cleanStyles.formGroup}>
+          <label htmlFor="amount" className={cleanStyles.label}>Donation Amount</label>
+          <div className={styles.inputGroup}>
+            <span className={styles.currencySymbol}>$</span>
+            <input
+              type="number"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              step="0.01"
+              min="0.01"
+              className={cleanStyles.input}
             />
-          </PayPalScriptProvider>
-        </ErrorBoundary>
-      ) : (
-        <div>
-          PayPal Client ID not configured. Please check your environment variables.
-          <br />
-          Make sure REACT_APP_PAYPAL_CLIENT_ID is set in your .env file and that you've restarted your development server after making changes.
+          </div>
         </div>
-      )}
-      <div>
-        <h3>Test Credit Card Numbers:</h3>
-        <ul>
+
+        <div className={cleanStyles.formGroup}>
+          <label htmlFor="charity" className={cleanStyles.label}>Select Charity</label>
+          <select
+            id="charity"
+            value={selectedCharity}
+            onChange={(e) => setSelectedCharity(e.target.value)}
+            className={cleanStyles.select}
+          >
+            <option value="">Select a charity</option>
+            {charities.map((charity) => (
+              <option key={charity.id} value={charity.id}>
+                {charity.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className={`${cleanStyles.card} ${styles.paymentSection}`}>
+        <h2 className={cleanStyles.subheading}>Credit Card Payment</h2>
+        {clientToken ? (
+          <>
+            <div className={styles.dropInContainer}>
+              <DropIn
+                options={{
+                  authorization: clientToken,
+                  paypal: false
+                }}
+                onInstance={(dropinInstance) => setInstance(dropinInstance)}
+              />
+            </div>
+            <button 
+              onClick={handleBraintreePayment} 
+              disabled={!instance || !isAmountValid || !selectedCharity}
+              className={cleanStyles.button}
+            >
+              Complete Donation
+            </button>
+          </>
+        ) : (
+          <div className={styles.message}>Loading payment options...</div>
+        )}
+      </div>
+
+      <div className={`${cleanStyles.card} ${styles.paymentSection}`}>
+        <h2 className={cleanStyles.subheading}>PayPal Payment</h2>
+        {PAYPAL_CLIENT_ID ? (
+          <ErrorBoundary>
+            <div className={styles.paypalContainer}>
+              <PayPalScriptProvider options={paypalOptions}>
+                <PayPalButtons 
+                  createOrder={createOrder} 
+                  onApprove={onApprove} 
+                  disabled={!isAmountValid || !selectedCharity}
+                  style={{ layout: "horizontal" }}
+                />
+              </PayPalScriptProvider>
+            </div>
+          </ErrorBoundary>
+        ) : (
+          <div className={cleanStyles.error}>
+            PayPal integration is currently unavailable. Please try another payment method.
+          </div>
+        )}
+      </div>
+
+      <div className={`${cleanStyles.card} ${styles.infoSection}`}>
+        <h3 className={cleanStyles.subheading}>Test Payment Information</h3>
+        <ul className={styles.list}>
           <li>Visa: 4111 1111 1111 1111</li>
           <li>MasterCard: 5555 5555 5555 4444</li>
           <li>American Express: 3714 496353 98431</li>
         </ul>
-        <p>Use any future expiration date and any CVV.</p>
+        <p className={styles.note}>Use any future expiration date and any CVV for testing.</p>
       </div>
     </div>
   );

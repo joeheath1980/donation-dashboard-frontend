@@ -1,155 +1,95 @@
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: 'Arial', sans-serif;
-}
+/* SearchCharities.module.css */
 
 .searchSection {
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.header {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.introText {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
 }
 
 .searchForm {
   display: flex;
   gap: 1rem;
+  margin-top: 1.5rem;
 }
 
-.input {
-  flex-grow: 1;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  transition: border-color 0.3s ease;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #4CAF50;
-}
-
-.searchButton {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.searchButton:hover {
-  background-color: #45a049;
-}
-
-.loading, .error {
-  text-align: center;
-  font-size: 1.1rem;
-  margin: 2rem 0;
-}
-
-.error {
-  color: #d32f2f;
+@media (max-width: 640px) {
+  .searchForm {
+    flex-direction: column;
+  }
 }
 
 .resultsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
-}
-
-.card {
-  background-color: white;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 2rem;
 }
 
 .charityName {
-  font-size: 1.3rem;
-  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
   margin-bottom: 1rem;
+  color: var(--text-primary);
+  line-height: 1.4;
 }
 
 .charityDetails {
-  color: #666;
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.charityDetails strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  min-width: 4rem;
 }
 
 .actionButtons {
   display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.viewDetailsButton {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.viewDetailsButton:hover {
-  background-color: #bbdefb;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .guidanceBox {
-  background-color: #f1f8e9;
-  border-radius: 10px;
-  padding: 1.5rem;
   margin-top: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-lg);
+  background-color: var(--background-light);
+  border-left: 4px solid var(--primary-color);
 }
 
 .guidanceBox h3 {
-  color: #33691e;
+  color: var(--text-primary);
   margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .guidanceBox ul {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 
 .guidanceBox li {
-  margin-bottom: 0.5rem;
-  color: #33691e;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.guidanceBox li strong {
-  color: #1b5e20;
+.guidanceBox li:last-child {
+  margin-bottom: 0;
+}
+
+.guidanceBox li::before {
+  content: "•";
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 1.2em;
 }

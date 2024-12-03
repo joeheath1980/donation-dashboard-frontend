@@ -1,9 +1,8 @@
-// src/components/Login.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from '../Login.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import logo from '../assets/logo.png';
 
 function Login() {
@@ -13,26 +12,11 @@ function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [accountType, setAccountType] = useState('user'); // 'user', 'business', or 'charity'
+  const [accountType, setAccountType] = useState('user');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Check for error message in URL after failed authentication
-    const params = new URLSearchParams(location.search);
-    const errorMessage = params.get('error');
-    if (errorMessage) {
-      setError(decodeURIComponent(errorMessage));
-    }
-
-    // Check for token in URL after successful social authentication
-    const token = params.get('token');
-    if (token) {
-      handleSocialLoginCallback(token);
-    }
-  }, [location]);
-
-  const handleSocialLoginCallback = async (token) => {
+  const handleSocialLoginCallback = useCallback(async (token) => {
     try {
       await socialLogin(token);
       navigate('/profile');
@@ -40,19 +24,31 @@ function Login() {
       console.error('Error handling social login callback:', err);
       setError('Failed to complete social login. Please try again.');
     }
-  };
+  }, [socialLogin, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const errorMessage = params.get('error');
+    if (errorMessage) {
+      setError(decodeURIComponent(errorMessage));
+    }
+
+    const token = params.get('token');
+    if (token) {
+      handleSocialLoginCallback(token);
+    }
+  }, [location, handleSocialLoginCallback]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Reset any previous errors
+    setError(null);
 
-    // Basic client-side validation
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
 
-    setLoading(true); // Set loading to true during authentication
+    setLoading(true);
 
     try {
       console.log('Attempting login with:', email, password, 'Account Type:', accountType);
@@ -74,7 +70,6 @@ function Login() {
         loginResult = await login(email, password);
         console.log('User login result:', loginResult);
 
-        // Check if the user is an admin (you might want to adjust this logic)
         if (loginResult && loginResult.isAdmin) {
           console.log('Admin user detected, navigating to /admin');
           navigate('/admin');
@@ -88,7 +83,7 @@ function Login() {
       console.error('Error response:', err.response);
       setError(err.response?.data?.message || 'Failed to log in. Please try again.');
     } finally {
-      setLoading(false); // Set loading to false after authentication attempt
+      setLoading(false);
     }
   };
 
@@ -99,12 +94,12 @@ function Login() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.loginContainer}>
+    <div className={`${styles.pageContainer} ${cleanStyles.container}`}>
+      <div className={`${styles.loginContainer} ${cleanStyles.card}`}>
         <img src={logo} alt="Logo" className={styles.logo} />
-        <h2>Login</h2>
+        <h2 className={cleanStyles.heading}>Login</h2>
         {error && (
-          <p className={styles.error} role="alert">
+          <p className={`${styles.error} ${cleanStyles.error}`} role="alert">
             {error}
           </p>
         )}
@@ -119,6 +114,7 @@ function Login() {
               placeholder="Email"
               required
               aria-describedby="emailError"
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -131,6 +127,7 @@ function Login() {
               placeholder="Password"
               required
               aria-describedby="passwordError"
+              className={cleanStyles.input}
             />
           </div>
           <div className={styles.formGroup}>
@@ -139,13 +136,14 @@ function Login() {
               id="accountType"
               value={accountType}
               onChange={(e) => setAccountType(e.target.value)}
+              className={cleanStyles.select}
             >
               <option value="user">User</option>
               <option value="business">Business</option>
               <option value="charity">Charity</option>
             </select>
           </div>
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} className={cleanStyles.button}>
             {loading ? 'Logging In...' : 'Login'}
           </button>
         </form>
@@ -155,19 +153,19 @@ function Login() {
             <h3>Or login with:</h3>
             <button
               onClick={() => handleSocialLogin('google')}
-              className={`${styles.socialButton} ${styles.google}`}
+              className={`${styles.socialButton} ${styles.google} ${cleanStyles.button}`}
             >
               Google
             </button>
             <button
               onClick={() => handleSocialLogin('microsoft')}
-              className={`${styles.socialButton} ${styles.microsoft}`}
+              className={`${styles.socialButton} ${styles.microsoft} ${cleanStyles.button}`}
             >
               Microsoft
             </button>
             <button
               onClick={() => handleSocialLogin('apple')}
-              className={`${styles.socialButton} ${styles.apple}`}
+              className={`${styles.socialButton} ${styles.apple} ${cleanStyles.button}`}
               disabled
               title="Apple login is coming soon"
             >
@@ -175,7 +173,7 @@ function Login() {
             </button>
             <button
               onClick={() => handleSocialLogin('facebook')}
-              className={`${styles.socialButton} ${styles.facebook}`}
+              className={`${styles.socialButton} ${styles.facebook} ${cleanStyles.button}`}
               disabled
               title="Facebook login is coming soon"
             >
@@ -185,10 +183,10 @@ function Login() {
         )}
 
         <p className={styles.toggleText}>
-          <Link to="/signup">Need an account? Sign Up</Link>
+          <Link to="/signup" className={cleanStyles.link}>Need an account? Sign Up</Link>
         </p>
         <p className={styles.organizationSignup}>
-          <Link to="/organization-signup">Are you a charity or organization? Sign up here</Link>
+          <Link to="/organization-signup" className={cleanStyles.link}>Are you a charity or organization? Sign up here</Link>
         </p>
       </div>
     </div>

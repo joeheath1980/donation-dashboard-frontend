@@ -12,7 +12,8 @@ function VolunteerActivitiesComponent({ userId }) {
     organization: '',
     hours: '',
     date: '',
-    description: ''
+    description: '',
+    charityType: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
@@ -68,6 +69,7 @@ function VolunteerActivitiesComponent({ userId }) {
     formData.append('hours', newActivity.hours);
     formData.append('date', newActivity.date);
     formData.append('description', newActivity.description);
+    formData.append('charityType', newActivity.charityType);
     formData.append('evidence', selectedFile);
 
     try {
@@ -78,7 +80,7 @@ function VolunteerActivitiesComponent({ userId }) {
         },
       });
       setActivities([...activities, response.data]);
-      setNewActivity({ organization: '', hours: '', date: '', description: '' });
+      setNewActivity({ organization: '', hours: '', date: '', description: '', charityType: '' });
       setSelectedFile(null);
       setError('');
       setIsAddActivityModalOpen(false);
@@ -124,6 +126,27 @@ function VolunteerActivitiesComponent({ userId }) {
               onChange={handleChange} 
               required 
             />
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Charity Type</label>
+            <select
+              name="charityType"
+              value={newActivity.charityType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a type</option>
+              <option value="Education">Education</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Environment">Environment</option>
+              <option value="Animal Welfare">Animal Welfare</option>
+              <option value="Poverty Relief">Poverty Relief</option>
+              <option value="Arts & Culture">Arts & Culture</option>
+              <option value="Community Development">Community Development</option>
+              <option value="Human Rights">Human Rights</option>
+              <option value="Disaster Relief">Disaster Relief</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
           <div className={modalStyles.formGroup}>
             <label>Hours</label>
@@ -215,6 +238,7 @@ function VolunteerActivitiesComponent({ userId }) {
                 <div className={styles.cardContent}>
                   <p><strong>Hours:</strong> {activity.hours}</p>
                   <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
+                  <p><strong>Charity Type:</strong> {activity.charityType || 'Not specified'}</p>
                   <p><strong>Description:</strong> {activity.description}</p>
                   {activity.evidence && (
                     <a 

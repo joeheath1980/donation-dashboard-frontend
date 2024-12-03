@@ -1,42 +1,42 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../About.module.css';
-import logo from '../assets/logo.png';
+import cleanStyles from './CleanDesign.module.css';
+import { AboutIcons } from './AboutIcons';
 
 const About = () => {
   return (
-    <div className={styles.aboutContainer}>
-      <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
-      <h1 className={styles.heading}>About Do-Nation</h1>
+    <div className={`${styles.aboutContainer} ${cleanStyles.container}`}>
+      <h1 className={`${styles.heading} ${cleanStyles.heading}`}>About</h1>
       <div className={styles.separator}></div>
       
       <div className={styles.contentColumns}>
-        <div className={styles.mainContent}>
+        <div className={`${styles.mainContent} ${cleanStyles.card}`}>
           <p>
-            At Do-Nation, we believe in the power of <strong>generosity</strong> to transform lives and communities. Our platform is designed to nurture the <em>generous spirit</em> within each of us, making it easier than ever to contribute to causes that matter.
+            At Do-Nation, we're redefining giving. Generosity isn't just an act; it's a joy-filled journey that fuels personal growth and inspires a better world.
           </p>
           
           <p>
-            We understand that giving is not just about financial contributions—it's about creating a <strong>lasting impact</strong> and fostering a sense of connection with the world around us. That's why we've created a space where individuals can explore, engage, and contribute in ways that resonate with their personal values and goals.
+            Our platform turns philanthropy into a win-win. With AI-powered insights, goal tracking, and gamification elements like badges and impact scores, giving becomes as rewarding for you as it is meaningful for others. Share your achievements, connect with like-minded givers, and spark a movement that transforms generosity into a collective force for good.
           </p>
           
           <p>
-            Do-Nation is more than just a donation platform; it's a community of like-minded individuals committed to making a difference. We provide tools and insights that help you track your giving journey, understand your impact, and discover new opportunities to help.
-          </p>
-          
-          <p>
-            Our mission is to empower you to give thoughtfully and effectively, whether it's through regular donations, one-time contributions, or volunteering your time and skills. We believe that every act of kindness, no matter how small, has the potential to create ripples of positive change.
+            Do-Nation makes giving seamless, personal, and empowering—amplifying the impact on individuals, charities, and communities. With every act of kindness, you're not just donating; you're leading the charge for a more generous nation.
           </p>
         </div>
         
         <div className={styles.sidebar}>
-          <div className={styles.quoteBox}>
+          <div className={`${styles.quoteBox} ${cleanStyles.card}`}>
+            <span className={cleanStyles.icon}><AboutIcons.Quote /></span>
             <blockquote>"Life's most persistent and urgent question is, 'What are you doing for others?'"</blockquote>
             <cite>- Martin Luther King Jr.</cite>
           </div>
           
-          <div className={styles.impactStats}>
-            <h3>Our Impact</h3>
+          <div className={`${styles.impactStats} ${cleanStyles.card}`}>
+            <div className={cleanStyles.cardHeader}>
+              <span className={cleanStyles.icon}><AboutIcons.Impact /></span>
+              <h3 className={cleanStyles.cardTitle}>Our Impact</h3>
+            </div>
             <ul>
               <li>10,000+ Donors</li>
               <li>$1M+ Raised</li>
@@ -46,13 +46,17 @@ const About = () => {
         </div>
       </div>
       
-      <div className={styles.highlightBox}>
+      <div className={`${styles.highlightBox} ${cleanStyles.card}`}>
+        <span className={cleanStyles.icon}><AboutIcons.Highlight /></span>
         <p>
           <strong>Welcome to Do-Nation</strong> — where your generosity meets opportunity, and together, we create a world of positive change.
         </p>
       </div>
       
-      <Link to="/signup" className={styles.ctaButton}>Join Us Today</Link>
+      <Link to="/signup" className={`${styles.ctaButton} ${cleanStyles.button}`}>
+        <span className={cleanStyles.icon}><AboutIcons.Join /></span>
+        Join Us Today
+      </Link>
     </div>
   );
 };

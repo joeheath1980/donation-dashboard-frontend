@@ -1,5 +1,12 @@
 .container {
   margin-bottom: 40px;
+  position: relative;
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  isolation: isolate;
 }
 
 .headerContainer {
@@ -7,44 +14,122 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  position: relative;
+  z-index: 3;
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 3;
+}
+
+.title {
   font-size: 24px;
   font-weight: bold;
   color: #2d8f7b;
   display: flex;
   align-items: center;
+  margin: 0;
 }
 
-.toggleButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: #5ecfb6;
-  transition: color 0.3s ease, transform 0.3s ease;
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  z-index: 3;
 }
 
-.toggleButton:hover {
+.periodSelect {
+  padding: 8px 12px;
+  border: 2px solid #5ecfb6;
+  border-radius: 6px;
+  background-color: white;
   color: #2d8f7b;
-  transform: translateY(2px);
-}
-
-.button {
-  display: inline-block;
-  background: linear-gradient(to right, #5ecfb6, #2d8f7b);
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 14px;
-  transition: background 0.3s ease;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  position: relative;
+  z-index: 3;
 }
 
-.button:hover {
-  background: linear-gradient(to right, #2d8f7b, #5ecfb6);
+.periodSelect:hover {
+  border-color: #2d8f7b;
+}
+
+.periodSelect:focus {
+  border-color: #2d8f7b;
+  box-shadow: 0 0 0 2px rgba(45, 143, 123, 0.1);
+}
+
+.chartContainer {
+  position: relative;
+  height: 400px;
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  isolation: isolate;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+  justify-content: center;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(94, 207, 182, 0.2);
+  position: relative;
+  z-index: 2;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #2d8f7b;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: white;
+  border: 1px solid transparent;
+  min-width: 150px;
+  position: relative;
+  z-index: 2;
+}
+
+.legendItem:hover {
+  background-color: rgba(94, 207, 182, 0.1);
+  border-color: rgba(94, 207, 182, 0.3);
+  transform: translateY(-1px);
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.legendDot[style*="rotate"] {
+  border-radius: 2px;
+  transform-origin: center;
 }
 
 .textCenter {
@@ -56,19 +141,28 @@
 
 /* Tooltip styles */
 .tooltipContent {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: white;
   border: 1px solid #5ecfb6;
   border-radius: 8px;
   padding: 12px 16px;
   font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  min-width: 250px;
+  max-width: 320px;
+  position: relative;
+  z-index: 1000;
 }
 
 .tooltipHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 16px;
   font-weight: bold;
   color: #2d8f7b;
   margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(94, 207, 182, 0.2);
 }
 
 .tooltipDate {
@@ -76,8 +170,23 @@
   color: #5ecfb6;
 }
 
+.tooltipBadge {
+  background-color: #ff7f50;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
 .tooltipBody {
   font-size: 14px;
+}
+
+.tooltipDivider {
+  margin: 8px 0;
+  border: none;
+  border-top: 1px dashed rgba(94, 207, 182, 0.2);
 }
 
 .tooltipRow {
@@ -120,7 +229,7 @@
 }
 
 :global(.recharts-default-tooltip) {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: white !important;
   border: 1px solid #5ecfb6 !important;
 }
 
@@ -143,4 +252,40 @@
 
 :global(.recharts-active-dot) {
   fill: #2d8f7b;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .title {
+    text-align: center;
+  }
+
+  .controls {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .periodSelect {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .legend {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .legendItem {
+    width: 100%;
+  }
+
+  .tooltipContent {
+    max-width: 280px;
+  }
 }

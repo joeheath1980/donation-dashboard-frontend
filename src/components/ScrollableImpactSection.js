@@ -7,6 +7,7 @@ import TierProgressModal from './TierProgressModal';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaStar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from './ScrollableImpactSection.module.css';
+import cleanStyles from './CleanDesign.module.css';
 
 const allBadges = [
   { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', description: 'Impact in the health sector' },
