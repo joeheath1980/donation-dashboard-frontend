@@ -201,6 +201,8 @@
   padding: 30px;
   margin-bottom: 30px;
   box-shadow: var(--shadow-sm);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .validationButton {
@@ -224,8 +226,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-top: 30px;
 }
 
 /* Spacing */
@@ -246,6 +249,7 @@
 @media (max-width: 1024px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
 
@@ -272,7 +276,7 @@
   }
 
   .card {
-    padding: 10px;
+    padding: 20px;
   }
 
   .cardTitle {

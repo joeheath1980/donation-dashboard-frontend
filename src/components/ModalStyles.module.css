@@ -72,21 +72,41 @@
 .formGroup input[type="text"],
 .formGroup input[type="number"],
 .formGroup input[type="date"],
-.formGroup select {
+.formGroup input[type="url"],
+.formGroup select,
+.formGroup textarea {
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: white;
 }
 
 .formGroup input[type="text"]:focus,
 .formGroup input[type="number"]:focus,
 .formGroup input[type="date"]:focus,
-.formGroup select:focus {
+.formGroup input[type="url"]:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(45, 143, 123, 0.1);
+}
+
+.formGroup input[type="url"] {
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.formGroup input[type="url"]::placeholder {
+  color: #aaa;
+  letter-spacing: normal;
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
 .formGroup input[type="file"] {
@@ -121,12 +141,17 @@
   transition: all 0.3s ease;
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .confirmButton {
   background-color: var(--primary-color);
   color: white;
 }
 
-.confirmButton:hover {
+.confirmButton:hover:not(:disabled) {
   background-color: var(--primary-dark);
 }
 
@@ -138,6 +163,23 @@
 .cancelButton:hover {
   background-color: #e0e0e0;
   color: #333;
+}
+
+.fieldError {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modalHeader {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px;
+  padding-right: 40px;
 }
 
 @media (max-width: 600px) {
@@ -153,5 +195,14 @@
 
   .button {
     width: 100%;
+  }
+
+  .formGroup input[type="text"],
+  .formGroup input[type="number"],
+  .formGroup input[type="date"],
+  .formGroup input[type="url"],
+  .formGroup select,
+  .formGroup textarea {
+    font-size: 16px; /* Prevent zoom on mobile */
   }
 }

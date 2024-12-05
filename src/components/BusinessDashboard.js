@@ -1,17 +1,14 @@
-// src/components/BusinessDashboard.js
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import styles from './BusinessDashboard.module.css';
+import cleanStyles from './CleanDesign.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function BusinessDashboard() {
   const { getAuthHeaders } = useAuth();
   
-  // Initialize businessData with default values to prevent undefined properties
   const [businessData, setBusinessData] = useState({
     name: '',
     email: '',
@@ -19,11 +16,8 @@ function BusinessDashboard() {
     preferredCauses: []
   });
   
-  // State for loading and error handling for business data
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // State for fetched campaigns
   const [campaigns, setCampaigns] = useState([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [campaignsError, setCampaignsError] = useState(null);
@@ -32,13 +26,12 @@ function BusinessDashboard() {
     const fetchBusinessData = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/business/me`, { headers: getAuthHeaders() });
-        console.log('Fetched Business Data:', response.data); // Logging fetched data for debugging
         setBusinessData(response.data);
       } catch (err) {
         console.error('Error fetching business data:', err);
         setError('Failed to load business data. Please try again later.');
       } finally {
-        setLoading(false); // Set loading to false regardless of success or failure
+        setLoading(false);
       }
     };
 
@@ -49,20 +42,18 @@ function BusinessDashboard() {
     const fetchCampaigns = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/business/campaigns`, { headers: getAuthHeaders() });
-        console.log('Fetched Campaigns:', response.data); // Logging fetched campaigns for debugging
         setCampaigns(response.data);
       } catch (err) {
         console.error('Error fetching campaigns:', err);
         setCampaignsError('Failed to load campaigns. Please try again later.');
       } finally {
-        setCampaignsLoading(false); // Set loading to false regardless of success or failure
+        setCampaignsLoading(false);
       }
     };
 
     fetchCampaigns();
   }, [getAuthHeaders]);
 
-  // Dummy data can be removed if not needed. If it's placeholder data, consider fetching real data.
   const dummyData = {
     financialSummary: {
       totalMicroMatches: 1500,
@@ -126,117 +117,133 @@ function BusinessDashboard() {
   };
 
   if (loading || campaignsLoading) {
-    return <div>Loading...</div>;
+    return <div className={`${cleanStyles.container} ${cleanStyles.textCenter}`}>Loading...</div>;
   }
 
   if (error || campaignsError) {
     return (
-      <div className={styles.error}>
-        {error && <p>{error}</p>}
-        {campaignsError && <p>{campaignsError}</p>}
+      <div className={cleanStyles.container}>
+        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+          {error && <p className={cleanStyles.description}>{error}</p>}
+          {campaignsError && <p className={cleanStyles.description}>{campaignsError}</p>}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.dashboard}>
-      <h1>Welcome, {businessData.name}</h1>
-      
-      <section className={styles.overview}>
-        <h2>Business Overview</h2>
-        <p>Email: {businessData.email}</p>
-        <p>Description: {businessData.description}</p>
-        <p>
-          Preferred Causes: {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
-        </p>
-      </section>
+    <div className={cleanStyles.container}>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h1 className={cleanStyles.gradientTitle}>Welcome, {businessData.name}</h1>
+        
+        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+          <h2 className={cleanStyles.title}>Business Overview</h2>
+          <p className={cleanStyles.description}><strong>Email:</strong> {businessData.email}</p>
+          <p className={cleanStyles.description}><strong>Description:</strong> {businessData.description}</p>
+          <p className={cleanStyles.description}>
+            <strong>Preferred Causes:</strong> {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
+          </p>
+        </div>
 
-      <section className={styles.overallFinancialSummary}>
-        <h2>Overall Financial Summary</h2>
-        <p>Total Micro-Matches: ${dummyData.financialSummary.totalMicroMatches}</p>
-        <p>Monthly Average: ${dummyData.financialSummary.monthlyAverage}</p>
-        <p>Year-to-Date: ${dummyData.financialSummary.yearToDate}</p>
-      </section>
+        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+          <h2 className={cleanStyles.title}>Overall Financial Summary</h2>
+          <p className={cleanStyles.description}><strong>Total Micro-Matches:</strong> ${dummyData.financialSummary.totalMicroMatches}</p>
+          <p className={cleanStyles.description}><strong>Monthly Average:</strong> ${dummyData.financialSummary.monthlyAverage}</p>
+          <p className={cleanStyles.description}><strong>Year-to-Date:</strong> ${dummyData.financialSummary.yearToDate}</p>
+        </div>
 
-      <Link to="/create-business-campaign" className={styles.createCampaignLink}>Create New Campaign</Link>
+        <div className={`${cleanStyles.flexBetween} ${cleanStyles.mt-10}`}>
+          <Link 
+            to="/create-business-campaign" 
+            className={cleanStyles.button}
+            style={{
+              background: 'var(--primary-gradient)',
+              color: 'white',
+              border: 'none',
+              padding: '15px 30px',
+              textDecoration: 'none',
+              fontSize: '18px'
+            }}
+          >
+            Create New Campaign
+          </Link>
+        </div>
 
-      <div className={styles.columnsContainer}>
-        {['employee', 'customer', 'all'].map(category => (
-          <div key={category} className={styles.column}>
-            <h2>{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
-            
-            <section className={styles.financialSummary}>
-              <h3>Financial Summary</h3>
-              <p>Total Micro-Matches: ${dummyData[category].financialSummary.totalMicroMatches}</p>
-              <p>Monthly Average: ${dummyData[category].financialSummary.monthlyAverage}</p>
-              <p>Year-to-Date: ${dummyData[category].financialSummary.yearToDate}</p>
-            </section>
+        <div className={`${cleanStyles.grid} ${cleanStyles.mt-10}`}>
+          {['employee', 'customer', 'all'].map(category => (
+            <div key={category} className={cleanStyles.card}>
+              <h2 className={cleanStyles.title}>{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+              
+              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+                <h3 className={cleanStyles.title}>Financial Summary</h3>
+                <p className={cleanStyles.description}><strong>Total Micro-Matches:</strong> ${dummyData[category].financialSummary.totalMicroMatches}</p>
+                <p className={cleanStyles.description}><strong>Monthly Average:</strong> ${dummyData[category].financialSummary.monthlyAverage}</p>
+                <p className={cleanStyles.description}><strong>Year-to-Date:</strong> ${dummyData[category].financialSummary.yearToDate}</p>
+              </div>
 
-            <section className={styles.microMatches}>
-              <h3>Recent Micro-Matches</h3>
-              <ul>
-                {dummyData[category].microMatches.map(match => (
-                  <li key={match.id}>
-                    ${match.amount} to {match.charity} on {match.date}
-                  </li>
-                ))}
-              </ul>
-            </section>
+              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+                <h3 className={cleanStyles.title}>Recent Micro-Matches</h3>
+                <ul className={cleanStyles.description}>
+                  {dummyData[category].microMatches.map(match => (
+                    <li key={match.id} className={cleanStyles.mb-10}>
+                      ${match.amount} to {match.charity} on {match.date}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <section className={styles.pendingRequests}>
-              <h3>Pending Requests</h3>
-              <ul>
-                {dummyData[category].requests.map(request => (
-                  <li key={request.id}>
-                    {request.charity} - ${request.amount} on {request.date}
-                  </li>
-                ))}
-              </ul>
-            </section>
+              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+                <h3 className={cleanStyles.title}>Pending Requests</h3>
+                <ul className={cleanStyles.description}>
+                  {dummyData[category].requests.map(request => (
+                    <li key={request.id} className={cleanStyles.mb-10}>
+                      {request.charity} - ${request.amount} on {request.date}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <section className={styles.campaigns}>
-              <h3>Your Campaigns</h3>
-              <ul>
-                {dummyData[category].campaigns.map(campaign => (
-                  <li key={campaign.id}>
-                    <h4>{campaign.name}</h4>
-                    <p>Amount: ${campaign.amount}</p>
-                    <p>Start Date: {campaign.startDate}</p>
-                    <p>End Date: {campaign.endDate}</p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        ))}
+              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+                <h3 className={cleanStyles.title}>Your Campaigns</h3>
+                <ul className={cleanStyles.description}>
+                  {dummyData[category].campaigns.map(campaign => (
+                    <li key={campaign.id} className={cleanStyles.mb-10}>
+                      <h4 className={cleanStyles.highlight}>{campaign.name}</h4>
+                      <p><strong>Amount:</strong> ${campaign.amount}</p>
+                      <p><strong>Start Date:</strong> {campaign.startDate}</p>
+                      <p><strong>End Date:</strong> {campaign.endDate}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+          <h2 className={cleanStyles.title}>Your Created Campaigns</h2>
+          {campaigns.length === 0 ? (
+            <p className={cleanStyles.description}>
+              No campaigns found. <Link to="/create-business-campaign" className={cleanStyles.link}>Create your first campaign</Link>.
+            </p>
+          ) : (
+            <div className={cleanStyles.grid}>
+              {campaigns.map(campaign => (
+                <div key={campaign._id} className={cleanStyles.card}>
+                  <h3 className={cleanStyles.title}>{campaign.name}</h3>
+                  <p className={cleanStyles.description}><strong>Description:</strong> {campaign.description}</p>
+                  <p className={cleanStyles.description}><strong>Goal:</strong> ${campaign.goal.toFixed(2)}</p>
+                  <p className={cleanStyles.description}><strong>Current Amount:</strong> ${campaign.currentAmount.toFixed(2)}</p>
+                  <p className={cleanStyles.description}><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+                  <p className={cleanStyles.description}><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* New Container for Real Campaigns */}
-      <section className={styles.realCampaigns}>
-        <h2>Your Created Campaigns</h2>
-        {campaigns.length === 0 ? (
-          <p>No campaigns found. <Link to="/create-business-campaign">Create your first campaign</Link>.</p>
-        ) : (
-          <ul className={styles.campaignList}>
-            {campaigns.map(campaign => (
-              <li key={campaign._id} className={styles.campaignItem}>
-                <h3>{campaign.name}</h3>
-                <p><strong>Description:</strong> {campaign.description}</p>
-                <p><strong>Goal:</strong> ${campaign.goal.toFixed(2)}</p>
-                <p><strong>Current Amount:</strong> ${campaign.currentAmount.toFixed(2)}</p>
-                <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
-                <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
-                {/* Add more fields if necessary */}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
 }
 
 export default BusinessDashboard;
-
-
-

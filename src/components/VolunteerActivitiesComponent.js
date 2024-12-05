@@ -221,7 +221,15 @@ function VolunteerActivitiesComponent({ userId }) {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
+        <div className={styles.headerContainer}>
+          <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
+          <button 
+            onClick={() => setIsAddActivityModalOpen(true)} 
+            className={styles.createButton}
+          >
+            <FaPlus /> Add Activity
+          </button>
+        </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
@@ -266,13 +274,6 @@ function VolunteerActivitiesComponent({ userId }) {
         ) : (
           <p className={styles.textCenter}>No volunteer activities found.</p>
         )}
-
-        <button 
-          onClick={() => setIsAddActivityModalOpen(true)} 
-          className={styles.createButton}
-        >
-          <FaPlus /> Add Activity
-        </button>
       </div>
       {createPortal(modalContent, document.body)}
     </>

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaLink, FaTimes, FaClock } from 'react-icons/fa';
+import { FaSearch, FaLink, FaTimes, FaClock, FaPlus } from 'react-icons/fa';
 import styles from '../CharityDashboard.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import logo from '../assets/logo.png';
 
 function CharityDashboard() {
@@ -30,13 +31,13 @@ function CharityDashboard() {
       }
 
       try {
-        const response = await axios.get(`${API_URL}/api/charity/me`, {
+        const response = await axios.get(`${API_URL}/api/charities/me`, {
           headers: getAuthHeaders()
         });
         setCharityData(response.data);
 
         // Fetch linking status
-        const statusResponse = await axios.get(`${API_URL}/api/charity/linking-status`, {
+        const statusResponse = await axios.get(`${API_URL}/api/charities/linking-status`, {
           headers: getAuthHeaders()
         });
         setLinkingStatus(statusResponse.data.status);
@@ -112,13 +113,17 @@ function CharityDashboard() {
     const formData = new FormData();
     formData.append('evidence', evidenceFile);
     formData.append('charityABN', selectedCharity.ABN);
+    formData.append('linkingRequestDate', new Date().toISOString());
 
     try {
-      await axios.post(`${API_URL}/api/charity/link-request`, formData, {
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data',
-        },
+      const headers = {
+        ...getAuthHeaders(),
+        'Content-Type': 'multipart/form-data',
+      };
+      delete headers['Content-Type']; // Let axios set the correct boundary
+
+      await axios.post(`${API_URL}/api/charities/link-request`, formData, {
+        headers: headers
       });
 
       setLinkingStatus('pending');
@@ -142,16 +147,16 @@ function CharityDashboard() {
     ].filter(Boolean).join(', ');
 
     return (
-      <div key={charity.ABN} className={styles.charityCard}>
-        <div className={styles.charityInfo}>
-          <h3>{charity.Charity_Legal_Name}</h3>
-          <p className={styles.charityAddress}>{address}</p>
-          <p className={styles.charityAbn}>ABN: {charity.ABN}</p>
+      <div key={charity.ABN} className={cleanStyles.card}>
+        <div className={cleanStyles.cardContent}>
+          <h3 className={cleanStyles.cardTitle}>{charity.Charity_Legal_Name}</h3>
+          <p className={cleanStyles.description}>{address}</p>
+          <p className={cleanStyles.highlight}>ABN: {charity.ABN}</p>
         </div>
-        <div className={styles.charityActions}>
+        <div className={cleanStyles.cardActions}>
           {isPending ? (
             <button
-              className={`${styles.linkButton} ${styles.pending}`}
+              className={`${cleanStyles.button} ${cleanStyles.compact}`}
               disabled
               title="Linking request pending"
             >
@@ -160,7 +165,7 @@ function CharityDashboard() {
           ) : (
             <button
               onClick={() => handleLinkCharity(charity)}
-              className={styles.linkButton}
+              className={cleanStyles.iconButton}
               title="Link this charity"
             >
               <FaLink />
@@ -172,39 +177,39 @@ function CharityDashboard() {
   };
 
   if (error) {
-    return <div className={styles.error}>Error: {error}</div>;
+    return <div className={cleanStyles.container}><p className={cleanStyles.description}>{error}</p></div>;
   }
 
   if (!charityData) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <div className={cleanStyles.container}><p className={cleanStyles.description}>Loading...</p></div>;
   }
 
   return (
-    <div className={styles.dashboard}>
-      <header className={styles.header}>
+    <div className={cleanStyles.container}>
+      <header className={`${cleanStyles.flexBetween} ${cleanStyles.mb-10}`}>
         <img src={logo} alt="Logo" className={styles.logo} />
-        <h1>Charity Dashboard</h1>
-        <button onClick={handleLogout} className={styles.logoutButton}>Log Out</button>
+        <h1 className={cleanStyles.gradientTitle}>Charity Dashboard</h1>
+        <button onClick={handleLogout} className={cleanStyles.button}>Log Out</button>
       </header>
       
-      <div className={styles.charityInfo}>
-        <h2>Welcome, {charityData.charityName}</h2>
-        <p><strong>Email:</strong> {charityData.contactEmail}</p>
-        <p><strong>Category:</strong> {charityData.category}</p>
+      <div className={cleanStyles.card}>
+        <h2 className={cleanStyles.title}>Welcome, {charityData.charityName}</h2>
+        <p className={cleanStyles.description}><strong>Email:</strong> {charityData.contactEmail}</p>
+        <p className={cleanStyles.description}><strong>Category:</strong> {charityData.category}</p>
       </div>
 
-      <div className={styles.searchSection}>
-        <h3>Link Your Charity</h3>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h3 className={cleanStyles.title}>Link Your Charity</h3>
         {linkingStatus === 'pending' && linkedCharity ? (
-          <div className={styles.pendingLinkContainer}>
-            <p>Your linking request is being reviewed</p>
+          <div>
+            <p className={cleanStyles.description}>Your linking request is being reviewed</p>
             {renderCharityCard(linkedCharity, true)}
           </div>
         ) : !charityData.linkedABN && (
           <>
-            <p>Search for your charity in the Australian Charities database to link it to your dashboard.</p>
-            <div className={styles.searchContainer}>
-              <div className={styles.searchInputWrapper}>
+            <p className={cleanStyles.description}>Search for your charity in the Australian Charities database to link it to your dashboard.</p>
+            <div className={cleanStyles.flexBetween}>
+              <div className={`${styles.searchInputWrapper} ${cleanStyles.mt-10}`}>
                 <FaSearch className={styles.searchIcon} />
                 <input
                   type="text"
@@ -215,68 +220,72 @@ function CharityDashboard() {
                 />
               </div>
               {isSearching && (
-                <div className={styles.searchingMessage}>Searching...</div>
+                <div className={cleanStyles.description}>Searching...</div>
               )}
             </div>
 
-            <div className={styles.resultsContainer}>
-              {searchResults.length > 0 && (
-                <div className={styles.charityGrid}>
-                  {searchResults.map(charity => renderCharityCard(charity))}
-                </div>
-              )}
-            </div>
+            {searchResults.length > 0 && (
+              <div className={`${cleanStyles.grid} ${cleanStyles.mt-10}`}>
+                {searchResults.map(charity => renderCharityCard(charity))}
+              </div>
+            )}
           </>
         )}
       </div>
 
       {linkingStatus === 'approved' && (
-        <div className={`${styles.linkingStatus} ${styles.approved}`}>
-          <h3>Public Page Status: Approved</h3>
+        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+          <h3 className={cleanStyles.title}>Public Page Status: Approved</h3>
           <button 
             onClick={() => navigate(`/charity/${charityData.linkedABN}/edit`)}
-            className={styles.editPublicPageButton}
+            className={cleanStyles.button}
           >
             Edit Public Page
           </button>
         </div>
       )}
       
-      <div className={styles.missionStatement}>
-        <h3>Mission Statement</h3>
-        <p>{charityData.missionStatement}</p>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h3 className={cleanStyles.title}>Mission Statement</h3>
+        <p className={cleanStyles.description}>{charityData.missionStatement}</p>
       </div>
       
-      <div className={styles.description}>
-        <h3>About Us</h3>
-        <p>{charityData.description}</p>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h3 className={cleanStyles.title}>About Us</h3>
+        <p className={cleanStyles.description}>{charityData.description}</p>
       </div>
       
-      <div className={styles.donationStats}>
-        <h3>Donation Statistics</h3>
-        <p>Total Donations: $X,XXX</p>
-        <p>Number of Donors: XXX</p>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h3 className={cleanStyles.title}>Donation Statistics</h3>
+        <p className={cleanStyles.description}>Total Donations: $X,XXX</p>
+        <p className={cleanStyles.description}>Number of Donors: XXX</p>
       </div>
       
-      <div className={styles.campaigns}>
-        <h3>Current Campaigns</h3>
-        <ul>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <h3 className={cleanStyles.title}>Current Campaigns</h3>
+        <ul className={cleanStyles.description}>
           <li>Campaign 1</li>
           <li>Campaign 2</li>
         </ul>
       </div>
       
-      <button className={styles.createCampaign}>Create New Campaign</button>
+      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
+        <div className={cleanStyles.textCenter}>
+          <button className={`${cleanStyles.button}`} style={{ background: 'var(--primary-gradient)', color: 'white', border: 'none', padding: '15px 30px', fontSize: '18px' }}>
+            <FaPlus style={{ marginRight: '8px' }} /> Create New Campaign
+          </button>
+        </div>
+      </div>
 
       {showLinkModal && (
         <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <button onClick={() => setShowLinkModal(false)} className={styles.closeModal}>
+          <div className={cleanStyles.card}>
+            <button onClick={() => setShowLinkModal(false)} className={cleanStyles.iconButton}>
               <FaTimes />
             </button>
-            <h2>Link Your Charity</h2>
-            <p>Please provide evidence that you represent {selectedCharity?.Charity_Legal_Name}</p>
-            <div className={styles.uploadSection}>
+            <h2 className={cleanStyles.title}>Link Your Charity</h2>
+            <p className={cleanStyles.description}>Please provide evidence that you represent {selectedCharity?.Charity_Legal_Name}</p>
+            <div className={`${cleanStyles.flexColumn} ${cleanStyles.mt-10}`}>
               <input
                 type="file"
                 onChange={handleFileChange}
@@ -285,7 +294,7 @@ function CharityDashboard() {
               />
               <button
                 onClick={handleSubmitEvidence}
-                className={styles.submitButton}
+                className={`${cleanStyles.button} ${cleanStyles.mt-10}`}
                 disabled={!evidenceFile}
               >
                 Submit Evidence

@@ -4,10 +4,10 @@ import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Max points for each component
+// Max points for each component - More balanced distribution
 const MAX_DONATION_SCORE = 40;
-const MAX_VOLUNTEER_SCORE = 30;
-const MAX_FUNDRAISING_SCORE = 20;
+const MAX_VOLUNTEER_SCORE = 25; // Reduced from 30
+const MAX_FUNDRAISING_SCORE = 25; // Increased from 20
 
 // Donation Score Calculation (Max 40 points)
 const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampaigns = []) => {
@@ -59,31 +59,31 @@ const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampa
   return Math.round(donationScore);
 };
 
-// Volunteer Score Calculation (Max 30 points)
+// Volunteer Score Calculation (Max 25 points) - Adjusted scoring
 const calculateVolunteerScore = (volunteeringActivities) => {
   const totalVolunteerHours = volunteeringActivities.reduce((sum, v) => sum + (v.hours || 0), 0);
 
   let volunteerScore = 0;
   let remainingHours = totalVolunteerHours;
 
-  // First 50 Hours: 0.6 points per hour
-  const firstTierHours = Math.min(remainingHours, 50);
-  volunteerScore += firstTierHours * 0.6;
+  // First 40 Hours: 0.5 points per hour (max 20 points)
+  const firstTierHours = Math.min(remainingHours, 40);
+  volunteerScore += firstTierHours * 0.5;
   remainingHours -= firstTierHours;
 
-  // Next 150 Hours: 0.4 points per hour
+  // Next 80 Hours: 0.3 points per hour
   if (remainingHours > 0) {
-    const secondTierHours = Math.min(remainingHours, 150);
-    volunteerScore += secondTierHours * 0.4;
+    const secondTierHours = Math.min(remainingHours, 80);
+    volunteerScore += secondTierHours * 0.3;
     remainingHours -= secondTierHours;
   }
 
-  // Above 200 Hours: 0.2 points per hour
+  // Above 120 Hours: 0.1 points per hour
   if (remainingHours > 0) {
-    volunteerScore += remainingHours * 0.2;
+    volunteerScore += remainingHours * 0.1;
   }
 
-  // Long-Term Commitment Bonus
+  // Long-Term Commitment Bonus (reduced)
   let longTermBonus = 0;
   let earliestStartDate = new Date();
   let latestEndDate = new Date(0);
@@ -98,9 +98,9 @@ const calculateVolunteerScore = (volunteeringActivities) => {
   const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + (latestEndDate.getMonth() - earliestStartDate.getMonth());
 
   if (durationInMonths >= 12) {
-    longTermBonus = 5;
+    longTermBonus = 3; // Reduced from 5
   } else if (durationInMonths >= 6) {
-    longTermBonus = 2.5;
+    longTermBonus = 1.5; // Reduced from 2.5
   }
 
   volunteerScore += longTermBonus;
@@ -111,12 +111,10 @@ const calculateVolunteerScore = (volunteeringActivities) => {
   return Math.round(volunteerScore);
 };
 
-// Fundraising Score Calculation (Max 20 points)
+// Fundraising Score Calculation (Max 25 points) - Adjusted scoring
 const calculateFundraisingScore = (fundraisingCampaigns) => {
-  // Only consider active campaigns
-  const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status !== 'archived');
-  
-  const totalFundsRaised = activeCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
+  // Consider both active and archived campaigns
+  const totalFundsRaised = fundraisingCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
 
   let fundraisingScore = 0;
   let remainingAmount = totalFundsRaised;
@@ -126,24 +124,24 @@ const calculateFundraisingScore = (fundraisingCampaigns) => {
   fundraisingScore += firstTierAmount / 100;
   remainingAmount -= firstTierAmount;
 
-  // Next $8,000: 1 point per $200 raised => 40 points
+  // Next $6,000: 1 point per $300 raised
   if (remainingAmount > 0) {
-    const secondTierAmount = Math.min(remainingAmount, 8000);
-    fundraisingScore += secondTierAmount / 200;
+    const secondTierAmount = Math.min(remainingAmount, 6000);
+    fundraisingScore += secondTierAmount / 300;
     remainingAmount -= secondTierAmount;
   }
 
-  // Above $10,000: 1 point per $500 raised => 10 points
+  // Above $8,000: 1 point per $600 raised
   if (remainingAmount > 0) {
-    fundraisingScore += remainingAmount / 500;
+    fundraisingScore += remainingAmount / 600;
   }
 
-  // Fundraising Activity Bonus
-  const totalEventsOrganized = activeCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
-  const totalOnlineCampaignsInitiated = activeCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
+  // Fundraising Activity Bonus (adjusted)
+  const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
+  const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
 
-  fundraisingScore += totalEventsOrganized * 2; // 2 points per event
-  fundraisingScore += totalOnlineCampaignsInitiated * 1; // 1 point per online campaign
+  fundraisingScore += totalEventsOrganized * 1.5; // Reduced from 2 points per event
+  fundraisingScore += totalOnlineCampaignsInitiated * 0.75; // Reduced from 1 point per campaign
 
   // Cap at MAX_FUNDRAISING_SCORE
   fundraisingScore = Math.min(fundraisingScore, MAX_FUNDRAISING_SCORE);
@@ -165,18 +163,17 @@ export const calculateComplexImpactScore = (userData) => {
     fundraisingCampaigns = []
   } = userData;
 
-  // Separate archived campaigns
+  // Separate archived campaigns for donation score calculation
   const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
-  const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status !== 'archived');
 
   const donationScore = calculateDonationScore(regularDonations, oneOffDonations, archivedCampaigns);
   const volunteerScore = calculateVolunteerScore(volunteeringActivities);
-  const fundraisingScore = calculateFundraisingScore(activeCampaigns);
+  const fundraisingScore = calculateFundraisingScore(fundraisingCampaigns);
 
   const totalScore = donationScore + volunteerScore + fundraisingScore;
 
-  // Ensure total score does not exceed 100
-  const finalTotalScore = Math.min(Math.round(totalScore), 100);
+  // Ensure total score does not exceed 90 (leaving room for special achievements)
+  const finalTotalScore = Math.min(Math.round(totalScore), 90);
 
   return {
     totalScore: finalTotalScore,

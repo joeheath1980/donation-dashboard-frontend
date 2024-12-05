@@ -21,9 +21,11 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     goalAmount: '',
     startDate: '',
     endDate: '',
-    justGivingLink: ''
+    campaignUrl: '',
+    charityType: ''
   });
   const [error, setError] = useState('');
+  const [urlError, setUrlError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [updatingCampaign, setUpdatingCampaign] = useState(null);
   const [tempRaisedAmounts, setTempRaisedAmounts] = useState({});
@@ -34,13 +36,44 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     }
   }, [isAuthenticated, fetchImpactData]);
 
-  const handleChange = (e) => {
-    setNewCampaign({ ...newCampaign, [e.target.name]: e.target.value });
+  const formatUrl = (url) => {
+    if (!url) return '';
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    return url;
   };
 
-  const validateJustGivingLink = (link) => {
-    if (!link) return true;
-    return link.startsWith('https://www.justgiving.com/');
+  const validateUrl = (url) => {
+    if (!url) return false;
+    try {
+      // Allow URLs that start with www.
+      const formattedUrl = formatUrl(url);
+      new URL(formattedUrl);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewCampaign({ ...newCampaign, [name]: value });
+    
+    // Clear general error when user types
+    setError('');
+    
+    // Validate URL as user types
+    if (name === 'campaignUrl') {
+      if (!value) {
+        setUrlError('Campaign URL is required');
+      } else if (!validateUrl(value)) {
+        setUrlError('Please enter a valid URL (e.g., www.example.com)');
+      } else {
+        setUrlError('');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -50,16 +83,23 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       return;
     }
 
-    if (newCampaign.justGivingLink && !validateJustGivingLink(newCampaign.justGivingLink)) {
-      setError('JustGiving link must start with https://www.justgiving.com/');
+    // Format and validate the URL
+    const formattedUrl = formatUrl(newCampaign.campaignUrl);
+    if (!validateUrl(newCampaign.campaignUrl)) {
+      setUrlError('Please provide a valid URL (e.g., www.example.com)');
       return;
     }
+
+    const campaignData = {
+      ...newCampaign,
+      campaignUrl: formattedUrl
+    };
 
     const headers = getAuthHeaders();
     try {
       await axios.post(
         'http://localhost:3002/api/fundraisingCampaigns',
-        newCampaign,
+        campaignData,
         {
           headers: {
             ...headers,
@@ -73,9 +113,11 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         goalAmount: '',
         startDate: '',
         endDate: '',
-        justGivingLink: ''
+        campaignUrl: '',
+        charityType: ''
       });
       setError('');
+      setUrlError('');
       setIsCreateModalOpen(false);
       if (isAuthenticated) {
         fetchImpactData();
@@ -133,6 +175,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         date: new Date().toISOString(),
         amount: campaign.raisedAmount || campaign.goalAmount,
         subject: `Completed fundraising campaign: ${campaign.description}`,
+        charityType: campaign.charityType
       };
       onCompleteCampaign(completedCampaign);
 
@@ -196,7 +239,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   };
 
   const activeCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'active');
-  const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
+  const pastCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
 
   if (!isAuthenticated) {
     return <div className={styles.container}>Please log in to view and manage fundraising campaigns.</div>;
@@ -234,6 +277,27 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
             ></textarea>
           </div>
           <div className={modalStyles.formGroup}>
+            <label>Charity Type</label>
+            <select
+              name="charityType"
+              value={newCampaign.charityType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a type</option>
+              <option value="Education">Education</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Environment">Environment</option>
+              <option value="Animal Welfare">Animal Welfare</option>
+              <option value="Poverty Relief">Poverty Relief</option>
+              <option value="Arts & Culture">Arts & Culture</option>
+              <option value="Community Development">Community Development</option>
+              <option value="Human Rights">Human Rights</option>
+              <option value="Disaster Relief">Disaster Relief</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className={modalStyles.formGroup}>
             <label>Goal Amount</label>
             <input
               type="number"
@@ -264,14 +328,16 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
             />
           </div>
           <div className={modalStyles.formGroup}>
-            <label>JustGiving Link (Optional)</label>
+            <label>Campaign URL (Required)</label>
             <input
-              type="url"
-              name="justGivingLink"
-              value={newCampaign.justGivingLink}
+              type="text"
+              name="campaignUrl"
+              value={newCampaign.campaignUrl}
               onChange={handleChange}
-              placeholder="https://www.justgiving.com/..."
+              placeholder="www.example.com"
+              required
             />
+            {urlError && <div className={modalStyles.fieldError}>{urlError}</div>}
           </div>
           <div className={modalStyles.buttonGroup}>
             <button
@@ -281,7 +347,11 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
             >
               Cancel
             </button>
-            <button type="submit" className={`${modalStyles.button} ${modalStyles.confirmButton}`}>
+            <button 
+              type="submit" 
+              className={`${modalStyles.button} ${modalStyles.confirmButton}`}
+              disabled={!!urlError}
+            >
               Create Campaign
             </button>
           </div>
@@ -293,7 +363,12 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Fundraising Campaigns</h2>
+        <div className={styles.headerContainer}>
+          <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Fundraising Campaigns</h2>
+          <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
+            <FaPlus /> Create Campaign
+          </button>
+        </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
@@ -307,6 +382,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
                 <div className={styles.cardContent}>
                   <p>{campaign.description}</p>
                   <p><strong>Goal:</strong> ${campaign.goalAmount}</p>
+                  <p><strong>Charity Type:</strong> {campaign.charityType || 'Not specified'}</p>
                   <div className={styles.raisedAmount}>
                     <strong>Raised:</strong>
                     {updatingCampaign === campaign._id ? (
@@ -336,20 +412,19 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
                   <div className={styles.progressBar}>
                     <div 
                       className={styles.progressFill} 
-                      style={{width: `${(campaign.raisedAmount / campaign.goalAmount) * 100}%`}}
+                      style={{width: `${Math.min((campaign.raisedAmount / campaign.goalAmount) * 100, 100)}%`}}
                     ></div>
                   </div>
                   <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
                   <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
-                  <p><strong>Status:</strong> {campaign.status}</p>
-                  {campaign.justGivingLink && (
+                  {campaign.campaignUrl && (
                     <a 
-                      href={campaign.justGivingLink}
+                      href={campaign.campaignUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.justGivingLink}
+                      className={styles.campaignLink}
                     >
-                      <FaLink /> View on JustGiving
+                      <FaLink /> View Campaign Page
                     </a>
                   )}
                   <button onClick={() => handleCompleteCampaign(campaign)} className={styles.tealButton}>
@@ -363,25 +438,26 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
           )}
         </div>
 
-        {archivedCampaigns.length > 0 && (
+        {pastCampaigns.length > 0 && (
           <>
-            <h3 className={styles.sectionHeader}>Archived Campaigns</h3>
+            <h3 className={styles.sectionHeader}>Past Campaigns</h3>
             <div className={styles.campaignsGrid}>
-              {archivedCampaigns.map((campaign) => (
+              {pastCampaigns.map((campaign) => (
                 <div key={campaign._id} className={styles.archivedCard}>
                   <div className={styles.cardContent}>
                     <h3 className={styles.cardTitle}>{campaign.title}</h3>
                     <div className={styles.archivedInfo}>
                       <span><FaDollarSign /> Raised: ${campaign.raisedAmount || 0}</span>
                       <span><FaCalendar /> Completed: {new Date(campaign.completedDate).toLocaleDateString()}</span>
-                      {campaign.justGivingLink && (
+                      <span>Type: {campaign.charityType || 'Not specified'}</span>
+                      {campaign.campaignUrl && (
                         <a 
-                          href={campaign.justGivingLink}
+                          href={campaign.campaignUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={styles.justGivingLink}
+                          className={styles.campaignLink}
                         >
-                          <FaLink /> View on JustGiving
+                          <FaLink /> View Campaign Page
                         </a>
                       )}
                       <button
@@ -398,10 +474,6 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
             </div>
           </>
         )}
-
-        <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
-          <FaPlus /> Create Campaign
-        </button>
       </div>
       {createPortal(modalContent, document.body)}
     </>
