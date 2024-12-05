@@ -23,20 +23,105 @@ const COLORS = {
   DENSE: '#ff7f50'
 };
 
-function processData(donations, oneOffContributions, volunteerActivities, fundraisingActivities) {
-  console.log('Processing data with:', {
-    donations: donations?.length,
-    oneOffContributions: oneOffContributions?.length,
-    volunteerActivities: volunteerActivities?.length,
-    fundraisingActivities: fundraisingActivities?.length
-  });
+function calculateDonationPointsIncremental(amount, cumulativeTotalBefore, frequency) {
+  let points = 0;
+  let remainingAmount = amount;
+  let totalSoFar = cumulativeTotalBefore;
 
+  // Tier limits and rates
+  const tiers = [
+    { limit: 1000, rate: 1 / 100 },    // Up to $1,000
+    { limit: 5000, rate: 1 / 200 },    // Up to $5,000
+    { limit: Infinity, rate: 1 / 500 }  // Above $5,000
+  ];
+
+  for (const tier of tiers) {
+    if (totalSoFar >= tier.limit) continue;
+
+    const tierAvailable = tier.limit - totalSoFar;
+    const amountInTier = Math.min(remainingAmount, tierAvailable);
+    points += amountInTier * tier.rate;
+
+    remainingAmount -= amountInTier;
+    totalSoFar += amountInTier;
+
+    if (remainingAmount <= 0) break;
+  }
+
+  // Regular Giving Multiplier
+  let regularGivingMultiplier = 1;
+  if (frequency === 'weekly') {
+    regularGivingMultiplier = 1.2;
+  } else if (frequency === 'monthly') {
+    regularGivingMultiplier = 1.1;
+  }
+
+  points *= regularGivingMultiplier;
+
+  return points;
+}
+
+function calculateVolunteerPointsIncremental(hours, cumulativeHoursBefore) {
+  let points = 0;
+  let remainingHours = hours;
+  let totalHoursSoFar = cumulativeHoursBefore;
+
+  const tiers = [
+    { limit: 50, rate: 0.6 },      // Up to 50 hours
+    { limit: 200, rate: 0.4 },     // Up to 200 hours
+    { limit: Infinity, rate: 0.2 }  // Above 200 hours
+  ];
+
+  for (const tier of tiers) {
+    if (totalHoursSoFar >= tier.limit) continue;
+
+    const tierAvailable = tier.limit - totalHoursSoFar;
+    const hoursInTier = Math.min(remainingHours, tierAvailable);
+    points += hoursInTier * tier.rate;
+
+    remainingHours -= hoursInTier;
+    totalHoursSoFar += hoursInTier;
+
+    if (remainingHours <= 0) break;
+  }
+
+  return points;
+}
+
+function calculateFundraisingPointsIncremental(amount, cumulativeTotalBefore) {
+  let points = 0;
+  let remainingAmount = amount;
+  let totalSoFar = cumulativeTotalBefore;
+
+  const tiers = [
+    { limit: 2000, rate: 1 / 100 },    // Up to $2,000
+    { limit: 10000, rate: 1 / 200 },   // Up to $10,000
+    { limit: Infinity, rate: 1 / 500 }  // Above $10,000
+  ];
+
+  for (const tier of tiers) {
+    if (totalSoFar >= tier.limit) continue;
+
+    const tierAvailable = tier.limit - totalSoFar;
+    const amountInTier = Math.min(remainingAmount, tierAvailable);
+    points += amountInTier * tier.rate;
+
+    remainingAmount -= amountInTier;
+    totalSoFar += amountInTier;
+
+    if (remainingAmount <= 0) break;
+  }
+
+  return points;
+}
+
+function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns) {
   if (!donations || !oneOffContributions) {
     return [];
   }
 
   // Split one-off contributions into regular and completed campaigns
-  const completedCampaigns = oneOffContributions.filter(contribution => 
+  const completedCampaignsFromOneOffs = oneOffContributions.filter(contribution => 
     contribution.subject?.startsWith('Completed fundraising campaign:')
   );
   
@@ -44,16 +129,25 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     !contribution.subject?.startsWith('Completed fundraising campaign:')
   );
 
-  console.log('Found completed campaigns:', completedCampaigns.length);
-  console.log('Regular one-offs:', regularOneOffs.length);
+  // Get archived campaigns from fundraisingCampaigns
+  const archivedCampaigns = (fundraisingCampaigns || [])
+    .filter(campaign => campaign.status === 'archived')
+    .map(campaign => ({
+      type: 'fundraisingCampaign',
+      date: new Date(campaign.completedDate || campaign.endDate),
+      amount: Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
+      charity: campaign.title,
+      subject: `Completed fundraising campaign: ${campaign.description}`
+    }));
 
-  // Convert all activities to a common format
+  // Combine all activities into a single array
   const allActivities = [
     ...donations.map(d => ({
       ...d,
       type: 'donation',
       date: new Date(d.date),
-      amount: Number(d.amount) || 0
+      amount: Number(d.amount) || 0,
+      frequency: d.frequency
     })),
     ...regularOneOffs.map(d => ({
       ...d,
@@ -61,13 +155,14 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       date: new Date(d.date),
       amount: Number(d.amount) || 0
     })),
-    ...completedCampaigns.map(d => ({
+    ...completedCampaignsFromOneOffs.map(d => ({
       ...d,
       type: 'fundraisingCampaign',
       date: new Date(d.date),
       amount: Number(d.amount) || 0,
       charity: d.charity || d.subject.replace('Completed fundraising campaign: ', '')
     })),
+    ...archivedCampaigns,
     ...(volunteerActivities || []).map(v => ({
       ...v,
       type: 'volunteer',
@@ -79,9 +174,13 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   // Sort activities by date
   allActivities.sort((a, b) => a.date - b.date);
 
-  console.log('Total activities after filtering:', allActivities.length);
+  // Initialize cumulative totals
+  let cumulativeDonationAmount = 0;
+  let cumulativeVolunteerHours = 0;
+  let cumulativeFundsRaised = 0;
+  let cumulativeScore = 0;
 
-  // Group activities by date to handle dense areas
+  // Group activities by date
   const groupedActivities = allActivities.reduce((acc, activity) => {
     const dateKey = activity.date.toISOString().split('T')[0];
     if (!acc[dateKey]) {
@@ -91,58 +190,104 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     return acc;
   }, {});
 
-  const benchmarks = {
-    monthlyDonationBenchmark: 100,
-    oneOffDonationBenchmark: 500,
-    volunteerHourBenchmark: 4,
-    fundraisingBenchmark: 1000
-  };
+  const processedData = [];
 
-  let cumulativeScore = 0;
-  const processedData = Object.entries(groupedActivities).map(([date, activities]) => {
-    const currentData = {
-      regularDonations: donations.filter(d => new Date(d.date) <= new Date(date)),
-      oneOffDonations: [
-        ...regularOneOffs.filter(d => new Date(d.date) <= new Date(date)),
-        ...completedCampaigns.filter(d => new Date(d.date) <= new Date(date))
-      ],
-      volunteeringActivities: (volunteerActivities || []).filter(v => new Date(v.date) <= new Date(date)),
-      fundraisingActivities: []
-    };
+  Object.entries(groupedActivities).forEach(([date, activities]) => {
+    const currentDate = new Date(date);
+    const activitiesWithPoints = activities.map(activity => {
+      let pointsEarned = 0;
 
-    const scoreResult = calculateComplexImpactScore(currentData);
-    const pointsEarned = scoreResult.totalScore - cumulativeScore;
-    cumulativeScore = scoreResult.totalScore;
+      switch (activity.type) {
+        case 'donation':
+          pointsEarned = calculateDonationPointsIncremental(
+            activity.amount,
+            cumulativeDonationAmount,
+            activity.frequency
+          );
+          cumulativeDonationAmount += activity.amount;
+          break;
 
-    return {
-      x: new Date(date),
-      y: cumulativeScore,
-      activities: activities.map(activity => ({
+        case 'oneOff':
+          pointsEarned = calculateDonationPointsIncremental(
+            activity.amount,
+            cumulativeDonationAmount,
+            null
+          );
+          cumulativeDonationAmount += activity.amount;
+          break;
+
+        case 'volunteer':
+          pointsEarned = calculateVolunteerPointsIncremental(
+            activity.hours,
+            cumulativeVolunteerHours
+          );
+          cumulativeVolunteerHours += activity.hours;
+          break;
+
+        case 'fundraisingCampaign':
+          pointsEarned = calculateFundraisingPointsIncremental(
+            activity.amount,
+            cumulativeFundsRaised
+          );
+          cumulativeFundsRaised += activity.amount;
+          break;
+
+        default:
+          console.warn(`Unknown activity type: ${activity.type}`);
+          pointsEarned = 0;
+          break;
+      }
+
+      return {
         type: activity.type,
         details: activity.type === 'volunteer' ? `${activity.hours} hours` : 
                 `$${activity.amount}`,
         recipient: activity.organization || activity.charity,
         pointsEarned
-      })),
-      pointsEarned,
+      };
+    });
+
+    const totalPointsEarned = activitiesWithPoints.reduce((sum, activity) => sum + activity.pointsEarned, 0);
+    cumulativeScore += totalPointsEarned;
+
+    processedData.push({
+      x: currentDate,
+      y: cumulativeScore,
+      activities: activitiesWithPoints,
+      pointsEarned: totalPointsEarned,
       isDense: activities.length > 1
-    };
+    });
   });
 
-  console.log('Final processed data points:', processedData.length);
+  // Verify total score matches
+  const totalImpactScore = calculateComplexImpactScore({
+    regularDonations: donations,
+    oneOffDonations: oneOffContributions,
+    volunteeringActivities: volunteerActivities,
+    fundraisingCampaigns: fundraisingCampaigns
+  }).totalScore;
+
+  if (Math.abs(cumulativeScore - totalImpactScore) > 0.01) {
+    console.warn('Cumulative score does not match total impact score', {
+      cumulativeScore,
+      totalImpactScore,
+      difference: Math.abs(cumulativeScore - totalImpactScore)
+    });
+  }
+
   return processedData;
 }
 
 function ImpactVisualization({ hideTitle = false }) {
-  const { donations, oneOffContributions, volunteerActivities, fundraisingActivities, impactScore } = useContext(ImpactContext);
+  const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore } = useContext(ImpactContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
   const dataPoints = useMemo(() => {
     console.log('Recalculating data points for period:', timePeriod);
-    return processData(donations, oneOffContributions, volunteerActivities, fundraisingActivities);
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingActivities, timePeriod]);
+    return processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns);
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
 
   useEffect(() => {
     if (!chartRef.current || !dataPoints || dataPoints.length === 0) {
@@ -265,6 +410,10 @@ function ImpactVisualization({ hideTitle = false }) {
                     <span class="${styles.tooltipLabel}">Recipient:</span>
                     <span class="${styles.tooltipValue}">${activity.recipient}</span>
                   </div>
+                  <div class="${styles.tooltipRow}">
+                    <span class="${styles.tooltipLabel}">Points Earned:</span>
+                    <span class="${styles.tooltipValue}">${activity.pointsEarned.toFixed(2)}</span>
+                  </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
 
                 tooltipEl.innerHTML = `
@@ -275,10 +424,6 @@ function ImpactVisualization({ hideTitle = false }) {
                     </div>
                     <div class="${styles.tooltipBody}">
                       ${activitiesHtml}
-                      <div class="${styles.tooltipRow}">
-                        <span class="${styles.tooltipLabel}">Points Earned:</span>
-                        <span class="${styles.tooltipValue}">${dataPoint.pointsEarned.toFixed(2)}</span>
-                      </div>
                       <div class="${styles.tooltipRow} ${styles.totalScore}">
                         <span class="${styles.tooltipLabel}">Total Impact Score:</span>
                         <span class="${styles.tooltipValue}">${dataPoint.y.toFixed(2)}</span>

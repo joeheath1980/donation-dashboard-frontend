@@ -1,38 +1,61 @@
 .container {
-  padding: 20px;
+  padding: 16px;
   background-color: #ffffff;
   border-radius: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  margin: 20px auto;
-  width: calc(100% - 40px);
+  margin: 16px auto;
+  width: calc(100% - 32px);
   max-width: 800px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
 }
 
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
 .header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 500;
   color: #2d8f7b;
-  margin-bottom: 32px;
+  margin: 0;
 }
 
 .activitiesGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-bottom: 100px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 4px;
   width: 100%;
   overflow-y: auto;
-  max-height: calc(100vh - 300px);
+  max-height: 500px;
+  scrollbar-width: thin;
+  scrollbar-color: #2d8f7b rgba(45, 143, 123, 0.1);
+}
+
+.activitiesGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activitiesGrid::-webkit-scrollbar-track {
+  background: rgba(45, 143, 123, 0.1);
+  border-radius: 3px;
+}
+
+.activitiesGrid::-webkit-scrollbar-thumb {
+  background-color: #2d8f7b;
+  border-radius: 3px;
 }
 
 .activityCard {
   background-color: #ffffff;
   border: 1px solid rgba(45, 143, 123, 0.12);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 14px;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   display: flex;
@@ -41,7 +64,7 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .activityCard:hover {
@@ -53,15 +76,15 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   position: relative;
 }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: #2d8f7b;
-  padding-right: 40px;
+  padding-right: 32px;
   word-break: break-word;
   flex: 1;
   line-height: 1.3;
@@ -70,13 +93,13 @@
 
 .cardContent {
   flex-grow: 1;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   color: #2d8f7b;
 }
 
 .cardContent p {
-  margin: 8px 0;
+  margin: 6px 0;
   color: #2d8f7b;
   display: flex;
   align-items: center;
@@ -85,8 +108,8 @@
 .cardContent strong {
   color: #2d8f7b;
   font-weight: 500;
-  min-width: 80px;
-  margin-right: 16px;
+  min-width: 70px;
+  margin-right: 12px;
 }
 
 .iconButton {
@@ -119,21 +142,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   background-color: transparent;
   color: #2d8f7b;
   border: 1px solid rgba(45, 143, 123, 0.3);
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 400;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 32px;
-  position: sticky;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .createButton:hover {
@@ -143,25 +162,25 @@
 
 .error {
   color: #ff6b6b;
-  margin-bottom: 16px;
-  font-size: 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
 }
 
 .textCenter {
   text-align: center;
   color: #2d8f7b;
   font-size: 14px;
-  padding: 32px;
+  padding: 24px;
 }
 
 .status {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
   position: absolute;
   top: 4px;
-  right: 32px;
+  right: 28px;
 }
 
 .status.active {
@@ -177,8 +196,8 @@
 .fileUploadContainer {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .fileInput {
@@ -188,13 +207,13 @@
 .fileUploadButton {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background-color: rgba(45, 143, 123, 0.04);
   color: #2d8f7b;
   border: 1px solid rgba(45, 143, 123, 0.3);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -207,10 +226,10 @@
 .fileName {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   color: #2d8f7b;
-  font-size: 14px;
-  max-width: 200px;
+  font-size: 13px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -219,15 +238,15 @@
 .evidenceLink {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #2d8f7b;
   text-decoration: none;
-  font-size: 14px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 16px;
   background-color: rgba(45, 143, 123, 0.04);
   transition: all 0.2s ease;
-  margin-top: 16px;
+  margin-top: 12px;
   width: fit-content;
 }
 
@@ -238,14 +257,24 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
-    width: calc(100% - 32px);
-    margin: 16px auto;
+    padding: 12px;
+    width: calc(100% - 24px);
+    margin: 12px auto;
+  }
+
+  .headerContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .header {
-    font-size: 28px;
-    margin-bottom: 24px;
+    font-size: 24px;
+  }
+
+  .activitiesGrid {
+    grid-template-columns: 1fr;
+    max-height: 400px;
   }
 
   .activityCard {
@@ -257,7 +286,7 @@
   }
 
   .cardContent {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .createButton {
@@ -267,12 +296,12 @@
 
   .fileUploadButton,
   .evidenceLink {
-    font-size: 13px;
-    padding: 6px 12px;
+    font-size: 12px;
+    padding: 5px 10px;
   }
 
   .fileName {
-    font-size: 13px;
-    max-width: 150px;
+    font-size: 12px;
+    max-width: 140px;
   }
 }

@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
             response = await axios.get(`${API_URL}/api/business/me`);
             setUser({ ...response.data, isBusiness: true, isCharity: false });
           } else if (userType === 'charity') {
-            response = await axios.get(`${API_URL}/api/charity/me`);
+            response = await axios.get(`${API_URL}/api/charities/me`);
             setUser({ ...response.data, isBusiness: false, isCharity: true });
           } else {
             response = await axios.get(`${API_URL}/api/users/me`);
@@ -160,7 +160,7 @@ export const AuthProvider = ({ children }) => {
   // Charity user login
   const charityLogin = async (contactEmail, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/charity/login`, {
+      const response = await axios.post(`${API_URL}/api/charities/login`, {
         contactEmail,
         password,
       });
@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('userType', 'charity');
       localStorage.setItem('charityId', charity.id);
       setupAxiosDefaults(token);
-      const charityResponse = await axios.get(`${API_URL}/api/charity/me`);
+      const charityResponse = await axios.get(`${API_URL}/api/charities/me`);
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
       return charityResponse.data;
     } catch (error) {
@@ -181,13 +181,13 @@ export const AuthProvider = ({ children }) => {
   // Charity user signup
   const charitySignup = async (signupData) => {
     try {
-      const response = await axios.post(`${API_URL}/api/charity/signup`, signupData);
+      const response = await axios.post(`${API_URL}/api/charities/signup`, signupData);
       if (response.status === 201 || response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('userType', 'charity');
         setupAxiosDefaults(token);
-        const charityResponse = await axios.get(`${API_URL}/api/charity/me`);
+        const charityResponse = await axios.get(`${API_URL}/api/charities/me`);
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
         return charityResponse.data;
       }
