@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './TierProgressModal.module.css';
+import cleanStyles from './CleanDesign.module.css';
 import { FaStar, FaAward, FaTrophy, FaHandsHelping, FaHeart } from 'react-icons/fa';
 
 const tiers = [
@@ -16,8 +17,10 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false }) => {
   const pointsToNextTier = nextTier ? nextTier.minScore - impactScore : 0;
 
   return (
-    <div className={styles.modalContent}>
-      {!hideTitle && <h2>Your Current Tier: {currentTier}</h2>}
+    <div className={`${styles.modalContent} ${cleanStyles.card}`}>
+      {!hideTitle && (
+        <h2 className={cleanStyles.title}>Your Current Tier: {currentTier}</h2>
+      )}
       <div className={styles.tierProgress}>
         {tiers.map((tier, index) => {
           const Icon = tier.icon;
@@ -42,11 +45,11 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false }) => {
           );
         })}
       </div>
-      <div className={styles.currentScore}>
+      <div className={`${styles.currentScore} ${cleanStyles.description}`}>
         Your Impact Score: {impactScore}
       </div>
       {nextTier && (
-        <div className={styles.nextTier}>
+        <div className={`${styles.nextTier} ${cleanStyles.highlight}`}>
           Points needed for {nextTier.name}: {pointsToNextTier}
         </div>
       )}

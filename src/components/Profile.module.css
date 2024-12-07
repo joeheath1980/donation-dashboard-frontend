@@ -18,6 +18,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.impactSection {
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  border: 1px solid #e2e8f0;
+}
+
+.impactContent {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 .sectionHeader {
   margin-bottom: 1.5rem;
 }
@@ -113,7 +126,7 @@
 .actionButton {
   composes: button from './CleanDesign.module.css';
   margin-top: auto;
-  padding: 8px 16px;
+  width: 100%;
 }
 
 .buttonIcon {
@@ -123,6 +136,7 @@
 
 .actionButton:hover .buttonIcon {
   transform: translateX(4px);
+  color: white;
 }
 
 .expandedContent {
@@ -151,7 +165,7 @@
   margin-top: auto;
   padding: 0.75rem;
   box-sizing: border-box;
-  border-radius: 6px;
+  border-radius: 50px;
 }
 
 .fullWidth {
@@ -226,5 +240,14 @@
 
   .donationCard {
     padding: 1.25rem;
+  }
+
+  .impactContent {
+    padding: 0.75rem;
+  }
+
+  .actionButton {
+    padding: 8px 20px;
+    font-size: 14px;
   }
 }
