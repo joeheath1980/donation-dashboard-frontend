@@ -6,6 +6,21 @@ import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile } from 'react-icons/fa';
 
+const CHARITY_TYPES = [
+  { value: "Health Services", label: "Health Services & Medical Research" },
+  { value: "Mental Health", label: "Mental Health & Wellness" },
+  { value: "Education", label: "Education & Youth Development" },
+  { value: "Environmental Conservation", label: "Environmental Conservation & Wildlife" },
+  { value: "Social Welfare", label: "Social Welfare & Community Support" },
+  { value: "Emergency Relief", label: "Emergency Relief & Disaster Response" },
+  { value: "Food Security", label: "Food Security & Poverty Alleviation" },
+  { value: "Child Welfare", label: "Child Welfare & Youth Support" },
+  { value: "Indigenous Support", label: "Indigenous Support & Programs" },
+  { value: "Housing", label: "Housing & Homelessness" },
+  { value: "Community Building", label: "Community Building & Development" },
+  { value: "Rural Support", label: "Rural & Regional Support" }
+];
+
 function VolunteerActivitiesComponent({ userId }) {
   const [activities, setActivities] = useState([]);
   const [newActivity, setNewActivity] = useState({
@@ -134,18 +149,14 @@ function VolunteerActivitiesComponent({ userId }) {
               value={newActivity.charityType}
               onChange={handleChange}
               required
+              className={cleanStyles.select}
             >
-              <option value="">Select a type</option>
-              <option value="Education">Education</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Environment">Environment</option>
-              <option value="Animal Welfare">Animal Welfare</option>
-              <option value="Poverty Relief">Poverty Relief</option>
-              <option value="Arts & Culture">Arts & Culture</option>
-              <option value="Community Development">Community Development</option>
-              <option value="Human Rights">Human Rights</option>
-              <option value="Disaster Relief">Disaster Relief</option>
-              <option value="Other">Other</option>
+              <option value="">Select a charity type</option>
+              {CHARITY_TYPES.map(type => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             </select>
           </div>
           <div className={modalStyles.formGroup}>
@@ -246,7 +257,11 @@ function VolunteerActivitiesComponent({ userId }) {
                 <div className={styles.cardContent}>
                   <p><strong>Hours:</strong> {activity.hours}</p>
                   <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
-                  <p><strong>Charity Type:</strong> {activity.charityType || 'Not specified'}</p>
+                  <p><strong>Charity Type:</strong> {
+                    CHARITY_TYPES.find(type => type.value === activity.charityType)?.label || 
+                    activity.charityType || 
+                    'Not specified'
+                  }</p>
                   <p><strong>Description:</strong> {activity.description}</p>
                   {activity.evidence && (
                     <a 

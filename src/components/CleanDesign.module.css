@@ -3,7 +3,7 @@
   --primary-color: #2d8f7b;
   --primary-light: #5ecfb6;
   --primary-dark: #236e61;
-  --primary-gradient: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
+  --primary-gradient: linear-gradient(to right, var(--primary-color), var(--primary-light));
   --hover-color: #236e61;
   --text-primary: #212121;
   --text-secondary: #757575;
@@ -16,29 +16,36 @@
 
 /* Button Styles */
 .button {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 20px;
   border: 2px solid var(--primary-color);
   border-radius: 50px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   text-align: center;
   cursor: pointer;
   transition: var(--transition-standard);
   text-decoration: none;
   background-color: transparent;
   color: var(--primary-color);
+  min-height: 44px;
+  gap: 8px;
 }
 
 .button:hover {
   background: var(--primary-gradient);
   color: white;
   border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .button.compact {
   padding: 8px 16px;
   font-size: 14px;
+  min-height: 36px;
 }
 
 /* Icon Button */
@@ -273,6 +280,7 @@
   .button {
     padding: 10px 16px;
     font-size: 14px;
+    min-height: 40px;
   }
 
   .card {

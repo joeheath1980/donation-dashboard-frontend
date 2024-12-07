@@ -28,6 +28,21 @@ const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
     onConfirm(editedDonation);
   };
 
+  const charityTypes = [
+    { value: "Health Services", label: "Health Services & Medical Research" },
+    { value: "Mental Health", label: "Mental Health & Wellness" },
+    { value: "Education", label: "Education & Youth Development" },
+    { value: "Environmental Conservation", label: "Environmental Conservation & Wildlife" },
+    { value: "Social Welfare", label: "Social Welfare & Community Support" },
+    { value: "Emergency Relief", label: "Emergency Relief & Disaster Response" },
+    { value: "Food Security", label: "Food Security & Poverty Alleviation" },
+    { value: "Child Welfare", label: "Child Welfare & Youth Support" },
+    { value: "Indigenous Support", label: "Indigenous Support & Programs" },
+    { value: "Housing", label: "Housing & Homelessness" },
+    { value: "Community Building", label: "Community Building & Development" },
+    { value: "Rural Support", label: "Rural & Regional Support" }
+  ];
+
   const modalContent = (
     <div className={styles.modalOverlay}>
       <div className={`${styles.modalContent} ${cleanStyles.card}`}>
@@ -86,15 +101,11 @@ const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
               className={cleanStyles.select}
             >
               <option value="">Select a charity type</option>
-              <option value="Health">Health</option>
-              <option value="Education">Education</option>
-              <option value="Environment">Environment</option>
-              <option value="Humanitarian">Humanitarian</option>
-              <option value="Arts and Culture">Arts and Culture</option>
-              <option value="Religious">Religious</option>
-              <option value="Human Rights">Human Rights</option>
-              <option value="Children and Youth">Children and Youth</option>
-              <option value="Other">Other</option>
+              {charityTypes.map(type => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             </select>
           </div>
           {type === 'regular' && (

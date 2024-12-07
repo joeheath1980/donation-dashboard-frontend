@@ -31,6 +31,7 @@ function DonationsComponent({ displayAll }) {
   const [showModal, setShowModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [error, setError] = useState('');
   const donationListRef = useRef(null);
 
   useEffect(() => {
@@ -65,39 +66,58 @@ function DonationsComponent({ displayAll }) {
   }, []);
 
   const handleDelete = async (donationId) => {
-    if (window.confirm('Are you sure you want to delete this donation?')) {
-      try {
-        const response = await fetch(`http://localhost:3002/api/donations/${donationId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-        });
+    if (!window.confirm('Are you sure you want to delete this donation?')) {
+      return;
+    }
 
-        if (response.ok) {
-          setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
-          if (isAuthenticated) {
-            fetchImpactData();
-          }
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to delete donation');
-        }
-      } catch (error) {
-        console.error('Error deleting donation:', error);
-        alert(`Failed to delete donation: ${error.message}`);
+    setError(''); // Clear any previous errors
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
       }
+
+      const response = await fetch(`http://localhost:3002/api/donations/${donationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete donation');
+      }
+
+      // Only update local state if the delete was successful
+      setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
+      
+      // Refresh the data from the server
+      if (isAuthenticated) {
+        await fetchImpactData();
+      }
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      setError(`Unable to delete the donation: ${error.message}. Please try again later.`);
+      // Keep the donation in the list since deletion failed
     }
   };
 
   const handleEditOrValidate = (donation) => {
+    setError(''); // Clear any previous errors
     setCurrentDonation(donation);
     setShowModal(true);
   };
 
   const handleConfirm = async (editedDonation) => {
+    setError(''); // Clear any previous errors
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+
       let url = 'http://localhost:3002/api/donations';
       let method = 'POST';
 
@@ -120,37 +140,41 @@ function DonationsComponent({ displayAll }) {
       const response = await fetch(url, {
         method: method,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: formData
       });
 
-      if (response.ok) {
-        const updatedDonation = await response.json();
-        if (currentDonation && currentDonation._id) {
-          setLocalDonations(prevDonations =>
-            prevDonations.map(donation =>
-              donation._id === updatedDonation._id ? updatedDonation : donation
-            )
-          );
-        } else {
-          setLocalDonations(prevDonations => [...prevDonations, updatedDonation]);
-        }
-        setShowModal(false);
-        if (isAuthenticated) {
-          fetchImpactData();
-        }
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update donation');
       }
+
+      const updatedDonation = await response.json();
+      
+      if (currentDonation && currentDonation._id) {
+        setLocalDonations(prevDonations =>
+          prevDonations.map(donation =>
+            donation._id === updatedDonation._id ? updatedDonation : donation
+          )
+        );
+      } else {
+        setLocalDonations(prevDonations => [...prevDonations, updatedDonation]);
+      }
+      
+      setShowModal(false);
+      
+      if (isAuthenticated) {
+        await fetchImpactData();
+      }
     } catch (error) {
       console.error('Error updating donation:', error);
-      alert(`Failed to update donation: ${error.message}`);
+      setError(`Unable to update the donation: ${error.message}. Please try again later.`);
     }
   };
 
   const handleAddNew = () => {
+    setError(''); // Clear any previous errors
     setCurrentDonation(null);
     setShowModal(true);
   };
@@ -177,6 +201,11 @@ function DonationsComponent({ displayAll }) {
             <FaPlus /> Add New Donation
           </button>
         </div>
+        {error && (
+          <div className={`${cleanStyles.alert} ${cleanStyles.error}`}>
+            {error}
+          </div>
+        )}
         <div className={donationStyles.donationList} ref={donationListRef}>
           {displayedDonations && displayedDonations.length > 0 ? (
             <>
