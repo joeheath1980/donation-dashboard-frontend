@@ -89,37 +89,38 @@
   padding: 16px;
   background-color: #f8f9fa;
   border: 1px solid rgba(45, 143, 123, 0.08);
-  min-height: 150px;
+  min-height: 120px;
 }
 
 .archivedCard .cardContent {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
 
 .archivedCard .cardTitle {
   font-size: 16px;
   margin-bottom: 8px;
-  grid-column: 1 / -1;
   color: #2d8f7b;
+  font-weight: 600;
+  padding-right: 32px;
 }
 
 .archivedInfo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   color: #2d8f7b;
   font-size: 13px;
   width: 100%;
-  align-items: center;
 }
 
 .archivedInfo span {
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1.4;
 }
 
 .archivedDate {
@@ -206,9 +207,9 @@
 }
 
 .editButton:hover {
-  background-color: rgba(45, 143, 123, 0.04);
-  color: #2d8f7b;
-  opacity: 0.8;
+  background-color: #5BA890;
+  color: white;
+  opacity: 1;
 }
 
 .iconButton {
@@ -232,9 +233,9 @@
 }
 
 .iconButton:hover {
-  background-color: rgba(45, 143, 123, 0.04);
-  color: #2d8f7b;
-  opacity: 0.8;
+  background-color: #5BA890;
+  color: white;
+  opacity: 1;
 }
 
 .createButton {
@@ -244,19 +245,21 @@
   gap: 6px;
   background-color: transparent;
   color: #2d8f7b;
-  border: 1px solid rgba(45, 143, 123, 0.3);
-  padding: 6px 16px;
-  border-radius: 20px;
+  border: 2px solid #2d8f7b;
+  padding: 12px 20px;
+  border-radius: 50px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .createButton:hover {
-  background-color: rgba(45, 143, 123, 0.04);
-  border-color: rgba(45, 143, 123, 0.5);
+  background-color: #5BA890;
+  border-color: #5BA890;
+  color: white;
 }
 
 .error {
@@ -312,20 +315,22 @@
   justify-content: center;
   background-color: transparent;
   color: #2d8f7b;
-  border: 1px solid rgba(45, 143, 123, 0.3);
-  padding: 6px 16px;
-  border-radius: 20px;
+  border: 2px solid #2d8f7b;
+  padding: 12px 20px;
+  border-radius: 50px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   margin-top: 16px;
   width: fit-content;
+  box-sizing: border-box;
 }
 
 .tealButton:hover {
-  background-color: rgba(45, 143, 123, 0.04);
-  border-color: rgba(45, 143, 123, 0.5);
+  background-color: #5BA890;
+  border-color: #5BA890;
+  color: white;
 }
 
 .campaignLink {
@@ -335,16 +340,21 @@
   color: #2d8f7b;
   text-decoration: none;
   font-size: 14px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background-color: rgba(45, 143, 123, 0.04);
-  transition: all 0.2s ease;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 50px;
+  background-color: transparent;
+  border: 2px solid #2d8f7b;
+  transition: all 0.3s ease;
   margin-top: 16px;
   width: fit-content;
+  box-sizing: border-box;
 }
 
 .campaignLink:hover {
-  background-color: rgba(45, 143, 123, 0.08);
+  background-color: #5BA890;
+  border-color: #5BA890;
+  color: white;
   text-decoration: none;
 }
 
@@ -397,20 +407,19 @@
 
   .createButton {
     font-size: 13px;
-    padding: 6px 14px;
+    padding: 10px 16px;
   }
 
   .campaignLink {
     font-size: 13px;
-    padding: 6px 14px;
+    padding: 10px 16px;
   }
 
   .archivedInfo {
-    grid-template-columns: 1fr;
     font-size: 13px;
   }
 
   .archivedCard .cardContent {
-    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }

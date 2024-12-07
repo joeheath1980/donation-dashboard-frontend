@@ -224,90 +224,92 @@ function Profile() {
           <GlobalGivingProjects />
         </section>
         
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.impactSection}`}>
           <div className={styles.sectionHeader}>
             <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>Your Impact</h2>
             <div className={styles.sectionTitleUnderline}></div>
           </div>
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
-        </section>
-        
-        <div className={styles.donationsGrid}>
-          <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-            <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
-              <FaRegHandshake className={styles.icon} /> Regular Donations
-            </h3>
-            <ul className={styles.list}>
-              {getUniqueCharities().map((charity, index) => (
-                <li key={index} className={styles.listItem}>{charity}</li>
-              ))}
-            </ul>
-            <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleRegularContributions}>
-              {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-            </button>
-            {showRegularContributions && (
-              <div className={styles.expandedContent}>
-                <DonationsComponent displayAll={true} />
-              </div>
-            )}
-          </div>
           
-          <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-            <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
-              <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
-            </h3>
-            <ul className={styles.list}>
-              {getRecentOneOffDonations().map((donation, index) => (
-                <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
-              ))}
-            </ul>
-            <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleOneOffContributions}>
-              {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-            </button>
-            {showOneOffContributions && (
-              <div className={styles.expandedContent}>
-                <OneOffContributionsComponent displayAll={true} />
+          <div className={styles.impactContent}>
+            <div className={styles.donationsGrid}>
+              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+                  <FaRegHandshake className={styles.icon} /> Regular Donations
+                </h3>
+                <ul className={styles.list}>
+                  {getUniqueCharities().map((charity, index) => (
+                    <li key={index} className={styles.listItem}>{charity}</li>
+                  ))}
+                </ul>
+                <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleRegularContributions}>
+                  {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
+                </button>
+                {showRegularContributions && (
+                  <div className={styles.expandedContent}>
+                    <DonationsComponent displayAll={true} />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          
-          <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-            <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
-              <FaRegHeart className={styles.icon} /> Charities Following
-            </h3>
-            <ul className={styles.list}>
-              {getDisplayedFollowedCharities().map((charity, index) => (
-                <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
-                  <span>{charity.name || 'Unknown Charity'}</span>
-                  <button
-                    onClick={() => handleUnfollowCharity(charity.ABN)}
-                    className={`${styles.deleteButton} ${cleanStyles.iconButton}`}
-                    aria-label="Unfollow Charity"
-                  >
-                    <FaTimes />
+              
+              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+                  <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
+                </h3>
+                <ul className={styles.list}>
+                  {getRecentOneOffDonations().map((donation, index) => (
+                    <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
+                  ))}
+                </ul>
+                <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleOneOffContributions}>
+                  {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
+                </button>
+                {showOneOffContributions && (
+                  <div className={styles.expandedContent}>
+                    <OneOffContributionsComponent displayAll={true} />
+                  </div>
+                )}
+              </div>
+              
+              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+                  <FaRegHeart className={styles.icon} /> Charities Following
+                </h3>
+                <ul className={styles.list}>
+                  {getDisplayedFollowedCharities().map((charity, index) => (
+                    <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
+                      <span>{charity.name || 'Unknown Charity'}</span>
+                      <button
+                        onClick={() => handleUnfollowCharity(charity.ABN)}
+                        className={`${styles.deleteButton} ${cleanStyles.iconButton}`}
+                        aria-label="Unfollow Charity"
+                      >
+                        <FaTimes />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {localFollowedCharities.length > 3 && (
+                  <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleFollowedCharities}>
+                    {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                   </button>
-                </li>
-              ))}
-            </ul>
-            {localFollowedCharities.length > 3 && (
-              <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleFollowedCharities}>
-                {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-              </button>
-            )}
-            <Link to="/search-charities" className={`${styles.followNewButton} ${cleanStyles.button} ${styles.fullWidth}`}>
-              <FaPlus /> Follow New Charity
-            </Link>
-          </div>
-        </div>
+                )}
+                <Link to="/search-charities" className={`${styles.followNewButton} ${cleanStyles.button} ${styles.fullWidth}`}>
+                  <FaPlus /> Follow New Charity
+                </Link>
+              </div>
+            </div>
 
-        <div className={styles.activitiesGrid}>
-          <div className={`${styles.activityCard} ${cleanStyles.card}`}>
-            <VolunteerActivitiesComponent />
+            <div className={styles.activitiesGrid}>
+              <div className={`${styles.activityCard} ${cleanStyles.card}`}>
+                <VolunteerActivitiesComponent />
+              </div>
+              <div className={`${styles.activityCard} ${cleanStyles.card}`}>
+                <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
+              </div>
+            </div>
           </div>
-          <div className={`${styles.activityCard} ${cleanStyles.card}`}>
-            <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
-          </div>
-        </div>
+        </section>
       </div>
     </div>
   );

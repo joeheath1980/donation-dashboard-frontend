@@ -1,10 +1,10 @@
 /* CleanDesign.module.css */
 :root {
   --primary-color: #2d8f7b;
-  --primary-light: #5ecfb6;
+  --primary-light: #5BA890;
   --primary-dark: #236e61;
   --primary-gradient: linear-gradient(to right, var(--primary-color), var(--primary-light));
-  --hover-color: #236e61;
+  --hover-color: #5BA890;
   --text-primary: #212121;
   --text-secondary: #757575;
   --background-light: #f8f8f8;
@@ -32,14 +32,13 @@
   color: var(--primary-color);
   min-height: 44px;
   gap: 8px;
+  box-sizing: border-box;
 }
 
 .button:hover {
-  background: var(--primary-gradient);
+  background-color: var(--hover-color);
   color: white;
-  border-color: transparent;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--hover-color);
 }
 
 .button.compact {

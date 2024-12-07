@@ -1,8 +1,8 @@
 .carouselContainer {
-  padding: 20px 0;
-  position: relative;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .carouselWrapper {
@@ -10,14 +10,14 @@
 }
 
 .carouselItemWrapper {
-  padding: 10px;
+  padding: 0 15px;
 }
 
 .carouselItem {
-  background: white;
+  background-color: #f8f8f8;
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -27,7 +27,7 @@
 
 .carouselItem:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .brandSection,
@@ -52,15 +52,16 @@
 }
 
 .brandName {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d8f7b;
+  font-size: 22px;
+  font-weight: 700;
+  color: #236e61;
   margin: 0;
+  line-height: 1.3;
 }
 
 .charityName {
   font-size: 16px;
-  color: #333;
+  color: #424242;
   font-weight: 500;
 }
 
@@ -84,7 +85,7 @@
 .causeDescription {
   font-size: 14px;
   color: #555;
-  line-height: 1.4;
+  line-height: 1.6;
 }
 
 .validitySection {
@@ -99,41 +100,45 @@
 }
 
 .buttonWrapper {
-  margin-top: 16px;
+  width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .matchButton,
 .learnMoreButton {
-  background: #2d8f7b;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 10px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  display: inline-block;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #2d8f7b;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  border: 2px solid #2d8f7b;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .matchButton:hover,
 .learnMoreButton:hover {
-  background: #236e61;
+  background-color: #2d8f7b;
+  color: white;
 }
 
 .matchedButton {
-  background: #666;
+  background-color: #666;
+  border-color: #666;
+  color: white;
   cursor: not-allowed;
 }
 
 .matchedButton:hover {
-  background: #666;
+  background-color: #666;
+  color: white;
 }
 
 .loadingState,
@@ -173,62 +178,97 @@
   margin-top: 16px;
 }
 
-.emptyStateContent {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.emptyStateTips {
-  text-align: left;
-  margin-top: 24px;
-  padding: 16px;
-  background: #f8f8f8;
-  border-radius: 8px;
-}
-
-.emptyStateTips h4 {
-  color: #2d8f7b;
-  margin-bottom: 12px;
-}
-
-.emptyStateTips ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.emptyStateTips li {
-  margin-bottom: 8px;
-  color: #555;
-}
-
+/* Custom arrow styles */
 .slickArrow {
-  width: 40px;
-  height: 40px;
-  background: white !important;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
-  transition: all 0.3s ease;
-}
-
-.slickArrow:hover {
-  background: #f8f8f8 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
 }
 
 .slickArrow::before {
-  color: #2d8f7b !important;
-  font-size: 20px;
-  line-height: 1;
-  opacity: 1;
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid #2d8f7b;
+  border-right: 2px solid #2d8f7b;
 }
 
 .slickPrev {
-  left: -20px;
+  left: -40px;
 }
 
 .slickNext {
-  right: -20px;
+  right: -40px;
+}
+
+.slickPrev::before {
+  transform: rotate(-135deg);
+}
+
+.slickNext::before {
+  transform: rotate(45deg);
+}
+
+/* Override slick-carousel default styles */
+:global(.slick-prev),
+:global(.slick-next) {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  transform: translate(0, -50%);
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+:global(.slick-dots) {
+  bottom: -35px;
+}
+
+:global(.slick-dots li button:before) {
+  font-size: 12px;
+  color: #9E9E9E;
+}
+
+:global(.slick-dots li.slick-active button:before) {
+  color: #2d8f7b;
+}
+
+:global(.slick-slide > div) {
+  margin: 0 15px;
+}
+
+:global(.slick-list) {
+  margin: 0 -15px;
+}
+
+:global(.slick-slide) {
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+:global(.slick-center) {
+  transform: scale(1);
+}
+
+:global(.slick-track) {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
