@@ -3,8 +3,9 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './CarouselComponent.module.css';
+import { FaSpinner, FaBuilding, FaHandHoldingHeart, FaDollarSign, FaBullseye } from 'react-icons/fa';
 
-const CarouselComponent = ({ items }) => {
+const CarouselComponent = ({ items, isLoading, error }) => {
   const settings = {
     dots: true,
     infinite: false,
@@ -31,27 +32,90 @@ const CarouselComponent = ({ items }) => {
     ]
   };
 
+  if (isLoading) {
+    return (
+      <div className={styles.loadingState}>
+        <FaSpinner className={styles.spinner} />
+        <p>Finding matching opportunities...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorState}>
+        <h3>Unable to Load Matching Opportunities</h3>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} className={styles.retryButton}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <div className={styles.emptyStateContent}>
+          <h3>No Matching Opportunities Available</h3>
+          <p>We're working on finding matching opportunities that align with your interests. Check back soon!</p>
+          <div className={styles.emptyStateTips}>
+            <h4>Tips to Find More Matches:</h4>
+            <ul>
+              <li>Add or update your preferred causes in your profile</li>
+              <li>Follow charities that interest you</li>
+              <li>Make sure your cause areas match the available opportunities</li>
+              <li>Check back regularly as new opportunities are added daily</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.carouselContainer}>
       <div className={styles.carouselWrapper}>
         <Slider {...settings}>
           {items.map((item, index) => (
-            <div key={index} className={styles.carouselItemWrapper}>
+            <div key={item.id || index} className={styles.carouselItemWrapper}>
               <div className={styles.carouselItem}>
-                <h3 className={styles.itemTitle}>{item.title}</h3>
-                <div className={styles.itemContent}>
-                  <div className={styles.charityLabel}>Charity</div>
-                  <div className={styles.charityName}>{item.charity}</div>
-                  <div className={styles.contributionLabel}>Your Contribution</div>
-                  <div className={styles.contributionAmount}>{item.contribution}</div>
-                  <div className={styles.multiplierLabel}>Multiplier</div>
-                  <div className={styles.multiplierValue}>{item.multiplier}</div>
-                  <div className={styles.validUntilLabel}>Valid Until</div>
-                  <div className={styles.validUntilDate}>{item.validUntil}</div>
+                <div className={styles.brandSection}>
+                  <FaBuilding className={styles.icon} />
+                  <h3 className={styles.brandName}>{item.businessName}</h3>
                 </div>
+                
+                <div className={styles.charitySection}>
+                  <FaHandHoldingHeart className={styles.icon} />
+                  <div className={styles.charityName}>{item.charity || 'Any eligible charity'}</div>
+                </div>
+
+                <div className={styles.matchSection}>
+                  <FaDollarSign className={styles.icon} />
+                  <div className={styles.matchAmount}>
+                    <span className={styles.amount}>{item.contribution}</span>
+                    <span className={styles.multiplier}>({item.multiplier} Match)</span>
+                  </div>
+                </div>
+
+                <div className={styles.causeSection}>
+                  <FaBullseye className={styles.icon} />
+                  <div className={styles.causeDescription}>
+                    {item.causeDescription || `Supporting ${item.cause?.toLowerCase() || 'various'} initiatives`}
+                  </div>
+                </div>
+
+                <div className={styles.validitySection}>
+                  <div className={styles.validUntil}>Valid until {item.validUntil}</div>
+                </div>
+
                 <div className={styles.buttonWrapper}>
                   {item.onMatch ? (
-                    <button className={styles.matchButton} onClick={item.onMatch} disabled={item.accepted}>
+                    <button 
+                      className={`${styles.matchButton} ${item.accepted ? styles.matchedButton : ''}`} 
+                      onClick={item.onMatch} 
+                      disabled={item.accepted}
+                    >
                       {item.accepted ? 'Matched' : 'Match'}
                     </button>
                   ) : (
