@@ -44,7 +44,7 @@ const ManagePaymentsComponent = () => {
       try {
         const [tokenResponse, charitiesResponse] = await Promise.all([
           axios.get(`${API_URL}/api/braintree/client_token`),
-          axios.get(`${API_URL}/api/charity`)
+          axios.get(`${API_URL}/api/charities`) // Updated to use plural form
         ]);
         setClientToken(tokenResponse.data.clientToken);
         setCharities(charitiesResponse.data);

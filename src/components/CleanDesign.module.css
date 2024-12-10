@@ -3,7 +3,7 @@
   --primary-color: #2d8f7b;
   --primary-light: #5BA890;
   --primary-dark: #236e61;
-  --primary-gradient: linear-gradient(to right, var(--primary-color), var(--primary-light));
+  --primary-gradient: linear-gradient(90deg, var(--primary-color), var(--primary-light));
   --hover-color: #5BA890;
   --text-primary: #212121;
   --text-secondary: #757575;

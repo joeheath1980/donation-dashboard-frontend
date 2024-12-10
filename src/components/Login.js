@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import styles from '../Login.module.css';
-import cleanStyles from './CleanDesign.module.css';
+import styles from './Login.module.css';
 import logo from '../assets/logo.png';
 
 function Login() {
@@ -15,6 +14,7 @@ function Login() {
   const [accountType, setAccountType] = useState('user');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
@@ -51,36 +51,22 @@ function Login() {
     setLoading(true);
 
     try {
-      console.log('Attempting login with:', email, password, 'Account Type:', accountType);
       let loginResult;
-
-      if (accountType === 'business') {
-        console.log('Starting business login process');
-        loginResult = await businessLogin(email, password);
-        console.log('Business login result:', loginResult);
-        console.log('Navigating to /business-dashboard');
-        navigate('/business-dashboard');
-      } else if (accountType === 'charity') {
-        console.log('Starting charity login process');
-        loginResult = await charityLogin(email, password);
-        console.log('Charity login result:', loginResult);
-        console.log('Navigating to /charity-dashboard');
-        navigate('/charity-dashboard');
-      } else {
-        loginResult = await login(email, password);
-        console.log('User login result:', loginResult);
-
-        if (loginResult && loginResult.isAdmin) {
-          console.log('Admin user detected, navigating to /admin');
-          navigate('/admin');
-        } else {
-          console.log('Regular user, navigating to /profile');
-          navigate('/profile');
-        }
+      switch (accountType) {
+        case 'business':
+          loginResult = await businessLogin(email, password);
+          navigate('/business-dashboard');
+          break;
+        case 'charity':
+          loginResult = await charityLogin(email, password);
+          navigate('/charity-dashboard');
+          break;
+        default:
+          loginResult = await login(email, password);
+          navigate(loginResult?.isAdmin ? '/admin' : '/profile');
       }
     } catch (err) {
-      console.error('Error logging in:', err);
-      console.error('Error response:', err.response);
+      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Failed to log in. Please try again.');
     } finally {
       setLoading(false);
@@ -88,106 +74,123 @@ function Login() {
   };
 
   const handleSocialLogin = (provider) => {
-    const url = `${API_URL}/api/auth/${provider}`;
-    console.log('Social login URL:', url);
-    window.location.href = url;
+    window.location.href = `${API_URL}/api/auth/${provider}`;
   };
 
   return (
-    <div className={`${styles.pageContainer} ${cleanStyles.container}`}>
-      <div className={`${styles.loginContainer} ${cleanStyles.card}`}>
+    <div className={styles.pageContainer}>
+      <div className={styles.loginContainer}>
         <img src={logo} alt="Logo" className={styles.logo} />
-        <h2 className={cleanStyles.heading}>Login</h2>
+        <h1 className={styles.title}>Welcome Back</h1>
+        
         {error && (
-          <p className={`${styles.error} ${cleanStyles.error}`} role="alert">
+          <div className={styles.error} role="alert">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
             {error}
-          </p>
+          </div>
         )}
+
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="email">Email:</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              aria-describedby="emailError"
-              className={cleanStyles.input}
-            />
+            <label htmlFor="email">Email</label>
+            <div className={styles.inputWrapper}>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                aria-describedby="emailError"
+              />
+            </div>
           </div>
+
           <div className={styles.formGroup}>
-            <label htmlFor="password">Password:</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-              aria-describedby="passwordError"
-              className={cleanStyles.input}
-            />
+            <label htmlFor="password">Password</label>
+            <div className={styles.passwordWrapper}>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                aria-describedby="passwordError"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={styles.toggleButton}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
+
           <div className={styles.formGroup}>
-            <label htmlFor="accountType">Account Type:</label>
+            <label htmlFor="accountType">Account Type</label>
             <select
               id="accountType"
               value={accountType}
               onChange={(e) => setAccountType(e.target.value)}
-              className={cleanStyles.select}
+              className={styles.select}
             >
-              <option value="user">User</option>
-              <option value="business">Business</option>
-              <option value="charity">Charity</option>
+              <option value="user">Personal Account</option>
+              <option value="business">Business Account</option>
+              <option value="charity">Charity Account</option>
             </select>
           </div>
-          <button type="submit" disabled={loading} className={cleanStyles.button}>
-            {loading ? 'Logging In...' : 'Login'}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={styles.submitButton}
+          >
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
         {accountType === 'user' && (
           <div className={styles.socialLogin}>
-            <h3>Or login with:</h3>
-            <button
-              onClick={() => handleSocialLogin('google')}
-              className={`${styles.socialButton} ${styles.google} ${cleanStyles.button}`}
-            >
-              Google
-            </button>
-            <button
-              onClick={() => handleSocialLogin('microsoft')}
-              className={`${styles.socialButton} ${styles.microsoft} ${cleanStyles.button}`}
-            >
-              Microsoft
-            </button>
-            <button
-              onClick={() => handleSocialLogin('apple')}
-              className={`${styles.socialButton} ${styles.apple} ${cleanStyles.button}`}
-              disabled
-              title="Apple login is coming soon"
-            >
-              Apple (Coming Soon)
-            </button>
-            <button
-              onClick={() => handleSocialLogin('facebook')}
-              className={`${styles.socialButton} ${styles.facebook} ${cleanStyles.button}`}
-              disabled
-              title="Facebook login is coming soon"
-            >
-              Facebook (Coming Soon)
-            </button>
+            <h3>Or continue with</h3>
+            <div className={styles.socialButtons}>
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('google')}
+                className={`${styles.socialButton} ${styles.google}`}
+              >
+                <svg viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                </svg>
+                Continue with Google
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('microsoft')}
+                className={`${styles.socialButton} ${styles.microsoft}`}
+              >
+                <svg viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
+                </svg>
+                Continue with Microsoft
+              </button>
+            </div>
           </div>
         )}
 
-        <p className={styles.toggleText}>
-          <Link to="/signup" className={cleanStyles.link}>Need an account? Sign Up</Link>
-        </p>
-        <p className={styles.organizationSignup}>
-          <Link to="/organization-signup" className={cleanStyles.link}>Are you a charity or organization? Sign up here</Link>
-        </p>
+        <div className={styles.links}>
+          <Link to="/signup" className={styles.link}>
+            Need an account? Sign Up
+          </Link>
+          <Link to="/organization-signup" className={styles.link}>
+            Register as a Charity or Organization
+          </Link>
+        </div>
       </div>
     </div>
   );
