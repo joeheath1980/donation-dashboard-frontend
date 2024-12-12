@@ -50,9 +50,9 @@ function CreateBusinessCampaign() {
         <Link to="/business-dashboard" className={styles.backButton}>Back to Dashboard</Link>
       </div>
       {error && <p className={styles.error}>{error}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="name">Campaign Name:</label>
+          <label htmlFor="name" className={styles.label}>Campaign Name:</label>
           <input
             type="text"
             id="name"
@@ -60,20 +60,22 @@ function CreateBusinessCampaign() {
             value={campaignData.name}
             onChange={handleInputChange}
             required
+            className={styles.input}
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="description">Description:</label>
+          <label htmlFor="description" className={styles.label}>Description:</label>
           <textarea
             id="description"
             name="description"
             value={campaignData.description}
             onChange={handleInputChange}
             required
+            className={styles.textarea}
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="startDate">Start Date:</label>
+          <label htmlFor="startDate" className={styles.label}>Start Date:</label>
           <input
             type="date"
             id="startDate"
@@ -81,10 +83,11 @@ function CreateBusinessCampaign() {
             value={campaignData.startDate}
             onChange={handleInputChange}
             required
+            className={styles.input}
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="endDate">End Date:</label>
+          <label htmlFor="endDate" className={styles.label}>End Date:</label>
           <input
             type="date"
             id="endDate"
@@ -92,10 +95,11 @@ function CreateBusinessCampaign() {
             value={campaignData.endDate}
             onChange={handleInputChange}
             required
+            className={styles.input}
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="goal">Campaign Goal ($):</label>
+          <label htmlFor="goal" className={styles.label}>Campaign Goal ($):</label>
           <input
             type="number"
             id="goal"
@@ -105,10 +109,11 @@ function CreateBusinessCampaign() {
             required
             min="0"
             step="0.01"
+            className={styles.input}
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="matchRate">Match Rate (%):</label>
+          <label htmlFor="matchRate" className={styles.label}>Match Rate (%):</label>
           <input
             type="number"
             id="matchRate"
@@ -119,6 +124,7 @@ function CreateBusinessCampaign() {
             min="0"
             max="100"
             step="0.01"
+            className={styles.input}
           />
         </div>
         <button type="submit" className={styles.submitButton}>Create Campaign</button>
@@ -128,4 +134,3 @@ function CreateBusinessCampaign() {
 }
 
 export default CreateBusinessCampaign;
-

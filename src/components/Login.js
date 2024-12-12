@@ -9,9 +9,11 @@ function Login() {
   const location = useLocation();
   const { login, businessLogin, charityLogin, socialLogin, API_URL } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [accountType, setAccountType] = useState('user');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    accountType: 'user'
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,11 +41,16 @@ function Login() {
     }
   }, [location, handleSocialLoginCallback]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!email || !password) {
+    if (!formData.email || !formData.password) {
       setError('Please enter both email and password.');
       return;
     }
@@ -52,17 +59,17 @@ function Login() {
 
     try {
       let loginResult;
-      switch (accountType) {
+      switch (formData.accountType) {
         case 'business':
-          loginResult = await businessLogin(email, password);
+          loginResult = await businessLogin(formData.email, formData.password);
           navigate('/business-dashboard');
           break;
         case 'charity':
-          loginResult = await charityLogin(email, password);
+          loginResult = await charityLogin(formData.email, formData.password);
           navigate('/charity-dashboard');
           break;
         default:
-          loginResult = await login(email, password);
+          loginResult = await login(formData.email, formData.password);
           navigate(loginResult?.isAdmin ? '/admin' : '/profile');
       }
     } catch (err) {
@@ -92,33 +99,33 @@ function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className={styles.loginForm}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email</label>
-            <div className={styles.inputWrapper}>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                aria-describedby="emailError"
-              />
-            </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+              className={`${styles.loginInput} ${error ? styles.error : ''}`}
+            />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="password">Password</label>
             <div className={styles.passwordWrapper}>
               <input
-                id="password"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Enter your password"
                 required
-                aria-describedby="passwordError"
+                className={`${styles.loginInput} ${error ? styles.error : ''}`}
               />
               <button
                 type="button"
@@ -135,9 +142,10 @@ function Login() {
             <label htmlFor="accountType">Account Type</label>
             <select
               id="accountType"
-              value={accountType}
-              onChange={(e) => setAccountType(e.target.value)}
-              className={styles.select}
+              name="accountType"
+              value={formData.accountType}
+              onChange={handleChange}
+              className={`${styles.loginInput} ${error ? styles.error : ''}`}
             >
               <option value="user">Personal Account</option>
               <option value="business">Business Account</option>
@@ -148,20 +156,20 @@ function Login() {
           <button 
             type="submit" 
             disabled={loading}
-            className={styles.submitButton}
+            className={styles.loginButton}
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
-        {accountType === 'user' && (
+        {formData.accountType === 'user' && (
           <div className={styles.socialLogin}>
             <h3>Or continue with</h3>
             <div className={styles.socialButtons}>
               <button
                 type="button"
                 onClick={() => handleSocialLogin('google')}
-                className={`${styles.socialButton} ${styles.google}`}
+                className={`${styles.loginSocialButton} ${styles.google}`}
               >
                 <svg viewBox="0 0 24 24">
                   <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
@@ -172,7 +180,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => handleSocialLogin('microsoft')}
-                className={`${styles.socialButton} ${styles.microsoft}`}
+                className={`${styles.loginSocialButton} ${styles.microsoft}`}
               >
                 <svg viewBox="0 0 24 24">
                   <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
@@ -184,10 +192,10 @@ function Login() {
         )}
 
         <div className={styles.links}>
-          <Link to="/signup" className={styles.link}>
+          <Link to="/signup" className={styles.loginLink}>
             Need an account? Sign Up
           </Link>
-          <Link to="/organization-signup" className={styles.link}>
+          <Link to="/organization-signup" className={styles.loginLink}>
             Register as a Charity or Organization
           </Link>
         </div>
