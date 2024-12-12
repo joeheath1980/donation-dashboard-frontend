@@ -46,13 +46,15 @@
 }
 
 form {
-  width: 100%;
-  max-width: 320px;
+  width: 320px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .formGroup {
   margin-bottom: 24px;
+  width: 320px;
+  box-sizing: border-box;
 }
 
 .formGroup label {
@@ -64,7 +66,7 @@ form {
 }
 
 .formGroup input {
-  width: 100%;
+  width: 320px;
   height: 48px;
   padding: 0 16px;
   border: 2px solid var(--border-light);
@@ -73,6 +75,7 @@ form {
   color: var(--text-primary);
   background-color: white;
   transition: var(--transition-standard);
+  box-sizing: border-box;
 }
 
 .formGroup input:focus {
@@ -87,6 +90,8 @@ form {
 
 .passwordWrapper {
   position: relative;
+  width: 320px;
+  box-sizing: border-box;
 }
 
 .toggleButton {
@@ -112,6 +117,8 @@ form {
   background-color: var(--border-light);
   border-radius: 2px;
   overflow: hidden;
+  width: 320px;
+  box-sizing: border-box;
 }
 
 .passwordStrengthBar {
@@ -144,10 +151,12 @@ form {
   color: var(--text-secondary);
   text-align: right;
   margin-top: 4px;
+  width: 320px;
+  box-sizing: border-box;
 }
 
 .submitButton {
-  width: 100%;
+  width: 320px;
   height: 48px;
   margin-top: 16px;
   background: var(--primary-color);
@@ -158,6 +167,7 @@ form {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-standard);
+  box-sizing: border-box;
 }
 
 .submitButton:hover {
@@ -194,13 +204,13 @@ form {
 .socialButtons {
   display: grid;
   gap: 12px;
-  width: 100%;
-  max-width: 320px;
+  width: 320px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .socialButton {
-  width: 100%;
+  width: 320px;
   height: 48px;
   border: 2px solid var(--border-light);
   border-radius: 12px;
@@ -214,6 +224,7 @@ form {
   justify-content: center;
   gap: 12px;
   transition: var(--transition-standard);
+  box-sizing: border-box;
 }
 
 .socialButton svg {
@@ -240,10 +251,10 @@ form {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  max-width: 320px;
+  width: 320px;
   margin-left: auto;
   margin-right: auto;
+  box-sizing: border-box;
 }
 
 .error {
@@ -269,6 +280,8 @@ form {
   font-size: 13px;
   margin-top: 4px;
   display: block;
+  width: 320px;
+  box-sizing: border-box;
 }
 
 .validationMessage.error {
@@ -282,6 +295,9 @@ form {
 .toggleText {
   text-align: center;
   margin-top: 24px;
+  width: 320px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .toggleText a {
