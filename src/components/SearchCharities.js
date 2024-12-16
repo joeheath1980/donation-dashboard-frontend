@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import styles from '../SearchCharities.module.css';
-import cleanStyles from './CleanDesign.module.css';
 import { FaSearch, FaInfoCircle } from 'react-icons/fa';
 
 function SearchCharities() {
@@ -35,70 +34,71 @@ function SearchCharities() {
   };
 
   return (
-    <div className={`${styles.container} ${cleanStyles.container}`}>
-      <div className={`${styles.searchSection} ${cleanStyles.card}`}>
-        <h1 className={`${styles.header} ${cleanStyles.heading}`}>Search Charities</h1>
-        <p className={`${styles.introText} ${cleanStyles.text}`}>
+    <div className={styles.container}>
+      <div className={styles.searchSection}>
+        <h1 className={styles.header}>Search Charities</h1>
+        <p className={styles.introText}>
           Discover charities that align with your values. Search for charities and view their details to learn more about their mission and impact.
         </p>
         <form onSubmit={handleSearch} className={styles.searchForm}>
-          <div className={cleanStyles.inputGroup}>
+          <div className={styles.inputGroup}>
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for charities"
-              className={`${styles.input} ${cleanStyles.input}`}
+              placeholder="Search for charities by name, location, or cause..."
+              className={styles.input}
+              aria-label="Search charities"
             />
-            <button type="submit" className={`${styles.searchButton} ${cleanStyles.button} ${cleanStyles.primary}`}>
-              <FaSearch className={cleanStyles.buttonIcon} /> Search
+            <button type="submit" className={styles.searchButton}>
+              <FaSearch /> Search
             </button>
           </div>
         </form>
       </div>
 
       {isLoading && (
-        <div className={`${styles.loading} ${cleanStyles.loadingContainer}`}>
-          Loading...
+        <div className={styles.loading}>
+          Searching for charities...
         </div>
       )}
       
       {error && (
-        <div className={`${styles.error} ${cleanStyles.error}`}>
+        <div className={styles.error}>
           {error}
         </div>
       )}
 
-      <div className={`${styles.resultsGrid} ${cleanStyles.grid}`}>
-        {results.map((charity) => (
-          <div key={charity._id} className={`${styles.card} ${cleanStyles.card}`}>
-            <h2 className={`${styles.charityName} ${cleanStyles.cardTitle}`}>
-              {charity['Charity_Legal_Name']}
-            </h2>
-            <div className={cleanStyles.cardContent}>
-              <p className={`${styles.charityDetails} ${cleanStyles.text}`}>
+      {results.length > 0 && (
+        <div className={styles.resultsGrid}>
+          {results.map((charity) => (
+            <div key={charity._id} className={styles.card}>
+              <h2 className={styles.charityName}>
+                {charity['Charity_Legal_Name']}
+              </h2>
+              <div className={styles.charityDetails}>
                 <strong>ABN:</strong> {charity['ABN']}
-              </p>
-              <p className={`${styles.charityDetails} ${cleanStyles.text}`}>
+              </div>
+              <div className={styles.charityDetails}>
                 <strong>State:</strong> {charity['State']}
-              </p>
+              </div>
+              <div className={styles.actionButtons}>
+                <Link 
+                  to={`/charity/${charity['ABN']}`} 
+                  className={styles.viewDetailsButton}
+                >
+                  <FaInfoCircle /> View Details
+                </Link>
+              </div>
             </div>
-            <div className={`${styles.actionButtons} ${cleanStyles.cardActions}`}>
-              <Link 
-                to={`/charity/${charity['ABN']}`} 
-                className={`${styles.viewDetailsButton} ${cleanStyles.button} ${cleanStyles.secondary}`}
-              >
-                <FaInfoCircle className={cleanStyles.buttonIcon} /> View Details
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {results.length > 0 && (
-        <div className={`${styles.guidanceBox} ${cleanStyles.card} ${cleanStyles.infoCard}`}>
-          <h3 className={cleanStyles.cardTitle}>What you can do:</h3>
-          <ul className={cleanStyles.list}>
+        <div className={styles.guidanceBox}>
+          <h3>What you can do:</h3>
+          <ul>
             <li>Click on "View Details" to learn more about a charity</li>
             <li>On the charity's detail page, you can choose to follow, find matching opportunities, or make donations</li>
           </ul>

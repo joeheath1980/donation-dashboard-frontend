@@ -7,18 +7,33 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
+const PrevArrow = ({ className, style, onClick }) => (
+  <div
+    className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
+    style={{ ...style }}
+    onClick={onClick}
+  />
+);
+
+const NextArrow = ({ className, style, onClick }) => (
+  <div
+    className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
+    style={{ ...style }}
+    onClick={onClick}
+  />
+);
+
 const GlobalGivingProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, user } = useAuth();
   const { formPersonalizedSearchQuery } = useContext(ImpactContext);
 
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const headers = getAuthHeaders();
       const searchQuery = formPersonalizedSearchQuery();
       console.log('Search Query:', searchQuery);
 
@@ -26,21 +41,37 @@ const GlobalGivingProjects = () => {
       const endpoint = `${apiUrl}/api/globalgiving/projects/recommended`;
 
       console.log('API URL:', endpoint);
-      console.log('Headers:', headers);
 
-      const response = await axios.get(endpoint, {
-        headers,
-        params: { searchQuery },
-        timeout: 60000,
+      // Only include search query if user is authenticated
+      const params = user && searchQuery ? { searchQuery } : undefined;
+      
+      // Get auth headers and ensure they're properly formatted
+      const headers = user ? {
+        ...getAuthHeaders(),
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      } : {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      console.log('Request Config:', {
+        params: params,
+        headers: headers.Authorization ? 'Bearer token present' : 'No token',
+        authenticated: !!user
       });
 
+      const config = {
+        params,
+        headers,
+        timeout: 60000,
+      };
+
+      const response = await axios.get(endpoint, config);
       console.log('API Response:', response.data);
       
-      // Check if response.data is an array (direct response) or if it's nested
-      const projectsData = Array.isArray(response.data) ? response.data : response.data.projects;
-      
-      if (Array.isArray(projectsData)) {
-        setProjects(projectsData);
+      if (Array.isArray(response.data)) {
+        setProjects(response.data);
       } else {
         console.error('Unexpected response format:', response.data);
         throw new Error('Invalid response format');
@@ -48,14 +79,41 @@ const GlobalGivingProjects = () => {
     } catch (err) {
       console.error('Error fetching GlobalGiving projects:', err);
       let errorMessage = 'An unexpected error occurred.';
+      
       if (err.response) {
         console.error('Error response:', err.response.data);
         console.error('Error status:', err.response.status);
         console.error('Error headers:', err.response.headers);
-        errorMessage = err.response.data.message || 'Failed to fetch GlobalGiving projects';
+
+        const errorCode = err.response.data.code;
+        
+        if (err.response.status === 401) {
+          switch (errorCode) {
+            case 'AUTH_REQUIRED':
+              errorMessage = 'Please log in to see personalized project recommendations.';
+              break;
+            case 'AUTH_FAILED':
+              errorMessage = 'Your session has expired. Please refresh the page or log in again.';
+              break;
+            default:
+              errorMessage = !user 
+                ? 'Please log in to see personalized project recommendations.'
+                : 'Your session has expired. Please refresh the page or log in again.';
+          }
+        } else if (err.response.status === 500) {
+          switch (errorCode) {
+            case 'FETCH_ERROR':
+              errorMessage = 'Unable to fetch personalized projects at this time. Please try again later.';
+              break;
+            default:
+              errorMessage = err.response.data.message || 'Failed to fetch GlobalGiving projects';
+          }
+        } else {
+          errorMessage = err.response.data.message || 'Failed to fetch GlobalGiving projects';
+        }
       } else if (err.request) {
         console.error('Error request:', err.request);
-        errorMessage = 'No response received from the server.';
+        errorMessage = 'No response received from the server. Please try again later.';
       } else {
         console.error('Error message:', err.message);
       }
@@ -63,7 +121,7 @@ const GlobalGivingProjects = () => {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders, formPersonalizedSearchQuery]);
+  }, [getAuthHeaders, formPersonalizedSearchQuery, user]);
 
   useEffect(() => {
     fetchProjects();
@@ -75,11 +133,35 @@ const GlobalGivingProjects = () => {
     fetchProjects();
   };
 
-  if (loading) return <div className={styles.loading}>Loading personalized GlobalGiving projects...</div>;
+  const formatSummary = (summary) => {
+    if (!summary) return 'No description available';
+    const words = summary.split(' ');
+    if (words.length <= 30) return summary;
+    return words.slice(0, 30).join(' ') + '...';
+  };
+
+  const formatAmount = (amount) => {
+    if (!amount) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        Loading {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} GlobalGiving projects...
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className={styles.error}>
-        <p>Error: {error}</p>
+        <p>{error}</p>
         <button onClick={handleRetry} className={styles.retryButton}>Retry</button>
       </div>
     );
@@ -114,48 +196,45 @@ const GlobalGivingProjects = () => {
   return (
     <div className={styles.container}>
       {projects.length === 0 ? (
-        <p className={styles.noProjects}>No personalized projects available at the moment. Please try again later.</p>
+        <p className={styles.noProjects}>
+          No {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} projects available at the moment. 
+          Please try again later.
+        </p>
       ) : (
-        <Slider {...settings}>
-          {projects.map((project, index) => (
-            <div key={index} className={styles.carouselItemWrapper}>
-              <div className={styles.carouselItem}>
-                <h3 className={styles.itemTitle}>{project.title}</h3>
-                <div className={styles.itemContent}>
-                  <p className={styles.projectSummary}>{project.summary.substring(0, 100)}...</p>
-                  <p className={styles.projectGoal}>Goal: ${project.goal.toLocaleString()}</p>
-                </div>
-                <div className={styles.buttonWrapper}>
-                  <a href={project.projectLink} className={styles.learnMoreButton} target="_blank" rel="noopener noreferrer">Donate now</a>
+        <div className={styles.carouselWrapper}>
+          <Slider {...settings}>
+            {projects.map((project, index) => (
+              <div key={project.id || index} className={styles.carouselItemWrapper}>
+                <div className={styles.carouselItem}>
+                  <div className={styles.itemContent}>
+                    <h3 className={styles.itemTitle}>{project.title}</h3>
+                    <p className={styles.projectSummary}>
+                      {formatSummary(project.summary)}
+                    </p>
+                    <div className={styles.projectDetails}>
+                      <p className={styles.projectGoalLabel}>Fundraising Goal</p>
+                      <p className={styles.projectGoal}>
+                        {formatAmount(project.goal)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={styles.buttonWrapper}>
+                    <a 
+                      href={project.projectLink} 
+                      className={styles.learnMoreButton} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      Support this project
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </Slider>
+            ))}
+          </Slider>
+        </div>
       )}
     </div>
-  );
-};
-
-const PrevArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
-      style={{ ...style, display: 'block' }}
-      onClick={onClick}
-    />
-  );
-};
-
-const NextArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
-      style={{ ...style, display: 'block' }}
-      onClick={onClick}
-    />
   );
 };
 

@@ -19,7 +19,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Profile</h2>
             </div>
             <p className={cleanStyles.cardText}>Manage your personal information and preferences.</p>
-            <button className={`${styles.cardButton} ${cleanStyles.button}`}>Edit Profile</button>
+            <button className={cleanStyles.button}>Edit Profile</button>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Keep your profile updated for a better experience!</span>
           </div>
 
@@ -31,7 +31,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Privacy</h2>
             </div>
             <p className={cleanStyles.cardText}>Control your privacy settings and data sharing preferences.</p>
-            <button className={`${styles.cardButton} ${cleanStyles.button}`}>Manage Privacy</button>
+            <button className={cleanStyles.button}>Manage Privacy</button>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Your privacy matters. Review your settings regularly.</span>
           </div>
 
@@ -43,7 +43,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Payments</h2>
             </div>
             <p className={cleanStyles.cardText}>View and manage your payment methods and recurring donations.</p>
-            <Link to="/manage-payments" className={`${styles.cardButton} ${cleanStyles.button}`}>Manage Payments</Link>
+            <Link to="/manage-payments" className={cleanStyles.button}>Manage Payments</Link>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Securely manage your payment options here.</span>
           </div>
 
@@ -55,7 +55,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Your Impact</h2>
             </div>
             <p className={cleanStyles.cardText}>Explore your giving history and see the impact you've made.</p>
-            <Link to="/your-impact" className={`${styles.cardButton} ${cleanStyles.button}`}>View Impact</Link>
+            <Link to="/your-impact" className={cleanStyles.button}>View Impact</Link>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Discover how your contributions are making a difference.</span>
           </div>
 
@@ -67,7 +67,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Discover Your Donations</h2>
             </div>
             <p className={cleanStyles.cardText}>Find and categorize your past donations from email receipts.</p>
-            <Link to="/activity" className={`${styles.cardButton} ${cleanStyles.button}`}>Discover</Link>
+            <Link to="/activity" className={cleanStyles.button}>Discover</Link>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Uncover and organize your charitable contributions.</span>
           </div>
 
@@ -79,7 +79,7 @@ const YourAccount = () => {
               <h2 className={cleanStyles.cardTitle}>Account Settings</h2>
             </div>
             <p className={cleanStyles.cardText}>Adjust your account preferences and notification settings.</p>
-            <button className={`${styles.cardButton} ${cleanStyles.button}`}>Manage Settings</button>
+            <button className={cleanStyles.button}>Manage Settings</button>
             <span className={`${styles.ctaTip} ${cleanStyles.tip}`}>Customize your account for the best experience.</span>
           </div>
         </div>
