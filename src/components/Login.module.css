@@ -45,7 +45,7 @@
   margin-bottom: 40px;
 }
 
-form {
+.loginForm {
   width: 320px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -131,7 +131,7 @@ form {
   color: var(--primary-color);
 }
 
-.submitButton {
+.loginButton {
   width: 320px !important;
   height: 48px !important;
   margin-top: 16px !important;
@@ -151,21 +151,22 @@ form {
   min-height: unset !important;
 }
 
-.submitButton:hover {
+.loginButton:hover:not(:disabled) {
   background: var(--primary-dark) !important;
   transform: translateY(-1px) !important;
   box-shadow: var(--shadow-md) !important;
 }
 
-.submitButton:active {
+.loginButton:active:not(:disabled) {
   transform: translateY(0) !important;
 }
 
-.submitButton:disabled {
+.loginButton:disabled {
   background: #a0a0a0 !important;
   cursor: not-allowed !important;
   transform: none !important;
   box-shadow: none !important;
+  opacity: 0.7;
 }
 
 .socialLogin {
@@ -190,7 +191,7 @@ form {
   box-sizing: border-box;
 }
 
-.socialButton {
+.loginSocialButton {
   width: 320px !important;
   height: 48px !important;
   border: 2px solid var(--border-light) !important;
@@ -209,21 +210,33 @@ form {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-  padding: 0 !important;
+  padding: 0 16px !important;
   min-height: unset !important;
+  position: relative;
 }
 
-.socialButton svg {
+.loginSocialButton:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.loginSocialButton .socialIcon {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
 }
 
-.socialButton.google:hover {
+.loginSocialButton span {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.google:hover:not(:disabled) {
   border-color: #db4437 !important;
   background-color: rgba(219, 68, 55, 0.05) !important;
 }
 
-.socialButton.microsoft:hover {
+.microsoft:hover:not(:disabled) {
   border-color: #00a4ef !important;
   background-color: rgba(0, 164, 239, 0.05) !important;
 }
@@ -289,7 +302,7 @@ form {
   gap: 12px;
 }
 
-.link {
+.loginLink {
   color: var(--primary-color);
   text-decoration: none;
   font-size: 15px;
@@ -297,7 +310,7 @@ form {
   transition: var(--transition-standard);
 }
 
-.link:hover {
+.loginLink:hover {
   color: var(--primary-dark);
   text-decoration: underline;
 }
@@ -313,8 +326,8 @@ form {
 
   .formGroup input,
   .formGroup select,
-  .submitButton,
-  .socialButton {
+  .loginButton,
+  .loginSocialButton {
     height: 46px;
     font-size: 14px;
   }

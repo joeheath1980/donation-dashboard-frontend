@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 const STORAGE_KEY = 'donation-activity-state';
 
-// Valid charity types from the backend model
 const CHARITY_TYPES = [
   'Health Services',
   'Mental Health',
@@ -36,73 +35,61 @@ function Activity() {
   const [authStatus, setAuthStatus] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
   const [donationStatuses, setDonationStatuses] = useState({});
+  const [isClearing, setIsClearing] = useState(false);
 
-  // Refs for state management
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
   const mountCount = useRef(0);
   const lastSavedState = useRef(null);
+  const wasCleared = useRef(false);
+  const clearingTimeout = useRef(null);
 
-  // Load saved state on mount using useLayoutEffect to avoid flicker
   useLayoutEffect(() => {
-    // Skip if already initialized
-    if (isInitialized.current) {
-      return;
-    }
+    if (isInitialized.current) return;
 
     const savedState = localStorage.getItem(STORAGE_KEY);
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        lastSavedState.current = parsed; // Store the parsed state
+        lastSavedState.current = parsed;
 
         let validSearchHistory = [];
         let validDonationStatuses = {};
 
-        // Try to parse search history
-        if (parsed?.searchHistory) {
-          try {
-            if (Array.isArray(parsed.searchHistory)) {
-              validSearchHistory = parsed.searchHistory.map(entry => {
-                try {
-                  return {
-                    ...entry,
-                    timestamp: new Date(entry.timestamp || Date.now()),
-                    results: Array.isArray(entry.results) ? entry.results.map(result => ({
-                      ...result,
-                      id: result.id || `recovered-${Date.now()}-${Math.random()}`,
-                      searchTimestamp: new Date(result.searchTimestamp || Date.now())
-                    })) : []
-                  };
-                } catch (entryError) {
-                  console.warn('Error parsing search history entry:', entryError);
-                  return null;
-                }
-              }).filter(Boolean);
-            }
-          } catch (searchHistoryError) {
-            console.warn('Error parsing search history:', searchHistoryError);
-          }
-        }
-
-        // Try to parse donation statuses
-        if (parsed?.donationStatuses && typeof parsed.donationStatuses === 'object') {
-          try {
-            Object.entries(parsed.donationStatuses).forEach(([key, value]) => {
-              if (value && typeof value === 'object' && value.type) {
-                validDonationStatuses[key] = {
-                  ...value,
-                  timestamp: value.timestamp || new Date().toISOString()
+        if (parsed?.searchHistory && Array.isArray(parsed.searchHistory)) {
+          validSearchHistory = parsed.searchHistory
+            .map(entry => {
+              try {
+                return {
+                  ...entry,
+                  timestamp: new Date(entry.timestamp || Date.now()),
+                  results: Array.isArray(entry.results) ? entry.results.map(result => ({
+                    ...result,
+                    id: result.id || `recovered-${Date.now()}-${Math.random()}`,
+                    searchTimestamp: new Date(result.searchTimestamp || Date.now())
+                  })) : []
                 };
+              } catch (entryError) {
+                console.warn('Error parsing search history entry:', entryError);
+                return null;
               }
-            });
-          } catch (statusError) {
-            console.warn('Error parsing donation statuses:', statusError);
-          }
+            })
+            .filter(Boolean);
         }
 
-        // Only update state if we have valid data
+        if (parsed?.donationStatuses && typeof parsed.donationStatuses === 'object') {
+          Object.entries(parsed.donationStatuses).forEach(([key, value]) => {
+            if (value && typeof value === 'object' && value.type) {
+              validDonationStatuses[key] = {
+                ...value,
+                timestamp: value.timestamp || new Date().toISOString()
+              };
+            }
+          });
+        }
+
         if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
+          console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
           setSearchHistory(validSearchHistory);
           setDonationStatuses(validDonationStatuses);
           hasSavedData.current = true;
@@ -113,31 +100,30 @@ function Activity() {
     }
 
     isInitialized.current = true;
-  }, []); // Empty dependency array since this should only run once
+  }, []);
 
-  // Save state changes to localStorage with guards against empty data
   useEffect(() => {
-    // Skip the first mount in StrictMode
     if (mountCount.current === 0) {
       mountCount.current++;
       return;
     }
 
-    // Skip if we haven't initialized yet
-    if (!isInitialized.current) {
+    if (!isInitialized.current) return;
+
+    const isEmpty = searchHistory.length === 0 && Object.keys(donationStatuses).length === 0;
+    console.log('[Activity] State change detected:', {
+      isEmpty,
+      wasCleared: wasCleared.current,
+      searchHistoryLength: searchHistory.length,
+      donationStatusesLength: Object.keys(donationStatuses).length
+    });
+
+    if (wasCleared.current && isEmpty) {
+      console.log('[Activity] Skipping save due to cleared state');
       return;
     }
 
-    // Only save if we have actual data to save
-    if (searchHistory.length === 0 && Object.keys(donationStatuses).length === 0) {
-      // If we previously had data but now it's empty, don't overwrite localStorage
-      if (hasSavedData.current) {
-        return;
-      }
-    }
-
     try {
-      // Prepare search history for storage
       const safeSearchHistory = searchHistory.map(entry => ({
         ...entry,
         timestamp: entry.timestamp instanceof Date ? entry.timestamp.toISOString() : new Date().toISOString(),
@@ -149,7 +135,6 @@ function Activity() {
         })) : []
       }));
 
-      // Prepare donation statuses for storage
       const safeDonationStatuses = Object.entries(donationStatuses).reduce((acc, [key, value]) => {
         if (value && typeof value === 'object' && value.type) {
           acc[key] = {
@@ -160,14 +145,21 @@ function Activity() {
         return acc;
       }, {});
 
-      // Compare with last saved state to prevent unnecessary saves
       const newState = {
         searchHistory: safeSearchHistory,
         donationStatuses: safeDonationStatuses
       };
 
       const lastState = lastSavedState.current;
-      if (JSON.stringify(newState) !== JSON.stringify(lastState)) {
+      const statesAreDifferent = JSON.stringify(newState) !== JSON.stringify(lastState);
+      console.log('[Activity] State comparison:', {
+        statesAreDifferent,
+        newStateEmpty: isEmpty,
+        lastStateNull: lastState === null
+      });
+
+      if (statesAreDifferent && !isEmpty) {
+        console.log('[Activity] Saving new state to localStorage');
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
         lastSavedState.current = newState;
         hasSavedData.current = true;
@@ -177,17 +169,45 @@ function Activity() {
     }
   }, [searchHistory, donationStatuses]);
 
+  useEffect(() => {
+    return () => {
+      if (clearingTimeout.current) {
+        clearTimeout(clearingTimeout.current);
+      }
+    };
+  }, []);
+
+  const handleClearAll = () => {
+    console.log('[Activity] Starting clear operation');
+    setIsClearing(true);
+    wasCleared.current = true;
+
+    console.log('[Activity] Removing data from localStorage');
+    localStorage.removeItem(STORAGE_KEY);
+    
+    console.log('[Activity] Resetting all states');
+    setSearchHistory([]);
+    setDonationStatuses({});
+    setSelectedTypes({});
+    setSelectedCharityTypes({});
+    
+    console.log('[Activity] Resetting refs');
+    lastSavedState.current = null;
+    hasSavedData.current = false;
+    
+    clearingTimeout.current = setTimeout(() => {
+      console.log('[Activity] Finishing clear operation');
+      setIsClearing(false);
+    }, 300);
+  };
+
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/google/status`, {
         credentials: 'include',
       });
       const data = await response.json();
-      if (data.authenticated) {
-        setAuthStatus('Authenticated');
-      } else {
-        setAuthStatus('');
-      }
+      setAuthStatus(data.authenticated ? 'Authenticated' : '');
     } catch (error) {
       console.error('Error checking auth status:', error);
       setAuthStatus('');
@@ -220,13 +240,18 @@ function Activity() {
         }
       } else {
         const data = await response.json();
-        const timestamp = new Date();
-        const resultsWithIds = data.map(result => ({
-          ...result,
-          id: `outlook-${timestamp.getTime()}-${Math.random()}`,
-          searchTimestamp: timestamp
-        }));
-        setSearchHistory(prev => [{ timestamp, source: 'outlook', results: resultsWithIds }, ...prev]);
+        if (data.length > 0) {
+          console.log('[Activity] Found Outlook emails:', data.length);
+          const timestamp = new Date();
+          const resultsWithIds = data.map(result => ({
+            ...result,
+            id: `outlook-${timestamp.getTime()}-${Math.random()}`,
+            searchTimestamp: timestamp
+          }));
+          setSearchHistory(prev => [{ timestamp, source: 'outlook', results: resultsWithIds }, ...prev]);
+          wasCleared.current = false;
+          console.log('[Activity] Reset wasCleared due to new data');
+        }
       }
     } catch (error) {
       console.error('Error during Outlook email search:', error);
@@ -274,13 +299,18 @@ function Activity() {
         }
       } else {
         const data = await response.json();
-        const timestamp = new Date();
-        const resultsWithIds = data.map(result => ({
-          ...result,
-          id: `gmail-${timestamp.getTime()}-${Math.random()}`,
-          searchTimestamp: timestamp
-        }));
-        setSearchHistory(prev => [{ timestamp, source: 'gmail', results: resultsWithIds }, ...prev]);
+        if (data.length > 0) {
+          console.log('[Activity] Found Gmail emails:', data.length);
+          const timestamp = new Date();
+          const resultsWithIds = data.map(result => ({
+            ...result,
+            id: `gmail-${timestamp.getTime()}-${Math.random()}`,
+            searchTimestamp: timestamp
+          }));
+          setSearchHistory(prev => [{ timestamp, source: 'gmail', results: resultsWithIds }, ...prev]);
+          wasCleared.current = false;
+          console.log('[Activity] Reset wasCleared due to new data');
+        }
       }
     } catch (error) {
       console.error('Error during email search:', error);
@@ -291,15 +321,14 @@ function Activity() {
   };
 
   const handleTypeChange = (index, event) => {
-    setSelectedTypes({ ...selectedTypes, [index]: event.target.value });
+    setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
   };
 
   const handleCharityTypeChange = (index, event) => {
-    setSelectedCharityTypes({ ...selectedCharityTypes, [index]: event.target.value });
+    setSelectedCharityTypes(prev => ({ ...prev, [index]: event.target.value }));
   };
 
   const formatDonationData = (donation) => {
-    // Parse amount to remove currency symbols and convert to number
     const amount = parseFloat(donation.amount.replace(/[^0-9.-]+/g, ''));
     const date = new Date(donation.date);
     
@@ -307,7 +336,7 @@ function Activity() {
       amount,
       charity: donation.charity,
       date: date.toISOString().split('T')[0],
-      charityType: selectedCharityTypes[donation.id] || 'Social Welfare', // Use selected charity type or default to a valid type
+      charityType: selectedCharityTypes[donation.id] || 'Social Welfare',
       needsValidation: true,
       subject: donation.subject
     };
@@ -323,64 +352,56 @@ function Activity() {
     }
 
     try {
-      let result;
-      if (selectedType === 'regular') {
-        formattedDonation.isMonthly = true;
-        result = await fetch(`${API_URL}/api/donations`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formattedDonation)
-        }).then(response => {
-          if (!response.ok) throw new Error('Failed to add donation');
-          return response.json();
-        });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
-        if (result?._id) {
-          setDonationStatuses(prev => ({ 
-            ...prev, 
-            [donation.id]: { 
-              type: 'committed-regular',
-              resultId: result._id,
-              timestamp: new Date().toISOString()
-            }
-          }));
-          // Call addDonation from context after successful commit
-          addDonation(result);
-        }
-      } else if (selectedType === 'one-off') {
-        // Updated endpoint to match backend
-        result = await fetch(`${API_URL}/api/contributions/one-off`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formattedDonation)
-        }).then(response => {
-          if (!response.ok) throw new Error('Failed to add one-off contribution');
-          return response.json();
-        });
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
-        if (result?._id) {
-          setDonationStatuses(prev => ({ 
-            ...prev, 
-            [donation.id]: { 
-              type: 'committed-oneoff',
-              resultId: result._id,
-              timestamp: new Date().toISOString()
-            }
-          }));
-          // Call addOneOffContribution from context after successful commit
-          addOneOffContribution(result);
+      const endpoint = selectedType === 'regular' 
+        ? `${API_URL}/api/donations`
+        : `${API_URL}/api/contributions/one-off`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(formattedDonation)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add donation');
+      }
+
+      const result = await response.json();
+
+      if (result?._id) {
+        console.log(`[Activity] Committed ${selectedType} donation:`, result._id);
+        setDonationStatuses(prev => ({ 
+          ...prev, 
+          [donation.id]: { 
+            type: `committed-${selectedType === 'regular' ? 'regular' : 'oneoff'}`,
+            resultId: result._id,
+            timestamp: new Date().toISOString()
+          }
+        }));
+
+        // Pass true for alreadySaved to prevent double API call
+        if (selectedType === 'regular') {
+          addDonation(result, true);
+        } else {
+          addOneOffContribution(result, true);
         }
+
+        wasCleared.current = false;
+        console.log('[Activity] Reset wasCleared due to new data');
       }
     } catch (error) {
       console.error('Error committing donation:', error);
       setError(`Failed to commit donation: ${error.message}`);
-      // Reset status if commit fails
       setDonationStatuses(prev => {
         const newStatuses = { ...prev };
         delete newStatuses[donation.id];
@@ -390,6 +411,7 @@ function Activity() {
   };
 
   const handleDelete = (donationId) => {
+    console.log('[Activity] Deleting donation:', donationId);
     setDonationStatuses(prev => ({ 
       ...prev, 
       [donationId]: { 
@@ -397,14 +419,19 @@ function Activity() {
         timestamp: new Date().toISOString()
       }
     }));
+    wasCleared.current = false;
+    console.log('[Activity] Reset wasCleared due to new data');
   };
 
   const handleRestore = (donationId) => {
+    console.log('[Activity] Restoring donation:', donationId);
     setDonationStatuses(prev => {
       const newStatuses = { ...prev };
       delete newStatuses[donationId];
       return newStatuses;
     });
+    wasCleared.current = false;
+    console.log('[Activity] Reset wasCleared due to new data');
   };
 
   const navigateToDonation = (donation, type) => {
@@ -425,7 +452,7 @@ function Activity() {
 
     const cardClassName = `${styles.emailResultItem} ${cleanStyles.card} ${
       isCommitted ? styles.committedDonation : ''
-    } ${isDeleted ? styles.deletedDonation : ''}`;
+    } ${isDeleted ? styles.deletedDonation : ''} ${isClearing ? styles.clearing : ''}`;
 
     return (
       <li key={donation.id} className={cardClassName}>
@@ -508,9 +535,9 @@ function Activity() {
   };
 
   const renderSearchResults = () => (
-    <div className={styles.searchHistory}>
+    <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
       {searchHistory.map((entry, index) => (
-        <div key={index} className={styles.searchEntry}>
+        <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className={cleanStyles.heading}>
             Search Results from {entry.source.toUpperCase()} - 
             {format(new Date(entry.timestamp), 'dd/MM/yyyy HH:mm:ss')}
@@ -533,21 +560,31 @@ function Activity() {
         <div className={styles.buttonContainer}>
           <button 
             onClick={handleSearchEmails} 
-            disabled={loading} 
+            disabled={loading || isClearing} 
             className={`${styles.scrapeButton} ${cleanStyles.button}`}
           >
             {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
           <button 
             onClick={handleSearchOutlookEmails} 
-            disabled={loading} 
+            disabled={loading || isClearing} 
             className={`${styles.scrapeButton} ${cleanStyles.button}`}
           >
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
-          <Link to="/your-impact" className={`${styles.toggleButton} ${cleanStyles.button}`}>
+          <Link to="/profile" className={`${styles.toggleButton} ${cleanStyles.button}`}>
             Check Out Your Impact
           </Link>
+          {searchHistory.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              disabled={isClearing}
+              className={`${styles.clearButton} ${cleanStyles.button}`}
+              aria-label="Clear all search results"
+            >
+              {isClearing ? 'Clearing...' : 'Clear All'}
+            </button>
+          )}
         </div>
 
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}

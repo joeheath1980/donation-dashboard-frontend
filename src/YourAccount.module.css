@@ -90,24 +90,6 @@
   text-align: left;
 }
 
-.cardButton {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: var(--transition-standard);
-  text-decoration: none;
-  display: inline-block;
-}
-
-.cardButton:hover {
-  background: var(--primary-gradient);
-  transform: scale(1.05);
-}
-
 .ctaTip {
   display: block;
   font-size: 0.9rem;

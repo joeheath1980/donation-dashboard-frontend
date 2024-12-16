@@ -1,17 +1,16 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Max points for each component - More balanced distribution
+// Max points for each component
 const MAX_DONATION_SCORE = 40;
-const MAX_VOLUNTEER_SCORE = 25; // Reduced from 30
-const MAX_FUNDRAISING_SCORE = 25; // Increased from 20
+const MAX_VOLUNTEER_SCORE = 25;
+const MAX_FUNDRAISING_SCORE = 25;
 
-// Donation Score Calculation (Max 40 points)
+// Score calculation functions remain unchanged
 const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampaigns = []) => {
-  // Convert archived campaigns to donation format
   const archivedDonations = archivedCampaigns.map(campaign => ({
     amount: campaign.raisedAmount || campaign.goalAmount,
     date: campaign.completedDate
@@ -20,28 +19,23 @@ const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampa
   const totalDonations = [...regularDonations, ...oneOffDonations, ...archivedDonations];
   const totalDonationAmount = totalDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
-  // Tiered Points with Diminishing Returns
   let donationScore = 0;
   let remainingAmount = totalDonationAmount;
 
-  // First $1,000: 1 point per $100 donated => 10 points
   const firstTierAmount = Math.min(remainingAmount, 1000);
   donationScore += firstTierAmount / 100;
   remainingAmount -= firstTierAmount;
 
-  // Next $4,000: 1 point per $200 donated => 20 points
   if (remainingAmount > 0) {
     const secondTierAmount = Math.min(remainingAmount, 4000);
     donationScore += secondTierAmount / 200;
     remainingAmount -= secondTierAmount;
   }
 
-  // Above $5,000: 1 point per $500 donated => 10 points
   if (remainingAmount > 0) {
     donationScore += remainingAmount / 500;
   }
 
-  // Regular Giving Multiplier
   let regularGivingMultiplier = 1;
   if (regularDonations && regularDonations.length > 0) {
     const frequencies = regularDonations.map(d => d.frequency);
@@ -53,37 +47,29 @@ const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampa
   }
   donationScore *= regularGivingMultiplier;
 
-  // Cap at MAX_DONATION_SCORE
-  donationScore = Math.min(donationScore, MAX_DONATION_SCORE);
-
-  return Math.round(donationScore);
+  return Math.min(Math.round(donationScore), MAX_DONATION_SCORE);
 };
 
-// Volunteer Score Calculation (Max 25 points) - Adjusted scoring
 const calculateVolunteerScore = (volunteeringActivities) => {
   const totalVolunteerHours = volunteeringActivities.reduce((sum, v) => sum + (v.hours || 0), 0);
 
   let volunteerScore = 0;
   let remainingHours = totalVolunteerHours;
 
-  // First 40 Hours: 0.5 points per hour (max 20 points)
   const firstTierHours = Math.min(remainingHours, 40);
   volunteerScore += firstTierHours * 0.5;
   remainingHours -= firstTierHours;
 
-  // Next 80 Hours: 0.3 points per hour
   if (remainingHours > 0) {
     const secondTierHours = Math.min(remainingHours, 80);
     volunteerScore += secondTierHours * 0.3;
     remainingHours -= secondTierHours;
   }
 
-  // Above 120 Hours: 0.1 points per hour
   if (remainingHours > 0) {
     volunteerScore += remainingHours * 0.1;
   }
 
-  // Long-Term Commitment Bonus (reduced)
   let longTermBonus = 0;
   let earliestStartDate = new Date();
   let latestEndDate = new Date(0);
@@ -98,58 +84,45 @@ const calculateVolunteerScore = (volunteeringActivities) => {
   const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + (latestEndDate.getMonth() - earliestStartDate.getMonth());
 
   if (durationInMonths >= 12) {
-    longTermBonus = 3; // Reduced from 5
+    longTermBonus = 3;
   } else if (durationInMonths >= 6) {
-    longTermBonus = 1.5; // Reduced from 2.5
+    longTermBonus = 1.5;
   }
 
   volunteerScore += longTermBonus;
 
-  // Cap at MAX_VOLUNTEER_SCORE
-  volunteerScore = Math.min(volunteerScore, MAX_VOLUNTEER_SCORE);
-
-  return Math.round(volunteerScore);
+  return Math.min(Math.round(volunteerScore), MAX_VOLUNTEER_SCORE);
 };
 
-// Fundraising Score Calculation (Max 25 points) - Adjusted scoring
 const calculateFundraisingScore = (fundraisingCampaigns) => {
-  // Consider both active and archived campaigns
   const totalFundsRaised = fundraisingCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
 
   let fundraisingScore = 0;
   let remainingAmount = totalFundsRaised;
 
-  // First $2,000: 1 point per $100 raised => 20 points
   const firstTierAmount = Math.min(remainingAmount, 2000);
   fundraisingScore += firstTierAmount / 100;
   remainingAmount -= firstTierAmount;
 
-  // Next $6,000: 1 point per $300 raised
   if (remainingAmount > 0) {
     const secondTierAmount = Math.min(remainingAmount, 6000);
     fundraisingScore += secondTierAmount / 300;
     remainingAmount -= secondTierAmount;
   }
 
-  // Above $8,000: 1 point per $600 raised
   if (remainingAmount > 0) {
     fundraisingScore += remainingAmount / 600;
   }
 
-  // Fundraising Activity Bonus (adjusted)
   const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
   const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
 
-  fundraisingScore += totalEventsOrganized * 1.5; // Reduced from 2 points per event
-  fundraisingScore += totalOnlineCampaignsInitiated * 0.75; // Reduced from 1 point per campaign
+  fundraisingScore += totalEventsOrganized * 1.5;
+  fundraisingScore += totalOnlineCampaignsInitiated * 0.75;
 
-  // Cap at MAX_FUNDRAISING_SCORE
-  fundraisingScore = Math.min(fundraisingScore, MAX_FUNDRAISING_SCORE);
-
-  return Math.round(fundraisingScore);
+  return Math.min(Math.round(fundraisingScore), MAX_FUNDRAISING_SCORE);
 };
 
-// Main Impact Score Calculation
 export const calculateComplexImpactScore = (userData) => {
   if (!userData) {
     console.error('Invalid input for calculateComplexImpactScore');
@@ -163,7 +136,6 @@ export const calculateComplexImpactScore = (userData) => {
     fundraisingCampaigns = []
   } = userData;
 
-  // Separate archived campaigns for donation score calculation
   const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
 
   const donationScore = calculateDonationScore(regularDonations, oneOffDonations, archivedCampaigns);
@@ -171,8 +143,6 @@ export const calculateComplexImpactScore = (userData) => {
   const fundraisingScore = calculateFundraisingScore(fundraisingCampaigns);
 
   const totalScore = donationScore + volunteerScore + fundraisingScore;
-
-  // Ensure total score does not exceed 90 (leaving room for special achievements)
   const finalTotalScore = Math.min(Math.round(totalScore), 90);
 
   return {
@@ -190,7 +160,6 @@ const defaultScoreDetails = {
   fundraisingScore: 0
 };
 
-// Helper function to extract keywords from text
 const extractKeywords = (text) => {
   if (!text) return [];
   const stopwords = new Set([
@@ -200,10 +169,7 @@ const extractKeywords = (text) => {
     'should', 'can', 'could', 'may', 'might', 'must', 'this', 'that', 'these', 'those'
   ]);
 
-  // Remove punctuation and convert to lowercase
   const words = text.replace(/[^\w\s]/gi, '').toLowerCase().split(/\s+/);
-
-  // Filter out stopwords and short words
   return words.filter(word => word.length > 2 && !stopwords.has(word));
 };
 
@@ -220,6 +186,15 @@ export const ImpactProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const searchQueryRef = useRef('');
+  const dataRef = useRef({
+    donations: [],
+    oneOffContributions: [],
+    volunteerActivities: [],
+    fundraisingCampaigns: [],
+    followedCharities: []
+  });
 
   const { user } = useAuth();
 
@@ -227,6 +202,23 @@ export const ImpactProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }, []);
+
+  const updateImpactScore = useCallback(() => {
+    const userData = {
+      regularDonations: donations,
+      oneOffDonations: oneOffContributions,
+      volunteeringActivities: volunteerActivities,
+      fundraisingCampaigns: fundraisingCampaigns
+    };
+
+    const scoreResult = calculateComplexImpactScore(userData);
+    setImpactScore(scoreResult.totalScore);
+    setScoreDetails(scoreResult);
+
+    const currentTier = getTier(scoreResult.totalScore);
+    setTier(currentTier.tier);
+    setPointsToNextTier(currentTier.pointsToNextTier);
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
 
   const fetchImpactData = useCallback(async () => {
     setError(null);
@@ -251,22 +243,6 @@ export const ImpactProvider = ({ children }) => {
       setVolunteerActivities(volunteerRes.data);
       setFundraisingCampaigns(fundraisingRes.data);
 
-      const userData = {
-        regularDonations: donationsRes.data,
-        oneOffDonations: oneOffRes.data,
-        volunteeringActivities: volunteerRes.data,
-        fundraisingCampaigns: fundraisingRes.data
-      };
-
-      const scoreResult = calculateComplexImpactScore(userData);
-      setImpactScore(scoreResult.totalScore);
-      setScoreDetails(scoreResult);
-
-      const currentTier = getTier(scoreResult.totalScore);
-      setTier(currentTier.tier);
-      setPointsToNextTier(currentTier.pointsToNextTier);
-
-      // Calculate last year's impact score
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
       const lastYearUserData = {
@@ -277,7 +253,6 @@ export const ImpactProvider = ({ children }) => {
       };
       const lastYearScoreResult = calculateComplexImpactScore(lastYearUserData);
       setLastYearImpactScore(lastYearScoreResult.totalScore);
-
     } catch (error) {
       console.error('Error fetching impact data:', error);
       setError('Failed to fetch impact data.');
@@ -293,45 +268,54 @@ export const ImpactProvider = ({ children }) => {
     return { tier: "Giver", nextTier: "Altruist", pointsToNextTier: 30 - score };
   };
 
-  const addDonation = async (donation) => {
+  const addDonation = useCallback(async (donation, alreadySaved = false) => {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.post('http://localhost:3002/api/donations', donation, { headers });
-      if (response.status === 201) {
-        setDonations(prevDonations => [...prevDonations, response.data]);
-        fetchImpactData();
+      let savedDonation = donation;
+      if (!alreadySaved) {
+        const headers = getAuthHeaders();
+        const response = await axios.post('http://localhost:3002/api/donations', donation, { headers });
+        if (response.status !== 201) {
+          throw new Error('Failed to add donation');
+        }
+        savedDonation = response.data;
       }
+      
+      setDonations(prevDonations => [...prevDonations, savedDonation]);
     } catch (error) {
       console.error('Error adding donation:', error);
       setError('Failed to add donation. Please try again.');
     }
-  };
+  }, [getAuthHeaders]);
 
-  const addOneOffContribution = async (contribution) => {
+  const addOneOffContribution = useCallback(async (contribution, alreadySaved = false) => {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.post('http://localhost:3002/api/contributions/one-off', contribution, { headers });
-      if (response.status === 201) {
-        setOneOffContributions(prevContributions => [...prevContributions, response.data]);
-        fetchImpactData();
+      let savedContribution = contribution;
+      if (!alreadySaved) {
+        const headers = getAuthHeaders();
+        const response = await axios.post('http://localhost:3002/api/contributions/one-off', contribution, { headers });
+        if (response.status !== 201) {
+          throw new Error('Failed to add contribution');
+        }
+        savedContribution = response.data;
       }
+      
+      setOneOffContributions(prevContributions => [...prevContributions, savedContribution]);
     } catch (error) {
       console.error('Error adding contribution:', error);
       setError('Failed to add contribution. Please try again.');
     }
-  };
+  }, [getAuthHeaders]);
 
-  const onDeleteContribution = async (contributionId) => {
+  const onDeleteContribution = useCallback(async (contributionId) => {
     try {
       const headers = getAuthHeaders();
       await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
       setOneOffContributions(prevContributions => prevContributions.filter(c => c._id !== contributionId));
-      fetchImpactData();
     } catch (error) {
       console.error('Error deleting contribution:', error);
       throw new Error('Failed to delete contribution. Please try again.');
     }
-  };
+  }, [getAuthHeaders]);
 
   const saveFollowedCharitiesToDb = useCallback(async (charities) => {
     try {
@@ -408,29 +392,29 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities([]);
   }, []);
 
-  const formPersonalizedSearchQuery = useCallback(() => {
+  const updateSearchQuery = useCallback(() => {
     const charityTypes = new Set();
     const charityNames = new Set();
     const keywords = new Set();
 
-    [...donations, ...oneOffContributions].forEach(item => {
+    [...dataRef.current.donations, ...dataRef.current.oneOffContributions].forEach(item => {
       if (item.charityType) charityTypes.add(item.charityType);
       if (item.charity) charityNames.add(item.charity);
     });
 
-    volunteerActivities.forEach(activity => {
+    dataRef.current.volunteerActivities.forEach(activity => {
       if (activity.organization) charityNames.add(activity.organization);
       if (activity.charityType) charityTypes.add(activity.charityType);
       const activityKeywords = extractKeywords(activity.description);
       activityKeywords.forEach(keyword => keywords.add(keyword));
     });
 
-    fundraisingCampaigns.forEach(campaign => {
+    dataRef.current.fundraisingCampaigns.forEach(campaign => {
       const campaignKeywords = extractKeywords(campaign.title);
       campaignKeywords.forEach(keyword => keywords.add(keyword));
     });
 
-    followedCharities.forEach(charity => {
+    dataRef.current.followedCharities.forEach(charity => {
       if (charity.name) charityNames.add(charity.name);
     });
 
@@ -441,10 +425,13 @@ export const ImpactProvider = ({ children }) => {
     ];
 
     const limitedQueryParts = queryParts.slice(0, 10);
-    const filteredQuery = limitedQueryParts.join(' OR ');
+    const query = limitedQueryParts.join(' OR ');
+    searchQueryRef.current = query;
+  }, []);
 
-    return filteredQuery;
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, followedCharities]);
+  const formPersonalizedSearchQuery = useCallback(() => {
+    return searchQueryRef.current;
+  }, []);
 
   useEffect(() => {
     const storedCharities = localStorage.getItem('followed-charities');
@@ -461,9 +448,10 @@ export const ImpactProvider = ({ children }) => {
   }, [user, clearFollowedCharities]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User is authenticated, fetching impact data...');
+    if (isAuthenticated && isInitialLoad) {
+      console.log('Initial load, fetching impact data...');
       fetchImpactData();
+      setIsInitialLoad(false);
 
       const syncFollowedCharities = async () => {
         try {
@@ -479,10 +467,23 @@ export const ImpactProvider = ({ children }) => {
       };
 
       syncFollowedCharities();
-    } else {
-      console.log('User is not authenticated');
     }
-  }, [isAuthenticated, fetchImpactData, getAuthHeaders]);
+  }, [isAuthenticated, isInitialLoad, fetchImpactData, getAuthHeaders]);
+
+  useEffect(() => {
+    updateImpactScore();
+  }, [updateImpactScore]);
+
+  useEffect(() => {
+    dataRef.current = {
+      donations,
+      oneOffContributions,
+      volunteerActivities,
+      fundraisingCampaigns,
+      followedCharities
+    };
+    updateSearchQuery();
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, followedCharities, updateSearchQuery]);
 
   return (
     <ImpactContext.Provider

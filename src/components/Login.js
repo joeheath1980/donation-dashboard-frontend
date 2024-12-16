@@ -17,14 +17,18 @@ function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [socialLoginInProgress, setSocialLoginInProgress] = useState(false);
 
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
+      setSocialLoginInProgress(true);
       await socialLogin(token);
       navigate('/profile');
     } catch (err) {
       console.error('Error handling social login callback:', err);
       setError('Failed to complete social login. Please try again.');
+    } finally {
+      setSocialLoginInProgress(false);
     }
   }, [socialLogin, navigate]);
 
@@ -44,6 +48,8 @@ function Login() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear any previous errors when user starts typing
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -81,6 +87,15 @@ function Login() {
   };
 
   const handleSocialLogin = (provider) => {
+    if (socialLoginInProgress) return;
+    
+    setSocialLoginInProgress(true);
+    setError(null);
+    
+    // Store current URL for potential redirect back
+    sessionStorage.setItem('loginRedirectUrl', window.location.href);
+    
+    // Redirect to the auth endpoint
     window.location.href = `${API_URL}/api/auth/${provider}`;
   };
 
@@ -111,6 +126,7 @@ function Login() {
               placeholder="Enter your email"
               required
               className={`${styles.loginInput} ${error ? styles.error : ''}`}
+              aria-invalid={error ? 'true' : 'false'}
             />
           </div>
 
@@ -126,6 +142,7 @@ function Login() {
                 placeholder="Enter your password"
                 required
                 className={`${styles.loginInput} ${error ? styles.error : ''}`}
+                aria-invalid={error ? 'true' : 'false'}
               />
               <button
                 type="button"
@@ -146,6 +163,7 @@ function Login() {
               value={formData.accountType}
               onChange={handleChange}
               className={`${styles.loginInput} ${error ? styles.error : ''}`}
+              aria-invalid={error ? 'true' : 'false'}
             >
               <option value="user">Personal Account</option>
               <option value="business">Business Account</option>
@@ -155,7 +173,7 @@ function Login() {
 
           <button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || socialLoginInProgress}
             className={styles.loginButton}
           >
             {loading ? 'Logging in...' : 'Log In'}
@@ -169,23 +187,27 @@ function Login() {
               <button
                 type="button"
                 onClick={() => handleSocialLogin('google')}
+                disabled={loading || socialLoginInProgress}
                 className={`${styles.loginSocialButton} ${styles.google}`}
+                aria-label="Continue with Google"
               >
-                <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24" className={styles.socialIcon}>
                   <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
                 </svg>
-                Continue with Google
+                <span>{socialLoginInProgress ? 'Connecting...' : 'Continue with Google'}</span>
               </button>
               
               <button
                 type="button"
                 onClick={() => handleSocialLogin('microsoft')}
+                disabled={loading || socialLoginInProgress}
                 className={`${styles.loginSocialButton} ${styles.microsoft}`}
+                aria-label="Continue with Microsoft"
               >
-                <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24" className={styles.socialIcon}>
                   <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
                 </svg>
-                Continue with Microsoft
+                <span>{socialLoginInProgress ? 'Connecting...' : 'Continue with Microsoft'}</span>
               </button>
             </div>
           </div>
