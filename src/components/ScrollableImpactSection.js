@@ -5,9 +5,29 @@ import ImpactVisualization from './ImpactVisualization';
 import ImpactScoreExplain from './ImpactScoreExplain';
 import TierProgressModal from './TierProgressModal';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaHeartbeat, FaGraduationCap, FaTree, FaHandHoldingHeart, FaGlobeAmericas, FaWater, FaBook, FaPaw, FaLeaf, FaBriefcaseMedical, FaUtensils, FaHome, FaSeedling, FaStar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { 
+  FaHeartbeat, 
+  FaGraduationCap, 
+  FaTree, 
+  FaHandHoldingHeart, 
+  FaGlobeAmericas, 
+  FaWater, 
+  FaBook, 
+  FaPaw, 
+  FaLeaf, 
+  FaBriefcaseMedical, 
+  FaUtensils, 
+  FaHome, 
+  FaSeedling,
+  FaChevronLeft, 
+  FaChevronRight,
+  FaCrown,
+  FaMedal,
+  FaTrophy,
+  FaAward,
+  FaHeart
+} from 'react-icons/fa';
 import styles from './ScrollableImpactSection.module.css';
-import cleanStyles from './CleanDesign.module.css';
 
 const allBadges = [
   { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', description: 'Impact in the health sector' },
@@ -25,12 +45,36 @@ const allBadges = [
   { icon: FaSeedling, title: 'Community Grower', color: '#2ECC71', description: 'Nurturing community development' },
   { icon: FaHandHoldingHeart, title: 'Disaster Relief Ally', color: '#D35400', description: 'Supporting disaster relief efforts' },
   { icon: FaHeartbeat, title: 'Child Welfare Protector', color: '#C0392B', description: 'Safeguarding children\'s rights' },
-  { icon: FaStar, title: 'Arts and Culture Patron', color: '#1ABC9C', description: 'Supporting arts and cultural initiatives' },
+  { icon: FaBook, title: 'Arts and Culture Patron', color: '#1ABC9C', description: 'Supporting arts and cultural initiatives' },
   { icon: FaGlobeAmericas, title: 'Climate Action Advocate', color: '#16A085', description: 'Fighting climate change' },
   { icon: FaBook, title: 'STEM Education Booster', color: '#2980B9', description: 'Advancing STEM education' },
   { icon: FaHandHoldingHeart, title: 'Elder Care Supporter', color: '#7F8C8D', description: 'Supporting elderly care' },
   { icon: FaLeaf, title: 'Conservation Champion', color: '#27AE60', description: 'Preserving biodiversity' },
 ];
+
+const tiers = [
+  { name: 'Visionary', minScore: 90, icon: FaCrown, color: '#FFD700' },
+  { name: 'Champion', minScore: 70, icon: FaMedal, color: '#C0C0C0' },
+  { name: 'Philanthropist', minScore: 50, icon: FaTrophy, color: '#CD7F32' },
+  { name: 'Altruist', minScore: 30, icon: FaAward, color: '#2ECC71' },
+  { name: 'Giver', minScore: 0, icon: FaHeart, color: '#E74C3C' }
+];
+
+// Mapping between charity types and badge titles
+const charityTypeToBadge = {
+  'Health Services': 'Healthcare Hero',
+  'Mental Health': 'Healthcare Hero',
+  'Education': 'Education Champion',
+  'Environmental Conservation': 'Environmental Guardian',
+  'Social Welfare': 'Humanitarian Helper',
+  'Emergency Relief': 'Disaster Relief Ally',
+  'Food Security': 'Hunger Fighter',
+  'Child Welfare': 'Child Welfare Protector',
+  'Indigenous Support': 'Community Grower',
+  'Housing': 'Housing Hero',
+  'Community Building': 'Community Grower',
+  'Rural Support': 'Community Grower'
+};
 
 const BadgesDisplay = () => {
   const { donations, oneOffContributions } = useContext(ImpactContext);
@@ -39,17 +83,24 @@ const BadgesDisplay = () => {
     const allContributions = [...donations, ...oneOffContributions];
     const charityTypeCounts = {};
 
+    // Count contributions by charity type
     allContributions.forEach(contribution => {
-      const charityType = contribution.charityType?.toLowerCase();
+      const charityType = contribution.charityType;
       if (charityType) {
         charityTypeCounts[charityType] = (charityTypeCounts[charityType] || 0) + 1;
       }
     });
 
+    // Map charity types to badges using the mapping object
     return Object.entries(charityTypeCounts).reduce((acc, [charityType, count]) => {
       if (count >= 3) {
-        const badge = allBadges.find(b => b.title.toLowerCase().includes(charityType));
-        if (badge) acc.push(badge);
+        const badgeTitle = charityTypeToBadge[charityType];
+        if (badgeTitle) {
+          const badge = allBadges.find(b => b.title === badgeTitle);
+          if (badge && !acc.some(b => b.title === badge.title)) {
+            acc.push(badge);
+          }
+        }
       }
       return acc;
     }, []);
@@ -128,6 +179,7 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
             currentTier={tier} 
             impactScore={impactScore}
             hideTitle={true}
+            tiers={tiers}
           />
         </SwiperSlide>
         <SwiperSlide>
