@@ -12,8 +12,27 @@ import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
-import { FaRegHandshake, FaRegCalendarAlt, FaChevronRight, FaRegHeart, FaTimes, FaPlus } from 'react-icons/fa';
+import { 
+  FaRegHandshake, 
+  FaRegCalendarAlt, 
+  FaChevronRight, 
+  FaRegHeart, 
+  FaTimes, 
+  FaPlus,
+  FaHandshake,
+  FaProjectDiagram,
+  FaChartLine
+} from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+
+const SectionTitle = ({ icon: Icon, title }) => (
+  <div className={styles.sectionHeader}>
+    <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>
+      <Icon className={styles.sectionIcon} /> {title}
+    </h2>
+    <div className={styles.sectionTitleUnderline}></div>
+  </div>
+);
 
 function Profile() {
   const { 
@@ -192,10 +211,7 @@ function Profile() {
         />
         
         <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>Matching Opportunities</h2>
-            <div className={styles.sectionTitleUnderline}></div>
-          </div>
+          <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           <CarouselComponent 
             items={matchingOpportunities.map(opportunity => ({
@@ -216,19 +232,13 @@ function Profile() {
         </section>
 
         <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>Projects to Support</h2>
-            <div className={styles.sectionTitleUnderline}></div>
-          </div>
+          <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
           <GlobalGivingProjects />
         </section>
         
         <section className={`${styles.section} ${styles.impactSection}`}>
-          <div className={styles.sectionHeader}>
-            <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>Your Impact</h2>
-            <div className={styles.sectionTitleUnderline}></div>
-          </div>
+          <SectionTitle icon={FaChartLine} title="Your Impact" />
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
           
           <div className={styles.impactContent}>

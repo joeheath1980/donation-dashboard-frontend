@@ -4,21 +4,21 @@ import axios from 'axios';
 import cleanStyles from './CleanDesign.module.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
-import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile, FaHandsHelping } from 'react-icons/fa';
 
 const CHARITY_TYPES = [
-  { value: "Health Services", label: "Health Services & Medical Research" },
-  { value: "Mental Health", label: "Mental Health & Wellness" },
-  { value: "Education", label: "Education & Youth Development" },
-  { value: "Environmental Conservation", label: "Environmental Conservation & Wildlife" },
-  { value: "Social Welfare", label: "Social Welfare & Community Support" },
-  { value: "Emergency Relief", label: "Emergency Relief & Disaster Response" },
-  { value: "Food Security", label: "Food Security & Poverty Alleviation" },
-  { value: "Child Welfare", label: "Child Welfare & Youth Support" },
-  { value: "Indigenous Support", label: "Indigenous Support & Programs" },
-  { value: "Housing", label: "Housing & Homelessness" },
-  { value: "Community Building", label: "Community Building & Development" },
-  { value: "Rural Support", label: "Rural & Regional Support" }
+  { value: "Health Services", label: "Health Services" },
+  { value: "Mental Health", label: "Mental Health" },
+  { value: "Education", label: "Education" },
+  { value: "Environmental Conservation", label: "Environmental Conservation" },
+  { value: "Social Welfare", label: "Social Welfare" },
+  { value: "Emergency Relief", label: "Emergency Relief" },
+  { value: "Food Security", label: "Food Security" },
+  { value: "Child Welfare", label: "Child Welfare" },
+  { value: "Indigenous Support", label: "Indigenous Support" },
+  { value: "Housing", label: "Housing" },
+  { value: "Community Building", label: "Community Building" },
+  { value: "Rural Support", label: "Rural Support" }
 ];
 
 function VolunteerActivitiesComponent({ userId }) {
@@ -233,7 +233,9 @@ function VolunteerActivitiesComponent({ userId }) {
     <>
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>Volunteer Activities</h2>
+          <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>
+            <FaHandsHelping className={styles.icon} /> Volunteer Activities
+          </h2>
           <button 
             onClick={() => setIsAddActivityModalOpen(true)} 
             className={styles.createButton}

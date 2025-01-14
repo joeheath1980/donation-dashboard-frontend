@@ -41,6 +41,13 @@
   margin-bottom: 0.5rem;
 }
 
+.sectionIcon {
+  margin-right: 0.75rem;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  color: var(--primary-color);
+}
+
 .gradientTitle {
   background: var(--primary-gradient);
   -webkit-background-clip: text;

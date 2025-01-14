@@ -34,6 +34,20 @@
   color: var(--primary-dark);
   margin-bottom: 15px;
   line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleIcon {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+.scoreIcon {
+  font-size: 18px;
+  color: var(--primary-color);
+  margin-right: 8px;
 }
 
 .tierProgress {
@@ -44,11 +58,10 @@
   width: 100%;
 }
 
-/* Retain original progress bar styling with some enhancements */
 .tierBarContainer {
   background-color: var(--background-light);
   border-radius: 8px;
-  height: 44px;
+  height: 52px;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-light);
@@ -70,9 +83,26 @@
 }
 
 .tierIcon {
-  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 8px;
   font-size: 20px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
   transition: var(--transition-standard);
+  padding: 8px;
+}
+
+.tierBarContainer:hover .tierIcon {
+  transform: scale(1.1);
+}
+
+.achieved .tierIcon {
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .tierName {
@@ -80,17 +110,26 @@
   font-weight: 600;
   color: var(--text-primary);
   font-size: 16px;
+  flex: 1;
 }
 
 .tierScore {
-  position: absolute;
-  right: 12px;
+  margin-right: 16px;
   font-weight: 500;
   color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
 }
 
 .achieved {
   color: white;
+}
+
+.achieved .tierScore {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .currentScore, .nextTier {
@@ -100,11 +139,34 @@
   line-height: 1.6;
   width: 100%;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
 
 .nextTier {
   font-weight: 600;
   color: var(--primary-color);
+}
+
+/* Tier-specific colors */
+.tierBar[data-tier="Visionary"] {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+}
+
+.tierBar[data-tier="Champion"] {
+  background: linear-gradient(45deg, #C0C0C0, #A9A9A9);
+}
+
+.tierBar[data-tier="Philanthropist"] {
+  background: linear-gradient(45deg, #CD7F32, #8B4513);
+}
+
+.tierBar[data-tier="Altruist"] {
+  background: linear-gradient(45deg, #2ECC71, #27AE60);
+}
+
+.tierBar[data-tier="Giver"] {
+  background: linear-gradient(45deg, #E74C3C, #C0392B);
 }
 
 /* Responsive adjustments */
@@ -118,12 +180,22 @@
     font-size: 20px;
   }
 
+  .titleIcon {
+    font-size: 20px;
+  }
+
+  .scoreIcon {
+    font-size: 16px;
+  }
+
   .tierBarContainer {
-    height: 40px;
+    height: 48px;
   }
 
   .tierIcon {
-    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
   }
 
   .tierName {
@@ -131,7 +203,8 @@
   }
 
   .tierScore {
-    font-size: 14px;
+    font-size: 12px;
+    padding: 3px 10px;
   }
 
   .currentScore, .nextTier {

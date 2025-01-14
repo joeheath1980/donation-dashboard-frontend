@@ -29,18 +29,18 @@ const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
   };
 
   const charityTypes = [
-    { value: "Health Services", label: "Health Services & Medical Research" },
-    { value: "Mental Health", label: "Mental Health & Wellness" },
-    { value: "Education", label: "Education & Youth Development" },
-    { value: "Environmental Conservation", label: "Environmental Conservation & Wildlife" },
-    { value: "Social Welfare", label: "Social Welfare & Community Support" },
-    { value: "Emergency Relief", label: "Emergency Relief & Disaster Response" },
-    { value: "Food Security", label: "Food Security & Poverty Alleviation" },
-    { value: "Child Welfare", label: "Child Welfare & Youth Support" },
-    { value: "Indigenous Support", label: "Indigenous Support & Programs" },
-    { value: "Housing", label: "Housing & Homelessness" },
-    { value: "Community Building", label: "Community Building & Development" },
-    { value: "Rural Support", label: "Rural & Regional Support" }
+    { value: "Health Services", label: "Health Services" },
+    { value: "Mental Health", label: "Mental Health" },
+    { value: "Education", label: "Education" },
+    { value: "Environmental Conservation", label: "Environmental Conservation" },
+    { value: "Social Welfare", label: "Social Welfare" },
+    { value: "Emergency Relief", label: "Emergency Relief" },
+    { value: "Food Security", label: "Food Security" },
+    { value: "Child Welfare", label: "Child Welfare" },
+    { value: "Indigenous Support", label: "Indigenous Support" },
+    { value: "Housing", label: "Housing" },
+    { value: "Community Building", label: "Community Building" },
+    { value: "Rural Support", label: "Rural Support" }
   ];
 
   const modalContent = (

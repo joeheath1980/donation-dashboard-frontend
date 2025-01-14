@@ -4,6 +4,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
 import cleanStyles from './CleanDesign.module.css';
 import { format } from 'date-fns';
+import { 
+  FaRegHandshake, 
+  FaRegCalendarAlt, 
+  FaChevronRight, 
+  FaRegHeart, 
+  FaTimes, 
+  FaPlus
+} from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 const STORAGE_KEY = 'donation-activity-state';
@@ -389,7 +397,6 @@ function Activity() {
           }
         }));
 
-        // Pass true for alreadySaved to prevent double API call
         if (selectedType === 'regular') {
           addDonation(result, true);
         } else {
