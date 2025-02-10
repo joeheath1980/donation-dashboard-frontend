@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styles from './Profile.module.css';
-import cleanStyles from './CleanDesign.module.css';
+import sharedStyles from './SharedStyles.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ScrollableImpactSection from './ScrollableImpactSection';
 import CarouselComponent from './CarouselComponent';
@@ -27,7 +27,7 @@ import { Link } from 'react-router-dom';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
-    <h2 className={`${styles.sectionTitle} ${cleanStyles.gradientTitle}`}>
+    <h2 className={`${styles.sectionTitle} ${sharedStyles.gradientTitle}`}>
       <Icon className={styles.sectionIcon} /> {title}
     </h2>
     <div className={styles.sectionTitleUnderline}></div>
@@ -184,9 +184,9 @@ function Profile() {
     }
   };
 
-  if (isLoading) return <div className={cleanStyles.textCenter}>Loading your impact data...</div>;
-  if (impactError) return <div className={cleanStyles.textCenter}>{impactError}</div>;
-  if (!isAuthenticated) return <div className={cleanStyles.textCenter}>Please log in to view your profile and impact data.</div>;
+  if (isLoading) return <div className={sharedStyles.textCenter}>Loading your impact data...</div>;
+  if (impactError) return <div className={sharedStyles.textCenter}>{impactError}</div>;
+  if (!isAuthenticated) return <div className={sharedStyles.textCenter}>Please log in to view your profile and impact data.</div>;
 
   return (
     <div className={styles.profileBackground}>
@@ -243,8 +243,8 @@ function Profile() {
           
           <div className={styles.impactContent}>
             <div className={styles.donationsGrid}>
-              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+              <div className={`${styles.donationCard} ${sharedStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${sharedStyles.cardTitle}`}>
                   <FaRegHandshake className={styles.icon} /> Regular Donations
                 </h3>
                 <ul className={styles.list}>
@@ -252,7 +252,7 @@ function Profile() {
                     <li key={index} className={styles.listItem}>{charity}</li>
                   ))}
                 </ul>
-                <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleRegularContributions}>
+                <button className={`${styles.actionButton} ${sharedStyles.button}`} onClick={toggleRegularContributions}>
                   {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
                 {showRegularContributions && (
@@ -262,8 +262,8 @@ function Profile() {
                 )}
               </div>
               
-              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+              <div className={`${styles.donationCard} ${sharedStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${sharedStyles.cardTitle}`}>
                   <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
                 </h3>
                 <ul className={styles.list}>
@@ -271,7 +271,7 @@ function Profile() {
                     <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
                   ))}
                 </ul>
-                <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleOneOffContributions}>
+                <button className={`${styles.actionButton} ${sharedStyles.button}`} onClick={toggleOneOffContributions}>
                   {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
                 {showOneOffContributions && (
@@ -281,8 +281,8 @@ function Profile() {
                 )}
               </div>
               
-              <div className={`${styles.donationCard} ${cleanStyles.card}`}>
-                <h3 className={`${styles.cardTitle} ${cleanStyles.cardTitle}`}>
+              <div className={`${styles.donationCard} ${sharedStyles.card}`}>
+                <h3 className={`${styles.cardTitle} ${sharedStyles.cardTitle}`}>
                   <FaRegHeart className={styles.icon} /> Charities Following
                 </h3>
                 <ul className={styles.list}>
@@ -291,7 +291,7 @@ function Profile() {
                       <span>{charity.name || 'Unknown Charity'}</span>
                       <button
                         onClick={() => handleUnfollowCharity(charity.ABN)}
-                        className={`${styles.deleteButton} ${cleanStyles.iconButton}`}
+                        className={`${styles.deleteButton} ${sharedStyles.iconButton}`}
                         aria-label="Unfollow Charity"
                       >
                         <FaTimes />
@@ -300,21 +300,21 @@ function Profile() {
                   ))}
                 </ul>
                 {localFollowedCharities.length > 3 && (
-                  <button className={`${styles.actionButton} ${cleanStyles.button}`} onClick={toggleFollowedCharities}>
+                  <button className={`${styles.actionButton} ${sharedStyles.button}`} onClick={toggleFollowedCharities}>
                     {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
-                <Link to="/search-charities" className={`${styles.followNewButton} ${cleanStyles.button} ${styles.fullWidth}`}>
+                <Link to="/search-charities" className={`${styles.followNewButton} ${sharedStyles.button} ${styles.fullWidth}`}>
                   <FaPlus /> Follow New Charity
                 </Link>
               </div>
             </div>
 
             <div className={styles.activitiesGrid}>
-              <div className={`${styles.activityCard} ${cleanStyles.card}`}>
+              <div className={`${styles.activityCard} ${sharedStyles.card}`}>
                 <VolunteerActivitiesComponent />
               </div>
-              <div className={`${styles.activityCard} ${cleanStyles.card}`}>
+              <div className={`${styles.activityCard} ${sharedStyles.card}`}>
                 <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
               </div>
             </div>

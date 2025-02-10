@@ -1,108 +1,177 @@
-.dashboard {
-  font-family: Arial, sans-serif;
+/* BusinessDashboard.module.css */
+
+.dashboardContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
-.overview, .overallFinancialSummary {
-  background-color: #f0f0f0;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.createCampaignLink {
-  display: inline-block;
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 15px;
-  text-decoration: none;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  transition: background-color 0.3s ease;
-}
-
-.createCampaignLink:hover {
-  background-color: #45a049;
-}
-
-.columnsContainer {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.column {
-  flex: 1;
-  background-color: #ffffff;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.column h2 {
-  background-color: #4CAF50;
-  color: white;
-  margin: 0;
-  padding: 15px;
+.dashboardTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 30px;
   text-align: center;
 }
 
-.financialSummary, .microMatches, .pendingRequests, .campaigns {
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.businessOverview,
+.financialSummary,
+.createdCampaigns {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.createCampaignContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.createCampaignButton {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--primary-gradient);
+  color: white;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: var(--transition-standard);
+}
+
+.createCampaignButton:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.categoryCard {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
   padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
 }
 
-.financialSummary:last-child, .microMatches:last-child, .pendingRequests:last-child, .campaigns:last-child {
-  border-bottom: none;
+.categoryTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 15px;
 }
 
-h1, h2, h3 {
-  color: #333;
+.summaryCard {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
-h3 {
-  margin-top: 0;
-  color: #4CAF50;
-  flex-shrink: 0;
-  height: 30px;
-  display: flex;
-  align-items: center;
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
 }
 
-ul {
+.list {
   list-style-type: none;
   padding: 0;
-  margin: 0;
-  flex-grow: 1;
-  overflow-y: auto;
 }
 
-li {
-  background-color: #f9f9f9;
+.listItem {
   margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 5px;
 }
 
-.campaigns li h4 {
-  margin: 0 0 10px 0;
-  color: #4CAF50;
+.campaignName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 5px;
 }
 
-.campaigns li p {
-  margin: 5px 0;
+.campaignsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.campaignCard {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.campaignTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.noCampaigns {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.errorMessage {
+  color: #dc2626;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
-  .columnsContainer {
-    flex-direction: column;
+  .dashboardTitle {
+    font-size: 28px;
+  }
+
+  .sectionTitle {
+    font-size: 22px;
+  }
+
+  .categoryCard {
+    padding: 15px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+
+  .campaignTitle {
+    font-size: 16px;
   }
 }

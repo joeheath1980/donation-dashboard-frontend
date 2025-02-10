@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
-import cleanStyles from './CleanDesign.module.css';
+import sharedStyles from './SharedStyles.css';
 import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign, FaBullhorn } from 'react-icons/fa';
@@ -298,7 +298,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
               value={newCampaign.charityType}
               onChange={handleChange}
               required
-              className={cleanStyles.select}
+              className={sharedStyles.select}
             >
               <option value="">Select a charity type</option>
               {CHARITY_TYPES.map(type => (
@@ -375,7 +375,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     <>
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <h2 className={`${styles.header} ${cleanStyles.gradientTitle}`}>
+          <h2 className={`${styles.header} ${sharedStyles.gradientTitle}`}>
             <FaBullhorn className={styles.icon} /> Fundraising Campaigns
           </h2>
           <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>

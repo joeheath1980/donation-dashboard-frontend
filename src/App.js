@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
-import BusinessLayout from './components/BusinessLayout';
 import Profile from './components/Profile';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
@@ -11,7 +10,6 @@ import YourAccount from './components/YourAccount';
 import About from './components/About';
 import YourPerks from './components/YourPerks';
 import CharityPartner from './components/CharityPartner';
-import BrandPartner from './components/BrandPartner';
 import Partners from './components/Partners';
 import SearchCharities from './components/SearchCharities';
 import Activity from './components/Activity';
@@ -19,10 +17,7 @@ import OrganizationSignup from './components/OrganizationSignup';
 import BusinessSignup from './components/BusinessSignup';
 import CharitySignup from './components/CharitySignup';
 import BusinessDashboard from './components/BusinessDashboard';
-import BusinessDonations from './components/BusinessDonations';
-import BusinessReports from './components/BusinessReports';
-import BusinessSettings from './components/BusinessSettings';
-import CreateBusinessCampaign from './components/CreateBusinessCampaign';
+import BusinessCreateCampaign from './components/BusinessCreateCampaign';
 import WelcomePage from './components/WelcomePage';
 import AdminDashboard from './components/AdminDashboard';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
@@ -31,10 +26,9 @@ import AuthCallback from './components/AuthCallback';
 import ManagePaymentsComponent from './components/ManagePaymentsComponent';
 import CharityDashboard from './components/CharityDashboard';
 import YourImpact from './components/YourImpact';
-import { starbucks } from './data/partnerData';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import styles from './components/CleanDesign.module.css';
+import styles from './components/SharedStyles.css';
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
   const token = localStorage.getItem('token');
@@ -87,18 +81,14 @@ function App() {
               <Route path="/your-perks" element={<ProtectedRoute><Layout><YourPerks /></Layout></ProtectedRoute>} />
               <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
               <Route path="/charity/:id" element={<ProtectedRoute><Layout><CharityPartner /></Layout></ProtectedRoute>} />
-              <Route path="/brand/starbucks" element={<ProtectedRoute><Layout><BrandPartner brand={starbucks} /></Layout></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
               <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
               <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
               <Route path="/your-impact" element={<ProtectedRoute><Layout><YourImpact /></Layout></ProtectedRoute>} />
               
               {/* Business routes */}
-              <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessDashboard /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-donations" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessDonations /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-reports" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessReports /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/business-settings" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><BusinessSettings /></BusinessLayout></ProtectedRoute>} />
-              <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><BusinessLayout><CreateBusinessCampaign /></BusinessLayout></ProtectedRoute>} />
+              <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessDashboard /></Layout></ProtectedRoute>} />
+              <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessCreateCampaign /></Layout></ProtectedRoute>} />
 
               {/* Charity routes */}
               <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><CharityDashboard /></ProtectedRoute>} />

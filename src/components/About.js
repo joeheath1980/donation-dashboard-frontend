@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styles from '../About.module.css';
-import cleanStyles from './CleanDesign.module.css';
+import styles from './about.module.css';
+import sharedStyles from './SharedStyles.css';
 import { AboutIcons } from './AboutIcons';
 
 const About = () => {
   return (
-    <div className={`${styles.aboutContainer} ${cleanStyles.container}`}>
-      <h1 className={`${styles.heading} ${cleanStyles.heading}`}>About</h1>
+    <div className={`${styles.aboutContainer} ${sharedStyles.container}`}>
+      <h1 className={`${styles.heading} ${sharedStyles.heading}`}>About</h1>
       <div className={styles.separator}></div>
       
       <div className={styles.contentColumns}>
-        <div className={`${styles.mainContent} ${cleanStyles.card}`}>
+        <div className={`${styles.mainContent} ${sharedStyles.card}`}>
           <p>
             At Do-Nation, we're redefining giving. Generosity isn't just an act; it's a joy-filled journey that fuels personal growth and inspires a better world.
           </p>
@@ -26,16 +26,16 @@ const About = () => {
         </div>
         
         <div className={styles.sidebar}>
-          <div className={`${styles.quoteBox} ${cleanStyles.card}`}>
-            <span className={cleanStyles.icon}><AboutIcons.Quote /></span>
+          <div className={`${styles.quoteBox} ${sharedStyles.card}`}>
+            <span className={sharedStyles.icon}><AboutIcons.Quote /></span>
             <blockquote>"Life's most persistent and urgent question is, 'What are you doing for others?'"</blockquote>
             <cite>- Martin Luther King Jr.</cite>
           </div>
           
-          <div className={`${styles.impactStats} ${cleanStyles.card}`}>
-            <div className={cleanStyles.cardHeader}>
-              <span className={cleanStyles.icon}><AboutIcons.Impact /></span>
-              <h3 className={cleanStyles.cardTitle}>Our Impact</h3>
+          <div className={`${styles.impactStats} ${sharedStyles.card}`}>
+            <div className={sharedStyles.cardHeader}>
+              <span className={sharedStyles.icon}><AboutIcons.Impact /></span>
+              <h3 className={sharedStyles.cardTitle}>Our Impact</h3>
             </div>
             <ul>
               <li>10,000+ Donors</li>
@@ -46,15 +46,15 @@ const About = () => {
         </div>
       </div>
       
-      <div className={`${styles.highlightBox} ${cleanStyles.card}`}>
-        <span className={cleanStyles.icon}><AboutIcons.Highlight /></span>
+      <div className={`${styles.highlightBox} ${sharedStyles.card}`}>
+        <span className={sharedStyles.icon}><AboutIcons.Highlight /></span>
         <p>
           <strong>Welcome to Do-Nation</strong> — where your generosity meets opportunity, and together, we create a world of positive change.
         </p>
       </div>
       
-      <Link to="/signup" className={`${styles.ctaButton} ${cleanStyles.button}`}>
-        <span className={cleanStyles.icon}><AboutIcons.Join /></span>
+      <Link to="/signup" className={`${styles.ctaButton} ${sharedStyles.button}`}>
+        <span className={sharedStyles.icon}><AboutIcons.Join /></span>
         Join Us Today
       </Link>
     </div>

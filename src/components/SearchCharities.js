@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import styles from '../SearchCharities.module.css';
+import styles from './SearchCharities.module.css';
 import { FaSearch, FaInfoCircle } from 'react-icons/fa';
 
 function SearchCharities() {
