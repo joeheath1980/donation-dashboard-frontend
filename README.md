@@ -1,6 +1,32 @@
-# Getting Started with Create React App
+# Donation Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a comprehensive donation management system that allows users to track, manage, and analyze charitable contributions. It provides features for individual donors, businesses, and charities to interact and manage their donation activities.
+
+## Project Structure
+
+This repository contains the frontend of the Donation Dashboard. The backend is located in a separate repository at `/Users/josephheath/giving-dashboard`.
+
+## Setup Instructions
+
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd donation-dashboard
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Set up environment variables:
+   - Copy the `.env.example` file to `.env`
+   - Fill in the necessary environment variables
+
+4. Start the development server:
+   ```
+   npm start
+   ```
 
 ## Available Scripts
 
@@ -16,55 +42,35 @@ You may also see any lint errors in the console.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner in the interactive watch mode.
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build` folder.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Tech Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- React
+- React Router for navigation
+- Axios for API requests
+- CSS Modules for styling
 
-### `npm run eject`
+## Project Structure and Important Files
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `src/components/`: Contains all React components
+- `src/contexts/`: Contains React context providers
+- `src/utils/`: Contains utility functions
+- `webpack.config.js`: Webpack configuration for the project
+- `PROJECT_STRUCTURE.md`: Detailed information about the project structure and best practices
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Additional Documentation
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- [Project Structure Guidelines](PROJECT_STRUCTURE.md)
+- [Google Auth Setup](GOOGLE_AUTH_SETUP.md)
+- [Microsoft Login Integration](MICROSOFT_LOGIN_INTEGRATION.md)
 
 ## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For any project-specific questions, please refer to the project documentation or contact the project maintainers.

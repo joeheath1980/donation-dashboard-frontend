@@ -1,12 +1,13 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
-import { ImpactContext } from '../contexts/ImpactContext';
-import cleanStyles from './CleanDesign.module.css';
-import donationStyles from './DonationsComponent.module.css';
-import { format, parseISO, parse } from 'date-fns';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { FaCheckCircle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import styles from './DonationsComponent.module.css';
+import sharedStyles from './SharedStyles.css';
 import DonationModal from './DonationModal';
-import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
+import { format, parseISO, parse } from 'date-fns';
 
 function formatDate(dateString) {
   let date;
@@ -26,7 +27,8 @@ function formatDate(dateString) {
 }
 
 function DonationsComponent({ displayAll }) {
-  const { donations, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
+  const { user, getAuthHeaders, API_URL } = useAuth();
+  const [donations, setDonations] = useState([]);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
@@ -34,11 +36,23 @@ function DonationsComponent({ displayAll }) {
   const [error, setError] = useState('');
   const donationListRef = useRef(null);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchImpactData();
+  const fetchDonations = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/donations`, {
+        headers: getAuthHeaders()
+      });
+      setDonations(response.data);
+    } catch (err) {
+      console.error('Error fetching donations:', err);
+      setError('Failed to load donations. Please try again later.');
     }
-  }, [fetchImpactData, isAuthenticated]);
+  }, [API_URL, getAuthHeaders]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDonations();
+    }
+  }, [user, fetchDonations]);
 
   useEffect(() => {
     setLocalDonations(donations);
@@ -70,55 +84,30 @@ function DonationsComponent({ displayAll }) {
       return;
     }
 
-    setError(''); // Clear any previous errors
+    setError('');
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
-      const response = await fetch(`http://localhost:3002/api/donations/${donationId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+      await axios.delete(`${API_URL}/api/donations/${donationId}`, {
+        headers: getAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete donation');
-      }
-
-      // Only update local state if the delete was successful
       setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
-      
-      // Refresh the data from the server
-      if (isAuthenticated) {
-        await fetchImpactData();
-      }
+      await fetchDonations();
     } catch (error) {
       console.error('Error deleting donation:', error);
       setError(`Unable to delete the donation: ${error.message}. Please try again later.`);
-      // Keep the donation in the list since deletion failed
     }
   };
 
   const handleEditOrValidate = (donation) => {
-    setError(''); // Clear any previous errors
+    setError('');
     setCurrentDonation(donation);
     setShowModal(true);
   };
 
   const handleConfirm = async (editedDonation) => {
-    setError(''); // Clear any previous errors
+    setError('');
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
-      let url = 'http://localhost:3002/api/donations';
+      let url = `${API_URL}/api/donations`;
       let method = 'POST';
 
       if (currentDonation && currentDonation._id) {
@@ -137,20 +126,17 @@ function DonationsComponent({ displayAll }) {
         }
       }
 
-      const response = await fetch(url, {
+      const response = await axios({
         method: method,
+        url: url,
+        data: formData,
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          ...getAuthHeaders(),
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update donation');
-      }
-
-      const updatedDonation = await response.json();
+      const updatedDonation = response.data;
       
       if (currentDonation && currentDonation._id) {
         setLocalDonations(prevDonations =>
@@ -163,10 +149,7 @@ function DonationsComponent({ displayAll }) {
       }
       
       setShowModal(false);
-      
-      if (isAuthenticated) {
-        await fetchImpactData();
-      }
+      await fetchDonations();
     } catch (error) {
       console.error('Error updating donation:', error);
       setError(`Unable to update the donation: ${error.message}. Please try again later.`);
@@ -174,15 +157,15 @@ function DonationsComponent({ displayAll }) {
   };
 
   const handleAddNew = () => {
-    setError(''); // Clear any previous errors
+    setError('');
     setCurrentDonation(null);
     setShowModal(true);
   };
 
   const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
 
-  if (!isAuthenticated) {
-    return <div className={cleanStyles.card}>Please log in to view your donations.</div>;
+  if (!user) {
+    return <div className={sharedStyles.card}>Please log in to view your donations.</div>;
   }
 
   const modalContent = showModal && (
@@ -194,62 +177,62 @@ function DonationsComponent({ displayAll }) {
   );
 
   return (
-    <div className={`${cleanStyles.container} ${donationStyles.donationComponentContainer}`}>
-      <div className={donationStyles.donationSection}>
-        <div className={cleanStyles.flexBetween}>
-          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
+    <div className={`${sharedStyles.container} ${styles.donationComponentContainer}`}>
+      <div className={styles.donationSection}>
+        <div className={sharedStyles.flexBetween}>
+          <button onClick={handleAddNew} className={styles.addNewDonationButton}>
             <FaPlus /> Add New Donation
           </button>
         </div>
         {error && (
-          <div className={`${cleanStyles.alert} ${cleanStyles.error}`}>
+          <div className={`${sharedStyles.alert} ${sharedStyles.error}`}>
             {error}
           </div>
         )}
-        <div className={donationStyles.donationList} ref={donationListRef}>
+        <div className={styles.donationList} ref={donationListRef}>
           {displayedDonations && displayedDonations.length > 0 ? (
             <>
               {displayedDonations.map((donation) => (
-                <div key={donation._id} className={donationStyles.donationCard}>
-                  <div className={cleanStyles.cardHeader}>
-                    <h3 className={cleanStyles.cardTitle}>{donation.charity}</h3>
-                    <div className={cleanStyles.validationButton}>
+                <div key={donation._id} className={styles.donationCard}>
+                  <div className={sharedStyles.cardHeader}>
+                    <h3 className={sharedStyles.cardTitle}>{donation.charity}</h3>
+                    <div className={sharedStyles.validationButton}>
                       <InstantTooltip text={donation.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
-                        <FaCheckCircle className={donation.receiptUrl ? donationStyles.validationIcon : donationStyles.validationIconPending} />
+                        <FaCheckCircle className={donation.receiptUrl ? styles.validationIcon : styles.validationIconPending} />
                       </InstantTooltip>
                     </div>
                   </div>
-                  <div className={donationStyles.donationContent}>
+                  <div className={styles.donationContent}>
                     <p><strong>Date:</strong> {formatDate(donation.date)}</p>
                     <p>
                       <strong>Amount:</strong> ${donation.amount.toFixed(2)}
-                      {donation.isMonthly && <span className={cleanStyles.highlight}> (Monthly)</span>}
+                      {donation.isMonthly && <span className={sharedStyles.highlight}> (Monthly)</span>}
                     </p>
                     <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                     {donation.receiptUrl && (
                       <p>
                         <strong>Receipt:</strong> 
                         <a 
-                          href={`http://localhost:3002${donation.receiptUrl}`} 
+                          href={`${API_URL}${donation.receiptUrl}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className={cleanStyles.link}
+                          className={sharedStyles.link}
                         >
                           View Receipt
                         </a>
                       </p>
                     )}
                   </div>
-                  <div className={cleanStyles.cardActions}>
+                  <div className={sharedStyles.cardActions}>
                     <InstantTooltip text="Edit donation">
-                      <button onClick={() => handleEditOrValidate(donation)} className={cleanStyles.iconButton} aria-label="Edit Donation">
+                      <button onClick={() => handleEditOrValidate(donation)} className={styles.iconButton} aria-label="Edit Donation">
                         <FaEdit />
                       </button>
                     </InstantTooltip>
                     <InstantTooltip text="Delete donation">
                       <button
                         onClick={() => handleDelete(donation._id)}
-                        className={cleanStyles.iconButton}
+                        className={styles.iconButton}
                         aria-label="Delete Donation"
                       >
                         <FaTrash />
@@ -260,13 +243,13 @@ function DonationsComponent({ displayAll }) {
               ))}
             </>
           ) : (
-            <p className={cleanStyles.textCenter}>No donations to display.</p>
+            <p className={sharedStyles.textCenter}>No donations to display.</p>
           )}
-          {showScrollIndicator && <div className={cleanStyles.scrollIndicator} />}
+          {showScrollIndicator && <div className={sharedStyles.scrollIndicator} />}
         </div>
-        <div className={cleanStyles.flexBetween}>
+        <div className={sharedStyles.flexBetween}>
           {!displayAll && localDonations.length > 5 && (
-            <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+            <button onClick={() => {}} className={`${sharedStyles.button} ${sharedStyles.secondary}`}>
               See All
             </button>
           )}

@@ -131,7 +131,7 @@
 }
 
 .actionButton {
-  composes: button from './CleanDesign.module.css';
+  composes: button from './SharedStyles.css';
   margin-top: auto;
   width: 100%;
 }
@@ -153,7 +153,7 @@
 }
 
 .deleteButton {
-  composes: iconButton from './CleanDesign.module.css';
+  composes: iconButton from './SharedStyles.css';
   color: #e53e3e;
   margin-left: 0.5rem;
 }
@@ -164,7 +164,7 @@
 }
 
 .followNewButton {
-  composes: button from './CleanDesign.module.css';
+  composes: button from './SharedStyles.css';
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,7 +207,7 @@
 }
 
 .retryButton {
-  composes: button from './CleanDesign.module.css';
+  composes: button from './SharedStyles.css';
   margin-top: 1rem;
 }
 

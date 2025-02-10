@@ -1,11 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ImpactContext } from '../contexts/ImpactContext';
-import cleanStyles from './CleanDesign.module.css';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import sharedStyles from './SharedStyles.css';
 import oneOffStyles from './OneOffContributions.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
 import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
+import { createPortal } from 'react-dom';
+import axios from 'axios';
 
 function formatDate(dateString) {
   let date;
@@ -25,46 +27,81 @@ function formatDate(dateString) {
 }
 
 function OneOffContributionsComponent({ displayAll }) {
-  const { oneOffContributions, onDeleteContribution, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
+  const { user, getAuthHeaders, API_URL } = useAuth();
+  const [oneOffContributions, setOneOffContributions] = useState([]);
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState('');
+  const contributionListRef = useRef(null);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('Fetching impact data...');
-      fetchImpactData();
+  const fetchContributions = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/contributions/one-off`, {
+        headers: getAuthHeaders()
+      });
+      setOneOffContributions(response.data);
+    } catch (err) {
+      console.error('Error fetching one-off contributions:', err);
+      setError('Failed to load one-off contributions. Please try again later.');
     }
-  }, [fetchImpactData, isAuthenticated]);
+  }, [API_URL, getAuthHeaders]);
 
   useEffect(() => {
-    console.log('oneOffContributions updated:', oneOffContributions);
+    if (user) {
+      fetchContributions();
+    }
+  }, [user, fetchContributions]);
+
+  useEffect(() => {
     setLocalContributions(oneOffContributions);
   }, [oneOffContributions]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (contributionListRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = contributionListRef.current;
+        setShowScrollIndicator(scrollTop === 0 && scrollHeight > clientHeight);
+      }
+    };
+
+    const listElement = contributionListRef.current;
+    if (listElement) {
+      listElement.addEventListener('scroll', handleScroll);
+      handleScroll();
+    }
+
+    return () => {
+      if (listElement) {
+        listElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
 
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
-        console.log('Deleting contribution:', contributionId);
-        await onDeleteContribution(contributionId);
-        console.log('Contribution deleted successfully');
+        await axios.delete(`${API_URL}/api/contributions/one-off/${contributionId}`, {
+          headers: getAuthHeaders()
+        });
+        setLocalContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
+        await fetchContributions();
       } catch (error) {
         console.error('Error deleting contribution:', error);
-        alert(`Failed to delete contribution: ${error.message}`);
+        setError(`Failed to delete contribution: ${error.message}`);
       }
     }
   };
 
   const handleEditOrValidate = (contribution) => {
-    console.log('Edit/Validate button clicked for contribution:', contribution);
     setEditingContribution(contribution);
     setShowModal(true);
   };
 
   const handleSave = async (editedContribution) => {
-    console.log('Saving contribution:', editedContribution);
     try {
-      let url = 'http://localhost:3002/api/contributions/one-off';
+      let url = `${API_URL}/api/contributions/one-off`;
       let method = 'POST';
 
       if (editingContribution && editingContribution._id) {
@@ -83,40 +120,34 @@ function OneOffContributionsComponent({ displayAll }) {
         }
       }
 
-      const response = await fetch(url, {
+      const response = await axios({
         method: method,
+        url: url,
+        data: formData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
+          ...getAuthHeaders(),
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      if (response.ok) {
-        const updatedContribution = await response.json();
-        console.log('Server response:', updatedContribution);
-        if (editingContribution && editingContribution._id) {
-          setLocalContributions(prevContributions => {
-            const newContributions = prevContributions.map(contribution =>
-              contribution._id === updatedContribution._id ? updatedContribution : contribution
-            );
-            console.log('Updated localContributions after edit:', newContributions);
-            return newContributions;
-          });
-        } else {
-          setLocalContributions(prevContributions => [...prevContributions, updatedContribution]);
-        }
-        setShowModal(false);
-        setEditingContribution(null);
-        if (isAuthenticated) {
-          fetchImpactData();
-        }
+      const updatedContribution = response.data;
+      
+      if (editingContribution && editingContribution._id) {
+        setLocalContributions(prevContributions =>
+          prevContributions.map(contribution =>
+            contribution._id === updatedContribution._id ? updatedContribution : contribution
+          )
+        );
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update contribution');
+        setLocalContributions(prevContributions => [...prevContributions, updatedContribution]);
       }
+      
+      setShowModal(false);
+      setEditingContribution(null);
+      await fetchContributions();
     } catch (error) {
       console.error('Error updating contribution:', error);
-      alert(`Failed to update contribution: ${error.message}`);
+      setError(`Failed to update contribution: ${error.message}`);
     }
   };
 
@@ -127,68 +158,76 @@ function OneOffContributionsComponent({ displayAll }) {
 
   const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
 
-  if (!isAuthenticated) {
-    return <div className={cleanStyles.card}>Please log in to view your one-off contributions.</div>;
+  if (!user) {
+    return <div className={sharedStyles.card}>Please log in to view your one-off contributions.</div>;
   }
 
+  const modalContent = showModal && (
+    <DonationModal
+      donation={editingContribution}
+      onConfirm={handleSave}
+      onCancel={() => {
+        setShowModal(false);
+        setEditingContribution(null);
+      }}
+      type="one-off"
+    />
+  );
+
   return (
-    <div className={oneOffStyles.oneOffComponentContainer}>
+    <div className={`${sharedStyles.container} ${oneOffStyles.oneOffComponentContainer}`}>
       <div className={oneOffStyles.oneOffSection}>
-        <div className={cleanStyles.flexBetween}>
-          <button onClick={handleAddNew} className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.compact}`}>
+        <div className={sharedStyles.flexBetween}>
+          <button onClick={handleAddNew} className={oneOffStyles.addNewContributionButton}>
             <FaPlus /> Add New One-Off Contribution
           </button>
         </div>
-        <div className={oneOffStyles.oneOffList}>
+        {error && (
+          <div className={`${sharedStyles.alert} ${sharedStyles.error}`}>
+            {error}
+          </div>
+        )}
+        <div className={oneOffStyles.oneOffList} ref={contributionListRef}>
           {displayedContributions && displayedContributions.length > 0 ? (
             <>
               {displayedContributions.map((contribution) => (
                 <div key={contribution._id} className={oneOffStyles.oneOffCard}>
-                  <div className={cleanStyles.cardHeader}>
-                    <h3 className={cleanStyles.cardTitle}>{contribution.charity}</h3>
-                    <div className={cleanStyles.validationButton}>
-                      {contribution.needsValidation && !contribution.isValidated && (
-                        <InstantTooltip text="Receipt required for validation">
-                          <FaCheckCircle className={oneOffStyles.validationIconPending} />
-                        </InstantTooltip>
-                      )}
-                      {contribution.isValidated && (
-                        <InstantTooltip text="Contribution validated">
-                          <FaCheckCircle className={oneOffStyles.validationIcon} />
-                        </InstantTooltip>
-                      )}
+                  <div className={sharedStyles.cardHeader}>
+                    <h3 className={sharedStyles.cardTitle}>{contribution.charity}</h3>
+                    <div className={sharedStyles.validationButton}>
+                      <InstantTooltip text={contribution.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
+                        <FaCheckCircle className={contribution.receiptUrl ? oneOffStyles.validationIcon : oneOffStyles.validationIconPending} />
+                      </InstantTooltip>
                     </div>
                   </div>
                   <div className={oneOffStyles.oneOffContent}>
                     <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
                     <p><strong>Amount:</strong> ${contribution.amount.toFixed(2)}</p>
-                    {contribution.charityType && (
-                      <p><strong>Charity Type:</strong> {contribution.charityType}</p>
-                    )}
+                    <p><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
                     {contribution.receiptUrl && (
                       <p>
                         <strong>Receipt:</strong> 
                         <a 
-                          href={`http://localhost:3002${contribution.receiptUrl}`} 
+                          href={`${API_URL}${contribution.receiptUrl}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className={cleanStyles.link}
+                          className={sharedStyles.link}
                         >
                           View Receipt
                         </a>
                       </p>
                     )}
                   </div>
-                  <div className={oneOffStyles.cardActions}>
-                    <InstantTooltip text={contribution.needsValidation && !contribution.isValidated ? "Edit or Validate contribution" : "Edit contribution"}>
-                      <button onClick={() => handleEditOrValidate(contribution)} className={cleanStyles.iconButton} aria-label="Edit or Validate Contribution">
+                  <div className={sharedStyles.cardActions}>
+                    <InstantTooltip text="Edit contribution">
+                      <button onClick={() => handleEditOrValidate(contribution)} className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
                         <FaEdit />
                       </button>
                     </InstantTooltip>
                     <InstantTooltip text="Delete contribution">
                       <button
                         onClick={() => handleDelete(contribution._id)}
-                        className={cleanStyles.iconButton}
+                        className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`}
                         aria-label="Delete Contribution"
                       >
                         <FaTrash />
@@ -199,29 +238,19 @@ function OneOffContributionsComponent({ displayAll }) {
               ))}
             </>
           ) : (
-            <p className={cleanStyles.textCenter}>No one-off contributions found.</p>
+            <p className={sharedStyles.textCenter}>No one-off contributions found.</p>
           )}
+          {showScrollIndicator && <div className={sharedStyles.scrollIndicator} />}
         </div>
-        <div className={cleanStyles.flexBetween}>
+        <div className={sharedStyles.flexBetween}>
           {!displayAll && localContributions.length > 5 && (
-            <button onClick={() => {}} className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+            <button onClick={() => {}} className={`${sharedStyles.button} ${sharedStyles.secondary}`}>
               See All
             </button>
           )}
         </div>
       </div>
-      {showModal && (
-        <DonationModal
-          donation={editingContribution}
-          onConfirm={handleSave}
-          onCancel={() => {
-            console.log('Modal closed');
-            setShowModal(false);
-            setEditingContribution(null);
-          }}
-          type="one-off"
-        />
-      )}
+      {createPortal(modalContent, document.body)}
     </div>
   );
 }

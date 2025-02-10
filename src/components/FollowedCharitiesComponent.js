@@ -2,7 +2,7 @@ import React, { useContext, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { FaRegHeart, FaTimes, FaChevronRight, FaPlus } from 'react-icons/fa';
-import cleanStyles from './CleanDesign.module.css';
+import sharedStyles from './SharedStyles.css';
 
 const FollowedCharitiesComponent = ({ displayAll }) => {
   const { followedCharities, removeFollowedCharity, error: contextError } = useContext(ImpactContext);
@@ -37,26 +37,26 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
   };
 
   return (
-    <div className={cleanStyles.contributionSection}>
-      <h3 className={cleanStyles.sectionTitle}>
-        <FaRegHeart className={cleanStyles.titleIcon} /> Charities Following
+    <div className={sharedStyles.contributionSection}>
+      <h3 className={sharedStyles.sectionTitle}>
+        <FaRegHeart className={sharedStyles.titleIcon} /> Charities Following
       </h3>
-      <Link to="/search-charities" className={`${cleanStyles.button} ${cleanStyles.primary} ${cleanStyles.fullWidth}`}>
+      <Link to="/search-charities" className={`${sharedStyles.button} ${sharedStyles.primary} ${sharedStyles.fullWidth}`}>
         <FaPlus /> Follow New Charity
       </Link>
-      <div className={cleanStyles.charitiesList}>
+      <div className={sharedStyles.charitiesList}>
         {displayedCharities && displayedCharities.length > 0 ? (
           displayedCharities.map((followedCharity, index) => {
             const charityName = getCharityName(followedCharity);
             const charityABN = getCharityABN(followedCharity);
             
             return (
-              <div key={charityABN || `charity-${index}`} className={cleanStyles.charityCard}>
-                <span className={cleanStyles.charityName}>{charityName}</span>
+              <div key={charityABN || `charity-${index}`} className={sharedStyles.charityCard}>
+                <span className={sharedStyles.charityName}>{charityName}</span>
                 {charityABN && (
                   <button
                     onClick={() => handleDelete(charityABN)}
-                    className={cleanStyles.deleteButton}
+                    className={sharedStyles.deleteButton}
                     aria-label="Unfollow Charity"
                   >
                     <FaTimes />
@@ -66,14 +66,14 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
             );
           })
         ) : (
-          <p className={cleanStyles.emptyMessage}>Not following any charities yet.</p>
+          <p className={sharedStyles.emptyMessage}>Not following any charities yet.</p>
         )}
       </div>
       {(contextError || localError) && (
-        <p className={cleanStyles.errorMessage}>{contextError || localError}</p>
+        <p className={sharedStyles.errorMessage}>{contextError || localError}</p>
       )}
       {!displayAll && followedCharities.length > 3 && (
-        <Link to="/followed-charities" className={`${cleanStyles.button} ${cleanStyles.secondary}`}>
+        <Link to="/followed-charities" className={`${sharedStyles.button} ${sharedStyles.secondary}`}>
           See All <FaChevronRight />
         </Link>
       )}

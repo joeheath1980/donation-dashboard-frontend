@@ -1,0 +1,132 @@
+/* OrganizationSignup.module.css */
+
+.container {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  max-width: 600px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 30px;
+  transition: var(--transition-standard);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  margin-bottom: 20px;
+}
+
+.cardIcon {
+  color: var(--primary-color);
+}
+
+.cardTitle {
+  font-size: 1.75rem;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.cardContent {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.cardList {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0;
+}
+
+.cardListItem {
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+}
+
+.cardListItemIcon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.cardActions {
+  margin-top: 25px;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition-standard);
+}
+
+.button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 40px 20px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .grid {
+    gap: 20px;
+  }
+
+  .cardTitle {
+    font-size: 1.5rem;
+  }
+}

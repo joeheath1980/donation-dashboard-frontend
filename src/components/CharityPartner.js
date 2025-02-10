@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import styles from '../../src/CharityPartner.module.css';
+import styles from './CharityPartner.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 
 // Create an axios instance with default config

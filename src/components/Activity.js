@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useLayoutEffect, useRef, useCal
 import { ImpactContext } from '../contexts/ImpactContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
-import cleanStyles from './CleanDesign.module.css';
+import sharedStyles from './SharedStyles.css';
 import { format } from 'date-fns';
 import { 
   FaRegHandshake, 
@@ -457,7 +457,7 @@ function Activity() {
     const isCommitted = status?.type?.startsWith('committed');
     const isDeleted = status?.type === 'deleted';
 
-    const cardClassName = `${styles.emailResultItem} ${cleanStyles.card} ${
+    const cardClassName = `${styles.emailResultItem} ${sharedStyles.card} ${
       isCommitted ? styles.committedDonation : ''
     } ${isDeleted ? styles.deletedDonation : ''} ${isClearing ? styles.clearing : ''}`;
 
@@ -504,7 +504,7 @@ function Activity() {
 
             <button 
               onClick={() => handleCommit(donation, source === 'outlook')} 
-              className={`${styles.saveButton} ${cleanStyles.button}`}
+              className={`${styles.saveButton} ${sharedStyles.button}`}
               disabled={!selectedTypes[donation.id] || !selectedCharityTypes[donation.id]}
             >
               Commit
@@ -524,14 +524,14 @@ function Activity() {
             {isCommitted && status?.resultId && (
               <button
                 onClick={() => navigateToDonation(donation, status.type === 'committed-regular' ? 'regular' : 'one-off')}
-                className={`${styles.linkButton} ${cleanStyles.button}`}
+                className={`${styles.linkButton} ${sharedStyles.button}`}
               >
                 View Details
               </button>
             )}
             <button
               onClick={() => handleRestore(donation.id)}
-              className={`${styles.restoreButton} ${cleanStyles.button}`}
+              className={`${styles.restoreButton} ${sharedStyles.button}`}
             >
               Restore
             </button>
@@ -545,7 +545,7 @@ function Activity() {
     <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
       {searchHistory.map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
-          <h5 className={cleanStyles.heading}>
+          <h5 className={sharedStyles.heading}>
             Search Results from {entry.source.toUpperCase()} - 
             {format(new Date(entry.timestamp), 'dd/MM/yyyy HH:mm:ss')}
           </h5>
@@ -558,35 +558,35 @@ function Activity() {
   );
 
   return (
-    <div className={`${styles.container} ${cleanStyles.container}`}>
-      <h1 className={`${styles.activityHeader} ${cleanStyles.heading}`}>
+    <div className={`${styles.container} ${sharedStyles.container}`}>
+      <h1 className={`${styles.activityHeader} ${sharedStyles.heading}`}>
         Discover your donations and start tracking your impact
       </h1>
 
-      <div className={`${styles.emailSection} ${cleanStyles.card}`}>
+      <div className={`${styles.emailSection} ${sharedStyles.card}`}>
         <div className={styles.buttonContainer}>
           <button 
             onClick={handleSearchEmails} 
             disabled={loading || isClearing} 
-            className={`${styles.scrapeButton} ${cleanStyles.button}`}
+            className={`${styles.scrapeButton} ${sharedStyles.button}`}
           >
             {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
           <button 
             onClick={handleSearchOutlookEmails} 
             disabled={loading || isClearing} 
-            className={`${styles.scrapeButton} ${cleanStyles.button}`}
+            className={`${styles.scrapeButton} ${sharedStyles.button}`}
           >
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
-          <Link to="/profile" className={`${styles.toggleButton} ${cleanStyles.button}`}>
+          <Link to="/profile" className={`${styles.toggleButton} ${sharedStyles.button}`}>
             Check Out Your Impact
           </Link>
           {searchHistory.length > 0 && (
             <button
               onClick={handleClearAll}
               disabled={isClearing}
-              className={`${styles.clearButton} ${cleanStyles.button}`}
+              className={`${styles.clearButton} ${sharedStyles.button}`}
               aria-label="Clear all search results"
             >
               {isClearing ? 'Clearing...' : 'Clear All'}

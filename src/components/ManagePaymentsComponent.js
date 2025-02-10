@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import DropIn from 'braintree-web-drop-in-react';
-import cleanStyles from './CleanDesign.module.css';
+import sharedStyles from './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      return <h3 className={cleanStyles.error}>Sorry, there was a problem loading the PayPal button.</h3>;
+      return <h3 className={sharedStyles.error}>Sorry, there was a problem loading the PayPal button.</h3>;
     }
     return this.props.children;
   }
@@ -125,7 +125,7 @@ const ManagePaymentsComponent = () => {
   }
 
   if (error) {
-    return <div className={cleanStyles.error}>{error}</div>;
+    return <div className={sharedStyles.error}>{error}</div>;
   }
 
   if (charities.length === 0) {
@@ -141,12 +141,12 @@ const ManagePaymentsComponent = () => {
   const isAmountValid = validateAndFormatAmount(amount) !== null;
 
   return (
-    <div className={cleanStyles.container}>
-      <h1 className={cleanStyles.heading}>Make a Donation</h1>
+    <div className={sharedStyles.container}>
+      <h1 className={sharedStyles.heading}>Make a Donation</h1>
       
-      <div className={`${cleanStyles.card} ${styles.formLayout}`}>
-        <div className={cleanStyles.formGroup}>
-          <label htmlFor="amount" className={cleanStyles.label}>Donation Amount</label>
+      <div className={`${sharedStyles.card} ${styles.formLayout}`}>
+        <div className={sharedStyles.formGroup}>
+          <label htmlFor="amount" className={sharedStyles.label}>Donation Amount</label>
           <div className={styles.inputGroup}>
             <span className={styles.currencySymbol}>$</span>
             <input
@@ -157,18 +157,18 @@ const ManagePaymentsComponent = () => {
               placeholder="Enter amount"
               step="0.01"
               min="0.01"
-              className={cleanStyles.input}
+              className={sharedStyles.input}
             />
           </div>
         </div>
 
-        <div className={cleanStyles.formGroup}>
-          <label htmlFor="charity" className={cleanStyles.label}>Select Charity</label>
+        <div className={sharedStyles.formGroup}>
+          <label htmlFor="charity" className={sharedStyles.label}>Select Charity</label>
           <select
             id="charity"
             value={selectedCharity}
             onChange={(e) => setSelectedCharity(e.target.value)}
-            className={cleanStyles.select}
+            className={sharedStyles.select}
           >
             <option value="">Select a charity</option>
             {charities.map((charity) => (
@@ -180,8 +180,8 @@ const ManagePaymentsComponent = () => {
         </div>
       </div>
 
-      <div className={`${cleanStyles.card} ${styles.paymentSection}`}>
-        <h2 className={cleanStyles.subheading}>Credit Card Payment</h2>
+      <div className={`${sharedStyles.card} ${styles.paymentSection}`}>
+        <h2 className={sharedStyles.subheading}>Credit Card Payment</h2>
         {clientToken ? (
           <>
             <div className={styles.dropInContainer}>
@@ -196,7 +196,7 @@ const ManagePaymentsComponent = () => {
             <button 
               onClick={handleBraintreePayment} 
               disabled={!instance || !isAmountValid || !selectedCharity}
-              className={cleanStyles.button}
+              className={sharedStyles.button}
             >
               Complete Donation
             </button>
@@ -206,8 +206,8 @@ const ManagePaymentsComponent = () => {
         )}
       </div>
 
-      <div className={`${cleanStyles.card} ${styles.paymentSection}`}>
-        <h2 className={cleanStyles.subheading}>PayPal Payment</h2>
+      <div className={`${sharedStyles.card} ${styles.paymentSection}`}>
+        <h2 className={sharedStyles.subheading}>PayPal Payment</h2>
         {PAYPAL_CLIENT_ID ? (
           <ErrorBoundary>
             <div className={styles.paypalContainer}>
@@ -222,14 +222,14 @@ const ManagePaymentsComponent = () => {
             </div>
           </ErrorBoundary>
         ) : (
-          <div className={cleanStyles.error}>
+          <div className={sharedStyles.error}>
             PayPal integration is currently unavailable. Please try another payment method.
           </div>
         )}
       </div>
 
-      <div className={`${cleanStyles.card} ${styles.infoSection}`}>
-        <h3 className={cleanStyles.subheading}>Test Payment Information</h3>
+      <div className={`${sharedStyles.card} ${styles.infoSection}`}>
+        <h3 className={sharedStyles.subheading}>Test Payment Information</h3>
         <ul className={styles.list}>
           <li>Visa: 4111 1111 1111 1111</li>
           <li>MasterCard: 5555 5555 5555 4444</li>

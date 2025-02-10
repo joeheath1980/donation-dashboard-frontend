@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import cleanStyles from './CleanDesign.module.css';
+import styles from './BusinessDashboard.module.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
@@ -117,131 +117,116 @@ function BusinessDashboard() {
   };
 
   if (loading || campaignsLoading) {
-    return <div className={`${cleanStyles.container} ${cleanStyles.textCenter}`}>Loading...</div>;
+    return <div className={styles.loadingContainer}>Loading...</div>;
   }
 
   if (error || campaignsError) {
     return (
-      <div className={cleanStyles.container}>
-        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-          {error && <p className={cleanStyles.description}>{error}</p>}
-          {campaignsError && <p className={cleanStyles.description}>{campaignsError}</p>}
-        </div>
+      <div className={styles.errorContainer}>
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        {campaignsError && <p className={styles.errorMessage}>{campaignsError}</p>}
       </div>
     );
   }
 
   return (
-    <div className={cleanStyles.container}>
-      <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-        <h1 className={cleanStyles.gradientTitle}>Welcome, {businessData.name}</h1>
-        
-        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-          <h2 className={cleanStyles.title}>Business Overview</h2>
-          <p className={cleanStyles.description}><strong>Email:</strong> {businessData.email}</p>
-          <p className={cleanStyles.description}><strong>Description:</strong> {businessData.description}</p>
-          <p className={cleanStyles.description}>
-            <strong>Preferred Causes:</strong> {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
-          </p>
-        </div>
+    <div className={styles.dashboardContainer}>
+      <h1 className={styles.dashboardTitle}>Welcome, {businessData.name}</h1>
+      
+      <section className={styles.businessOverview}>
+        <h2 className={styles.sectionTitle}>Business Overview</h2>
+        <p><strong>Email:</strong> {businessData.email}</p>
+        <p><strong>Description:</strong> {businessData.description}</p>
+        <p>
+          <strong>Preferred Causes:</strong> {Array.isArray(businessData.preferredCauses) ? businessData.preferredCauses.join(', ') : 'No preferred causes specified'}
+        </p>
+      </section>
 
-        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-          <h2 className={cleanStyles.title}>Overall Financial Summary</h2>
-          <p className={cleanStyles.description}><strong>Total Micro-Matches:</strong> ${dummyData.financialSummary.totalMicroMatches}</p>
-          <p className={cleanStyles.description}><strong>Monthly Average:</strong> ${dummyData.financialSummary.monthlyAverage}</p>
-          <p className={cleanStyles.description}><strong>Year-to-Date:</strong> ${dummyData.financialSummary.yearToDate}</p>
-        </div>
+      <section className={styles.financialSummary}>
+        <h2 className={styles.sectionTitle}>Overall Financial Summary</h2>
+        <p><strong>Total Micro-Matches:</strong> ${dummyData.financialSummary.totalMicroMatches}</p>
+        <p><strong>Monthly Average:</strong> ${dummyData.financialSummary.monthlyAverage}</p>
+        <p><strong>Year-to-Date:</strong> ${dummyData.financialSummary.yearToDate}</p>
+      </section>
 
-        <div className={`${cleanStyles.flexBetween} ${cleanStyles.mt-10}`}>
-          <Link 
-            to="/create-business-campaign" 
-            className={cleanStyles.button}
-            style={{
-              background: 'var(--primary-gradient)',
-              color: 'white',
-              border: 'none',
-              padding: '15px 30px',
-              textDecoration: 'none',
-              fontSize: '18px'
-            }}
-          >
-            Create New Campaign
-          </Link>
-        </div>
-
-        <div className={`${cleanStyles.grid} ${cleanStyles.mt-10}`}>
-          {['employee', 'customer', 'all'].map(category => (
-            <div key={category} className={cleanStyles.card}>
-              <h2 className={cleanStyles.title}>{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
-              
-              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-                <h3 className={cleanStyles.title}>Financial Summary</h3>
-                <p className={cleanStyles.description}><strong>Total Micro-Matches:</strong> ${dummyData[category].financialSummary.totalMicroMatches}</p>
-                <p className={cleanStyles.description}><strong>Monthly Average:</strong> ${dummyData[category].financialSummary.monthlyAverage}</p>
-                <p className={cleanStyles.description}><strong>Year-to-Date:</strong> ${dummyData[category].financialSummary.yearToDate}</p>
-              </div>
-
-              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-                <h3 className={cleanStyles.title}>Recent Micro-Matches</h3>
-                <ul className={cleanStyles.description}>
-                  {dummyData[category].microMatches.map(match => (
-                    <li key={match.id} className={cleanStyles.mb-10}>
-                      ${match.amount} to {match.charity} on {match.date}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-                <h3 className={cleanStyles.title}>Pending Requests</h3>
-                <ul className={cleanStyles.description}>
-                  {dummyData[category].requests.map(request => (
-                    <li key={request.id} className={cleanStyles.mb-10}>
-                      {request.charity} - ${request.amount} on {request.date}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-                <h3 className={cleanStyles.title}>Your Campaigns</h3>
-                <ul className={cleanStyles.description}>
-                  {dummyData[category].campaigns.map(campaign => (
-                    <li key={campaign.id} className={cleanStyles.mb-10}>
-                      <h4 className={cleanStyles.highlight}>{campaign.name}</h4>
-                      <p><strong>Amount:</strong> ${campaign.amount}</p>
-                      <p><strong>Start Date:</strong> {campaign.startDate}</p>
-                      <p><strong>End Date:</strong> {campaign.endDate}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className={`${cleanStyles.card} ${cleanStyles.mt-10}`}>
-          <h2 className={cleanStyles.title}>Your Created Campaigns</h2>
-          {campaigns.length === 0 ? (
-            <p className={cleanStyles.description}>
-              No campaigns found. <Link to="/create-business-campaign" className={cleanStyles.link}>Create your first campaign</Link>.
-            </p>
-          ) : (
-            <div className={cleanStyles.grid}>
-              {campaigns.map(campaign => (
-                <div key={campaign._id} className={cleanStyles.card}>
-                  <h3 className={cleanStyles.title}>{campaign.name}</h3>
-                  <p className={cleanStyles.description}><strong>Description:</strong> {campaign.description}</p>
-                  <p className={cleanStyles.description}><strong>Goal:</strong> ${campaign.goal.toFixed(2)}</p>
-                  <p className={cleanStyles.description}><strong>Current Amount:</strong> ${campaign.currentAmount.toFixed(2)}</p>
-                  <p className={cleanStyles.description}><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
-                  <p className={cleanStyles.description}><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className={styles.createCampaignContainer}>
+        <Link to="/create-business-campaign" className={styles.createCampaignButton}>
+          Create New Campaign
+        </Link>
       </div>
+
+      <div className={styles.categoriesGrid}>
+        {['employee', 'customer', 'all'].map(category => (
+          <div key={category} className={styles.categoryCard}>
+            <h2 className={styles.categoryTitle}>{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+            
+            <div className={styles.summaryCard}>
+              <h3 className={styles.cardTitle}>Financial Summary</h3>
+              <p><strong>Total Micro-Matches:</strong> ${dummyData[category].financialSummary.totalMicroMatches}</p>
+              <p><strong>Monthly Average:</strong> ${dummyData[category].financialSummary.monthlyAverage}</p>
+              <p><strong>Year-to-Date:</strong> ${dummyData[category].financialSummary.yearToDate}</p>
+            </div>
+
+            <div className={styles.summaryCard}>
+              <h3 className={styles.cardTitle}>Recent Micro-Matches</h3>
+              <ul className={styles.list}>
+                {dummyData[category].microMatches.map(match => (
+                  <li key={match.id} className={styles.listItem}>
+                    ${match.amount} to {match.charity} on {match.date}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={styles.summaryCard}>
+              <h3 className={styles.cardTitle}>Pending Requests</h3>
+              <ul className={styles.list}>
+                {dummyData[category].requests.map(request => (
+                  <li key={request.id} className={styles.listItem}>
+                    {request.charity} - ${request.amount} on {request.date}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={styles.summaryCard}>
+              <h3 className={styles.cardTitle}>Your Campaigns</h3>
+              <ul className={styles.list}>
+                {dummyData[category].campaigns.map(campaign => (
+                  <li key={campaign.id} className={styles.listItem}>
+                    <h4 className={styles.campaignName}>{campaign.name}</h4>
+                    <p><strong>Amount:</strong> ${campaign.amount}</p>
+                    <p><strong>Start Date:</strong> {campaign.startDate}</p>
+                    <p><strong>End Date:</strong> {campaign.endDate}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <section className={styles.createdCampaigns}>
+        <h2 className={styles.sectionTitle}>Your Created Campaigns</h2>
+        {campaigns.length === 0 ? (
+          <p className={styles.noCampaigns}>
+            No campaigns found. <Link to="/create-business-campaign" className={styles.link}>Create your first campaign</Link>.
+          </p>
+        ) : (
+          <div className={styles.campaignsGrid}>
+            {campaigns.map(campaign => (
+              <div key={campaign._id} className={styles.campaignCard}>
+                <h3 className={styles.campaignTitle}>{campaign.name}</h3>
+                <p><strong>Description:</strong> {campaign.description}</p>
+                <p><strong>Goal:</strong> ${campaign.goal.toFixed(2)}</p>
+                <p><strong>Current Amount:</strong> ${campaign.currentAmount.toFixed(2)}</p>
+                <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

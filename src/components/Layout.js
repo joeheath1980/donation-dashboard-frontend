@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import styles from '../NavBar.module.css';
-import layoutStyles from '../Layout.module.css';
+import styles from './NavBar.module.css';
+import layoutStyles from './Layout.module.css';
 import logo from '../assets/logo.png';
-import '../NavReset.css';
+import './NavReset.css';
 
 function Layout({ children }) {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
