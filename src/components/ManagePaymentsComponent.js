@@ -5,7 +5,7 @@ import DropIn from 'braintree-web-drop-in-react';
 import sharedStyles from './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+const API_URL = process.env.REACT_APP_API_URL;
 const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
 
 class ErrorBoundary extends React.Component {

@@ -16,7 +16,7 @@ function SearchCharities() {
     setError(null);
 
     try {
-      const response = await axios.get(`http://localhost:3002/api/search-charities`, {
+      const response = await axios.get(`process.env.API_BASE_URL/api/search-charities`, {
         params: { q: query }
       });
 

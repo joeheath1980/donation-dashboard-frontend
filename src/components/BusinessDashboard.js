@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import styles from './BusinessDashboard.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+const API_URL = process.env.REACT_APP_API_URL;
 
 function BusinessDashboard() {
   const { getAuthHeaders } = useAuth();

@@ -41,7 +41,7 @@ function VolunteerActivitiesComponent({ userId }) {
   const fetchActivities = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:3002/api/volunteerActivities`, {
+      const response = await axios.get(`process.env.API_BASE_URL/api/volunteerActivities`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -88,7 +88,7 @@ function VolunteerActivitiesComponent({ userId }) {
     formData.append('evidence', selectedFile);
 
     try {
-      const response = await axios.post('http://localhost:3002/api/volunteerActivities', formData, {
+      const response = await axios.post('process.env.API_BASE_URL/api/volunteerActivities', formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -108,7 +108,7 @@ function VolunteerActivitiesComponent({ userId }) {
   const handleDeleteActivity = async (activityId) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:3002/api/volunteerActivities/${activityId}`, {
+      await axios.delete(`process.env.API_BASE_URL/api/volunteerActivities/${activityId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -267,7 +267,7 @@ function VolunteerActivitiesComponent({ userId }) {
                   <p><strong>Description:</strong> {activity.description}</p>
                   {activity.evidence && (
                     <a 
-                      href={`http://localhost:3002/api/volunteerActivities/evidence/${activity.evidence.split('/').pop()}`}
+                      href={`process.env.API_BASE_URL/api/volunteerActivities/evidence/${activity.evidence.split('/').pop()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.evidenceLink}
