@@ -6,7 +6,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3002',
+  baseURL: process.env.REACT_APP_API_URL,
   withCredentials: true,
   headers: {
     'Accept': 'application/json',

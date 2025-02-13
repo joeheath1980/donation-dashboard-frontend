@@ -232,10 +232,10 @@ export const ImpactProvider = ({ children }) => {
         volunteerRes,
         fundraisingRes
       ] = await Promise.all([
-        axios.get('http://localhost:3002/api/donations', { headers }),
-        axios.get('http://localhost:3002/api/contributions/one-off', { headers }),
-        axios.get('http://localhost:3002/api/volunteerActivities', { headers }),
-        axios.get('http://localhost:3002/api/fundraisingCampaigns', { headers })
+        axios.get('process.env.API_BASE_URL/api/donations', { headers }),
+        axios.get('process.env.API_BASE_URL/api/contributions/one-off', { headers }),
+        axios.get('process.env.API_BASE_URL/api/volunteerActivities', { headers }),
+        axios.get('process.env.API_BASE_URL/api/fundraisingCampaigns', { headers })
       ]);
 
       setDonations(donationsRes.data);
@@ -273,7 +273,7 @@ export const ImpactProvider = ({ children }) => {
       let savedDonation = donation;
       if (!alreadySaved) {
         const headers = getAuthHeaders();
-        const response = await axios.post('http://localhost:3002/api/donations', donation, { headers });
+        const response = await axios.post('process.env.API_BASE_URL/api/donations', donation, { headers });
         if (response.status !== 201) {
           throw new Error('Failed to add donation');
         }
@@ -292,7 +292,7 @@ export const ImpactProvider = ({ children }) => {
       let savedContribution = contribution;
       if (!alreadySaved) {
         const headers = getAuthHeaders();
-        const response = await axios.post('http://localhost:3002/api/contributions/one-off', contribution, { headers });
+        const response = await axios.post('process.env.API_BASE_URL/api/contributions/one-off', contribution, { headers });
         if (response.status !== 201) {
           throw new Error('Failed to add contribution');
         }
@@ -309,7 +309,7 @@ export const ImpactProvider = ({ children }) => {
   const onDeleteContribution = useCallback(async (contributionId) => {
     try {
       const headers = getAuthHeaders();
-      await axios.delete(`http://localhost:3002/api/contributions/one-off/${contributionId}`, { headers });
+      await axios.delete(`process.env.API_BASE_URL/api/contributions/one-off/${contributionId}`, { headers });
       setOneOffContributions(prevContributions => prevContributions.filter(c => c._id !== contributionId));
     } catch (error) {
       console.error('Error deleting contribution:', error);
@@ -330,7 +330,7 @@ export const ImpactProvider = ({ children }) => {
       console.log('Sending payload:', validCharities);
 
       const promises = validCharities.map(charity =>
-        axios.post('http://localhost:3002/api/followed-charities', charity, { headers })
+        axios.post('process.env.API_BASE_URL/api/followed-charities', charity, { headers })
       );
 
       const responses = await Promise.all(promises);
@@ -366,7 +366,7 @@ export const ImpactProvider = ({ children }) => {
       }
 
       const headers = getAuthHeaders();
-      await axios.delete(`http://localhost:3002/api/followed-charities/${charityABN}`, { headers });
+      await axios.delete(`process.env.API_BASE_URL/api/followed-charities/${charityABN}`, { headers });
 
       setFollowedCharities(prevCharities => {
         const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
@@ -456,7 +456,7 @@ export const ImpactProvider = ({ children }) => {
       const syncFollowedCharities = async () => {
         try {
           const headers = getAuthHeaders();
-          const response = await axios.get('http://localhost:3002/api/followed-charities', { headers });
+          const response = await axios.get('process.env.API_BASE_URL/api/followed-charities', { headers });
           const dbCharities = response.data;
 
           setFollowedCharities(dbCharities);

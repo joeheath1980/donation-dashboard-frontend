@@ -37,7 +37,7 @@ const GlobalGivingProjects = () => {
       const searchQuery = formPersonalizedSearchQuery();
       console.log('Search Query:', searchQuery);
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const endpoint = `${apiUrl}/api/globalgiving/projects/recommended`;
 
       console.log('API URL:', endpoint);

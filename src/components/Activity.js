@@ -13,7 +13,7 @@ import {
   FaPlus
 } from 'react-icons/fa';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+const API_URL = process.env.REACT_APP_API_URL;
 const STORAGE_KEY = 'donation-activity-state';
 
 const CHARITY_TYPES = [
@@ -211,7 +211,7 @@ function Activity() {
 
   const checkAuthStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/google/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/google/status`, {
         credentials: 'include',
       });
       const data = await response.json();
@@ -230,7 +230,7 @@ function Activity() {
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      const response = await fetch(`${API_URL}/api/scrape-outlook`, { 
+      const response = await fetch (`${API_BASE_URL}/api/scrape-outlook`, { 
         mode: 'cors',
         credentials: 'include',
         headers: {
@@ -289,7 +289,7 @@ function Activity() {
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      const response = await fetch(`${API_URL}/api/scrape-gmail`, { 
+      const response = await fetch(`${API_BASE_URL}/api/scrape-gmail`, { 
         mode: 'cors',
         credentials: 'include',
         headers: {

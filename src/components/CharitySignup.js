@@ -26,7 +26,7 @@ function CharitySignup() {
 
   const fetchCharityProfile = async (token) => {
     try {
-      const response = await axios.get('http://localhost:3002/api/charities/me', {
+      const response = await axios.get('process.env.API_BASE_URL/api/charities/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ function CharitySignup() {
     setSuccessMessage('');
     try {
       // Register charity
-      const response = await axios.post('http://localhost:3002/api/charities/signup', formData, {
+      const response = await axios.post('process.env.API_BASE_URL/api/charities/signup', formData, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'

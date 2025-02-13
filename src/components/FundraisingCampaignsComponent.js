@@ -113,7 +113,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     const headers = getAuthHeaders();
     try {
       await axios.post(
-        'http://localhost:3002/api/fundraisingCampaigns',
+        'process.env.API_BASE_URL/api/fundraisingCampaigns',
         campaignData,
         {
           headers: {
@@ -150,7 +150,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     }
     const headers = getAuthHeaders();
     try {
-      await axios.delete(`http://localhost:3002/api/fundraisingCampaigns/${campaignId}`, { headers });
+      await axios.delete(`process.env.API_BASE_URL/api/fundraisingCampaigns/${campaignId}`, { headers });
       if (isAuthenticated) {
         fetchImpactData();
       }
@@ -174,7 +174,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       };
 
       await axios.patch(
-        `http://localhost:3002/api/fundraisingCampaigns/${campaign._id}`,
+        `process.env.API_BASE_URL/api/fundraisingCampaigns/${campaign._id}`,
         updatedCampaign,
         {
           headers: {
@@ -221,7 +221,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         const updatedCampaign = { raisedAmount: updatedRaisedAmount };
 
         await axios.patch(
-          `http://localhost:3002/api/fundraisingCampaigns/${campaign._id}`,
+          `process.env.API_BASE_URL/api/fundraisingCampaigns/${campaign._id}`,
           updatedCampaign,
           {
             headers: {
