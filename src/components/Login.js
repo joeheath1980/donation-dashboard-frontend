@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'react-icons/fa';
 import styles from './Login.module.css';
+import cleanStyles from './SharedStyles.css';
 import logo from '../assets/logo.png';
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, businessLogin, charityLogin, socialLogin, API_URL } = useAuth();
+  const { login, businessLogin, charityLogin, socialLogin } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -88,15 +90,15 @@ function Login() {
 
   const handleSocialLogin = (provider) => {
     if (socialLoginInProgress) return;
-    
+
     setSocialLoginInProgress(true);
     setError(null);
-    
+
     // Store current URL for potential redirect back
     sessionStorage.setItem('loginRedirectUrl', window.location.href);
-    
+
     // Redirect to the auth endpoint
-    window.location.href = `${API_URL}/api/auth/${provider}`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/${provider}`;
   };
 
   return (
@@ -104,7 +106,7 @@ function Login() {
       <div className={styles.loginContainer}>
         <img src={logo} alt="Logo" className={styles.logo} />
         <h1 className={styles.title}>Welcome Back</h1>
-        
+
         {error && (
           <div className={styles.error} role="alert">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -171,8 +173,8 @@ function Login() {
             </select>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading || socialLoginInProgress}
             className={styles.loginButton}
           >
@@ -196,7 +198,7 @@ function Login() {
                 </svg>
                 <span>{socialLoginInProgress ? 'Connecting...' : 'Continue with Google'}</span>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => handleSocialLogin('microsoft')}

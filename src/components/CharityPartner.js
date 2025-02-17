@@ -6,7 +6,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002',
   withCredentials: true,
   headers: {
     'Accept': 'application/json',
@@ -20,7 +20,7 @@ function CharityPartner() {
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const { addFollowedCharity, removeFollowedCharity, followedCharities } = useContext(ImpactContext);
   const [isFollowed, setIsFollowed] = useState(false);
 
@@ -119,7 +119,7 @@ function CharityPartner() {
         charity['State'],
         charity['Postcode'],
         charity['Country']
-      ].filter(Boolean);
+      ].filter(Boolean).join(', ');
       return addressParts.length > 0 ? addressParts.join(', ') : 'N/A';
     } catch (err) {
       console.error('[CharityPartner] Error formatting address:', err);
@@ -180,8 +180,8 @@ function CharityPartner() {
         <div className={styles.errorContainer}>
           <h2>Error</h2>
           <p>{error}</p>
-          <button 
-            onClick={fetchCharityDetails} 
+          <button
+            onClick={fetchCharityDetails}
             className={styles.primaryButton}
           >
             Try Again
@@ -209,8 +209,8 @@ function CharityPartner() {
         <div className={styles.cardHeader}>
           <h1 className={styles.header}>{charity.Charity_Legal_Name}</h1>
           <div className={styles.buttonContainer}>
-            <button 
-              onClick={handleFollow} 
+            <button
+              onClick={handleFollow}
               className={isFollowed ? styles.secondaryButton : styles.primaryButton}
             >
               {isFollowed ? 'Following' : 'Follow'}
@@ -259,9 +259,9 @@ function CharityPartner() {
           {charity.Website && (
             <p className={styles.paragraph}>
               <strong>Website:</strong>{' '}
-              <a 
-                href={charity.Website.startsWith('http') ? charity.Website : `https://${charity.Website}`} 
-                target="_blank" 
+              <a
+                href={charity.Website.startsWith('http') ? charity.Website : `https://${charity.Website}`}
+                target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
               >
@@ -319,13 +319,13 @@ function CharityPartner() {
 
         {/* Action Buttons */}
         <div className={styles.buttonContainer}>
-          <button 
+          <button
             className={styles.secondaryButton}
             onClick={() => console.log('Match clicked')}
           >
             Match
           </button>
-          <button 
+          <button
             className={styles.primaryButton}
             onClick={() => console.log('Donate clicked')}
           >

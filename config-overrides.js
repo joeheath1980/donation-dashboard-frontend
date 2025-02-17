@@ -1,13 +1,6 @@
 const webpack = require('webpack');
 
 module.exports = function override(config, env) {
-  // DefinePlugin for explicit variable injection
-  config.plugins = (config.plugins || []).concat([
-    new webpack.DefinePlugin({
-      'API_BASE_URL': JSON.stringify(process.env.REACT_APP_API_BASE_URL), // CORRECTED
-    }),
-  ]);
-
   // Add fallbacks for Node.js core modules
   config.resolve.fallback = {
     ...config.resolve.fallback,
@@ -27,8 +20,8 @@ module.exports = function override(config, env) {
     }),
   ]);
 
-  // Handle .mjs files
-  config.module.rules = [
+    // Handle .mjs files
+    config.module.rules = [
     ...config.module.rules,
     {
       test: /\.m?js/,
@@ -36,7 +29,7 @@ module.exports = function override(config, env) {
         fullySpecified: false,
       },
     },
-  ];
+   ];
 
   return config;
 };

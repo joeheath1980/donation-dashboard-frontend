@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import styles from './BusinessDashboard.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL;
-
 function BusinessDashboard() {
-  const { getAuthHeaders } = useAuth();
-  
+  const { getAuthHeaders, user } = useAuth();
+
   const [businessData, setBusinessData] = useState({
     name: '',
     email: '',
     description: '',
     preferredCauses: []
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
@@ -25,7 +23,7 @@ function BusinessDashboard() {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/business/me`, { headers: getAuthHeaders() });
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`, { headers: getAuthHeaders() });
         setBusinessData(response.data);
       } catch (err) {
         console.error('Error fetching business data:', err);
@@ -41,7 +39,7 @@ function BusinessDashboard() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/business/campaigns`, { headers: getAuthHeaders() });
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/campaigns`, { headers: getAuthHeaders() });
         setCampaigns(response.data);
       } catch (err) {
         console.error('Error fetching campaigns:', err);
@@ -132,7 +130,7 @@ function BusinessDashboard() {
   return (
     <div className={styles.dashboardContainer}>
       <h1 className={styles.dashboardTitle}>Welcome, {businessData.name}</h1>
-      
+
       <section className={styles.businessOverview}>
         <h2 className={styles.sectionTitle}>Business Overview</h2>
         <p><strong>Email:</strong> {businessData.email}</p>

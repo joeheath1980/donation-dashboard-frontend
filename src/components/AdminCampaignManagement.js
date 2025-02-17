@@ -1,83 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { FaCheck, FaTimes, FaFileDownload } from 'react-icons/fa';
+import styles from './AdminCharityManagement.module.css';
 
-const AdminCampaignManagement = () => {
-  const [campaigns, setCampaigns] = useState([]);
+function AdminCharityManagement() {
+  const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getAuthHeaders } = useAuth();
+
+  const fetchPendingRequests = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests`, {
+        headers: getAuthHeaders()
+      });
+      setPendingRequests(response.data);
+    } catch (err) {
+      console.error('Error fetching pending requests:', err);
+      setError('Failed to load pending requests');
+    } finally {
+      setLoading(false);
+    }
+  }, [getAuthHeaders]);
 
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const response = await axios.get('/api/admin/campaigns');
-        setCampaigns(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch campaigns');
-        setLoading(false);
-      }
-    };
+    fetchPendingRequests();
+  }, [fetchPendingRequests]);
 
-    fetchCampaigns();
-  }, []);
-
-  const handleStatusChange = async (campaignId, newStatus) => {
+  const handleApprove = async (requestId) => {
     try {
-      await axios.put(`/api/admin/campaigns/${campaignId}/status`, { status: newStatus });
-      setCampaigns(campaigns.map(campaign => 
-        campaign._id === campaignId ? { ...campaign, status: newStatus } : campaign
-      ));
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/approve`, {}, {
+        headers: getAuthHeaders()
+      });
+      fetchPendingRequests();
     } catch (err) {
-      setError('Failed to update campaign status');
+      console.error('Error approving request:', err);
+      setError('Failed to approve request');
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  const handleReject = async (requestId) => {
+    try {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/reject`, {}, {
+        headers: getAuthHeaders()
+      });
+      fetchPendingRequests();
+    } catch (err) {
+      console.error('Error rejecting request:', err);
+      setError('Failed to reject request');
+    }
+  };
+
+  const handleDownloadEvidence = async (evidencePath) => {
+    try {
+      const downloadUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${evidencePath}`;
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error downloading evidence:', err);
+      setError('Failed to download evidence');
+    }
+  };
+
+  if (loading) {
+    return <div className={styles.loading}>Loading pending requests...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
+  }
 
   return (
-    <div>
-      <h2>Campaign Management</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Organization</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Goal</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {campaigns.map(campaign => (
-            <tr key={campaign._id}>
-              <td>{campaign.name}</td>
-              <td>{campaign.organization.name}</td>
-              <td>{new Date(campaign.startDate).toLocaleDateString()}</td>
-              <td>{new Date(campaign.endDate).toLocaleDateString()}</td>
-              <td>${campaign.goal.toFixed(2)}</td>
-              <td>
-                <select 
-                  value={campaign.status} 
-                  onChange={(e) => handleStatusChange(campaign._id, e.target.value)}
+    <div className={styles.container}>
+      <h2>Charity Link Requests</h2>
+      {pendingRequests.length === 0 ? (
+        <p className={styles.noRequests}>No pending requests</p>
+      ) : (
+        <div className={styles.requestsGrid}>
+          {pendingRequests.map((request) => (
+            <div key={request._id} className={styles.requestCard}>
+              <div className={styles.requestInfo}>
+                <h3>{request.charityName}</h3>
+                <p><strong>Email:</strong> {request.contactEmail}</p>
+                <p><strong>ABN to Link:</strong> {request.linkedABN}</p>
+                <p><strong>Requested:</strong> {new Date(request.linkingRequestDate).toLocaleDateString()}</p>
+              </div>
+              <div className={styles.evidence}>
+                <button
+                  onClick={() => handleDownloadEvidence(request.linkingEvidence)}
+                  className={styles.downloadButton}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="paused">Paused</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </td>
-              <td>
-                {/* Add more actions here */}
-              </td>
-            </tr>
+                  <FaFileDownload /> View Evidence
+                </button>
+              </div>
+              <div className={styles.actions}>
+                <button
+                  onClick={() => handleApprove(request._id)}
+                  className={`${styles.actionButton} ${styles.approve}`}
+                  title="Approve Request"
+                >
+                  <FaCheck />
+                </button>
+                <button
+                  onClick={() => handleReject(request._id)}
+                  className={`${styles.actionButton} ${styles.reject}`}
+                  title="Reject Request"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AdminCampaignManagement;
+export default AdminCharityManagement;

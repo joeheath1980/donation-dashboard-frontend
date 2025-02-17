@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'react-icons/fa';
 import styles from './SignUp.module.css';
+import cleanStyles from './SharedStyles.css';
 import logo from '../assets/logo.png';
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { userSignup, API_URL } = useAuth();
+  const { userSignup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -111,188 +113,229 @@ const SignUp = () => {
 
     try {
       const { name, email, password } = formData;
-      await userSignup(name, email, password);
+      console.log('Attempting to sign up user:', { name, email });
+      const result = await userSignup(name, email, password);
+      console.log('Signup successful:', result);
       setSuccess('Registration successful! Redirecting to your profile...');
-      setTimeout(() => navigate('/profile'), 2000);
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
     } catch (error) {
-      let errorMessage = 'An error occurred during registration.';
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      console.error('Signup error:', error);
+      let errorMessage = 'An error occurred during registration. Please try again.';
+      if (error.message === 'A user with this email already exists. Please try logging in or use a different email.') {
+        errorMessage = error.message;
+      } else if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || JSON.stringify(error.response.data);
       } else if (error.message) {
         errorMessage = error.message;
       }
-      setError(errorMessage);
+      setError(`Error: ${errorMessage}`);
+      console.error('Detailed error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSocialSignup = (provider) => {
-    window.location.href = `${API_URL}/api/auth/${provider}`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/${provider}`;
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const containerStyle = {
+    maxWidth: '500px',
+    margin: '40px auto',
+    padding: '0 20px',
+    boxSizing: 'border-box'
+  };
+
+  const cardStyle = {
+    padding: '30px',
+    width: '100%',
+    boxSizing: 'border-box'
+  };
+
+  const formGroupStyle = {
+    marginBottom: '20px',
+    width: '100%',
+    boxSizing: 'border-box'
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-light)',
+    fontSize: '16px',
+    marginTop: '8px',
+    boxSizing: 'border-box'
+  };
+
+  const buttonStyle = {
+    width: '100%',
+    padding: '15px',
+    fontSize: '18px',
+    marginTop: '20px',
+    background: 'var(--primary-gradient)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    opacity: loading ? 0.7 : 1,
+    transition: 'opacity 0.3s ease'
+  };
+
+  const socialButtonStyle = {
+    width: '100%',
+    padding: '12px',
+    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    fontSize: '16px',
+    border: '1px solid var(--border-light)',
+    borderRadius: '8px',
+    background: 'white',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease'
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.signupContainer}>
-        <img src={logo} alt="Logo" className={styles.logo} />
-        <h1 className={styles.title}>Create Your Account</h1>
-        
+    <div className={cleanStyles.container} style={containerStyle}>
+      <div className={cleanStyles.card} style={cardStyle}>
+        <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
+        <h2 className={cleanStyles.gradientTitle}>Create an Account</h2>
+
         {error && (
-          <div className={styles.error} role="alert">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-            {error}
+          <div className={cleanStyles.card} style={{ backgroundColor: '#FEE2E2', border: 'none', marginBottom: '20px' }}>
+            <p className={cleanStyles.description} style={{ color: '#DC2626', margin: 0 }} role="alert">{error}</p>
           </div>
         )}
-        
         {success && (
-          <div className={styles.success} role="alert">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-            </svg>
-            {success}
+          <div className={cleanStyles.card} style={{ backgroundColor: '#ECFDF5', border: 'none', marginBottom: '20px' }}>
+            <p className={cleanStyles.description} style={{ color: '#059669', margin: 0 }} role="alert">{success}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="name">Full Name</label>
+        <form onSubmit={handleSubmit} className={cleanStyles.flexColumn}>
+          <div style={formGroupStyle}>
+            <label className={cleanStyles.description}>Full Name:</label>
             <input
               type="text"
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter your full name"
+              placeholder="Full Name"
               required
-              className={!validations.name.valid ? styles.error : ''}
+              style={inputStyle}
             />
-            {!validations.name.valid && (
-              <span className={`${styles.validationMessage} ${styles.error}`}>
-                {validations.name.message}
-              </span>
-            )}
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
+          <div style={formGroupStyle}>
+            <label className={cleanStyles.description}>Email:</label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder="Email"
               required
-              className={!validations.email.valid ? styles.error : ''}
+              style={inputStyle}
             />
-            {!validations.email.valid && (
-              <span className={`${styles.validationMessage} ${styles.error}`}>
-                {validations.email.message}
-              </span>
-            )}
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <div className={styles.passwordWrapper}>
+          <div style={formGroupStyle}>
+            <label className={cleanStyles.description}>Password:</label>
+            <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Create a password"
+                placeholder="Password"
                 required
-                className={!validations.password.valid ? styles.error : ''}
+                style={inputStyle}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={styles.toggleButton}
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={togglePasswordVisibility}
+                className={cleanStyles.iconButton}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
-            {formData.password && (
-              <>
-                <div className={styles.passwordStrength}>
-                  <div 
-                    className={`${styles.passwordStrengthBar} ${styles[getPasswordStrengthClass(validations.password.strength)]}`}
-                  />
-                </div>
-                <span className={styles.passwordStrengthText}>
-                  Password Strength: {getPasswordStrengthLabel(validations.password.strength)}
-                </span>
-              </>
-            )}
-            {!validations.password.valid && (
-              <span className={`${styles.validationMessage} ${styles.error}`}>
-                {validations.password.message}
-              </span>
-            )}
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="confirmPassword">Confirm Password</label>
+          <div style={formGroupStyle}>
+            <label className={cleanStyles.description}>Confirm Password:</label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm your password"
+              placeholder="Confirm Password"
               required
-              className={!validations.confirmPassword.valid ? styles.error : ''}
+              style={inputStyle}
             />
-            {!validations.confirmPassword.valid && (
-              <span className={`${styles.validationMessage} ${styles.error}`}>
-                {validations.confirmPassword.message}
-              </span>
-            )}
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading || !Object.values(validations).every(v => v.valid)}
-            className={styles.submitButton}
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
+          <button type="submit" disabled={loading} style={buttonStyle}>
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
 
-        <div className={styles.socialLogin}>
-          <h3>Or sign up with</h3>
-          <div className={styles.socialButtons}>
+        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+          <h3 className={cleanStyles.title}>Or sign up with:</h3>
+          <div style={{ marginTop: '15px' }}>
             <button
-              type="button"
               onClick={() => handleSocialSignup('google')}
-              className={`${styles.socialButton} ${styles.google}`}
+              style={socialButtonStyle}
             >
-              <svg viewBox="0 0 24 24">
-                <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-              </svg>
-              Continue with Google
+              <FaGoogle /> Google
             </button>
-            
             <button
-              type="button"
               onClick={() => handleSocialSignup('microsoft')}
-              className={`${styles.socialButton} ${styles.microsoft}`}
+              style={socialButtonStyle}
             >
-              <svg viewBox="0 0 24 24">
-                <path fill="currentColor" d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
-              </svg>
-              Continue with Microsoft
+              <FaMicrosoft /> Microsoft
+            </button>
+            <button
+              style={{ ...socialButtonStyle, opacity: 0.6, cursor: 'not-allowed' }}
+              disabled
+              title="Apple signup is coming soon"
+            >
+              <FaApple /> Apple (Coming Soon)
+            </button>
+            <button
+              style={{ ...socialButtonStyle, opacity: 0.6, cursor: 'not-allowed' }}
+              disabled
+              title="Facebook signup is coming soon"
+            >
+              <FaFacebook /> Facebook (Coming Soon)
             </button>
           </div>
         </div>
 
-        <div className={styles.toggleText}>
-          <Link to="/login">Already have an account? Log in</Link>
-        </div>
+        <p style={{ textAlign: 'center', marginTop: '20px' }} className={cleanStyles.description}>
+          Already have an account? <Link to="/login" className={cleanStyles.link}>Log in</Link>
+        </p>
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'react-icons/fa';
 import styles from '../SignUp.module.css';
-import cleanStyles from './CleanDesign.module.css';
+import cleanStyles from './SharedStyles.css';
 import logo from '../assets/logo.png';
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { userSignup, API_URL } = useAuth();
+  const { userSignup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,10 +22,7 @@ const SignUp = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
 
     // Real-time validation
     if (name === 'email') {
@@ -104,13 +101,8 @@ const SignUp = () => {
     }
   };
 
-  const handleSocialSignup = (provider) => {
-    const url = `${API_URL}/api/auth/${provider}`;
-    console.log(`Redirecting to ${provider} signup:`, url);
-    if (provider === 'microsoft') {
-      console.log('Microsoft login URL:', url);
-    }
-    window.location.href = url;
+  const handleSocialLogin = (provider) => {
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/${provider}`;
   };
 
   const containerStyle = {
@@ -177,7 +169,7 @@ const SignUp = () => {
       <div className={cleanStyles.card} style={cardStyle}>
         <img src={logo} alt="Do-Nation Logo" className={styles.logo} />
         <h2 className={cleanStyles.gradientTitle}>Create an Account</h2>
-        
+
         {error && (
           <div className={cleanStyles.card} style={{ backgroundColor: '#FEE2E2', border: 'none', marginBottom: '20px' }}>
             <p className={cleanStyles.description} style={{ color: '#DC2626', margin: 0 }} role="alert">{error}</p>
@@ -188,7 +180,7 @@ const SignUp = () => {
             <p className={cleanStyles.description} style={{ color: '#059669', margin: 0 }} role="alert">{success}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className={cleanStyles.flexColumn}>
           <div style={formGroupStyle}>
             <label className={cleanStyles.description}>Full Name:</label>
@@ -268,32 +260,30 @@ const SignUp = () => {
             {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <div style={{ marginTop: '30px', textAlign: 'center' }}>
           <h3 className={cleanStyles.title}>Or sign up with:</h3>
           <div style={{ marginTop: '15px' }}>
-            <button 
-              onClick={() => handleSocialSignup('google')} 
+            <button
+              onClick={() => handleSocialLogin('google')}
               style={socialButtonStyle}
             >
               <FaGoogle /> Google
             </button>
-            <button 
-              onClick={() => handleSocialSignup('microsoft')} 
+            <button
+              onClick={() => handleSocialLogin('microsoft')}
               style={socialButtonStyle}
             >
               <FaMicrosoft /> Microsoft
             </button>
-            <button 
-              onClick={() => handleSocialSignup('apple')} 
+            <button
               style={{ ...socialButtonStyle, opacity: 0.6, cursor: 'not-allowed' }}
               disabled
               title="Apple signup is coming soon"
             >
               <FaApple /> Apple (Coming Soon)
             </button>
-            <button 
-              onClick={() => handleSocialSignup('facebook')} 
+            <button
               style={{ ...socialButtonStyle, opacity: 0.6, cursor: 'not-allowed' }}
               disabled
               title="Facebook signup is coming soon"

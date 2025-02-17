@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaLink, FaTimes, FaClock, FaPlus } from 'react-icons/fa';
 import styles from './CharityDashboard.module.css';
+import { ImpactContext } from '../contexts/ImpactContext';
+import { FaSearch, FaLink, FaTimes, FaClock, FaPlus } from 'react-icons/fa';
 import logo from '../assets/logo.png';
+import { useAuth } from '../contexts/AuthContext';
 
 function CharityDashboard() {
   const [charityData, setCharityData] = useState(null);
   const [error, setError] = useState(null);
-  const { user, getAuthHeaders, API_URL, logout } = useAuth();
+  const { user, getAuthHeaders, logout } = useAuth();
   const navigate = useNavigate();
 
   // Search and linking states
@@ -30,20 +31,20 @@ function CharityDashboard() {
       }
 
       try {
-        const response = await axios.get(`${API_URL}/api/charities/me`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`, {
           headers: getAuthHeaders()
         });
         setCharityData(response.data);
 
         // Fetch linking status
-        const statusResponse = await axios.get(`${API_URL}/api/charities/linking-status`, {
+        const statusResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/linking-status`, {
           headers: getAuthHeaders()
         });
         setLinkingStatus(statusResponse.data.status);
-        
+
         // If there's a linked ABN, fetch the charity details
         if (statusResponse.data.linkedABN) {
-          const linkedResponse = await axios.get(`${API_URL}/api/search-charities`, {
+          const linkedResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`, {
             params: { q: statusResponse.data.linkedABN }
           });
           if (linkedResponse.data?.result?.records?.length > 0) {
@@ -57,7 +58,7 @@ function CharityDashboard() {
     };
 
     fetchCharityData();
-  }, [user, getAuthHeaders, API_URL]);
+  }, [user, getAuthHeaders]);
 
   const searchCharities = useCallback(async (term) => {
     if (!term || term.length < 2) {
@@ -67,10 +68,10 @@ function CharityDashboard() {
 
     setIsSearching(true);
     try {
-      const response = await axios.get(`${API_URL}/api/search-charities`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`, {
         params: { q: term }
       });
-      
+
       if (response.data?.result?.records) {
         setSearchResults(response.data.result.records);
       }
@@ -80,7 +81,7 @@ function CharityDashboard() {
     } finally {
       setIsSearching(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     const delaySearch = setTimeout(() => {
@@ -121,7 +122,7 @@ function CharityDashboard() {
       };
       delete headers['Content-Type']; // Let axios set the correct boundary
 
-      await axios.post(`${API_URL}/api/charities/link-request`, formData, {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/link-request`, formData, {
         headers: headers
       });
 
@@ -190,7 +191,7 @@ function CharityDashboard() {
         <h1 className={styles.title}>Charity Dashboard</h1>
         <button onClick={handleLogout} className={styles.button}>Log Out</button>
       </header>
-      
+
       <div className={styles.card}>
         <h2 className={styles.cardTitle}>Welcome, {charityData.charityName}</h2>
         <p className={styles.description}><strong>Email:</strong> {charityData.contactEmail}</p>
@@ -233,7 +234,7 @@ function CharityDashboard() {
       {linkingStatus === 'approved' && (
         <div className={styles.card}>
           <h3 className={styles.cardTitle}>Public Page Status: Approved</h3>
-          <button 
+          <button
             onClick={() => navigate(`/charity/${charityData.linkedABN}/edit`)}
             className={styles.button}
           >
@@ -241,23 +242,23 @@ function CharityDashboard() {
           </button>
         </div>
       )}
-      
+
       <div className={styles.card}>
         <h3 className={styles.cardTitle}>Mission Statement</h3>
         <p className={styles.description}>{charityData.missionStatement}</p>
       </div>
-      
+
       <div className={styles.card}>
         <h3 className={styles.cardTitle}>About Us</h3>
         <p className={styles.description}>{charityData.description}</p>
       </div>
-      
+
       <div className={styles.card}>
         <h3 className={styles.cardTitle}>Donation Statistics</h3>
         <p className={styles.description}>Total Donations: $X,XXX</p>
         <p className={styles.description}>Number of Donors: XXX</p>
       </div>
-      
+
       <div className={styles.card}>
         <h3 className={styles.cardTitle}>Current Campaigns</h3>
         <ul className={styles.description}>
@@ -265,7 +266,7 @@ function CharityDashboard() {
           <li>Campaign 2</li>
         </ul>
       </div>
-      
+
       <div className={styles.card}>
         <div className={styles.cardActions}>
           <button className={styles.button}>

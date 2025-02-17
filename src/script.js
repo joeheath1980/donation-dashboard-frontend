@@ -1,9 +1,9 @@
 const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
-const API_URL = 'https://api.globalgiving.org/api/public/projectservice/all/projects/summary';
+const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectservice/all/projects/summary';
 
 async function fetchProjects() {
     try {
-        const response = await fetch(`${API_BASE_URL}?api_key=${API_KEY}`, {
+        const response = await fetch(`${GLOBAL_GIVING_API_URL}?api_key=${API_KEY}`, {
             headers: {
                 'Accept': 'application/json'
             }
