@@ -1,12 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import jwt_decode from 'jwt-decode';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
-
-// Set a default API URL if the environment variable is not set
-const API_URL = process.env.REACT_APP_API_URL;
 
 // Set up axios defaults
 const setupAxiosDefaults = (token) => {
@@ -30,13 +28,13 @@ export const AuthProvider = ({ children }) => {
         try {
           let response;
           if (userType === 'business') {
-            response = await axios.get(`${API_URL}/api/business/me`);
+            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
             setUser({ ...response.data, isBusiness: true, isCharity: false });
           } else if (userType === 'charity') {
-            response = await axios.get(`${API_URL}/api/charities/me`);
+            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
             setUser({ ...response.data, isBusiness: false, isCharity: true });
           } else {
-            response = await axios.get(`${API_URL}/api/users/me`);
+            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
             setUser({ ...response.data, isBusiness: false, isCharity: false });
           }
         } catch (error) {
@@ -63,12 +61,12 @@ export const AuthProvider = ({ children }) => {
   // Regular user login
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/login`, { email, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userType', 'user');
       setupAxiosDefaults(token);
-      const userResponse = await axios.get(`${API_URL}/api/users/me`);
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
       return userResponse.data;
     } catch (error) {
@@ -81,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   const userSignup = async (name, email, password) => {
     try {
       console.log('Attempting to register user:', { name, email });
-      const response = await axios.post(`${API_URL}/api/users/register`, { name, email, password });
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/register`, { name, email, password });
       console.log('Registration response:', response.data);
 
       if (response.data.token) {
@@ -90,7 +88,7 @@ export const AuthProvider = ({ children }) => {
         console.log('Token stored in localStorage');
         setupAxiosDefaults(response.data.token);
 
-        const validatedUser = await axios.get(`${API_URL}/api/users/me`);
+        const validatedUser = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
       } else {
@@ -119,7 +117,7 @@ export const AuthProvider = ({ children }) => {
   // Business user login
   const businessLogin = async (contactEmail, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/business/auth/login`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/auth/login`, {
         contactEmail,
         password,
       });
@@ -128,7 +126,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('userType', 'business');
       localStorage.setItem('businessId', businessId);
       setupAxiosDefaults(token);
-      const businessResponse = await axios.get(`${API_URL}/api/business/me`);
+      const businessResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
       setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
       return businessResponse.data;
     } catch (error) {
@@ -140,14 +138,14 @@ export const AuthProvider = ({ children }) => {
   // Business user signup
   const businessSignup = async (signupData) => {
     try {
-      const response = await axios.post(`${API_URL}/api/business/auth/signup`, signupData);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/auth/signup`, signupData);
       if (response.status === 201 || response.status === 200) {
         const { token, businessId } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('userType', 'business');
         localStorage.setItem('businessId', businessId);
         setupAxiosDefaults(token);
-        const businessResponse = await axios.get(`${API_URL}/api/business/me`);
+        const businessResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
         setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
         return businessResponse.data;
       }
@@ -160,7 +158,7 @@ export const AuthProvider = ({ children }) => {
   // Charity user login
   const charityLogin = async (contactEmail, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/charities/login`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/login`, {
         contactEmail,
         password,
       });
@@ -169,7 +167,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('userType', 'charity');
       localStorage.setItem('charityId', charity.id);
       setupAxiosDefaults(token);
-      const charityResponse = await axios.get(`${API_URL}/api/charities/me`);
+      const charityResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
       return charityResponse.data;
     } catch (error) {
@@ -181,13 +179,13 @@ export const AuthProvider = ({ children }) => {
   // Charity user signup
   const charitySignup = async (signupData) => {
     try {
-      const response = await axios.post(`${API_URL}/api/charities/signup`, signupData);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/signup`, signupData);
       if (response.status === 201 || response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('userType', 'charity');
         setupAxiosDefaults(token);
-        const charityResponse = await axios.get(`${API_URL}/api/charities/me`);
+        const charityResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
         return charityResponse.data;
       }
@@ -207,7 +205,7 @@ export const AuthProvider = ({ children }) => {
       setupAxiosDefaults(token);
 
       console.log('Social login: Fetching user data from API');
-      const userResponse = await axios.get(`${API_URL}/api/users/me`);
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
       console.log('Social login: User data received', userResponse.data);
 
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
@@ -256,7 +254,6 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     getAuthHeaders,
-    API_URL,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

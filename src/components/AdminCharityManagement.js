@@ -4,15 +4,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { FaCheck, FaTimes, FaFileDownload } from 'react-icons/fa';
 import styles from './AdminCharityManagement.module.css';
 
-const AdminCharityManagement = () => {
+function AdminCharityManagement() {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getAuthHeaders, API_URL } = useAuth();
+  const { getAuthHeaders } = useAuth();
 
   const fetchPendingRequests = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/charity/admin/link-requests`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests`, {
         headers: getAuthHeaders()
       });
       setPendingRequests(response.data);
@@ -22,7 +22,7 @@ const AdminCharityManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [API_URL, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     fetchPendingRequests();
@@ -30,7 +30,7 @@ const AdminCharityManagement = () => {
 
   const handleApprove = async (requestId) => {
     try {
-      await axios.post(`${API_URL}/api/charity/admin/link-requests/${requestId}/approve`, {}, {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/approve`, {}, {
         headers: getAuthHeaders()
       });
       fetchPendingRequests(); // Refresh the list
@@ -42,7 +42,7 @@ const AdminCharityManagement = () => {
 
   const handleReject = async (requestId) => {
     try {
-      await axios.post(`${API_URL}/api/charity/admin/link-requests/${requestId}/reject`, {}, {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/reject`, {}, {
         headers: getAuthHeaders()
       });
       fetchPendingRequests(); // Refresh the list
@@ -54,15 +54,14 @@ const AdminCharityManagement = () => {
 
   const handleDownloadEvidence = async (evidencePath) => {
     try {
-      // Create a direct download link
-      const downloadUrl = `${API_URL}/${evidencePath}`;
-      
+      const downloadUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${evidencePath}`;
+
       // Create a temporary link element
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.target = '_blank'; // Open in new tab
-      link.rel = 'noopener noreferrer'; // Security best practice
-      
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
       // Trigger click
       document.body.appendChild(link);
       link.click();
@@ -126,6 +125,6 @@ const AdminCharityManagement = () => {
       )}
     </div>
   );
-};
+}
 
 export default AdminCharityManagement;

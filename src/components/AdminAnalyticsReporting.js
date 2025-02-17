@@ -9,7 +9,7 @@ const AdminAnalyticsReporting = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await axios.get('/api/admin/analytics');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/analytics`);
         setAnalytics(response.data);
         setLoading(false);
       } catch (err) {

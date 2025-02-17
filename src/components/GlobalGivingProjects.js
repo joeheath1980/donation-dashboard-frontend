@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './GlobalGivingProjects.module.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import axios from 'axios';
+import { ImpactContext } from '../contexts/ImpactContext';
+
+// Define the EXTERNAL GlobalGiving API URL.  This is *NOT* your backend.
+const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectservice/all/projects/summary';
 
 const PrevArrow = ({ className, style, onClick }) => (
   <div
@@ -23,7 +26,7 @@ const NextArrow = ({ className, style, onClick }) => (
   />
 );
 
-const GlobalGivingProjects = () => {
+function GlobalGivingProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,18 +37,20 @@ const GlobalGivingProjects = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Get personalized search query, if applicable
       const searchQuery = formPersonalizedSearchQuery();
       console.log('Search Query:', searchQuery);
 
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const endpoint = `${apiUrl}/api/globalgiving/projects/recommended`;
+      // Use process.env.REACT_APP_API_BASE_URL for *YOUR* backend endpoint
+      const endpoint = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/globalgiving/projects/recommended`;
 
       console.log('API URL:', endpoint);
 
-      // Only include search query if user is authenticated
+      // Include search query if user is authenticated
       const params = user && searchQuery ? { searchQuery } : undefined;
-      
-      // Get auth headers and ensure they're properly formatted
+
+      // Get auth headers (for your backend)
       const headers = user ? {
         ...getAuthHeaders(),
         'Accept': 'application/json',
@@ -67,9 +72,10 @@ const GlobalGivingProjects = () => {
         timeout: 60000,
       };
 
+      // Make request to *YOUR* backend
       const response = await axios.get(endpoint, config);
       console.log('API Response:', response.data);
-      
+
       if (Array.isArray(response.data)) {
         setProjects(response.data);
       } else {
@@ -79,14 +85,14 @@ const GlobalGivingProjects = () => {
     } catch (err) {
       console.error('Error fetching GlobalGiving projects:', err);
       let errorMessage = 'An unexpected error occurred.';
-      
+
       if (err.response) {
         console.error('Error response:', err.response.data);
         console.error('Error status:', err.response.status);
         console.error('Error headers:', err.response.headers);
 
         const errorCode = err.response.data.code;
-        
+
         if (err.response.status === 401) {
           switch (errorCode) {
             case 'AUTH_REQUIRED':
@@ -96,7 +102,7 @@ const GlobalGivingProjects = () => {
               errorMessage = 'Your session has expired. Please refresh the page or log in again.';
               break;
             default:
-              errorMessage = !user 
+              errorMessage = !user
                 ? 'Please log in to see personalized project recommendations.'
                 : 'Your session has expired. Please refresh the page or log in again.';
           }
@@ -197,7 +203,7 @@ const GlobalGivingProjects = () => {
     <div className={styles.container}>
       {projects.length === 0 ? (
         <p className={styles.noProjects}>
-          No {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} projects available at the moment. 
+          No {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} projects available at the moment.
           Please try again later.
         </p>
       ) : (
@@ -219,10 +225,10 @@ const GlobalGivingProjects = () => {
                     </div>
                   </div>
                   <div className={styles.buttonWrapper}>
-                    <a 
-                      href={project.projectLink} 
-                      className={styles.learnMoreButton} 
-                      target="_blank" 
+                    <a
+                      href={project.projectLink}
+                      className={styles.learnMoreButton}
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       Support this project
@@ -236,6 +242,6 @@ const GlobalGivingProjects = () => {
       )}
     </div>
   );
-};
+}
 
 export default GlobalGivingProjects;

@@ -104,7 +104,7 @@ function Profile() {
     
     try {
       const headers = getAuthHeaders();
-      const response = await axios.get('process.env.API_BASE_URL/api/matchingOpportunities', { headers });
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matchingOpportunities`, { headers });
       setMatchingOpportunities(response.data);
     } catch (err) {
       console.error('Error fetching matching opportunities:', err);
@@ -160,7 +160,7 @@ function Profile() {
   const handleMatch = async (opportunityId) => {
     try {
       const headers = getAuthHeaders();
-      await axios.post(`process.env.API_BASE_URL/api/matchingOpportunities/${opportunityId}/accept`, {}, { headers });
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matchingOpportunities/${opportunityId}/accept`, {}, { headers });
       setMatchingOpportunities(prevOpportunities =>
         prevOpportunities.map(opp =>
           opp._id === opportunityId ? { ...opp, accepted: true } : opp

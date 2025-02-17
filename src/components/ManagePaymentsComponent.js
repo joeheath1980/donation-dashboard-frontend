@@ -5,7 +5,6 @@ import DropIn from 'braintree-web-drop-in-react';
 import sharedStyles from './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL;
 const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
 
 class ErrorBoundary extends React.Component {
@@ -43,8 +42,8 @@ const ManagePaymentsComponent = () => {
     const fetchData = async () => {
       try {
         const [tokenResponse, charitiesResponse] = await Promise.all([
-          axios.get(`${API_URL}/api/braintree/client_token`),
-          axios.get(`${API_URL}/api/charities`) // Updated to use plural form
+          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/braintree/client_token`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities`)
         ]);
         setClientToken(tokenResponse.data.clientToken);
         setCharities(charitiesResponse.data);
@@ -63,7 +62,7 @@ const ManagePaymentsComponent = () => {
     if (instance) {
       try {
         const { nonce } = await instance.requestPaymentMethod();
-        const response = await axios.post(`${API_URL}/api/braintree/checkout`, {
+        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/braintree/checkout`, {
           paymentMethodNonce: nonce,
           amount: amount,
           charityId: selectedCharity
@@ -105,7 +104,7 @@ const ManagePaymentsComponent = () => {
   const onApprove = async (data, actions) => {
     try {
       await actions.order.capture();
-      const response = await axios.post(`${API_URL}/api/paypal/capture-order`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/paypal/capture-order`, {
         orderId: data.orderID,
         charityId: selectedCharity
       });
@@ -143,7 +142,7 @@ const ManagePaymentsComponent = () => {
   return (
     <div className={sharedStyles.container}>
       <h1 className={sharedStyles.heading}>Make a Donation</h1>
-      
+
       <div className={`${sharedStyles.card} ${styles.formLayout}`}>
         <div className={sharedStyles.formGroup}>
           <label htmlFor="amount" className={sharedStyles.label}>Donation Amount</label>
@@ -193,8 +192,8 @@ const ManagePaymentsComponent = () => {
                 onInstance={(dropinInstance) => setInstance(dropinInstance)}
               />
             </div>
-            <button 
-              onClick={handleBraintreePayment} 
+            <button
+              onClick={handleBraintreePayment}
               disabled={!instance || !isAmountValid || !selectedCharity}
               className={sharedStyles.button}
             >
@@ -212,9 +211,9 @@ const ManagePaymentsComponent = () => {
           <ErrorBoundary>
             <div className={styles.paypalContainer}>
               <PayPalScriptProvider options={paypalOptions}>
-                <PayPalButtons 
-                  createOrder={createOrder} 
-                  onApprove={onApprove} 
+                <PayPalButtons
+                  createOrder={createOrder}
+                  onApprove={onApprove}
                   disabled={!isAmountValid || !selectedCharity}
                   style={{ layout: "horizontal" }}
                 />

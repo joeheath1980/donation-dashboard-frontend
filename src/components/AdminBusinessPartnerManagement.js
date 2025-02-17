@@ -9,7 +9,7 @@ const AdminBusinessPartnerManagement = () => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const response = await axios.get('/api/admin/business-partners');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/business-partners`);
         setPartners(response.data);
         setLoading(false);
       } catch (err) {
@@ -23,7 +23,7 @@ const AdminBusinessPartnerManagement = () => {
 
   const handleStatusChange = async (partnerId, newStatus) => {
     try {
-      await axios.put(`/api/admin/business-partners/${partnerId}/status`, { status: newStatus });
+      await axios.put(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/business-partners/${partnerId}/status`, { status: newStatus });
       setPartners(partners.map(partner => 
         partner._id === partnerId ? { ...partner, status: newStatus } : partner
       ));

@@ -3,27 +3,38 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@greatsumini/react-facebook-login": "^3.3.3",
-    "@paypal/react-paypal-js": "^8.7.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.7.9",
-    "braintree-web-drop-in-react": "^1.2.1",
-    "chart.js": "^4.4.4",
-    "chartjs-adapter-date-fns": "^3.0.0",
-    "jwt-decode": "^4.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.0",
-    "react-scripts": "5.0.1",
-    "react-slick": "^0.30.2",
-    "slick-carousel": "^1.8.1",
-    "swiper": "^11.1.14",
-    "twitter-api-v2": "^1.17.2",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
+      "@greatsumini/react-facebook-login": "^3.3.3",
+      "@paypal/react-paypal-js": "^8.7.0",
+      "@testing-library/jest-dom": "^5.17.0",
+      "@testing-library/react": "^13.4.0",
+      "@testing-library/user-event": "^13.5.0",
+      "axios": "^1.7.9",
+      "braintree-web-drop-in-react": "^1.2.1",
+      "chart.js": "^4.4.4",
+      "chartjs-adapter-date-fns": "^3.0.0",
+      "jwt-decode": "^4.0.0",
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1",
+      "react-router-dom": "^6.26.0",
+      "react-scripts": "5.0.1",
+      "react-slick": "^0.30.2",
+      "slick-carousel": "^1.8.1",
+      "swiper": "^11.1.14",
+      "twitter-api-v2": "^1.17.2",
+      "web-vitals": "^2.1.4"
+    },
+    "devDependencies": {
+      "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+      "assert": "^2.1.0",
+      "browserify-zlib": "^0.2.0",
+      "buffer": "^6.0.3",
+      "dotenv": "^16.4.7",
+      "process": "^0.11.10",
+      "react-app-rewired": "^2.2.1",
+      "stream-browserify": "^3.0.0",
+      "util": "^0.12.5"
+    },
+    "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
@@ -46,16 +57,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "assert": "^2.1.0",
-    "browserify-zlib": "^0.2.0",
-    "buffer": "^6.0.3",
-    "dotenv": "^16.4.7",
-    "process": "^0.11.10",
-    "react-app-rewired": "^2.2.1",
-    "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
   }
 }

@@ -6,8 +6,6 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './BusinessCreateCampaign.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL;
-
 function BusinessCreateCampaign() {
   const [campaignData, setCampaignData] = useState({
     name: '',
@@ -35,7 +33,7 @@ function BusinessCreateCampaign() {
 
     try {
       const headers = getAuthHeaders();
-      const response = await axios.post(`${API_URL}/api/business/campaigns`, campaignData, { headers });
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/campaigns`, campaignData, { headers });
 
       if (response.status === 201) {
         navigate('/business-dashboard');
@@ -52,7 +50,7 @@ function BusinessCreateCampaign() {
     <div className={styles.pageContainer}>
       <div className={styles.formContainer}>
         <h1 className={styles.title}>Create New Business Campaign</h1>
-        
+
         {error && (
           <div className={styles.error} role="alert">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -76,7 +74,7 @@ function BusinessCreateCampaign() {
               placeholder="Enter campaign name"
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="description">Description</label>
             <textarea
@@ -89,7 +87,7 @@ function BusinessCreateCampaign() {
               placeholder="Describe your campaign"
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="startDate">Start Date</label>
             <input
@@ -102,7 +100,7 @@ function BusinessCreateCampaign() {
               className={styles.input}
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="endDate">End Date</label>
             <input
@@ -115,7 +113,7 @@ function BusinessCreateCampaign() {
               className={styles.input}
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="goal">Campaign Goal ($)</label>
             <input
@@ -131,7 +129,7 @@ function BusinessCreateCampaign() {
               placeholder="Enter campaign goal"
             />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="matchRate">Match Rate (%)</label>
             <input
@@ -148,7 +146,7 @@ function BusinessCreateCampaign() {
               placeholder="Enter match rate"
             />
           </div>
-          
+
           <button type="submit" className={styles.submitButton} disabled={loading}>
             {loading ? 'Creating Campaign...' : 'Create Campaign'}
           </button>

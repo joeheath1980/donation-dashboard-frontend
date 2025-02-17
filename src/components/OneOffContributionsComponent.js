@@ -11,23 +11,23 @@ import axios from 'axios';
 
 function formatDate(dateString) {
   let date;
-  
+
   try {
     date = parseISO(dateString);
   } catch (error) {
     try {
-      date = parse(dateString, "EEE, dd MMM yyyy HH:mm:ss xx", new Date());
+      date = parse(dateString, "EEE, dd MMM solubilities HH:mm:ss xx", new Date());
     } catch (error) {
       console.error("Failed to parse date:", dateString);
       return dateString;
     }
   }
-  
+
   return format(date, 'dd/MM/yyyy');
 }
 
 function OneOffContributionsComponent({ displayAll }) {
-  const { user, getAuthHeaders, API_URL } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
@@ -38,7 +38,7 @@ function OneOffContributionsComponent({ displayAll }) {
 
   const fetchContributions = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/contributions/one-off`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`, {
         headers: getAuthHeaders()
       });
       setOneOffContributions(response.data);
@@ -46,7 +46,7 @@ function OneOffContributionsComponent({ displayAll }) {
       console.error('Error fetching one-off contributions:', err);
       setError('Failed to load one-off contributions. Please try again later.');
     }
-  }, [API_URL, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     if (user) {
@@ -82,7 +82,7 @@ function OneOffContributionsComponent({ displayAll }) {
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
-        await axios.delete(`${API_URL}/api/contributions/one-off/${contributionId}`, {
+        await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off/${contributionId}`, {
           headers: getAuthHeaders()
         });
         setLocalContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
@@ -101,7 +101,7 @@ function OneOffContributionsComponent({ displayAll }) {
 
   const handleSave = async (editedContribution) => {
     try {
-      let url = `${API_URL}/api/contributions/one-off`;
+      let url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`;
       let method = 'POST';
 
       if (editingContribution && editingContribution._id) {
@@ -131,7 +131,7 @@ function OneOffContributionsComponent({ displayAll }) {
       });
 
       const updatedContribution = response.data;
-      
+
       if (editingContribution && editingContribution._id) {
         setLocalContributions(prevContributions =>
           prevContributions.map(contribution =>
@@ -141,7 +141,7 @@ function OneOffContributionsComponent({ displayAll }) {
       } else {
         setLocalContributions(prevContributions => [...prevContributions, updatedContribution]);
       }
-      
+
       setShowModal(false);
       setEditingContribution(null);
       await fetchContributions();
@@ -206,10 +206,10 @@ function OneOffContributionsComponent({ displayAll }) {
                     <p><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
                     {contribution.receiptUrl && (
                       <p>
-                        <strong>Receipt:</strong> 
-                        <a 
-                          href={`${API_URL}${contribution.receiptUrl}`} 
-                          target="_blank" 
+                        <strong>Receipt:</strong>
+                        <a
+                          href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className={sharedStyles.link}
                         >

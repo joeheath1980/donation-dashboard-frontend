@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { FaCheckCircle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
@@ -11,23 +11,23 @@ import { format, parseISO, parse } from 'date-fns';
 
 function formatDate(dateString) {
   let date;
-  
+
   try {
     date = parseISO(dateString);
   } catch (error) {
     try {
-      date = parse(dateString, "EEE, dd MMM yyyy HH:mm:ss xx", new Date());
+      date = parse(dateString, "EEE, dd MMM solubilities HH:mm:ss xx", new Date());
     } catch (error) {
       console.error("Failed to parse date:", dateString);
       return dateString;
     }
   }
-  
+
   return format(date, 'dd/MM/yyyy');
 }
 
 function DonationsComponent({ displayAll }) {
-  const { user, getAuthHeaders, API_URL } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
   const [donations, setDonations] = useState([]);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -38,7 +38,7 @@ function DonationsComponent({ displayAll }) {
 
   const fetchDonations = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/donations`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`, {
         headers: getAuthHeaders()
       });
       setDonations(response.data);
@@ -46,7 +46,7 @@ function DonationsComponent({ displayAll }) {
       console.error('Error fetching donations:', err);
       setError('Failed to load donations. Please try again later.');
     }
-  }, [API_URL, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     if (user) {
@@ -86,7 +86,7 @@ function DonationsComponent({ displayAll }) {
 
     setError('');
     try {
-      await axios.delete(`${API_URL}/api/donations/${donationId}`, {
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations/${donationId}`, {
         headers: getAuthHeaders()
       });
 
@@ -107,7 +107,7 @@ function DonationsComponent({ displayAll }) {
   const handleConfirm = async (editedDonation) => {
     setError('');
     try {
-      let url = `${API_URL}/api/donations`;
+      let url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`;
       let method = 'POST';
 
       if (currentDonation && currentDonation._id) {
@@ -137,7 +137,7 @@ function DonationsComponent({ displayAll }) {
       });
 
       const updatedDonation = response.data;
-      
+
       if (currentDonation && currentDonation._id) {
         setLocalDonations(prevDonations =>
           prevDonations.map(donation =>
@@ -147,7 +147,7 @@ function DonationsComponent({ displayAll }) {
       } else {
         setLocalDonations(prevDonations => [...prevDonations, updatedDonation]);
       }
-      
+
       setShowModal(false);
       await fetchDonations();
     } catch (error) {
@@ -173,6 +173,7 @@ function DonationsComponent({ displayAll }) {
       donation={currentDonation}
       onConfirm={handleConfirm}
       onCancel={() => setShowModal(false)}
+      type="donation"
     />
   );
 
@@ -190,7 +191,7 @@ function DonationsComponent({ displayAll }) {
           </div>
         )}
         <div className={styles.donationList} ref={donationListRef}>
-          {displayedDonations && displayedDonations.length > 0 ? (
+          {displayedDonations.length > 0 ? (
             <>
               {displayedDonations.map((donation) => (
                 <div key={donation._id} className={styles.donationCard}>
@@ -211,10 +212,10 @@ function DonationsComponent({ displayAll }) {
                     <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
                     {donation.receiptUrl && (
                       <p>
-                        <strong>Receipt:</strong> 
-                        <a 
-                          href={`${API_URL}${donation.receiptUrl}`} 
-                          target="_blank" 
+                        <strong>Receipt:</strong>
+                        <a
+                          href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${donation.receiptUrl}`}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className={sharedStyles.link}
                         >

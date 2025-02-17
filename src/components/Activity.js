@@ -4,16 +4,24 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
 import sharedStyles from './SharedStyles.css';
 import { format } from 'date-fns';
-import { 
-  FaRegHandshake, 
-  FaRegCalendarAlt, 
-  FaChevronRight, 
-  FaRegHeart, 
-  FaTimes, 
+import {
+  FaRegHandshake,
+  FaRegCalendarAlt,
+  FaChevronRight,
+  FaRegHeart,
+  FaTimes,
   FaPlus
 } from 'react-icons/fa';
 
-const API_URL = process.env.REACT_APP_API_URL;
+// Helper function for safe date formatting
+function safeFormatDate(dateValue, dateFormat) {
+  const dateObj = new Date(dateValue);
+  if (!dateValue || isNaN(dateObj.getTime())) {
+    return "Date not available";
+  }
+  return format(dateObj, dateFormat);
+}
+
 const STORAGE_KEY = 'donation-activity-state';
 
 const CHARITY_TYPES = [
@@ -64,7 +72,7 @@ function Activity() {
         let validSearchHistory = [];
         let validDonationStatuses = {};
 
-        if (parsed?.searchHistory && Array.isArray(parsed.searchHistory)) {
+        if (parsed?.searchHistory && Array.isArray(parsed?.searchHistory)) {
           validSearchHistory = parsed.searchHistory
             .map(entry => {
               try {
@@ -137,8 +145,8 @@ function Activity() {
         timestamp: entry.timestamp instanceof Date ? entry.timestamp.toISOString() : new Date().toISOString(),
         results: Array.isArray(entry.results) ? entry.results.map(result => ({
           ...result,
-          searchTimestamp: result.searchTimestamp instanceof Date 
-            ? result.searchTimestamp.toISOString() 
+          searchTimestamp: result.searchTimestamp instanceof Date
+            ? result.searchTimestamp.toISOString()
             : new Date().toISOString()
         })) : []
       }));
@@ -192,17 +200,17 @@ function Activity() {
 
     console.log('[Activity] Removing data from localStorage');
     localStorage.removeItem(STORAGE_KEY);
-    
+
     console.log('[Activity] Resetting all states');
     setSearchHistory([]);
     setDonationStatuses({});
     setSelectedTypes({});
     setSelectedCharityTypes({});
-    
+
     console.log('[Activity] Resetting refs');
     lastSavedState.current = null;
     hasSavedData.current = false;
-    
+
     clearingTimeout.current = setTimeout(() => {
       console.log('[Activity] Finishing clear operation');
       setIsClearing(false);
@@ -211,7 +219,7 @@ function Activity() {
 
   const checkAuthStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/google/status`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google/status`, {
         credentials: 'include',
       });
       const data = await response.json();
@@ -227,10 +235,11 @@ function Activity() {
     setError(null);
     try {
       const token = localStorage.getItem('token');
+      console.log('Token in handleSearchOutlookEmails:', token);
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      const response = await fetch (`${API_BASE_URL}/api/scrape-outlook`, { 
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook`, {
         mode: 'cors',
         credentials: 'include',
         headers: {
@@ -242,7 +251,7 @@ function Activity() {
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.error === 'Microsoft authentication required' && errorData.action === 'microsoft_auth') {
-          window.location.href = `${API_URL}/api/auth/microsoft`;
+          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/microsoft`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Outlook emails. Status: ${response.status}`);
         }
@@ -286,47 +295,78 @@ function Activity() {
     setError(null);
     try {
       const token = localStorage.getItem('token');
+      console.log('Token in handleSearchEmails:', token);
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      const response = await fetch(`${API_BASE_URL}/api/scrape-gmail`, { 
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+  
+      // STEP 1: Start the background job by calling the new endpoint.
+      const startResponse = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/start-email-search`,
+        {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ /* Include any parameters if needed */ })
         }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.error === 'Authentication required') {
-          window.location.href = `${API_URL}/api/auth/google`;
-        } else {
-          throw new Error(errorData.error || `An error occurred while searching emails. Status: ${response.status}`);
-        }
-      } else {
-        const data = await response.json();
-        if (data.length > 0) {
-          console.log('[Activity] Found Gmail emails:', data.length);
+      );
+  
+      if (!startResponse.ok) {
+        const errorData = await startResponse.json();
+        throw new Error(errorData.error || 'Failed to start email search job.');
+      }
+  
+      const { jobId } = await startResponse.json();
+      console.log('[Activity] Started email search job with ID:', jobId);
+  
+      // STEP 2: Connect via SSE to receive real-time status updates.
+      const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email-search-status-stream/${jobId}?token=${encodeURIComponent(token)}`;
+      const eventSource = new EventSource(sseUrl);
+  
+      eventSource.onmessage = (event) => {
+        const statusData = JSON.parse(event.data);
+        console.log('[SSE] Job status update:', statusData);
+        if (statusData.state === 'completed') {
           const timestamp = new Date();
-          const resultsWithIds = data.map(result => ({
-            ...result,
-            id: `gmail-${timestamp.getTime()}-${Math.random()}`,
-            searchTimestamp: timestamp
-          }));
-          setSearchHistory(prev => [{ timestamp, source: 'gmail', results: resultsWithIds }, ...prev]);
+          const resultsWithIds = Array.isArray(statusData.result)
+            ? statusData.result.map(result => ({
+                ...result,
+                id: `gmail-${timestamp.getTime()}-${Math.random()}`,
+                searchTimestamp: timestamp
+              }))
+            : [];
+          
+          setSearchHistory(prev => [{
+            timestamp,
+            source: 'gmail',
+            results: resultsWithIds
+          }, ...prev]);
           wasCleared.current = false;
           console.log('[Activity] Reset wasCleared due to new data');
+          eventSource.close(); // Close the SSE connection
+        } else if (statusData.state === 'failed') {
+          console.error('[SSE] Job failed:', statusData.error);
+          eventSource.close();
         }
-      }
+      };
+  
+      eventSource.onerror = (err) => {
+        console.error('[SSE] Error:', err);
+        eventSource.close();
+        setError('Error in SSE connection. Please check the console for details.');
+      };
+  
     } catch (error) {
       console.error('Error during email search:', error);
       setError(`Error: ${error.message}. Please check the console for more details.`);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const handleTypeChange = (index, event) => {
     setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
@@ -339,7 +379,7 @@ function Activity() {
   const formatDonationData = (donation) => {
     const amount = parseFloat(donation.amount.replace(/[^0-9.-]+/g, ''));
     const date = new Date(donation.date);
-    
+
     return {
       amount,
       charity: donation.charity,
@@ -361,6 +401,7 @@ function Activity() {
 
     try {
       const token = localStorage.getItem('token');
+      console.log('Token in handleCommit:', token);
       if (!token) {
         throw new Error('No authentication token found');
       }
@@ -370,9 +411,9 @@ function Activity() {
         'Content-Type': 'application/json'
       };
 
-      const endpoint = selectedType === 'regular' 
-        ? `${API_URL}/api/donations`
-        : `${API_URL}/api/contributions/one-off`;
+      const endpoint = selectedType === 'regular'
+        ? `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`
+        : `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`;
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -388,9 +429,9 @@ function Activity() {
 
       if (result?._id) {
         console.log(`[Activity] Committed ${selectedType} donation:`, result._id);
-        setDonationStatuses(prev => ({ 
-          ...prev, 
-          [donation.id]: { 
+        setDonationStatuses(prev => ({
+          ...prev,
+          [donation.id]: {
             type: `committed-${selectedType === 'regular' ? 'regular' : 'oneoff'}`,
             resultId: result._id,
             timestamp: new Date().toISOString()
@@ -419,9 +460,9 @@ function Activity() {
 
   const handleDelete = (donationId) => {
     console.log('[Activity] Deleting donation:', donationId);
-    setDonationStatuses(prev => ({ 
-      ...prev, 
-      [donationId]: { 
+    setDonationStatuses(prev => ({
+      ...prev,
+      [donationId]: {
         type: 'deleted',
         timestamp: new Date().toISOString()
       }
@@ -474,11 +515,11 @@ function Activity() {
           </div>
         </div>
         <div className={styles.donationContent}>
-          <strong>Date:</strong> {donation.date}<br />
-          <strong>Amount:</strong> {donation.amount}<br />
-          <strong>Subject:</strong> {donation.subject}<br />
+        <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
+          <strong>Amount:</strong> {parseFloat(donation.amount).toFixed(2)}<br/>
+          <strong>Subject:</strong> {donation.subject} <br/>
         </div>
-        
+
         {!isCommitted && !isDeleted && (
           <>
             <select
@@ -501,9 +542,8 @@ function Activity() {
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
-
-            <button 
-              onClick={() => handleCommit(donation, source === 'outlook')} 
+            <button
+              onClick={() => handleCommit(donation, source === 'outlook')}
               className={`${styles.saveButton} ${sharedStyles.button}`}
               disabled={!selectedTypes[donation.id] || !selectedCharityTypes[donation.id]}
             >
@@ -520,7 +560,7 @@ function Activity() {
         )}
 
         {(isCommitted || isDeleted) && (
-          <div className={styles.actionButtons}>
+           <div className={styles.actionButtons}>
             {isCommitted && status?.resultId && (
               <button
                 onClick={() => navigateToDonation(donation, status.type === 'committed-regular' ? 'regular' : 'one-off')}
@@ -546,8 +586,8 @@ function Activity() {
       {searchHistory.map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className={sharedStyles.heading}>
-            Search Results from {entry.source.toUpperCase()} - 
-            {format(new Date(entry.timestamp), 'dd/MM/yyyy HH:mm:ss')}
+            Search Results from {entry.source.toUpperCase()} -
+            {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
           </h5>
           <ul className={styles.emailResultsList}>
             {entry.results.map(result => renderDonationCard(result, entry.source))}
@@ -565,16 +605,17 @@ function Activity() {
 
       <div className={`${styles.emailSection} ${sharedStyles.card}`}>
         <div className={styles.buttonContainer}>
-          <button 
-            onClick={handleSearchEmails} 
-            disabled={loading || isClearing} 
-            className={`${styles.scrapeButton} ${sharedStyles.button}`}
-          >
-            {loading ? 'Searching...' : 'Search Gmail for Donations'}
-          </button>
-          <button 
-            onClick={handleSearchOutlookEmails} 
-            disabled={loading || isClearing} 
+        <button
+        id="start-search-btn"
+        onClick={handleSearchEmails}
+        disabled={loading || isClearing}
+        className={`${styles.scrapeButton} ${sharedStyles.button}`}
+      >
+        {loading ? 'Searching...' : 'Search Gmail for Donations'}
+      </button>
+          <button
+            onClick={handleSearchOutlookEmails}
+            disabled={loading || isClearing}
             className={`${styles.scrapeButton} ${sharedStyles.button}`}
           >
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
@@ -597,7 +638,7 @@ function Activity() {
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
         {error && <p className={styles.error}>{error}</p>}
         {authStatus === 'Authenticated' && <p className={styles.authStatus}>{authStatus}</p>}
-        
+
         {searchHistory.length > 0 && renderSearchResults()}
       </div>
     </div>
