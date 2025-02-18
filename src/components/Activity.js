@@ -302,7 +302,7 @@ function Activity() {
   
       // STEP 1: Start the background job by calling the new endpoint.
       const startResponse = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/start-email-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -324,7 +324,7 @@ function Activity() {
       console.log('[Activity] Started email search job with ID:', jobId);
   
       // STEP 2: Connect via SSE to receive real-time status updates.
-      const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email-search-status-stream/${jobId}?token=${encodeURIComponent(token)}`;
+      const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${jobId}?token=${encodeURIComponent(token)}`;
       const eventSource = new EventSource(sseUrl);
   
       eventSource.onmessage = (event) => {
