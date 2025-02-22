@@ -3,22 +3,13 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
 import sharedStyles from './SharedStyles.css';
-import { format } from 'date-fns';
-import {
-  FaRegHandshake,
-  FaRegCalendarAlt,
-  FaChevronRight,
-  FaRegHeart,
-  FaTimes,
-  FaPlus
-} from 'react-icons/fa';
+import { format, isValid, parseISO } from 'date-fns';
 
 // Helper function for safe date formatting
 function safeFormatDate(dateValue, dateFormat) {
-  const dateObj = new Date(dateValue);
-  if (!dateValue || isNaN(dateObj.getTime())) {
-    return "Date not available";
-  }
+  if (!dateValue) return "N/A";
+  const dateObj = typeof dateValue === 'string' ? parseISO(dateValue) : new Date(dateValue);
+  if (!isValid(dateObj)) return "N/A";
   return format(dateObj, dateFormat);
 }
 
@@ -239,15 +230,22 @@ function Activity() {
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook`, {
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      
+      // Use POST request to the proper endpoint for starting Outlook search
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook/start-outlook-search`,
+        {
+          method: 'POST', // Correct HTTP method
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({}) // Adjust parameters here if needed
         }
-      });
-
+      );
+      
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.error === 'Microsoft authentication required' && errorData.action === 'microsoft_auth') {
@@ -257,17 +255,16 @@ function Activity() {
         }
       } else {
         const data = await response.json();
-        if (data.length > 0) {
-          console.log('[Activity] Found Outlook emails:', data.length);
+        console.log('[Activity] Outlook search response:', data);
+        
+        // Expecting an object with a jobId property
+        if (data.jobId) {
+          console.log('[Activity] Outlook job started with jobId:', data.jobId);
           const timestamp = new Date();
-          const resultsWithIds = data.map(result => ({
-            ...result,
-            id: `outlook-${timestamp.getTime()}-${Math.random()}`,
-            searchTimestamp: timestamp
-          }));
-          setSearchHistory(prev => [{ timestamp, source: 'outlook', results: resultsWithIds }, ...prev]);
+          setSearchHistory(prev => [{ timestamp, source: 'outlook', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
-          console.log('[Activity] Reset wasCleared due to new data');
+        } else {
+          console.log('[Activity] No jobId found in response');
         }
       }
     } catch (error) {
@@ -277,6 +274,8 @@ function Activity() {
       setLoading(false);
     }
   }, []);
+  
+  
 
   useEffect(() => {
     checkAuthStatus();
@@ -377,18 +376,27 @@ function Activity() {
   };
 
   const formatDonationData = (donation) => {
+    // Clean up the donation amount string first
     const amount = parseFloat(donation.amount.replace(/[^0-9.-]+/g, ''));
-    const date = new Date(donation.date);
-
+  
+    // Try to create a Date object from the donation date
+    let dateObj = new Date(donation.date);
+    // If the date is invalid (e.g., donation.date is "N/A"), use the current date
+    if (!isValid(dateObj)) {
+      dateObj = new Date();
+    }
+    
+    const formattedDate = format(dateObj, 'yyyy-MM-dd');
+  
     return {
       amount,
       charity: donation.charity,
-      date: date.toISOString().split('T')[0],
+      date: formattedDate,
       charityType: selectedCharityTypes[donation.id] || 'Social Welfare',
       needsValidation: true,
       subject: donation.subject
     };
-  };
+  };  
 
   const handleCommit = async (donation, isOutlook = false) => {
     const selectedType = selectedTypes[donation.id];
@@ -396,6 +404,11 @@ function Activity() {
 
     if (!selectedCharityTypes[donation.id]) {
       setError('Please select a charity type before committing the donation.');
+      return;
+    }
+
+    if (!formattedDonation.date) {
+      setError('Invalid date for the donation. Please check the date format.');
       return;
     }
 
@@ -516,8 +529,8 @@ function Activity() {
         </div>
         <div className={styles.donationContent}>
         <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
-          <strong>Amount:</strong> {parseFloat(donation.amount).toFixed(2)}<br/>
-          <strong>Subject:</strong> {donation.subject} <br/>
+        <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br/>
+        <strong>Subject:</strong> {donation.subject} <br/>
         </div>
 
         {!isCommitted && !isDeleted && (
@@ -583,19 +596,19 @@ function Activity() {
 
   const renderSearchResults = () => (
     <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
-      {searchHistory.map((entry, index) => (
+      {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className={sharedStyles.heading}>
-            Search Results from {entry.source.toUpperCase()} -
-            {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
+            Search Results from {entry.source.toUpperCase()} - {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
           </h5>
           <ul className={styles.emailResultsList}>
-            {entry.results.map(result => renderDonationCard(result, entry.source))}
+            {(entry.results || []).map(result => renderDonationCard(result, entry.source))}
           </ul>
         </div>
       ))}
     </div>
   );
+  
 
   return (
     <div className={`${styles.container} ${sharedStyles.container}`}>
