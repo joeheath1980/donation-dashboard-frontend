@@ -428,4 +428,23 @@
   .sectionIcon {
     font-size: 1.1rem;
   }
+
+  /* In your Activity.module.css or SharedStyles.css */
+.progressContainer {
+  margin: 10px 0;
+}
+
+.progressBarBackground {
+  width: 100%;
+  height: 8px;
+  background-color: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.5s ease;
+}
 }
