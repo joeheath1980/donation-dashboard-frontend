@@ -32,7 +32,7 @@ const CHARITY_TYPES = [
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
-  const location = useLocation();
+  useLocation();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -110,7 +110,7 @@ function Activity() {
     }
 
     isInitialized.current = true;
-  }, []);
+  }, []); // Add a semicolon at the end of the useEffect dependency array
 
   useEffect(() => {
     if (mountCount.current === 0) {
@@ -187,7 +187,7 @@ function Activity() {
         clearTimeout(clearingTimeout.current);
       }
     };
-  }, []);
+  }, []); // Add a semicolon at the end of the useEffect dependency array
 
   const handleClearAll = () => {
     console.log('[Activity] Starting clear operation');
@@ -213,8 +213,7 @@ function Activity() {
     }, 300);
   };
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
+  // Remove the declaration of checkAuthStatus function
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google/status`, {
         credentials: 'include',
       });
