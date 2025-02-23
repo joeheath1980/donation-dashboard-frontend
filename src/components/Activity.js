@@ -43,6 +43,7 @@ function Activity() {
   const [searchHistory, setSearchHistory] = useState([]);
   const [donationStatuses, setDonationStatuses] = useState({});
   const [isClearing, setIsClearing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -70,11 +71,13 @@ function Activity() {
                 return {
                   ...entry,
                   timestamp: new Date(entry.timestamp || Date.now()),
-                  results: Array.isArray(entry.results) ? entry.results.map(result => ({
-                    ...result,
-                    id: result.id || `recovered-${Date.now()}-${Math.random()}`,
-                    searchTimestamp: new Date(result.searchTimestamp || Date.now())
-                  })) : []
+                  results: Array.isArray(entry.results)
+                    ? entry.results.map(result => ({
+                        ...result,
+                        id: result.id || `recovered-${Date.now()}-${Math.random()}`,
+                        searchTimestamp: new Date(result.searchTimestamp || Date.now())
+                      }))
+                    : []
                 };
               } catch (entryError) {
                 console.warn('Error parsing search history entry:', entryError);
@@ -134,12 +137,14 @@ function Activity() {
       const safeSearchHistory = searchHistory.map(entry => ({
         ...entry,
         timestamp: entry.timestamp instanceof Date ? entry.timestamp.toISOString() : new Date().toISOString(),
-        results: Array.isArray(entry.results) ? entry.results.map(result => ({
-          ...result,
-          searchTimestamp: result.searchTimestamp instanceof Date
-            ? result.searchTimestamp.toISOString()
-            : new Date().toISOString()
-        })) : []
+        results: Array.isArray(entry.results)
+          ? entry.results.map(result => ({
+              ...result,
+              searchTimestamp: result.searchTimestamp instanceof Date
+                ? result.searchTimestamp.toISOString()
+                : new Date().toISOString()
+            }))
+          : []
       }));
 
       const safeDonationStatuses = Object.entries(donationStatuses).reduce((acc, [key, value]) => {
@@ -235,7 +240,7 @@ function Activity() {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook/start-outlook-search`,
         {
-          method: 'POST', // Correct HTTP method
+          method: 'POST',
           mode: 'cors',
           credentials: 'include',
           headers: {
@@ -274,32 +279,16 @@ function Activity() {
       setLoading(false);
     }
   }, []);
-  
-  
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, [checkAuthStatus]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const justAuthenticated = urlParams.get('justAuthenticated');
-    if (justAuthenticated === 'true') {
-      handleSearchOutlookEmails();
-    }
-  }, [location, handleSearchOutlookEmails]);
 
   const handleSearchEmails = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      console.log('Token in handleSearchEmails:', token);
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-  
-      // STEP 1: Start the background job by calling the new endpoint.
+      // Start the background job
       const startResponse = await fetch(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
         {
@@ -310,25 +299,29 @@ function Activity() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ /* Include any parameters if needed */ })
+          body: JSON.stringify({ token }) // Pass token so worker can verify user
         }
       );
-  
       if (!startResponse.ok) {
         const errorData = await startResponse.json();
         throw new Error(errorData.error || 'Failed to start email search job.');
       }
-  
       const { jobId } = await startResponse.json();
       console.log('[Activity] Started email search job with ID:', jobId);
-  
-      // STEP 2: Connect via SSE to receive real-time status updates.
+      
+      // Open SSE connection to stream progress updates
       const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${jobId}?token=${encodeURIComponent(token)}`;
       const eventSource = new EventSource(sseUrl);
-  
+      
       eventSource.onmessage = (event) => {
         const statusData = JSON.parse(event.data);
         console.log('[SSE] Job status update:', statusData);
+        
+        // Update progress if available
+        if (statusData.progress !== undefined) {
+          setProgress(statusData.progress);
+        }
+        
         if (statusData.state === 'completed') {
           const timestamp = new Date();
           const resultsWithIds = Array.isArray(statusData.result)
@@ -338,34 +331,34 @@ function Activity() {
                 searchTimestamp: timestamp
               }))
             : [];
-          
           setSearchHistory(prev => [{
             timestamp,
             source: 'gmail',
             results: resultsWithIds
           }, ...prev]);
-          wasCleared.current = false;
-          console.log('[Activity] Reset wasCleared due to new data');
-          eventSource.close(); // Close the SSE connection
+          eventSource.close();
+          setLoading(false);
         } else if (statusData.state === 'failed') {
           console.error('[SSE] Job failed:', statusData.error);
           eventSource.close();
+          setError('Email search failed. Please check the console for details.');
+          setLoading(false);
         }
       };
-  
+      
       eventSource.onerror = (err) => {
         console.error('[SSE] Error:', err);
         eventSource.close();
         setError('Error in SSE connection. Please check the console for details.');
+        setLoading(false);
       };
   
     } catch (error) {
       console.error('Error during email search:', error);
-      setError(`Error: ${error.message}. Please check the console for more details.`);
-    } finally {
+      setError(`Error: ${error.message}. Please check the console for details.`);
       setLoading(false);
     }
-  };  
+  };
 
   const handleTypeChange = (index, event) => {
     setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
@@ -396,7 +389,7 @@ function Activity() {
       needsValidation: true,
       subject: donation.subject
     };
-  };  
+  };
 
   const handleCommit = async (donation, isOutlook = false) => {
     const selectedType = selectedTypes[donation.id];
@@ -528,9 +521,9 @@ function Activity() {
           </div>
         </div>
         <div className={styles.donationContent}>
-        <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
-        <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br/>
-        <strong>Subject:</strong> {donation.subject} <br/>
+          <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
+          <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br/>
+          <strong>Subject:</strong> {donation.subject} <br/>
         </div>
 
         {!isCommitted && !isDeleted && (
@@ -573,7 +566,7 @@ function Activity() {
         )}
 
         {(isCommitted || isDeleted) && (
-           <div className={styles.actionButtons}>
+          <div className={styles.actionButtons}>
             {isCommitted && status?.resultId && (
               <button
                 onClick={() => navigateToDonation(donation, status.type === 'committed-regular' ? 'regular' : 'one-off')}
@@ -608,7 +601,6 @@ function Activity() {
       ))}
     </div>
   );
-  
 
   return (
     <div className={`${styles.container} ${sharedStyles.container}`}>
@@ -618,14 +610,14 @@ function Activity() {
 
       <div className={`${styles.emailSection} ${sharedStyles.card}`}>
         <div className={styles.buttonContainer}>
-        <button
-        id="start-search-btn"
-        onClick={handleSearchEmails}
-        disabled={loading || isClearing}
-        className={`${styles.scrapeButton} ${sharedStyles.button}`}
-      >
-        {loading ? 'Searching...' : 'Search Gmail for Donations'}
-      </button>
+          <button
+            id="start-search-btn"
+            onClick={handleSearchEmails}
+            disabled={loading || isClearing}
+            className={`${styles.scrapeButton} ${sharedStyles.button}`}
+          >
+            {loading ? 'Searching...' : 'Search Gmail for Donations'}
+          </button>
           <button
             onClick={handleSearchOutlookEmails}
             disabled={loading || isClearing}
@@ -647,6 +639,19 @@ function Activity() {
             </button>
           )}
         </div>
+
+        {/* Progress Indicator */}
+        {loading && (
+          <div className={styles.progressContainer}>
+            <p>Progress: {progress}%</p>
+            <div className={styles.progressBarBackground}>
+              <div
+                className={styles.progressBarFill}
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
 
         {loading && <p className={styles.loading}>Searching emails... Please wait.</p>}
         {error && <p className={styles.error}>{error}</p>}
