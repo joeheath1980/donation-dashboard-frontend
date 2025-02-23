@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'react-icons/fa';
 import styles from './Login.module.css';
-import cleanStyles from './SharedStyles.css';
 import logo from '../assets/logo.png';
 
 function Login() {
@@ -24,7 +22,9 @@ function Login() {
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
       setSocialLoginInProgress(true);
-      await socialLogin(token);
+      const userData = await socialLogin(token);
+      // Set the current user ID for social login
+      localStorage.setItem('currentUserId', userData._id || userData.id);
       navigate('/profile');
     } catch (err) {
       console.error('Error handling social login callback:', err);
@@ -70,14 +70,23 @@ function Login() {
       switch (formData.accountType) {
         case 'business':
           loginResult = await businessLogin(formData.email, formData.password);
+          // For business logins, set the currentUserId using either _id or businessId
+          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
+          localStorage.setItem('currentUserId', loginResult._id || loginResult.businessId);
           navigate('/business-dashboard');
           break;
         case 'charity':
           loginResult = await charityLogin(formData.email, formData.password);
+          // For charity logins, set the currentUserId using either _id or id
+          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
+          localStorage.setItem('currentUserId', loginResult._id || loginResult.id);
           navigate('/charity-dashboard');
           break;
         default:
           loginResult = await login(formData.email, formData.password);
+          // For regular user logins, set the currentUserId using either _id or id
+          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
+          localStorage.setItem('currentUserId', loginResult._id || loginResult.id);
           navigate(loginResult?.isAdmin ? '/admin' : '/profile');
       }
     } catch (err) {
