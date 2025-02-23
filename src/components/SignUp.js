@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'react-icons/fa';
@@ -33,22 +33,6 @@ const SignUp = () => {
     if (password.match(/[0-9]/)) strength++;
     if (password.match(/[^a-zA-Z0-9]/)) strength++;
     return strength;
-  };
-
-  const getPasswordStrengthClass = (strength) => {
-    if (strength === 0) return '';
-    if (strength === 1) return 'weak';
-    if (strength === 2) return 'medium';
-    if (strength === 3) return 'strong';
-    return 'veryStrong';
-  };
-
-  const getPasswordStrengthLabel = (strength) => {
-    if (strength === 0) return 'Very Weak';
-    if (strength === 1) return 'Weak';
-    if (strength === 2) return 'Medium';
-    if (strength === 3) return 'Strong';
-    return 'Very Strong';
   };
 
   const handleChange = (e) => {
@@ -116,6 +100,9 @@ const SignUp = () => {
       console.log('Attempting to sign up user:', { name, email });
       const result = await userSignup(name, email, password);
       console.log('Signup successful:', result);
+
+      localStorage.setItem('currentUserId', result._id || result.id);
+
       setSuccess('Registration successful! Redirecting to your profile...');
       setTimeout(() => {
         navigate('/profile');

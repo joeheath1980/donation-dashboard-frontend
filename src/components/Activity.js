@@ -1,10 +1,17 @@
 import React, { useState, useContext, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
 import sharedStyles from './SharedStyles.css';
 import { format, isValid, parseISO } from 'date-fns';
 
+// Retrieve the current user's ID from localStorage
+const currentUserId = localStorage.getItem('currentUserId');
+// Create a user-specific storage key
+const STORAGE_KEY = currentUserId 
+  ? `donation-activity-state-${currentUserId}` 
+  : 'donation-activity-state-guest';
+  
 // Helper function for safe date formatting
 function safeFormatDate(dateValue, dateFormat) {
   if (!dateValue) return "N/A";
@@ -12,8 +19,6 @@ function safeFormatDate(dateValue, dateFormat) {
   if (!isValid(dateObj)) return "N/A";
   return format(dateObj, dateFormat);
 }
-
-const STORAGE_KEY = 'donation-activity-state';
 
 const CHARITY_TYPES = [
   'Health Services',
@@ -32,14 +37,13 @@ const CHARITY_TYPES = [
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
-  useLocation();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [selectedCharityTypes, setSelectedCharityTypes] = useState({});
-  const [authStatus, setAuthStatus] = useState('');
+  const [authStatus] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
   const [donationStatuses, setDonationStatuses] = useState({});
   const [isClearing, setIsClearing] = useState(false);
@@ -59,50 +63,58 @@ function Activity() {
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        lastSavedState.current = parsed;
+        
+        // Implement data isolation check
+        if (parsed.userId === currentUserId) {
+          lastSavedState.current = parsed;
 
-        let validSearchHistory = [];
-        let validDonationStatuses = {};
+          let validSearchHistory = [];
+          let validDonationStatuses = {};
 
-        if (parsed?.searchHistory && Array.isArray(parsed?.searchHistory)) {
-          validSearchHistory = parsed.searchHistory
-            .map(entry => {
-              try {
-                return {
-                  ...entry,
-                  timestamp: new Date(entry.timestamp || Date.now()),
-                  results: Array.isArray(entry.results)
-                    ? entry.results.map(result => ({
-                        ...result,
-                        id: result.id || `recovered-${Date.now()}-${Math.random()}`,
-                        searchTimestamp: new Date(result.searchTimestamp || Date.now())
-                      }))
-                    : []
+          if (parsed?.searchHistory && Array.isArray(parsed?.searchHistory)) {
+            validSearchHistory = parsed.searchHistory
+              .map(entry => {
+                try {
+                  return {
+                    ...entry,
+                    timestamp: new Date(entry.timestamp || Date.now()),
+                    results: Array.isArray(entry.results)
+                      ? entry.results.map(result => ({
+                          ...result,
+                          id: result.id || `recovered-${Date.now()}-${Math.random()}`,
+                          searchTimestamp: new Date(result.searchTimestamp || Date.now())
+                        }))
+                      : []
+                  };
+                } catch (entryError) {
+                  console.warn('Error parsing search history entry:', entryError);
+                  return null;
+                }
+              })
+              .filter(Boolean);
+          }
+
+          if (parsed?.donationStatuses && typeof parsed.donationStatuses === 'object') {
+            Object.entries(parsed.donationStatuses).forEach(([key, value]) => {
+              if (value && typeof value === 'object' && value.type) {
+                validDonationStatuses[key] = {
+                  ...value,
+                  timestamp: value.timestamp || new Date().toISOString()
                 };
-              } catch (entryError) {
-                console.warn('Error parsing search history entry:', entryError);
-                return null;
               }
-            })
-            .filter(Boolean);
-        }
+            });
+          }
 
-        if (parsed?.donationStatuses && typeof parsed.donationStatuses === 'object') {
-          Object.entries(parsed.donationStatuses).forEach(([key, value]) => {
-            if (value && typeof value === 'object' && value.type) {
-              validDonationStatuses[key] = {
-                ...value,
-                timestamp: value.timestamp || new Date().toISOString()
-              };
-            }
-          });
-        }
-
-        if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
-          console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
-          setSearchHistory(validSearchHistory);
-          setDonationStatuses(validDonationStatuses);
-          hasSavedData.current = true;
+          if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
+            console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
+            setSearchHistory(validSearchHistory);
+            setDonationStatuses(validDonationStatuses);
+            hasSavedData.current = true;
+          }
+        } else {
+          // Clear mismatched data
+          localStorage.removeItem(STORAGE_KEY);
+          console.log('[Activity] Cleared mismatched data for user');
         }
       } catch (e) {
         console.error('Error parsing saved state:', e);
@@ -110,7 +122,7 @@ function Activity() {
     }
 
     isInitialized.current = true;
-  }, []); // Add a semicolon at the end of the useEffect dependency array
+  }, []);
 
   useEffect(() => {
     if (mountCount.current === 0) {
@@ -158,6 +170,7 @@ function Activity() {
       }, {});
 
       const newState = {
+        userId: currentUserId,
         searchHistory: safeSearchHistory,
         donationStatuses: safeDonationStatuses
       };
@@ -187,7 +200,7 @@ function Activity() {
         clearTimeout(clearingTimeout.current);
       }
     };
-  }, []); // Add a semicolon at the end of the useEffect dependency array
+  }, []);
 
   const handleClearAll = () => {
     console.log('[Activity] Starting clear operation');
@@ -212,19 +225,7 @@ function Activity() {
       setIsClearing(false);
     }, 300);
   };
-
-  // Remove the declaration of checkAuthStatus function
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google/status`, {
-        credentials: 'include',
-      });
-      const data = await response.json();
-      setAuthStatus(data.authenticated ? 'Authenticated' : '');
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setAuthStatus('');
-    }
-  }, []);
-
+  
   const handleSearchOutlookEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
