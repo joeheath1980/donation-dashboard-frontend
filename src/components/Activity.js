@@ -1,17 +1,12 @@
-import React, { useState, useContext, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import React, { useState, useContext, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { useUser } from '../contexts/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
 import sharedStyles from './SharedStyles.css';
-import { format, isValid, parseISO } from 'date-fns';
+import { format, isValid, parseISO, differenceInDays } from 'date-fns';
+import debounce from 'lodash/debounce';
 
-// Retrieve the current user's ID from localStorage
-const currentUserId = localStorage.getItem('currentUserId');
-// Create a user-specific storage key
-const STORAGE_KEY = currentUserId 
-  ? `donation-activity-state-${currentUserId}` 
-  : 'donation-activity-state-guest';
-  
 // Helper function for safe date formatting
 function safeFormatDate(dateValue, dateFormat) {
   if (!dateValue) return "N/A";
@@ -35,9 +30,60 @@ const CHARITY_TYPES = [
   'Rural Support'
 ];
 
+// Custom hook for user storage
+const useUserStorage = (userId) => {
+  const STORAGE_KEY = userId ? `user-${userId}-donation-activity-state` : 'donation-activity-state-guest';
+  const EXPIRATION_DAYS = 30;
+
+  const loadState = useCallback(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const lastUpdated = new Date(parsed.lastUpdated || Date.now());
+        const now = new Date();
+        if (differenceInDays(now, lastUpdated) > EXPIRATION_DAYS) {
+          localStorage.removeItem(STORAGE_KEY);
+          return null;
+        }
+        if (parsed.userId === userId) return parsed;
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        console.error('Error parsing localStorage data:', e);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+    return null;
+  }, [STORAGE_KEY, userId, EXPIRATION_DAYS]);
+
+  const saveState = useCallback((state) => {
+    try {
+      const newState = {
+        userId,
+        ...state,
+        lastUpdated: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        console.error('Storage quota exceeded. Clearing all data.');
+        localStorage.clear();
+      } else {
+        console.error('Error saving to localStorage:', e);
+      }
+    }
+  }, [STORAGE_KEY, userId]);
+
+  const clearState = useCallback(() => localStorage.removeItem(STORAGE_KEY), [STORAGE_KEY]);
+
+  return { loadState, saveState, clearState };
+};
+
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
+  const { currentUserId, updateCurrentUserId } = useUser();
   const navigate = useNavigate();
+  const { loadState, saveState, clearState } = useUserStorage(currentUserId);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -56,73 +102,78 @@ function Activity() {
   const wasCleared = useRef(false);
   const clearingTimeout = useRef(null);
 
+  const clearOldStorageKeys = useCallback(() => {
+    localStorage.removeItem('donation-activity-state');
+    // Add other legacy keys if applicable
+  }, []);
+
   useLayoutEffect(() => {
     if (isInitialized.current) return;
-
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState);
-        
-        // Implement data isolation check
-        if (parsed.userId === currentUserId) {
-          lastSavedState.current = parsed;
-
-          let validSearchHistory = [];
-          let validDonationStatuses = {};
-
-          if (parsed?.searchHistory && Array.isArray(parsed?.searchHistory)) {
-            validSearchHistory = parsed.searchHistory
-              .map(entry => {
-                try {
-                  return {
-                    ...entry,
-                    timestamp: new Date(entry.timestamp || Date.now()),
-                    results: Array.isArray(entry.results)
-                      ? entry.results.map(result => ({
-                          ...result,
-                          id: result.id || `recovered-${Date.now()}-${Math.random()}`,
-                          searchTimestamp: new Date(result.searchTimestamp || Date.now())
-                        }))
-                      : []
-                  };
-                } catch (entryError) {
-                  console.warn('Error parsing search history entry:', entryError);
-                  return null;
-                }
-              })
-              .filter(Boolean);
-          }
-
-          if (parsed?.donationStatuses && typeof parsed.donationStatuses === 'object') {
-            Object.entries(parsed.donationStatuses).forEach(([key, value]) => {
-              if (value && typeof value === 'object' && value.type) {
-                validDonationStatuses[key] = {
-                  ...value,
-                  timestamp: value.timestamp || new Date().toISOString()
-                };
-              }
-            });
-          }
-
-          if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
-            console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
-            setSearchHistory(validSearchHistory);
-            setDonationStatuses(validDonationStatuses);
-            hasSavedData.current = true;
-          }
-        } else {
-          // Clear mismatched data
-          localStorage.removeItem(STORAGE_KEY);
-          console.log('[Activity] Cleared mismatched data for user');
-        }
-      } catch (e) {
-        console.error('Error parsing saved state:', e);
+  
+    clearOldStorageKeys();
+  
+    const savedState = loadState(); // Updated to call loadState directly
+    if (savedState && savedState.userId === currentUserId) {
+      let validSearchHistory = [];
+      let validDonationStatuses = {};
+  
+      if (savedState?.searchHistory && Array.isArray(savedState?.searchHistory)) {
+        validSearchHistory = savedState.searchHistory
+          .map(entry => {
+            try {
+              return {
+                ...entry,
+                timestamp: new Date(entry.timestamp || Date.now()),
+                results: Array.isArray(entry.results)
+                  ? entry.results.map(result => ({
+                      ...result,
+                      id: result.id || `recovered-${Date.now()}-${Math.random()}`,
+                      searchTimestamp: new Date(result.searchTimestamp || Date.now())
+                    }))
+                  : []
+              };
+            } catch (entryError) {
+              console.warn('Error parsing search history entry:', entryError);
+              return null;
+            }
+          })
+          .filter(Boolean);
       }
+  
+      if (savedState?.donationStatuses && typeof savedState.donationStatuses === 'object') {
+        Object.entries(savedState.donationStatuses).forEach(([key, value]) => {
+          if (value && typeof value === 'object' && value.type) {
+            validDonationStatuses[key] = {
+              ...value,
+              timestamp: value.timestamp || new Date().toISOString()
+            };
+          }
+        });
+      }
+  
+      if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
+        console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
+        setSearchHistory(validSearchHistory);
+        setDonationStatuses(validDonationStatuses);
+        hasSavedData.current = true;
+      }
+    } else {
+      console.warn('Loaded state does not match current user. Ignoring.');
+      setSearchHistory([]);
+      setDonationStatuses({});
     }
-
+  
     isInitialized.current = true;
-  }, []);
+  }, [loadState, clearOldStorageKeys, currentUserId]);
+
+// Memoize the inner function with useCallback
+const saveFunction = useCallback((newState) => {
+  saveState(newState);
+  lastSavedState.current = newState;
+}, [saveState]);
+
+// Memoize the debounced function with useMemo
+const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunction]);
 
   useEffect(() => {
     if (mountCount.current === 0) {
@@ -145,54 +196,15 @@ function Activity() {
       return;
     }
 
-    try {
-      const safeSearchHistory = searchHistory.map(entry => ({
-        ...entry,
-        timestamp: entry.timestamp instanceof Date ? entry.timestamp.toISOString() : new Date().toISOString(),
-        results: Array.isArray(entry.results)
-          ? entry.results.map(result => ({
-              ...result,
-              searchTimestamp: result.searchTimestamp instanceof Date
-                ? result.searchTimestamp.toISOString()
-                : new Date().toISOString()
-            }))
-          : []
-      }));
+    const newState = {
+      searchHistory,
+      donationStatuses
+    };
 
-      const safeDonationStatuses = Object.entries(donationStatuses).reduce((acc, [key, value]) => {
-        if (value && typeof value === 'object' && value.type) {
-          acc[key] = {
-            ...value,
-            timestamp: value.timestamp || new Date().toISOString()
-          };
-        }
-        return acc;
-      }, {});
-
-      const newState = {
-        userId: currentUserId,
-        searchHistory: safeSearchHistory,
-        donationStatuses: safeDonationStatuses
-      };
-
-      const lastState = lastSavedState.current;
-      const statesAreDifferent = JSON.stringify(newState) !== JSON.stringify(lastState);
-      console.log('[Activity] State comparison:', {
-        statesAreDifferent,
-        newStateEmpty: isEmpty,
-        lastStateNull: lastState === null
-      });
-
-      if (statesAreDifferent && !isEmpty) {
-        console.log('[Activity] Saving new state to localStorage');
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-        lastSavedState.current = newState;
-        hasSavedData.current = true;
-      }
-    } catch (e) {
-      console.error('Error saving state to localStorage:', e);
+    if (JSON.stringify(newState) !== JSON.stringify(lastSavedState.current)) {
+      saveToLocalStorage(newState);
     }
-  }, [searchHistory, donationStatuses]);
+  }, [searchHistory, donationStatuses, saveToLocalStorage]);
 
   useEffect(() => {
     return () => {
@@ -202,13 +214,56 @@ function Activity() {
     };
   }, []);
 
-  const handleClearAll = () => {
+  const clearOtherUsersData = useCallback(() => {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('user-') && !key.includes(currentUserId)) {
+        localStorage.removeItem(key);
+      }
+      // Remove any old format keys
+      if (key.startsWith('donation-activity-state-') && !key.includes(currentUserId)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }, [currentUserId]);
+
+  const auditLocalStorage = useCallback(() => {
+    const allKeys = Object.keys(localStorage);
+    const userKeys = allKeys.filter(key => key.startsWith('user-'));
+    userKeys.forEach(key => {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        if (data.userId !== currentUserId) {
+          localStorage.removeItem(key);
+        }
+      } catch (e) {
+        console.error('Error parsing localStorage data:', e);
+        localStorage.removeItem(key);
+      }
+    });
+  }, [currentUserId]);
+
+  useEffect(() => {
+    clearOtherUsersData();
+    auditLocalStorage();
+  }, [clearOtherUsersData, auditLocalStorage]);
+
+  const handleLogout = useCallback(() => {
+    clearState();
+    updateCurrentUserId(null);
+    setSearchHistory([]);
+    setDonationStatuses({});
+    setSelectedTypes({});
+    setSelectedCharityTypes({});
+    navigate('/login');
+  }, [clearState, updateCurrentUserId, navigate]);
+
+  const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');
     setIsClearing(true);
     wasCleared.current = true;
 
     console.log('[Activity] Removing data from localStorage');
-    localStorage.removeItem(STORAGE_KEY);
+    clearState();
 
     console.log('[Activity] Resetting all states');
     setSearchHistory([]);
@@ -224,7 +279,12 @@ function Activity() {
       console.log('[Activity] Finishing clear operation');
       setIsClearing(false);
     }, 300);
-  };
+  }, [clearState]);
+
+  const logError = useCallback((message, error) => {
+    console.error(message, error);
+    setError(`${message}: ${error.message}`);
+  }, []);
   
   const handleSearchOutlookEmails = useCallback(async () => {
     setLoading(true);
@@ -236,7 +296,6 @@ function Activity() {
         throw new Error('No authentication token found. Please log in again.');
       }
       
-      // Use POST request to the proper endpoint for starting Outlook search
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook/start-outlook-search`,
         {
@@ -247,7 +306,7 @@ function Activity() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({}) // Adjust parameters here if needed
+          body: JSON.stringify({})
         }
       );
       
@@ -262,7 +321,6 @@ function Activity() {
         const data = await response.json();
         console.log('[Activity] Outlook search response:', data);
         
-        // Expecting an object with a jobId property
         if (data.jobId) {
           console.log('[Activity] Outlook job started with jobId:', data.jobId);
           const timestamp = new Date();
@@ -273,14 +331,13 @@ function Activity() {
         }
       }
     } catch (error) {
-      console.error('Error during Outlook email search:', error);
-      setError(`Error: ${error.message}. Please check the console for more details.`);
+      logError('Error during Outlook email search', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [logError]);
 
-  const handleSearchEmails = async () => {
+  const handleSearchEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -288,7 +345,6 @@ function Activity() {
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      // Start the background job
       const startResponse = await fetch(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
         {
@@ -299,7 +355,7 @@ function Activity() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ token }) // Pass token so worker can verify user
+          body: JSON.stringify({ token })
         }
       );
       if (!startResponse.ok) {
@@ -309,7 +365,6 @@ function Activity() {
       const { jobId } = await startResponse.json();
       console.log('[Activity] Started email search job with ID:', jobId);
       
-      // Open SSE connection to stream progress updates
       const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${jobId}?token=${encodeURIComponent(token)}`;
       const eventSource = new EventSource(sseUrl);
       
@@ -317,7 +372,6 @@ function Activity() {
         const statusData = JSON.parse(event.data);
         console.log('[SSE] Job status update:', statusData);
         
-        // Update progress if available
         if (statusData.progress !== undefined) {
           setProgress(statusData.progress);
         }
@@ -354,33 +408,26 @@ function Activity() {
       };
   
     } catch (error) {
-      console.error('Error during email search:', error);
-      setError(`Error: ${error.message}. Please check the console for details.`);
+      logError('Error during email search', error);
       setLoading(false);
     }
-  };
+  }, [logError]);
 
-  const handleTypeChange = (index, event) => {
+  const handleTypeChange = useCallback((index, event) => {
     setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
-  };
+  }, []);
 
-  const handleCharityTypeChange = (index, event) => {
+  const handleCharityTypeChange = useCallback((index, event) => {
     setSelectedCharityTypes(prev => ({ ...prev, [index]: event.target.value }));
-  };
+  }, []);
 
-  const formatDonationData = (donation) => {
-    // Clean up the donation amount string first
+  const formatDonationData = useCallback((donation) => {
     const amount = parseFloat(donation.amount.replace(/[^0-9.-]+/g, ''));
-  
-    // Try to create a Date object from the donation date
     let dateObj = new Date(donation.date);
-    // If the date is invalid (e.g., donation.date is "N/A"), use the current date
     if (!isValid(dateObj)) {
       dateObj = new Date();
     }
-    
     const formattedDate = format(dateObj, 'yyyy-MM-dd');
-  
     return {
       amount,
       charity: donation.charity,
@@ -389,9 +436,9 @@ function Activity() {
       needsValidation: true,
       subject: donation.subject
     };
-  };
+  }, [selectedCharityTypes]);
 
-  const handleCommit = async (donation, isOutlook = false) => {
+  const handleCommit = useCallback(async (donation, isOutlook = false) => {
     const selectedType = selectedTypes[donation.id];
     const formattedDonation = formatDonationData(donation);
 
@@ -454,17 +501,16 @@ function Activity() {
         console.log('[Activity] Reset wasCleared due to new data');
       }
     } catch (error) {
-      console.error('Error committing donation:', error);
-      setError(`Failed to commit donation: ${error.message}`);
+      logError('Error committing donation', error);
       setDonationStatuses(prev => {
         const newStatuses = { ...prev };
         delete newStatuses[donation.id];
         return newStatuses;
       });
     }
-  };
+  }, [selectedTypes, selectedCharityTypes, formatDonationData, addDonation, addOneOffContribution, logError]);
 
-  const handleDelete = (donationId) => {
+  const handleDelete = useCallback((donationId) => {
     console.log('[Activity] Deleting donation:', donationId);
     setDonationStatuses(prev => ({
       ...prev,
@@ -475,9 +521,9 @@ function Activity() {
     }));
     wasCleared.current = false;
     console.log('[Activity] Reset wasCleared due to new data');
-  };
+  }, []);
 
-  const handleRestore = (donationId) => {
+  const handleRestore = useCallback((donationId) => {
     console.log('[Activity] Restoring donation:', donationId);
     setDonationStatuses(prev => {
       const newStatuses = { ...prev };
@@ -486,9 +532,9 @@ function Activity() {
     });
     wasCleared.current = false;
     console.log('[Activity] Reset wasCleared due to new data');
-  };
+  }, []);
 
-  const navigateToDonation = (donation, type) => {
+  const navigateToDonation = useCallback((donation, type) => {
     const status = donationStatuses[donation.id];
     if (!status?.resultId) {
       console.error('No result ID found for donation');
@@ -497,9 +543,9 @@ function Activity() {
 
     const path = type === 'regular' ? '/donations' : '/one-off';
     navigate(`${path}?highlight=${status.resultId}`);
-  };
+  }, [donationStatuses, navigate]);
 
-  const renderDonationCard = (donation, source) => {
+  const renderDonationCard = useCallback((donation, source) => {
     const status = donationStatuses[donation.id];
     const isCommitted = status?.type?.startsWith('committed');
     const isDeleted = status?.type === 'deleted';
@@ -585,9 +631,9 @@ function Activity() {
         )}
       </li>
     );
-  };
+  }, [donationStatuses, selectedTypes, selectedCharityTypes, isClearing, handleTypeChange, handleCharityTypeChange, handleCommit, handleDelete, navigateToDonation, handleRestore]);
 
-  const renderSearchResults = () => (
+  const renderSearchResults = useCallback(() => (
     <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
       {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
@@ -600,7 +646,7 @@ function Activity() {
         </div>
       ))}
     </div>
-  );
+  ), [searchHistory, isClearing, renderDonationCard]);
 
   return (
     <div className={`${styles.container} ${sharedStyles.container}`}>
@@ -638,6 +684,12 @@ function Activity() {
               {isClearing ? 'Clearing...' : 'Clear All'}
             </button>
           )}
+          <button
+            onClick={handleLogout}
+            className={`${styles.logoutButton} ${sharedStyles.button}`}
+          >
+            Logout
+          </button>
         </div>
 
         {/* Progress Indicator */}
