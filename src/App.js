@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UserProvider } from './contexts/UserContext'; // Add this import
 import Layout from './components/Layout';
 import Profile from './components/Profile';
 import Login from './components/Login';
@@ -56,49 +57,51 @@ const AdminRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <ImpactProvider>
-        <Router>
-          <div className={styles.app}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<WelcomePage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/organization-signup" element={<OrganizationSignup />} />
-              <Route path="/business-signup" element={<BusinessSignup />} />
-              <Route path="/charity-signup" element={<CharitySignup />} />
-              
-              {/* Auth Callback routes */}
-              <Route path="/auth-callback" element={<AuthCallback />} />
-              <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
-              <Route path="/microsoft-callback" element={<MicrosoftAuthCallback />} />
-              
-              {/* Protected routes */}
-              <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
-              <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/YourAccount" element={<ProtectedRoute><Layout><YourAccount /></Layout></ProtectedRoute>} />
-              <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
-              <Route path="/your-perks" element={<ProtectedRoute><Layout><YourPerks /></Layout></ProtectedRoute>} />
-              <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
-              <Route path="/charity/:id" element={<ProtectedRoute><Layout><CharityPartner /></Layout></ProtectedRoute>} />
-              <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
-              <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
-              <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
-              <Route path="/your-impact" element={<ProtectedRoute><Layout><YourImpact /></Layout></ProtectedRoute>} />
-              
-              {/* Business routes */}
-              <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessDashboard /></Layout></ProtectedRoute>} />
-              <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessCreateCampaign /></Layout></ProtectedRoute>} />
+      <UserProvider> {/* Add UserProvider here */}
+        <ImpactProvider>
+          <Router>
+            <div className={styles.app}>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<WelcomePage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/organization-signup" element={<OrganizationSignup />} />
+                <Route path="/business-signup" element={<BusinessSignup />} />
+                <Route path="/charity-signup" element={<CharitySignup />} />
+                
+                {/* Auth Callback routes */}
+                <Route path="/auth-callback" element={<AuthCallback />} />
+                <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+                <Route path="/microsoft-callback" element={<MicrosoftAuthCallback />} />
+                
+                {/* Protected routes */}
+                <Route path="/dashboard" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+                <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/YourAccount" element={<ProtectedRoute><Layout><YourAccount /></Layout></ProtectedRoute>} />
+                <Route path="/about" element={<ProtectedRoute><Layout><About /></Layout></ProtectedRoute>} />
+                <Route path="/your-perks" element={<ProtectedRoute><Layout><YourPerks /></Layout></ProtectedRoute>} />
+                <Route path="/partners" element={<ProtectedRoute><Layout><Partners /></Layout></ProtectedRoute>} />
+                <Route path="/charity/:id" element={<ProtectedRoute><Layout><CharityPartner /></Layout></ProtectedRoute>} />
+                <Route path="/activity" element={<ProtectedRoute><Layout><Activity /></Layout></ProtectedRoute>} />
+                <Route path="/search-charities" element={<ProtectedRoute><Layout><SearchCharities /></Layout></ProtectedRoute>} />
+                <Route path="/manage-payments" element={<ProtectedRoute><Layout><ManagePaymentsComponent /></Layout></ProtectedRoute>} />
+                <Route path="/your-impact" element={<ProtectedRoute><Layout><YourImpact /></Layout></ProtectedRoute>} />
+                
+                {/* Business routes */}
+                <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessDashboard /></Layout></ProtectedRoute>} />
+                <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><BusinessCreateCampaign /></Layout></ProtectedRoute>} />
 
-              {/* Charity routes */}
-              <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><CharityDashboard /></ProtectedRoute>} />
+                {/* Charity routes */}
+                <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><CharityDashboard /></ProtectedRoute>} />
 
-              {/* Admin routes */}
-              <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            </Routes>
-          </div>
-        </Router>
-      </ImpactProvider>
+                {/* Admin routes */}
+                <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              </Routes>
+            </div>
+          </Router>
+        </ImpactProvider>
+      </UserProvider>
     </AuthProvider>
   );
 }
