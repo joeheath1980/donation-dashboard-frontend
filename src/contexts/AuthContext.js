@@ -41,11 +41,7 @@ export const AuthProvider = ({ children }) => {
           console.error('Authentication error:', error);
           if (error.response && error.response.status === 401) {
             console.log('Token expired or invalid. Clearing local storage.');
-            localStorage.removeItem('token');
-            localStorage.removeItem('userType');
-            localStorage.removeItem('businessId');
-            localStorage.removeItem('charityId');
-            setupAxiosDefaults(null);
+            clearUserData();
           }
           setUser(null);
         }
@@ -217,21 +213,68 @@ export const AuthProvider = ({ children }) => {
         console.error('Error response:', error.response.data);
         console.error('Error status:', error.response.status);
       }
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
-      setupAxiosDefaults(null);
+      clearUserData();
       throw error;
     }
   };
 
-  // Logout function
-  const logout = () => {
+  // Enhanced clearUserData function
+  const clearUserData = () => {
+    console.log('Clearing all user data from localStorage');
+    
+    // Get current user ID for targeted cleaning
+    const currentUserId = localStorage.getItem('currentUserId');
+    
+    // Activity-specific data for the current user
+    if (currentUserId) {
+      localStorage.removeItem(`user-${currentUserId}-donation-activity-state`);
+    }
+    
+    // Clear all Activity-related state
+    localStorage.removeItem('donation-activity-state');
+    localStorage.removeItem('donation-activity-state-guest');
+    localStorage.removeItem('searchHistory');
+    localStorage.removeItem('donationStatuses');
+    localStorage.removeItem('selectedTypes');
+    localStorage.removeItem('selectedCharityTypes');
+    
+    // Clear auth-related data
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     localStorage.removeItem('businessId');
     localStorage.removeItem('charityId');
+    localStorage.removeItem('currentUserId');
+    
+    // Comprehensive cleanup of any other Activity-specific or user data
+    Object.keys(localStorage).forEach(key => {
+      if (
+        key.startsWith('user-') || 
+        key.startsWith('donation-activity-state') || 
+        key.includes('search') ||
+        key.includes('donation') ||
+        key.includes('charity') ||
+        key.includes('activity')
+      ) {
+        console.log(`Removing localStorage item: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Reset axios headers
     setupAxiosDefaults(null);
+    
+    console.log('All user data cleared from localStorage');
+  };
+
+  // Enhanced logout function
+  const logout = () => {
+    // Clear all user data
+    clearUserData();
+    
+    // Reset user state
     setUser(null);
+    
+    console.log('User logged out successfully');
   };
 
   // Function to get auth headers
@@ -252,6 +295,7 @@ export const AuthProvider = ({ children }) => {
     charitySignup,
     socialLogin,
     logout,
+    clearUserData,
     loading,
     getAuthHeaders,
   };
