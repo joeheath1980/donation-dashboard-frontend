@@ -81,7 +81,7 @@ const useUserStorage = (userId) => {
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
-  const { currentUserId, updateCurrentUserId } = useUser();
+  const { currentUserId } = useUser();
   const navigate = useNavigate();
   const { loadState, saveState, clearState } = useUserStorage(currentUserId);
 
@@ -247,16 +247,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     auditLocalStorage();
   }, [clearOtherUsersData, auditLocalStorage]);
 
-  const handleLogout = useCallback(() => {
-    clearState();
-    updateCurrentUserId(null);
-    setSearchHistory([]);
-    setDonationStatuses({});
-    setSelectedTypes({});
-    setSelectedCharityTypes({});
-    navigate('/login');
-  }, [clearState, updateCurrentUserId, navigate]);
-
   const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');
     setIsClearing(true);
@@ -292,12 +282,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     try {
       const token = localStorage.getItem('token');
       console.log('Token in handleSearchOutlookEmails:', token);
+      
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/scrape-outlook/start-outlook-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/outlook/outlook-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -324,95 +315,90 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         if (data.jobId) {
           console.log('[Activity] Outlook job started with jobId:', data.jobId);
           const timestamp = new Date();
+          
+          // Add the job to search history
           setSearchHistory(prev => [{ timestamp, source: 'outlook', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
+          
+          // Set up SSE connection to get real-time updates
+          const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/outlook/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
+          console.log('[Activity] Connecting to SSE at:', sseUrl);
+          
+          const eventSource = new EventSource(sseUrl);
+          
+          eventSource.onmessage = (event) => {
+            try {
+              const statusData = JSON.parse(event.data);
+              console.log('[Outlook SSE] Event received:', statusData);
+              
+              // Update progress if available
+              if (statusData.progress !== undefined) {
+                setProgress(statusData.progress);
+              }
+              
+              // Handle completed job
+              if (statusData.state === 'completed' && statusData.result) {
+                console.log('[Outlook SSE] Job completed with results:', statusData.result);
+                
+                // Add IDs and timestamp to each result
+                const resultsWithIds = Array.isArray(statusData.result)
+                  ? statusData.result.map(result => ({
+                      ...result,
+                      id: `outlook-${timestamp.getTime()}-${Math.random()}`,
+                      searchTimestamp: timestamp
+                    }))
+                  : [];
+                
+                // Update search history with results
+                setSearchHistory(prev => {
+                  const updatedHistory = [...prev];
+                  // Find the entry with this job ID
+                  const index = updatedHistory.findIndex(entry => entry.jobId === data.jobId);
+                  if (index !== -1) {
+                    // Replace the entry with one that includes results
+                    updatedHistory[index] = {
+                      ...updatedHistory[index],
+                      results: resultsWithIds
+                    };
+                  }
+                  return updatedHistory;
+                });
+                
+                eventSource.close();
+                setLoading(false);
+                
+              } else if (statusData.state === 'failed' || statusData.error) {
+                console.error('[Outlook SSE] Job failed:', statusData.error);
+                setError(`Outlook search failed: ${statusData.error || 'Unknown error'}`);
+                eventSource.close();
+                setLoading(false);
+              }
+            } catch (parseError) {
+              console.error('[Outlook SSE] Error parsing event data:', parseError, event.data);
+              setError('Error processing server response');
+              eventSource.close();
+              setLoading(false);
+            }
+          };
+          
+          eventSource.onerror = (err) => {
+            console.error('[Outlook SSE] Error:', err);
+            setError('Error in real-time connection. Please try again.');
+            eventSource.close();
+            setLoading(false);
+          };
+          
         } else {
           console.log('[Activity] No jobId found in response');
+          setLoading(false);
         }
       }
     } catch (error) {
       logError('Error during Outlook email search', error);
-    } finally {
       setLoading(false);
     }
   }, [logError]);
-
-  const handleSearchEmails = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found. Please log in again.');
-      }
-      const startResponse = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
-        {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ token })
-        }
-      );
-      if (!startResponse.ok) {
-        const errorData = await startResponse.json();
-        throw new Error(errorData.error || 'Failed to start email search job.');
-      }
-      const { jobId } = await startResponse.json();
-      console.log('[Activity] Started email search job with ID:', jobId);
-      
-      const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${jobId}?token=${encodeURIComponent(token)}`;
-      const eventSource = new EventSource(sseUrl);
-      
-      eventSource.onmessage = (event) => {
-        const statusData = JSON.parse(event.data);
-        console.log('[SSE] Job status update:', statusData);
-        
-        if (statusData.progress !== undefined) {
-          setProgress(statusData.progress);
-        }
-        
-        if (statusData.state === 'completed') {
-          const timestamp = new Date();
-          const resultsWithIds = Array.isArray(statusData.result)
-            ? statusData.result.map(result => ({
-                ...result,
-                id: `gmail-${timestamp.getTime()}-${Math.random()}`,
-                searchTimestamp: timestamp
-              }))
-            : [];
-          setSearchHistory(prev => [{
-            timestamp,
-            source: 'gmail',
-            results: resultsWithIds
-          }, ...prev]);
-          eventSource.close();
-          setLoading(false);
-        } else if (statusData.state === 'failed') {
-          console.error('[SSE] Job failed:', statusData.error);
-          eventSource.close();
-          setError('Email search failed. Please check the console for details.');
-          setLoading(false);
-        }
-      };
-      
-      eventSource.onerror = (err) => {
-        console.error('[SSE] Error:', err);
-        eventSource.close();
-        setError('Error in SSE connection. Please check the console for details.');
-        setLoading(false);
-      };
   
-    } catch (error) {
-      logError('Error during email search', error);
-      setLoading(false);
-    }
-  }, [logError]);
-
   const handleTypeChange = useCallback((index, event) => {
     setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
   }, []);
@@ -658,7 +644,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         <div className={styles.buttonContainer}>
           <button
             id="start-search-btn"
-            onClick={handleSearchEmails}
+            onClick={() => handleSearchEmails()}  // Change to use an arrow function
             disabled={loading || isClearing}
             className={`${styles.scrapeButton} ${sharedStyles.button}`}
           >
@@ -684,12 +670,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               {isClearing ? 'Clearing...' : 'Clear All'}
             </button>
           )}
-          <button
-            onClick={handleLogout}
-            className={`${styles.logoutButton} ${sharedStyles.button}`}
-          >
-            Logout
-          </button>
         </div>
 
         {/* Progress Indicator */}

@@ -10,20 +10,19 @@ function Layout({ children }) {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
-
+  
   const handleLogoClick = () => {
     navigate('/profile');
   };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Failed to log out', error);
-    }
+  
+  const handleLogout = () => {
+    // Perform logout which now handles all data clearing
+    logout();
+    
+    // Immediately navigate to login page
+    navigate('/login');
   };
-
+  
   return (
     <div className={layoutStyles.layoutContainer}>
       <nav className={styles.navBar}>
