@@ -276,6 +276,129 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setError(`${message}: ${error.message}`);
   }, []);
   
+  const handleSearchEmails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token in handleSearchEmails:', token);
+      
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
+        {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.error === 'Google authentication required' && errorData.action === 'google_auth') {
+          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+        } else {
+          throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
+        }
+      } else {
+        const data = await response.json();
+        console.log('[Activity] Gmail search response:', data);
+        
+        if (data.jobId) {
+          console.log('[Activity] Gmail job started with jobId:', data.jobId);
+          const timestamp = new Date();
+          
+          // Add the job to search history
+          setSearchHistory(prev => [{ timestamp, source: 'gmail', jobId: data.jobId }, ...prev]);
+          wasCleared.current = false;
+          
+          // Set up SSE connection to get real-time updates
+          const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
+          console.log('[Activity] Connecting to SSE at:', sseUrl);
+          
+          const eventSource = new EventSource(sseUrl);
+          
+          eventSource.onmessage = (event) => {
+            try {
+              const statusData = JSON.parse(event.data);
+              console.log('[Gmail SSE] Event received:', statusData);
+              
+              // Update progress if available
+              if (statusData.progress !== undefined) {
+                setProgress(statusData.progress);
+              }
+              
+              // Handle completed job
+              if (statusData.state === 'completed' && statusData.result) {
+                console.log('[Gmail SSE] Job completed with results:', statusData.result);
+                
+                // Add IDs and timestamp to each result
+                const resultsWithIds = Array.isArray(statusData.result)
+                  ? statusData.result.map(result => ({
+                      ...result,
+                      id: `gmail-${timestamp.getTime()}-${Math.random()}`,
+                      searchTimestamp: timestamp
+                    }))
+                  : [];
+                
+                // Update search history with results
+                setSearchHistory(prev => {
+                  const updatedHistory = [...prev];
+                  // Find the entry with this job ID
+                  const index = updatedHistory.findIndex(entry => entry.jobId === data.jobId);
+                  if (index !== -1) {
+                    // Replace the entry with one that includes results
+                    updatedHistory[index] = {
+                      ...updatedHistory[index],
+                      results: resultsWithIds
+                    };
+                  }
+                  return updatedHistory;
+                });
+                
+                eventSource.close();
+                setLoading(false);
+                
+              } else if (statusData.state === 'failed' || statusData.error) {
+                console.error('[Gmail SSE] Job failed:', statusData.error);
+                setError(`Gmail search failed: ${statusData.error || 'Unknown error'}`);
+                eventSource.close();
+                setLoading(false);
+              }
+            } catch (parseError) {
+              console.error('[Gmail SSE] Error parsing event data:', parseError, event.data);
+              setError('Error processing server response');
+              eventSource.close();
+              setLoading(false);
+            }
+          };
+          
+          eventSource.onerror = (err) => {
+            console.error('[Gmail SSE] Error:', err);
+            setError('Error in real-time connection. Please try again.');
+            eventSource.close();
+            setLoading(false);
+          };
+          
+        } else {
+          console.log('[Activity] No jobId found in response');
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      logError('Error during Gmail email search', error);
+      setLoading(false);
+    }
+  }, [logError]);
+  
   const handleSearchOutlookEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
