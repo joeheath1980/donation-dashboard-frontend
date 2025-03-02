@@ -1,84 +1,147 @@
+/* Perks Container - Improved Layout */
 .perksContainer {
   width: 100%;
-  padding: 24px;
+  padding: 32px;
+  background-color: var(--background-light, #f9fafb);
+  border-radius: 16px;
+  margin-top: 20px;
 }
 
 .header {
   font-size: 2.5rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  display: inline-block;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
 }
 
 .intro {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
   color: var(--text-secondary);
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  max-width: 800px;
 }
 
 .impactScoreContainer {
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
+/* Grid Layout for Perks */
 .perksList {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .perkCard {
   background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  padding: 24px;
-  transition: var(--transition-standard);
-  margin-bottom: 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.05));
+  padding: 28px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .perkCard:hover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md, 0 10px 20px rgba(0, 0, 0, 0.08));
 }
 
+/* Perk Header Styling */
 .perkHeader {
   display: flex;
   align-items: center;
-  cursor: pointer;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .perkIcon {
-  font-size: 1.5rem;
-  margin-right: 15px;
+  font-size: 1.8rem;
+  margin-right: 18px;
   color: var(--primary-color);
+  min-width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--primary-color-rgb, 49, 151, 149), 0.1);
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 
-.perkHeader h2 {
-  font-size: 1.3rem;
-  margin: 0;
-  flex-grow: 1;
-  color: var(--text-primary);
+/* Badge for new or featured items */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #38B2AC 0%, #2C7A7B 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.expandIcon {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
+.new {
+  background: linear-gradient(135deg, #38B2AC 0%, #2C7A7B 100%);
 }
 
+.featured {
+  background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+}
+
+.limited {
+  background: linear-gradient(135deg, #9F7AEA 0%, #805AD5 100%);
+}
+
+/* Always visible perk details */
 .perkDetails {
-  margin-top: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
 }
 
+/* Event Cards */
 .eventList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .eventCard {
-  background-color: var(--background-light);
-  border-radius: 6px;
+  background-color: var(--background-light, #f9fafb);
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.eventCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .eventIconContainer {
@@ -88,8 +151,9 @@
   align-items: center;
   justify-content: center;
   background: var(--primary-gradient);
-  border-radius: 50%;
-  margin-right: 15px;
+  border-radius: 12px;
+  margin-right: 16px;
+  flex-shrink: 0;
 }
 
 .eventIcon {
@@ -101,108 +165,256 @@
   flex-grow: 1;
 }
 
-.eventInfo h3 {
-  margin: 0 0 5px 0;
-  font-size: 1.1rem;
-  color: var(--text-primary);
+/* Feature List */
+.featureList {
+  list-style-type: none;
+  padding: 0;
 }
 
-.eventInfo p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.featureItem {
+  padding: 14px;
+  margin-bottom: 12px;
+  background-color: var(--background-light, #f9fafb);
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.featureItem:hover {
+  transform: translateX(5px);
+}
+
+/* Offers Styling */
 .offerList {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 
 .offerItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background-color: var(--background-light, #f9fafb);
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.offerItem:hover {
+  transform: translateX(5px);
+}
+
+.offerItem:last-child {
+  margin-bottom: 0;
+}
+
+.offerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.offerTitle {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.offerDescription {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
 .redeemButton {
   background: var(--primary-gradient);
   color: white;
   border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: var(--transition-standard);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  margin-left: 12px;
+  flex-shrink: 0;
 }
 
 .redeemButton:hover {
-  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(var(--primary-color-rgb, 49, 151, 149), 0.3);
 }
 
+/* Referral Program */
 .referralProgram {
-  background-color: var(--background-light);
-  border-radius: 12px;
-  padding: 24px;
-  margin-top: 40px;
+  background: linear-gradient(135deg, var(--background-light, #f9fafb) 0%, white 100%);
+  border-radius: 16px;
+  padding: 30px;
+  margin-top: 50px;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(var(--primary-color-rgb, 49, 151, 149), 0.1);
+}
+
+.referralHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
 }
 
 .referralIcon {
-  font-size: 1.5rem;
-  margin-right: 10px;
+  font-size: 1.8rem;
+  margin-right: 12px;
   color: var(--primary-color);
+}
+
+.referralText {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .referralButton {
   background: var(--primary-gradient);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 50px;
   cursor: pointer;
-  font-size: 1rem;
-  margin-top: 10px;
-  transition: var(--transition-standard);
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  min-width: 200px;
 }
 
 .referralButton:hover {
-  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(var(--primary-color-rgb, 49, 151, 149), 0.4);
 }
 
+/* Call to Action */
 .callToAction {
-  margin-top: 40px;
+  margin-top: 60px;
   text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ctaText {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .ctaButtons {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .ctaButton {
+  padding: 14px 28px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.ctaButton.primary {
   background: var(--primary-gradient);
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: var(--transition-standard);
+}
+
+.ctaButton.secondary {
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
 }
 
 .ctaButton:hover {
-  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 600px) {
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .perksContainer {
+    padding: 24px 20px;
+  }
+  
+  .header {
+    font-size: 2.2rem;
+  }
+  
+  .intro {
+    font-size: 1.1rem;
+  }
+  
+  .perksList {
+    grid-template-columns: 1fr;
+  }
+  
   .eventList {
     grid-template-columns: 1fr;
   }
-
+  
+  .offerItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .redeemButton {
+    margin-left: 0;
+    margin-top: 12px;
+    align-self: flex-start;
+  }
+  
   .ctaButtons {
     flex-direction: column;
+    align-items: center;
+  }
+  
+  .ctaButton {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .perksContainer {
+    padding: 20px 16px;
+  }
+  
+  .header {
+    font-size: 2rem;
+  }
+  
+  .perkHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .eventIconContainer {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .eventIcon {
+    font-size: 1.5rem;
   }
 }
