@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import styles from './PersonalImpactScore.module.css';
 
@@ -13,6 +14,7 @@ const tierColors = {
 const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color }) => {
   const [showCircleTooltip, setShowCircleTooltip] = useState(false);
   const [showScoreTooltip, setShowScoreTooltip] = useState(false);
+  const [animateCircle, setAnimateCircle] = useState(false);
   const percentage = ((100 - pointsToNextTier) / 100) * 100;
   const radius = 150;
   const strokeWidth = 30;
@@ -22,9 +24,17 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   const gradientId = `gradient-${tier}`;
   const isPositiveChange = scoreChange > 0;
 
+  // Add animation effect on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimateCircle(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div 
-      className={`${styles.circularProgressBar} ${showScoreTooltip ? styles.scoreHovered : ''}`}
+      className={`${styles.circularProgressBar} ${showScoreTooltip ? styles.scoreHovered : ''} ${animateCircle ? styles.animate : ''}`}
       onMouseEnter={() => setShowCircleTooltip(true)}
       onMouseLeave={() => setShowCircleTooltip(false)}
     >
@@ -53,15 +63,16 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
         />
         {/* Progress circle */}
         <circle
+          className={styles.progressCircle}
           stroke={`url(#${gradientId})`}
           fill="transparent"
           strokeWidth={strokeWidth}
           strokeDasharray={`${circumference} ${circumference}`}
           style={{
-            strokeDashoffset,
+            strokeDashoffset: animateCircle ? strokeDashoffset : circumference,
             transform: 'rotate(-90deg)',
             transformOrigin: '50% 50%',
-            transition: 'stroke-dashoffset 0.5s ease',
+            transition: 'stroke-dashoffset 1.2s ease-out',
           }}
           r={normalizedRadius}
           cx={radius}
@@ -104,21 +115,44 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
 
 const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier }) => {
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
+  const [animate, setAnimate] = useState(false);
+
+  // Trigger animations on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimate(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className={styles.mainContent}>
-      <div className={styles.scoreSection}>
-        <CircularProgressBar 
-          score={impactScore} 
-          pointsToNextTier={pointsToNextTier} 
-          tier={tier} 
-          scoreChange={scoreChange}
-          color={tierColor}
-        />
+    <div className={styles.mainContainer}>
+      <div className={styles.contentRow}>
+        <div className={`${styles.circleColumn} ${animate ? styles.animate : ''}`}>
+          <CircularProgressBar 
+            score={impactScore} 
+            pointsToNextTier={pointsToNextTier} 
+            tier={tier} 
+            scoreChange={scoreChange}
+            color={tierColor}
+          />
+        </div>
+        
+        <div className={`${styles.headerColumn} ${animate ? styles.animate : ''}`}>
+          <div className={styles.headerWrap}>
+            <h1 className={styles.impactScoreHeader}>
+              <span className={styles.impactWord}>IMPACT</span>
+              <span className={styles.scoreWord}>SCORE</span>
+            </h1>
+            <div className={styles.headerUnderline}></div>
+          </div>
+        </div>
       </div>
-      <div className={`${styles.impactScoreTitle} ${styles.gradientTitle}`}>
-        <span className={styles.impactWord} data-text="IMPACT">IMPACT</span>
-        <span className={styles.scoreWord} data-text="SCORE">SCORE</span>
+      
+      <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>
+        <Link to="/activity" className={styles.discoverButton}>
+          Discover Your Contributions
+        </Link>
       </div>
     </div>
   );
