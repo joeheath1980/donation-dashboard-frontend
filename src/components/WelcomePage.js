@@ -81,8 +81,8 @@ const WelcomePage = () => {
       <footer className={styles.footer}>
         <p>&copy; 2024 Do-Nation. All rights reserved.</p>
         <div className={styles.footerLinks}>
-          <a href="/privacy" className={sharedStyles.link}>Privacy Policy</a>
-          <a href="/terms" className={sharedStyles.link}>Terms of Service</a>
+        <a href="/privacy_policy.html" className={sharedStyles.link}>Privacy Policy</a>
+        <a href="/terms_of_service.html" className={sharedStyles.link}>Terms of Service</a>
         </div>
         <div className={styles.socialIcons}>
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className={`${styles.socialIcon} ${sharedStyles.link}`}>
