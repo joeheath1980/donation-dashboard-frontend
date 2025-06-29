@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
+import { API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
 import { createLogger } from '../utils/logger';
 
 const AuthContext = createContext();

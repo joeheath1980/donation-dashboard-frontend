@@ -52,16 +52,19 @@ const DonationItem = React.memo(({
         {donation.receiptUrl && (
           <p>
             <strong>Receipt:</strong>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onReceiptClick(donation.receiptUrl);
-              }}
+            <button
+              onClick={() => onReceiptClick(donation.receiptUrl)}
               className={sharedStyles.link}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                padding: 0, 
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
             >
               View Receipt
-            </a>
+            </button>
           </p>
         )}
       </div>

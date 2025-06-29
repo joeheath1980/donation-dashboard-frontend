@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_CONFIG, API_ENDPOINTS, getApiUrl, SECURITY_HEADERS } from '../config/api.config';
+import { API_CONFIG, API_ENDPOINTS, SECURITY_HEADERS } from '../config/api.config';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import { createLogger } from '../utils/logger';
 
@@ -267,7 +267,7 @@ export const globalGivingService = {
 export { apiClient };
 
 // Default export with all services
-export default {
+const apiServices = {
   auth: authService,
   donations: donationService,
   charities: charityService,
@@ -278,3 +278,5 @@ export default {
   globalGiving: globalGivingService,
   client: apiClient
 };
+
+export default apiServices;

@@ -269,7 +269,7 @@ export const getCurrentUserRole = () => {
   return UserDataStorage.getUserType();
 };
 
-export default {
+const authUtils = {
   SecureTokenStorage,
   UserDataStorage,
   TokenValidator,
@@ -278,3 +278,5 @@ export default {
   isAuthenticated,
   getCurrentUserRole
 };
+
+export default authUtils;

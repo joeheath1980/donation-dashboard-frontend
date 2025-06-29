@@ -1,38 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { FaCheckCircle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import styles from './DonationsComponent.module.css';
 import sharedStyles from './SharedStyles.css';
 import DonationModal from './DonationModal';
 import DonationItem from './DonationItem';
-import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
-import { format, parseISO, parse } from 'date-fns';
 import { donationService } from '../services/api.service';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('DonationsComponent');
 
-function formatDate(dateString) {
-  let date;
-
-  try {
-    date = parseISO(dateString);
-  } catch (error) {
-    try {
-      date = parse(dateString, "EEE, dd MMM solubilities HH:mm:ss xx", new Date());
-    } catch (error) {
-      logger.error("Failed to parse date", { dateString });
-      return dateString;
-    }
-  }
-
-  return format(date, 'dd/MM/yyyy');
-}
-
 function DonationsComponent({ displayAll }) {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const [donations, setDonations] = useState([]);
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
