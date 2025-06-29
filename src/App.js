@@ -10,6 +10,11 @@ import { createLogger } from './utils/logger';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import WelcomePage from './components/WelcomePage';
+import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import styles from './components/SharedStyles.css';
 
 // Lazy loaded components for code splitting
 const Profile = lazy(() => import('./components/Profile'));
@@ -33,14 +38,6 @@ const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsComponent'));
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
 const YourImpact = lazy(() => import('./components/YourImpact'));
-
-// Loading and Error components
-import LoadingSpinner from './components/LoadingSpinner';
-import ErrorBoundary from './components/ErrorBoundary';
-
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import styles from './components/SharedStyles.css';
 
 const logger = createLogger('App');
 
