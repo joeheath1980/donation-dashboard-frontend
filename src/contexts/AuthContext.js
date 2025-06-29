@@ -1,7 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
+import { createLogger } from '../utils/logger';
 
 const AuthContext = createContext();
+const logger = createLogger('AuthContext');
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -20,26 +23,29 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      const userType = localStorage.getItem('userType');
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
       if (token && userType) {
         setupAxiosDefaults(token);
         try {
           let response;
-          if (userType === 'business') {
-            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
+          if (userType === USER_TYPES.BUSINESS) {
+            response = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
             setUser({ ...response.data, isBusiness: true, isCharity: false });
-          } else if (userType === 'charity') {
-            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
+          } else if (userType === USER_TYPES.CHARITY) {
+            response = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
             setUser({ ...response.data, isBusiness: false, isCharity: true });
           } else {
-            response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
+            response = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
             setUser({ ...response.data, isBusiness: false, isCharity: false });
           }
         } catch (error) {
-          console.error('Authentication error:', error);
+          logger.error('Authentication error', { 
+            status: error.response?.status,
+            message: error.message 
+          });
           if (error.response && error.response.status === 401) {
-            console.log('Token expired or invalid. Clearing local storage.');
+            logger.info('Token expired or invalid. Clearing local storage.');
             clearUserData();
           }
           setUser(null);
@@ -56,16 +62,16 @@ export const AuthProvider = ({ children }) => {
   // Regular user login
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/login`, { email, password });
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_LOGIN), { email, password });
       const { token } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('userType', 'user');
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
       setupAxiosDefaults(token);
-      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
+      const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
       return userResponse.data;
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error', { message: error.message });
       throw error;
     }
   };
@@ -73,37 +79,36 @@ export const AuthProvider = ({ children }) => {
   // User signup
   const userSignup = async (name, email, password) => {
     try {
-      console.log('Attempting to register user:', { name, email });
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/register`, { name, email, password });
-      console.log('Registration response:', response.data);
+      logger.debug('Attempting to register user', { name, email });
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_REGISTER), { name, email, password });
+      logger.debug('Registration successful');
 
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userType', 'user');
-        console.log('Token stored in localStorage');
+        localStorage.setItem(STORAGE_KEYS.TOKEN, response.data.token);
+        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
+        logger.debug('Token stored in localStorage');
         setupAxiosDefaults(response.data.token);
 
-        const validatedUser = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
+        const validatedUser = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
       } else {
         throw new Error('Registration successful, but no token received.');
       }
     } catch (error) {
-      console.error('User signup error:', error);
+      logger.error('User signup error', { 
+        status: error.response?.status,
+        message: error.message 
+      });
       if (error.response) {
-        console.error('Error response:', error.response.data);
-        console.error('Error status:', error.response.status);
         if (error.response.status === 400 && error.response.data.error === 'User already exists') {
           throw new Error('A user with this email already exists. Please try logging in or use a different email.');
         } else {
           throw new Error(error.response.data.message || 'An error occurred during registration.');
         }
       } else if (error.request) {
-        console.error('Error request:', error.request);
         throw new Error('No response received from the server. Please try again later.');
       } else {
-        console.error('Error message:', error.message);
         throw new Error('An unexpected error occurred. Please try again.');
       }
     }
@@ -112,20 +117,20 @@ export const AuthProvider = ({ children }) => {
   // Business user login
   const businessLogin = async (contactEmail, password) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/auth/login`, {
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_LOGIN), {
         contactEmail,
         password,
       });
       const { token, businessId } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('userType', 'business');
-      localStorage.setItem('businessId', businessId);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.BUSINESS);
+      localStorage.setItem(STORAGE_KEYS.BUSINESS_ID, businessId);
       setupAxiosDefaults(token);
-      const businessResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
+      const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
       setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
       return businessResponse.data;
     } catch (error) {
-      console.error('Business login error:', error);
+      logger.error('Business login error', { message: error.message });
       throw error;
     }
   };
@@ -133,19 +138,19 @@ export const AuthProvider = ({ children }) => {
   // Business user signup
   const businessSignup = async (signupData) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/auth/signup`, signupData);
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_SIGNUP), signupData);
       if (response.status === 201 || response.status === 200) {
         const { token, businessId } = response.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('userType', 'business');
-        localStorage.setItem('businessId', businessId);
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.BUSINESS);
+        localStorage.setItem(STORAGE_KEYS.BUSINESS_ID, businessId);
         setupAxiosDefaults(token);
-        const businessResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`);
+        const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
         setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
         return businessResponse.data;
       }
     } catch (error) {
-      console.error('Business signup error:', error);
+      logger.error('Business signup error', { message: error.message });
       throw error;
     }
   };
@@ -153,20 +158,20 @@ export const AuthProvider = ({ children }) => {
   // Charity user login
   const charityLogin = async (contactEmail, password) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/login`, {
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_LOGIN), {
         contactEmail,
         password,
       });
       const { token, charity } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('userType', 'charity');
-      localStorage.setItem('charityId', charity.id);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.CHARITY);
+      localStorage.setItem(STORAGE_KEYS.CHARITY_ID, charity.id);
       setupAxiosDefaults(token);
-      const charityResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
+      const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
       return charityResponse.data;
     } catch (error) {
-      console.error('Charity login error:', error);
+      logger.error('Charity login error', { message: error.message });
       throw error;
     }
   };
@@ -174,18 +179,18 @@ export const AuthProvider = ({ children }) => {
   // Charity user signup
   const charitySignup = async (signupData) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/signup`, signupData);
+      const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_SIGNUP), signupData);
       if (response.status === 201 || response.status === 200) {
         const { token } = response.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('userType', 'charity');
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.CHARITY);
         setupAxiosDefaults(token);
-        const charityResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`);
+        const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
         return charityResponse.data;
       }
     } catch (error) {
-      console.error('Charity signup error:', error);
+      logger.error('Charity signup error', { message: error.message });
       throw error;
     }
   };
@@ -193,25 +198,24 @@ export const AuthProvider = ({ children }) => {
   // Social login
   const socialLogin = async (token) => {
     try {
-      console.log('Social login: Starting with token', token);
-      localStorage.setItem('token', token);
-      localStorage.setItem('userType', 'user');
-      console.log('Social login: Token and userType set in localStorage');
+      logger.debug('Social login: Starting');
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
+      logger.debug('Social login: Token and userType set in localStorage');
       setupAxiosDefaults(token);
 
-      console.log('Social login: Fetching user data from API');
-      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/me`);
-      console.log('Social login: User data received', userResponse.data);
+      logger.debug('Social login: Fetching user data from API');
+      const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+      logger.debug('Social login: User data received');
 
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
-      console.log('Social login: User state updated');
+      logger.debug('Social login: User state updated');
       return userResponse.data;
     } catch (error) {
-      console.error('Social login error:', error);
-      if (error.response) {
-        console.error('Error response:', error.response.data);
-        console.error('Error status:', error.response.status);
-      }
+      logger.error('Social login error', {
+        status: error.response?.status,
+        message: error.message
+      });
       clearUserData();
       throw error;
     }
@@ -219,10 +223,10 @@ export const AuthProvider = ({ children }) => {
 
   // Enhanced clearUserData function
   const clearUserData = () => {
-    console.log('Clearing all user data from localStorage');
+    logger.debug('Clearing all user data from localStorage');
     
     // Get current user ID for targeted cleaning
-    const currentUserId = localStorage.getItem('currentUserId');
+    const currentUserId = localStorage.getItem(STORAGE_KEYS.USER_ID);
     
     // Activity-specific data for the current user
     if (currentUserId) {
@@ -238,11 +242,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('selectedCharityTypes');
     
     // Clear auth-related data
-    localStorage.removeItem('token');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('businessId');
-    localStorage.removeItem('charityId');
-    localStorage.removeItem('currentUserId');
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
     
     // Comprehensive cleanup of any other Activity-specific or user data
     Object.keys(localStorage).forEach(key => {
@@ -254,7 +256,7 @@ export const AuthProvider = ({ children }) => {
         key.includes('charity') ||
         key.includes('activity')
       ) {
-        console.log(`Removing localStorage item: ${key}`);
+        logger.debug(`Removing localStorage item: ${key}`);
         localStorage.removeItem(key);
       }
     });
@@ -262,7 +264,7 @@ export const AuthProvider = ({ children }) => {
     // Reset axios headers
     setupAxiosDefaults(null);
     
-    console.log('All user data cleared from localStorage');
+    logger.debug('All user data cleared from localStorage');
   };
 
   // Enhanced logout function
@@ -273,13 +275,13 @@ export const AuthProvider = ({ children }) => {
     // Reset user state
     setUser(null);
     
-    console.log('User logged out successfully');
+    logger.info('User logged out successfully');
   };
 
   // Function to get auth headers
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    console.log('Retrieved token from localStorage:', token);
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    logger.debug('Retrieved auth headers');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 

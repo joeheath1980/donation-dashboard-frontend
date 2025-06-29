@@ -6,6 +6,10 @@ import styles from './Activity.module.css';
 import sharedStyles from './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
+import { createLogger } from '../utils/logger';
+
+// Create a logger instance for this component
+const logger = createLogger('Activity');
 
 // Helper function for safe date formatting
 function safeFormatDate(dateValue, dateFormat) {
@@ -281,7 +285,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      console.log('Token in handleSearchEmails:', token);
+      logger.debug('Token retrieved for handleSearchEmails', { hasToken: !!token });
       
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
@@ -404,7 +408,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      console.log('Token in handleSearchOutlookEmails:', token);
+      logger.debug('Token retrieved for handleSearchOutlookEmails', { hasToken: !!token });
       
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
@@ -563,7 +567,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
     try {
       const token = localStorage.getItem('token');
-      console.log('Token in handleCommit:', token);
+      logger.debug('Token retrieved for handleCommit', { hasToken: !!token });
       if (!token) {
         throw new Error('No authentication token found');
       }
