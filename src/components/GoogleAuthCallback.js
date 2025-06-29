@@ -15,24 +15,36 @@ const GoogleAuthCallback = () => {
     const handleCallback = async () => {
       logger.debug('Handling Google auth callback');
       try {
-        // Extract the token from the URL
+        // Extract parameters from the URL
         const params = new URLSearchParams(location.search);
+        const status = params.get('status');
         const token = params.get('token');
+        const message = params.get('message');
 
-        logger.debug('Token extracted from URL');
+        logger.debug('Parameters extracted from URL', { status, hasToken: !!token });
 
-        if (token) {
-          // Decode the token to get isNewUser flag
+        if (status === 'error') {
+          logger.error('OAuth error from backend', { message });
+          navigate(`/login?error=${encodeURIComponent(message || 'Authentication failed')}`);
+          return;
+        }
+
+        if (status === 'success' && token) {
+          // Decode the token to get user info
           const decodedToken = jwtDecode(token);
-          const isNewUser = decodedToken.isNewUser;
-          logger.debug('Token decoded', { isNewUser: decodedToken.isNewUser });
+          logger.debug('Token decoded', { 
+            userId: decodedToken.userId,
+            email: decodedToken.email,
+            isNewUser: decodedToken.isNewUser 
+          });
 
           logger.debug('Calling socialLogin');
           // Call the socialLogin function with the token
           await socialLogin(token);
           logger.debug('socialLogin successful');
 
-          // Redirect based on isNewUser flag
+          // Redirect based on isNewUser flag (default to dashboard if not present)
+          const isNewUser = decodedToken.isNewUser || false;
           if (isNewUser) {
             logger.debug('Navigating to Activity page for new user');
             navigate('/activity');
@@ -42,11 +54,11 @@ const GoogleAuthCallback = () => {
           }
         } else {
           logger.error('No token found in the URL');
-          navigate('/login');
+          navigate('/login?error=No%20authentication%20token%20received');
         }
       } catch (error) {
         logger.error('Error handling Google authentication callback', { message: error.message });
-        navigate('/login');
+        navigate(`/login?error=${encodeURIComponent(error.message || 'Authentication failed')}`);
       }
     };
 
