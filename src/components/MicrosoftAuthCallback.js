@@ -3,6 +3,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('MicrosoftAuthCallback');
 
 function MicrosoftAuthCallback() {
   const navigate = useNavigate();
@@ -11,24 +14,24 @@ function MicrosoftAuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      console.log('MicrosoftAuthCallback: Handling callback');
+      logger.debug('Handling Microsoft auth callback');
       const params = new URLSearchParams(location.search);
       const token = params.get('token');
 
-      console.log('MicrosoftAuthCallback: Received token:', token);
+      logger.debug('Token extracted from URL');
 
       if (token) {
         try {
-          console.log('MicrosoftAuthCallback: Attempting social login');
+          logger.debug('Attempting social login');
           await socialLogin(token);
-          console.log('MicrosoftAuthCallback: Social login successful');
+          logger.debug('Social login successful');
           navigate('/profile');
         } catch (error) {
-          console.error('MicrosoftAuthCallback: Error during Microsoft authentication:', error);
+          logger.error('Error during Microsoft authentication', { message: error.message });
           navigate('/login', { state: { error: 'Failed to authenticate with Microsoft. Please try again.' } });
         }
       } else {
-        console.error('MicrosoftAuthCallback: No authentication token received from Microsoft');
+        logger.error('No authentication token received from Microsoft');
         navigate('/login', { state: { error: 'No authentication token received from Microsoft.' } });
       }
     };

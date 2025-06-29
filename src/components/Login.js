@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_CONFIG, STORAGE_KEYS } from '../config/api.config';
+import { createLogger } from '../utils/logger';
 import styles from './Login.module.css';
 import logo from '../assets/logo.png';
+
+const logger = createLogger('Login');
 
 function Login() {
   const navigate = useNavigate();
@@ -71,26 +75,26 @@ function Login() {
         case 'business':
           loginResult = await businessLogin(formData.email, formData.password);
           // For business logins, set the currentUserId using either _id or businessId
-          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
-          localStorage.setItem('currentUserId', loginResult._id || loginResult.businessId);
+          logger.debug('Business login successful');
+          localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.businessId);
           navigate('/business-dashboard');
           break;
         case 'charity':
           loginResult = await charityLogin(formData.email, formData.password);
           // For charity logins, set the currentUserId using either _id or id
-          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
-          localStorage.setItem('currentUserId', loginResult._id || loginResult.id);
+          logger.debug('Charity login successful');
+          localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.id);
           navigate('/charity-dashboard');
           break;
         default:
           loginResult = await login(formData.email, formData.password);
           // For regular user logins, set the currentUserId using either _id or id
-          console.log('DEBUG: loginResult for', formData.accountType, loginResult);
-          localStorage.setItem('currentUserId', loginResult._id || loginResult.id);
+          logger.debug('User login successful');
+          localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.id);
           navigate(loginResult?.isAdmin ? '/admin' : '/profile');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      logger.error('Login error', { message: err.message });
       setError(err.response?.data?.message || 'Failed to log in. Please try again.');
     } finally {
       setLoading(false);
@@ -107,7 +111,7 @@ function Login() {
     sessionStorage.setItem('loginRedirectUrl', window.location.href);
 
     // Redirect to the auth endpoint
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/${provider}`;
+    window.location.href = `${API_CONFIG.BASE_URL}/api/auth/${provider}`;
   };
 
   return (

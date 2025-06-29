@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('GoogleAuthCallback');
 
 const GoogleAuthCallback = () => {
   const navigate = useNavigate();
@@ -10,39 +13,39 @@ const GoogleAuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      console.log('GoogleAuthCallback: Handling callback');
+      logger.debug('Handling Google auth callback');
       try {
         // Extract the token from the URL
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
 
-        console.log('GoogleAuthCallback: Extracted token:', token);
+        logger.debug('Token extracted from URL');
 
         if (token) {
           // Decode the token to get isNewUser flag
           const decodedToken = jwtDecode(token);
           const isNewUser = decodedToken.isNewUser;
-          console.log('Decoded token:', decodedToken);
+          logger.debug('Token decoded', { isNewUser: decodedToken.isNewUser });
 
-          console.log('GoogleAuthCallback: Calling socialLogin');
+          logger.debug('Calling socialLogin');
           // Call the socialLogin function with the token
           await socialLogin(token);
-          console.log('GoogleAuthCallback: socialLogin successful');
+          logger.debug('socialLogin successful');
 
           // Redirect based on isNewUser flag
           if (isNewUser) {
-            console.log('Navigating to Activity');
+            logger.debug('Navigating to Activity page for new user');
             navigate('/activity');
           } else {
-            console.log('Navigating to dashboard');
+            logger.debug('Navigating to dashboard for existing user');
             navigate('/dashboard');
           }
         } else {
-          console.error('GoogleAuthCallback: No token found in the URL');
+          logger.error('No token found in the URL');
           navigate('/login');
         }
       } catch (error) {
-        console.error('GoogleAuthCallback: Error handling Google authentication callback:', error);
+        logger.error('Error handling Google authentication callback', { message: error.message });
         navigate('/login');
       }
     };

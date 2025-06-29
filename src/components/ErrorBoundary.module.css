@@ -1,0 +1,125 @@
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.errorContent {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.errorTitle {
+  color: #dc3545;
+  font-size: 2rem;
+  margin: 0 0 1rem;
+}
+
+.errorMessage {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 0 0 2rem;
+  line-height: 1.5;
+}
+
+.errorDetails {
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.errorDetails summary {
+  cursor: pointer;
+  color: #007bff;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.errorStack {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.errorActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.errorButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.errorButton:hover {
+  background-color: #0056b3;
+}
+
+.errorButton:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.errorButtonSecondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.errorButtonSecondary:hover {
+  background-color: #545b62;
+}
+
+.errorButtonSecondary:focus {
+  outline: 2px solid #6c757d;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .errorContent {
+    padding: 2rem;
+  }
+  
+  .errorTitle {
+    font-size: 1.5rem;
+  }
+  
+  .errorMessage {
+    font-size: 1rem;
+  }
+  
+  .errorActions {
+    flex-direction: column;
+  }
+  
+  .errorButton,
+  .errorButtonSecondary {
+    width: 100%;
+  }
+}

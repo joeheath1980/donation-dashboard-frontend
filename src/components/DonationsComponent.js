@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { FaCheckCircle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from './DonationsComponent.module.css';
 import sharedStyles from './SharedStyles.css';
 import DonationModal from './DonationModal';
+import DonationItem from './DonationItem';
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
 import { format, parseISO, parse } from 'date-fns';
+import { donationService } from '../services/api.service';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('DonationsComponent');
 
 function formatDate(dateString) {
   let date;
@@ -18,7 +23,7 @@ function formatDate(dateString) {
     try {
       date = parse(dateString, "EEE, dd MMM solubilities HH:mm:ss xx", new Date());
     } catch (error) {
-      console.error("Failed to parse date:", dateString);
+      logger.error("Failed to parse date", { dateString });
       return dateString;
     }
   }
@@ -38,15 +43,13 @@ function DonationsComponent({ displayAll }) {
 
   const fetchDonations = useCallback(async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`, {
-        headers: getAuthHeaders()
-      });
-      setDonations(response.data);
+      const data = await donationService.getDonations();
+      setDonations(data);
     } catch (err) {
-      console.error('Error fetching donations:', err);
+      logger.error('Error fetching donations', { error: err.message });
       setError('Failed to load donations. Please try again later.');
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -79,42 +82,31 @@ function DonationsComponent({ displayAll }) {
     };
   }, []);
 
-  const handleDelete = async (donationId) => {
+  const handleDelete = useCallback(async (donationId) => {
     if (!window.confirm('Are you sure you want to delete this donation?')) {
       return;
     }
 
     setError('');
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations/${donationId}`, {
-        headers: getAuthHeaders()
-      });
-
+      await donationService.deleteDonation(donationId);
       setLocalDonations(prevDonations => prevDonations.filter(donation => donation._id !== donationId));
       await fetchDonations();
     } catch (error) {
-      console.error('Error deleting donation:', error);
+      logger.error('Error deleting donation', { error: error.message });
       setError(`Unable to delete the donation: ${error.message}. Please try again later.`);
     }
-  };
+  }, [fetchDonations]);
 
-  const handleEditOrValidate = (donation) => {
+  const handleEditOrValidate = useCallback((donation) => {
     setError('');
     setCurrentDonation(donation);
     setShowModal(true);
-  };
+  }, []);
 
-  const handleConfirm = async (editedDonation) => {
+  const handleConfirm = useCallback(async (editedDonation) => {
     setError('');
     try {
-      let url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`;
-      let method = 'POST';
-
-      if (currentDonation && currentDonation._id) {
-        url += `/${currentDonation._id}`;
-        method = 'PUT';
-      }
-
       const formData = new FormData();
       for (const key in editedDonation) {
         if (key === 'receipt' && editedDonation.receipt instanceof File) {
@@ -126,43 +118,44 @@ function DonationsComponent({ displayAll }) {
         }
       }
 
-      const response = await axios({
-        method: method,
-        url: url,
-        data: formData,
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      const updatedDonation = response.data;
-
+      let updatedDonation;
       if (currentDonation && currentDonation._id) {
+        updatedDonation = await donationService.updateDonation(currentDonation._id, formData);
         setLocalDonations(prevDonations =>
           prevDonations.map(donation =>
             donation._id === updatedDonation._id ? updatedDonation : donation
           )
         );
       } else {
+        updatedDonation = await donationService.createDonation(formData);
         setLocalDonations(prevDonations => [...prevDonations, updatedDonation]);
       }
 
       setShowModal(false);
       await fetchDonations();
     } catch (error) {
-      console.error('Error updating donation:', error);
+      logger.error('Error updating donation', { error: error.message });
       setError(`Unable to update the donation: ${error.message}. Please try again later.`);
     }
-  };
+  }, [currentDonation, fetchDonations]);
 
-  const handleAddNew = () => {
+  const handleAddNew = useCallback(() => {
     setError('');
     setCurrentDonation(null);
     setShowModal(true);
-  };
+  }, []);
 
-  const displayedDonations = displayAll ? localDonations : localDonations.slice(0, 5);
+  // Memoize displayed donations to prevent unnecessary recalculations
+  const displayedDonations = useMemo(
+    () => displayAll ? localDonations : localDonations.slice(0, 5),
+    [displayAll, localDonations]
+  );
+
+  // Memoize receipt click handler
+  const handleReceiptClick = useCallback((receiptUrl) => {
+    const fullUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${receiptUrl}`;
+    window.open(fullUrl, '_blank');
+  }, []);
 
   if (!user) {
     return <div className={sharedStyles.card}>Please log in to view your donations.</div>;
@@ -194,53 +187,13 @@ function DonationsComponent({ displayAll }) {
           {displayedDonations.length > 0 ? (
             <>
               {displayedDonations.map((donation) => (
-                <div key={donation._id} className={styles.donationCard}>
-                  <div className={sharedStyles.cardHeader}>
-                    <h3 className={sharedStyles.cardTitle}>{donation.charity}</h3>
-                    <div className={sharedStyles.validationButton}>
-                      <InstantTooltip text={donation.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
-                        <FaCheckCircle className={donation.receiptUrl ? styles.validationIcon : styles.validationIconPending} />
-                      </InstantTooltip>
-                    </div>
-                  </div>
-                  <div className={styles.donationContent}>
-                    <p><strong>Date:</strong> {formatDate(donation.date)}</p>
-                    <p>
-                      <strong>Amount:</strong> ${donation.amount.toFixed(2)}
-                      {donation.isMonthly && <span className={sharedStyles.highlight}> (Monthly)</span>}
-                    </p>
-                    <p><strong>Charity Type:</strong> {donation.charityType || 'Not specified'}</p>
-                    {donation.receiptUrl && (
-                      <p>
-                        <strong>Receipt:</strong>
-                        <a
-                          href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${donation.receiptUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={sharedStyles.link}
-                        >
-                          View Receipt
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                  <div className={sharedStyles.cardActions}>
-                    <InstantTooltip text="Edit donation">
-                      <button onClick={() => handleEditOrValidate(donation)} className={styles.iconButton} aria-label="Edit Donation">
-                        <FaEdit />
-                      </button>
-                    </InstantTooltip>
-                    <InstantTooltip text="Delete donation">
-                      <button
-                        onClick={() => handleDelete(donation._id)}
-                        className={styles.iconButton}
-                        aria-label="Delete Donation"
-                      >
-                        <FaTrash />
-                      </button>
-                    </InstantTooltip>
-                  </div>
-                </div>
+                <DonationItem
+                  key={donation._id}
+                  donation={donation}
+                  onEdit={handleEditOrValidate}
+                  onDelete={handleDelete}
+                  onReceiptClick={handleReceiptClick}
+                />
               ))}
             </>
           ) : (
