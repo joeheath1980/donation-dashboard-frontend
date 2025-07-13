@@ -38,6 +38,7 @@ function Layout({ children }) {
         <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Dashboard</NavLink>
           <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
+          <NavLink to="/email-forwarding" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Email Forwarding</NavLink>
           <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
           <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
           <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>

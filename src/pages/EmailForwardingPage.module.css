@@ -1,0 +1,101 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin: 0;
+  color: #333;
+}
+
+.backButton {
+  padding: 0.5rem 1rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.backButton:hover {
+  background: #e0e0e0;
+}
+
+.introCard {
+  margin-bottom: 2rem;
+}
+
+.alert {
+  padding: 1rem;
+  background: #e3f2fd;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  color: #0d47a1;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.tab:hover {
+  background: #f5f5f5;
+}
+
+.activeTab {
+  border-bottom-color: #1976d2;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.tabContent {
+  min-height: 400px;
+}
+
+.infoCard {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.infoCard h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.infoCard ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.infoCard li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.privacy {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
