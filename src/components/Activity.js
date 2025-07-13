@@ -7,6 +7,7 @@ import sharedStyles from './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
+import { EmailForwardingModal } from './EmailForwarding';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -98,6 +99,7 @@ function Activity() {
   const [donationStatuses, setDonationStatuses] = useState({});
   const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showEmailForwarding, setShowEmailForwarding] = useState(false);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -784,6 +786,12 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           >
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
+          <button
+            onClick={() => setShowEmailForwarding(true)}
+            className={`${styles.scrapeButton} ${sharedStyles.button}`}
+          >
+            📧 Email Forwarding
+          </button>
           <Link to="/profile" className={`${styles.toggleButton} ${sharedStyles.button}`}>
             Check Out Your Impact
           </Link>
@@ -818,6 +826,11 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
         {searchHistory.length > 0 && renderSearchResults()}
       </div>
+      
+      <EmailForwardingModal 
+        isOpen={showEmailForwarding} 
+        onClose={() => setShowEmailForwarding(false)} 
+      />
     </div>
   );
 }

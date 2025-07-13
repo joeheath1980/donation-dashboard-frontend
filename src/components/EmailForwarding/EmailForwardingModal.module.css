@@ -1,0 +1,311 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.emailBox {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.emailBox h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.emailDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.emailIcon {
+  font-size: 20px;
+}
+
+.email {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #2c5aa0;
+  word-break: break-all;
+}
+
+.copyButton {
+  background-color: #2c5aa0;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.copyButton:hover {
+  background-color: #1e3d6f;
+  transform: translateY(-1px);
+}
+
+.emailInfo {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.providerTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.providerTab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.providerTab:hover {
+  color: #333;
+}
+
+.activeProviderTab {
+  color: #2c5aa0;
+  border-bottom-color: #2c5aa0;
+}
+
+.searchCriteria {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.searchCriteria h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.criteriaDescription {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.criteriaList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.criteriaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.criteriaCode {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #333;
+  word-break: break-word;
+}
+
+.instructions {
+  background-color: #e8f4f8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.instructions h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.instructions ol {
+  margin: 0;
+  padding-left: 24px;
+  color: #555;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.instructions strong {
+  color: #2c5aa0;
+}
+
+.providerTip {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fff;
+  border-radius: 4px;
+  border-left: 4px solid #2c5aa0;
+  font-size: 14px;
+  color: #555;
+}
+
+.providerTip strong {
+  color: #333;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #d32f2f;
+  font-size: 16px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.copyNotification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 24px;
+    margin: 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .emailDisplay {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .copyButton {
+    width: 100%;
+  }
+  
+  .providerTabs {
+    justify-content: stretch;
+  }
+  
+  .providerTab {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .criteriaCode {
+    font-size: 12px;
+  }
+}

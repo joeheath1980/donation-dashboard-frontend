@@ -38,7 +38,6 @@ const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsComponent'));
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
 const YourImpact = lazy(() => import('./components/YourImpact'));
-const EmailForwardingPage = lazy(() => import('./pages/EmailForwardingPage'));
 
 const logger = createLogger('App');
 
@@ -108,7 +107,6 @@ function App() {
                 <Route path="/search-charities" element={<ProtectedRoute><Layout><SuspenseWrapper><SearchCharities /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/manage-payments" element={<ProtectedRoute><Layout><SuspenseWrapper><ManagePaymentsComponent /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-impact" element={<ProtectedRoute><Layout><SuspenseWrapper><YourImpact /></SuspenseWrapper></Layout></ProtectedRoute>} />
-                <Route path="/email-forwarding" element={<ProtectedRoute><Layout><SuspenseWrapper><EmailForwardingPage /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 
                 {/* Business routes */}
                 <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessDashboard /></SuspenseWrapper></Layout></ProtectedRoute>} />
