@@ -10,6 +10,7 @@ const EmailForwardingGuide = () => {
   const [error, setError] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [userInstructions, setUserInstructions] = useState(null);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
@@ -25,7 +26,9 @@ const EmailForwardingGuide = () => {
       const emailResponse = await axios.get(`${API_URL}/api/email/forward-address`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setForwardingEmail(emailResponse.data.email);
+      // Use the forwardToEmail instead of the old donor-specific email
+      setForwardingEmail(emailResponse.data.forwardToEmail || emailResponse.data.email);
+      setUserInstructions(emailResponse.data.instructions);
 
       // Get search templates
       const templatesResponse = await axios.get(`${API_URL}/api/email/search-templates`);
@@ -81,8 +84,13 @@ const EmailForwardingGuide = () => {
           </button>
         </div>
         <div className={styles.emailInfo}>
-          ℹ️ Emails processed within 5-10 minutes
+          ℹ️ {userInstructions?.step2 || 'Emails processed within 5-10 minutes'}
         </div>
+        {userInstructions?.example && (
+          <div className={styles.exampleBox}>
+            <strong>Example:</strong> {userInstructions.example}
+          </div>
+        )}
       </div>
 
       {/* Email Provider Tabs */}

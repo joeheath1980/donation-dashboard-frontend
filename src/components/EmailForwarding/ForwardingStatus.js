@@ -11,7 +11,7 @@ const ForwardingStatus = () => {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+  const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {

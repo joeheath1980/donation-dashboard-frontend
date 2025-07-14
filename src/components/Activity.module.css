@@ -6,6 +6,19 @@
   background-color: var(--background-light);
 }
 
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
 .activityHeader {
   font-size: 2rem;
   color: var(--text-primary);
