@@ -13,9 +13,8 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       if (user && user._id) {
-        // Use the shared forwarding email address
-        // Users must include their User ID in the email subject or body
-        const email = 'joeheath@do-nation.space';
+        // Generate unique forwarding email for this user
+        const email = `donor-${user._id}@forward.do-nation.space`;
         setForwardingEmail(email);
         setLoading(false);
         setError('');
@@ -25,7 +24,7 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
         const userId = localStorage.getItem('currentUserId');
         
         if (token && userId) {
-          const email = 'joeheath@do-nation.space';
+          const email = `donor-${userId}@forward.do-nation.space`;
           setForwardingEmail(email);
           setLoading(false);
           setError('');
@@ -108,7 +107,7 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
                 </button>
               </div>
               <p className={styles.emailInfo}>
-                ℹ️ Forward donation receipts to this address. Include "User ID: {user?._id || localStorage.getItem('currentUserId')}" in your email subject or body.
+                ℹ️ Forward donation receipt emails to this address. Your donations will be automatically tracked!
               </p>
             </div>
 
@@ -156,8 +155,7 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
                 <li>Paste it into your {emailProviders[activeTab].label} search bar</li>
                 <li>Select the donation receipt emails you want to track</li>
                 <li>Forward them to: <strong>{forwardingEmail}</strong></li>
-                <li>Important: Include <strong>"User ID: {user?._id || localStorage.getItem('currentUserId')}"</strong> in your email subject or body</li>
-                <li>Our AI will process them and add them to your dashboard</li>
+                <li>Our AI will process them and add them to your dashboard within minutes</li>
               </ol>
               
               {currentProvider === 'gmail' && (
