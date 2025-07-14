@@ -7,7 +7,7 @@ import sharedStyles from './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
-import { EmailForwardingModal } from './EmailForwarding';
+import { EmailForwardingModal, ForwardingStatus } from './EmailForwarding';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -100,6 +100,7 @@ function Activity() {
   const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showEmailForwarding, setShowEmailForwarding] = useState(false);
+  const [showForwardingStatus, setShowForwardingStatus] = useState(false);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -825,6 +826,25 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {authStatus === 'Authenticated' && <p className={styles.authStatus}>{authStatus}</p>}
 
         {searchHistory.length > 0 && renderSearchResults()}
+      </div>
+
+      {/* Email Forwarding Status Section */}
+      <div className={`${styles.emailSection} ${sharedStyles.card}`} style={{ marginTop: '20px' }}>
+        <div className={styles.sectionHeader}>
+          <h2>📧 Forwarded Email Status</h2>
+          <button
+            onClick={() => setShowForwardingStatus(!showForwardingStatus)}
+            className={`${styles.toggleButton} ${sharedStyles.button}`}
+          >
+            {showForwardingStatus ? 'Hide' : 'Show'} Forwarded Emails
+          </button>
+        </div>
+        
+        {showForwardingStatus && (
+          <div style={{ marginTop: '20px' }}>
+            <ForwardingStatus />
+          </div>
+        )}
       </div>
       
       <EmailForwardingModal 

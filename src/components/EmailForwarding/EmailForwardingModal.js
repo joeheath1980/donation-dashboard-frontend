@@ -1,46 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './EmailForwardingModal.module.css';
 
 const EmailForwardingModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [forwardingEmail, setForwardingEmail] = useState('');
-  const [searchTemplates, setSearchTemplates] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-
-  const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+  const { user } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
-      fetchData();
+      if (user && user._id) {
+        // Use the shared forwarding email address
+        // Users must include their User ID in the email subject or body
+        const email = 'joeheath@do-nation.space';
+        setForwardingEmail(email);
+        setLoading(false);
+        setError('');
+      } else {
+        // Try to get from localStorage as fallback
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('currentUserId');
+        
+        if (token && userId) {
+          const email = 'joeheath@do-nation.space';
+          setForwardingEmail(email);
+          setLoading(false);
+          setError('');
+        } else {
+          setError('Please log in to view your forwarding email');
+          setLoading(false);
+        }
+      }
     }
-  }, [isOpen]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Get forwarding email address
-      const token = localStorage.getItem('token');
-      const emailResponse = await axios.get(`${API_URL}/api/email/forward-address`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setForwardingEmail(emailResponse.data.email);
-
-      // Get search templates
-      const templatesResponse = await axios.get(`${API_URL}/api/email/search-templates`);
-      setSearchTemplates(templatesResponse.data);
-      
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching forwarding data:', err);
-      setError('Failed to load email forwarding information');
-      setLoading(false);
-    }
-  };
+  }, [isOpen, user]);
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -57,7 +52,6 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const currentProvider = emailProviders[activeTab].value;
-  const templates = searchTemplates?.[currentProvider] || [];
 
   // Gmail search criteria
   const gmailSearchCriteria = [
@@ -114,7 +108,7 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
                 </button>
               </div>
               <p className={styles.emailInfo}>
-                ℹ️ Forward donation receipt emails to this address as attachments
+                ℹ️ Forward donation receipts to this address. Include "User ID: {user?._id || localStorage.getItem('currentUserId')}" in your email subject or body.
               </p>
             </div>
 
@@ -161,7 +155,8 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
                 <li>Copy one of the search queries above</li>
                 <li>Paste it into your {emailProviders[activeTab].label} search bar</li>
                 <li>Select the donation receipt emails you want to track</li>
-                <li>Forward them as attachments to: <strong>{forwardingEmail}</strong></li>
+                <li>Forward them to: <strong>{forwardingEmail}</strong></li>
+                <li>Important: Include <strong>"User ID: {user?._id || localStorage.getItem('currentUserId')}"</strong> in your email subject or body</li>
                 <li>Our AI will process them and add them to your dashboard</li>
               </ol>
               
