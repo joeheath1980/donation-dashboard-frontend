@@ -1,80 +1,91 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './OrganizationSignup.module.css';
-import { FaHandHoldingHeart, FaBuilding, FaArrowRight } from 'react-icons/fa';
+import { FaHandHoldingHeart, FaBuilding, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 
 function OrganizationSignup() {
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Choose Your Path</h1>
-        <p className={styles.description}>
-          Select the type of organization you represent and join our community of change-makers
+    <div className={styles.pageContainer}>
+      <div className={styles.container}>
+        <img src={logo} alt="Logo" className={styles.logo} />
+        <h1 className={styles.title}>Join Our Community</h1>
+        <p className={styles.subtitle}>
+          Select your organization type to get started
         </p>
-      </header>
-      
-      <div className={styles.grid}>
-        <Link to="/charity-signup" className={styles.card}>
-          <div className={styles.cardHeader}>
-            <FaHandHoldingHeart size={40} className={styles.cardIcon} />
-          </div>
-          <h2 className={styles.cardTitle}>Charitable Organization</h2>
-          <div className={styles.cardContent}>
-            <p>Join as a charitable organization to:</p>
-            <ul className={styles.cardList}>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Create impactful fundraising campaigns</span>
+        
+        <div className={styles.cardsGrid}>
+          <Link to="/charity-signup" className={styles.card}>
+            <div className={styles.cardIcon}>
+              <FaHandHoldingHeart />
+            </div>
+            <h2 className={styles.cardTitle}>Charitable Organization</h2>
+            <p className={styles.cardDescription}>
+              Perfect for non-profits and charitable organizations
+            </p>
+            <ul className={styles.cardFeatures}>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Create fundraising campaigns</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Connect with passionate donors</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Connect with donors</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Track donations and measure impact</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Track donations & impact</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Access detailed analytics dashboard</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Access analytics dashboard</span>
               </li>
             </ul>
-          </div>
-          <div className={styles.cardActions}>
-            <span className={styles.button}>Get Started →</span>
-          </div>
-        </Link>
+            <div className={styles.cardButton}>
+              <span>Sign Up as Charity</span>
+              <FaArrowRight />
+            </div>
+          </Link>
 
-        <Link to="/business-signup" className={styles.card}>
-          <div className={styles.cardHeader}>
-            <FaBuilding size={40} className={styles.cardIcon} />
-          </div>
-          <h2 className={styles.cardTitle}>Business Partner</h2>
-          <div className={styles.cardContent}>
-            <p>Join as a business partner to:</p>
-            <ul className={styles.cardList}>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Create matching opportunities</span>
+          <Link to="/business-signup" className={styles.card}>
+            <div className={styles.cardIcon}>
+              <FaBuilding />
+            </div>
+            <h2 className={styles.cardTitle}>Business Partner</h2>
+            <p className={styles.cardDescription}>
+              For businesses looking to make a difference
+            </p>
+            <ul className={styles.cardFeatures}>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Create matching programs</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Partner with impactful charities</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Partner with charities</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Monitor corporate giving initiatives</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Monitor giving initiatives</span>
               </li>
-              <li className={styles.cardListItem}>
-                <FaArrowRight size={14} className={styles.cardListItemIcon} />
-                <span>Generate comprehensive impact reports</span>
+              <li>
+                <FaArrowRight className={styles.featureIcon} />
+                <span>Generate impact reports</span>
               </li>
             </ul>
-          </div>
-          <div className={styles.cardActions}>
-            <span className={styles.button}>Get Started →</span>
-          </div>
-        </Link>
+            <div className={styles.cardButton}>
+              <span>Sign Up as Business</span>
+              <FaArrowRight />
+            </div>
+          </Link>
+        </div>
+
+        <div className={styles.footer}>
+          <Link to="/login" className={styles.backLink}>
+            <FaArrowLeft />
+            <span>Back to Login</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
