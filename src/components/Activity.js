@@ -327,16 +327,24 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           setSearchHistory(prev => [{ timestamp, source: 'gmail', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
           
-          // Set up SSE connection to get real-time updates
-          const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
-          console.log('[Activity] Connecting to SSE at:', sseUrl);
-          
-          const eventSource = new EventSource(sseUrl);
-          
-          eventSource.onmessage = (event) => {
+          // Poll for status updates instead of using SSE (temporary fix for 401 error)
+          const pollInterval = setInterval(async () => {
             try {
-              const statusData = JSON.parse(event.data);
-              console.log('[Gmail SSE] Event received:', statusData);
+              const statusResponse = await fetch(
+                `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email-search-status/${data.jobId}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                }
+              );
+              
+              if (!statusResponse.ok) {
+                throw new Error('Failed to get job status');
+              }
+              
+              const statusData = await statusResponse.json();
+              console.log('[Gmail Polling] Status update:', statusData);
               
               // Update progress if available
               if (statusData.progress !== undefined) {
@@ -345,7 +353,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               
               // Handle completed job
               if (statusData.state === 'completed' && statusData.result) {
-                console.log('[Gmail SSE] Job completed with results:', statusData.result);
+                console.log('[Gmail Polling] Job completed with results:', statusData.result);
                 
                 // Add IDs and timestamp to each result
                 const resultsWithIds = Array.isArray(statusData.result)
@@ -371,29 +379,22 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   return updatedHistory;
                 });
                 
-                eventSource.close();
+                clearInterval(pollInterval);
                 setLoading(false);
                 
-              } else if (statusData.state === 'failed' || statusData.error) {
-                console.error('[Gmail SSE] Job failed:', statusData.error);
+              } else if (statusData.state === 'failed') {
+                console.error('[Gmail Polling] Job failed');
                 setError(`Gmail search failed: ${statusData.error || 'Unknown error'}`);
-                eventSource.close();
+                clearInterval(pollInterval);
                 setLoading(false);
               }
-            } catch (parseError) {
-              console.error('[Gmail SSE] Error parsing event data:', parseError, event.data);
-              setError('Error processing server response');
-              eventSource.close();
+            } catch (error) {
+              console.error('[Gmail Polling] Error checking status:', error);
+              setError('Error checking job status');
+              clearInterval(pollInterval);
               setLoading(false);
             }
-          };
-          
-          eventSource.onerror = (err) => {
-            console.error('[Gmail SSE] Error:', err);
-            setError('Error in real-time connection. Please try again.');
-            eventSource.close();
-            setLoading(false);
-          };
+          }, 2000); // Poll every 2 seconds
           
         } else {
           console.log('[Activity] No jobId found in response');
