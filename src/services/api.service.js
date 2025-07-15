@@ -263,6 +263,28 @@ export const globalGivingService = {
   }
 };
 
+/**
+ * Email Forwarding API Service
+ */
+export const emailForwardingService = {
+  async getForwardStatus(limit = 10, skip = 0) {
+    const response = await apiClient.get(API_ENDPOINTS.EMAIL_FORWARD_STATUS, {
+      params: { limit, skip }
+    });
+    return response.data;
+  },
+  
+  async setupForwarding() {
+    const response = await apiClient.post(API_ENDPOINTS.EMAIL_FORWARD_SETUP);
+    return response.data;
+  },
+  
+  async verifyForwarding() {
+    const response = await apiClient.get(API_ENDPOINTS.EMAIL_FORWARD_VERIFY);
+    return response.data;
+  }
+};
+
 // Export the axios instance for custom requests
 export { apiClient };
 
@@ -276,6 +298,7 @@ const apiServices = {
   admin: adminService,
   matching: matchingService,
   globalGiving: globalGivingService,
+  emailForwarding: emailForwardingService,
   client: apiClient
 };
 
