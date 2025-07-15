@@ -1,132 +1,271 @@
 /* OrganizationSignup.module.css */
+.pageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: var(--background-light);
+}
 
 .container {
-  padding: 60px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header {
-  max-width: 600px;
-  margin: 0 auto 40px;
-  text-align: center;
-}
-
-.title {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-}
-
-.description {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.card {
+  width: 100%;
+  max-width: 900px;
+  padding: 48px 40px;
   background-color: white;
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
-  padding: 30px;
-  transition: var(--transition-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+}
+
+.logo {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 40px;
+  object-fit: contain;
+}
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  line-height: 1.5;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background-color: var(--background-light);
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 32px;
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
+  transition: var(--transition-standard);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: var(--primary-gradient);
+  transition: height 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-md);
+  border-color: var(--primary-color);
 }
 
-.cardHeader {
-  margin-bottom: 20px;
+.card:hover::before {
+  height: 4px;
+}
+
+.card:hover .cardIcon {
+  background: var(--primary-gradient);
+  color: white;
+  transform: scale(1.1);
+}
+
+.card:hover .cardButton {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardIcon {
-  color: var(--primary-color);
-}
-
-.cardTitle {
-  font-size: 1.75rem;
-  margin-bottom: 15px;
-  color: var(--primary-color);
-}
-
-.cardContent {
-  font-size: 1rem;
-  color: var(--text-secondary);
-}
-
-.cardList {
-  list-style: none;
-  padding: 0;
-  margin: 15px 0 0;
-}
-
-.cardListItem {
-  margin: 12px 0;
+  width: 64px;
+  height: 64px;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: var(--text-primary);
-}
-
-.cardListItemIcon {
+  justify-content: center;
+  font-size: 28px;
   color: var(--primary-color);
-  flex-shrink: 0;
-}
-
-.cardActions {
-  margin-top: 25px;
-}
-
-.button {
-  display: inline-block;
-  padding: 10px 20px;
-  background: var(--primary-gradient);
-  color: white;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 600;
+  margin-bottom: 24px;
   transition: var(--transition-standard);
 }
 
-.button:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
+.cardTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.cardDescription {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.cardFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+  flex-grow: 1;
+}
+
+.cardFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.featureIcon {
+  color: var(--primary-color);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cardButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 50px;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 16px;
+  transition: var(--transition-standard);
+  cursor: pointer;
+}
+
+.cardButton svg {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .cardButton svg {
+  transform: translateX(4px);
+}
+
+.footer {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: var(--transition-standard);
+}
+
+.backLink:hover {
+  color: var(--primary-dark);
+}
+
+.backLink svg {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.backLink:hover svg {
+  transform: translateX(-4px);
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 40px 20px;
+    padding: 32px 24px;
   }
 
   .title {
-    font-size: 2rem;
+    font-size: 28px;
   }
 
-  .description {
-    font-size: 1rem;
+  .subtitle {
+    font-size: 16px;
+    margin-bottom: 32px;
   }
 
-  .grid {
+  .cardsGrid {
+    grid-template-columns: 1fr;
     gap: 20px;
   }
 
+  .card {
+    padding: 24px;
+  }
+
+  .cardIcon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
   .cardTitle {
-    font-size: 1.5rem;
+    font-size: 20px;
+  }
+
+  .cardDescription {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .cardFeatures li {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .cardButton {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 32px;
   }
 }

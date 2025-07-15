@@ -38,6 +38,9 @@ const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsComponent'));
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
 const YourImpact = lazy(() => import('./components/YourImpact'));
+const DonationForm = lazy(() => import('./components/DonationForm'));
+const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
+const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
 
 const logger = createLogger('App');
 
@@ -114,6 +117,11 @@ function App() {
 
                 {/* Charity routes */}
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-onboarding" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityOnboarding /></SuspenseWrapper></ProtectedRoute>} />
+
+                {/* Donation routes */}
+                <Route path="/donate/:charityId" element={<ProtectedRoute><Layout><SuspenseWrapper><DonationForm /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/donation-success" element={<ProtectedRoute><Layout><SuspenseWrapper><DonationSuccess /></SuspenseWrapper></Layout></ProtectedRoute>} />
 
                 {/* Admin routes */}
                 <Route path="/admin/*" element={<AdminRoute><SuspenseWrapper><AdminDashboard /></SuspenseWrapper></AdminRoute>} />
