@@ -295,7 +295,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -842,7 +842,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         
         {showForwardingStatus && (
           <div style={{ marginTop: '20px' }}>
-            <ForwardingStatus />
+            <ForwardingStatus refreshTrigger={showForwardingStatus} />
           </div>
         )}
       </div>
