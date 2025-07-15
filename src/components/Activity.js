@@ -295,7 +295,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-email-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -304,7 +304,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({})
+          body: JSON.stringify({ source: 'gmail' })
         }
       );
       
