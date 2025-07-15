@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/api.config';
+import { createLogger } from '../../utils/logger';
 import styles from './ForwardingStatus.module.css';
 
-const ForwardingStatus = () => {
+const logger = createLogger('ForwardingStatus');
+
+const ForwardingStatus = ({ refreshTrigger }) => {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,29 +15,75 @@ const ForwardingStatus = () => {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchForwardedEmails();
   }, [page]);
 
+  // Refresh when component becomes visible or refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger) {
+      logger.debug('Refresh trigger activated, fetching emails');
+      fetchForwardedEmails();
+    }
+  }, [refreshTrigger]);
+
   const fetchForwardedEmails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/email/forward-status`, {
+      setError('');
+      
+      // Check if token exists before making request
+      const token = localStorage.getItem('token');
+      if (!token) {
+        logger.warn('No authentication token found');
+        setError('Please log in to view forwarded emails');
+        setLoading(false);
+        return;
+      }
+      
+      logger.debug('Fetching forwarded emails', { 
+        page, 
+        limit: ITEMS_PER_PAGE,
+        hasToken: !!token 
+      });
+      
+      const response = await apiClient.get(API_ENDPOINTS.EMAIL_FORWARD_STATUS, {
         params: {
           limit: ITEMS_PER_PAGE,
           skip: (page - 1) * ITEMS_PER_PAGE
-        },
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }
       });
 
-      setEmails(response.data.emails);
-      setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE));
+      logger.debug('Forwarded emails response', { 
+        status: response.status,
+        emails: response.data.emails?.length || 0, 
+        total: response.data.total 
+      });
+      
+      setEmails(response.data.emails || []);
+      setTotalPages(Math.ceil((response.data.total || 0) / ITEMS_PER_PAGE));
       setLoading(false);
     } catch (err) {
-      setError('Failed to load forwarded emails');
+      logger.error('Failed to fetch forwarded emails', { 
+        error: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      });
+      
+      if (err.response?.status === 401) {
+        setError('You need to log in again to view forwarded emails');
+      } else if (err.response?.status === 404) {
+        setError('Email forwarding service not available. Please try again later.');
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err.message.includes('Network Error')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError('Failed to load forwarded emails. Please try again.');
+      }
+      
       setLoading(false);
     }
   };
@@ -68,17 +118,19 @@ const ForwardingStatus = () => {
     try {
       // TODO: Implement approval endpoint
       alert('Donation approval feature coming soon!');
-      // await axios.post(`${API_URL}/api/donations/approve/${emailId}`, {}, {
-      //   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      // });
+      // await apiClient.post(`/api/donations/approve/${emailId}`);
       // fetchForwardedEmails();
     } catch (err) {
-      console.error('Failed to approve donation:', err);
+      logger.error('Failed to approve donation:', err);
     }
   };
 
   if (loading && emails.length === 0) {
-    return <div className={styles.loading}>Loading forwarded emails...</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading forwarded emails...</div>
+      </div>
+    );
   }
 
   return (
@@ -97,6 +149,11 @@ const ForwardingStatus = () => {
       {error && (
         <div className={styles.error}>
           {error}
+          {error.includes('log in') && (
+            <div style={{ marginTop: '10px' }}>
+              <a href="/login" className={styles.loginLink}>Go to Login</a>
+            </div>
+          )}
         </div>
       )}
 
@@ -129,7 +186,7 @@ const ForwardingStatus = () => {
                     <td>
                       {email.status === 'processed' && email.parsed ? (
                         <div className={styles.parsedData}>
-                          <strong>{email.parsed.charityName}</strong>
+                          <strong>{email.parsed.charity}</strong>
                           <br />
                           <small>{email.parsed.amount} {email.parsed.currency}</small>
                         </div>
@@ -223,7 +280,7 @@ const ForwardingStatus = () => {
                   <div className={styles.parsedGrid}>
                     <div>
                       <label>Charity:</label>
-                      <span>{selectedEmail.parsed.charityName}</span>
+                      <span>{selectedEmail.parsed.charity}</span>
                     </div>
                     <div>
                       <label>Amount:</label>

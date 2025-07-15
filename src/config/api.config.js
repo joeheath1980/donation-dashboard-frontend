@@ -66,6 +66,11 @@ export const API_ENDPOINTS = {
   // Other endpoints
   MATCHING_OPPORTUNITIES: '/api/matchingOpportunities',
   GLOBALGIVING_PROJECTS: '/api/globalgiving/projects/recommended',
+  
+  // Email forwarding endpoints
+  EMAIL_FORWARD_STATUS: '/api/email/forward-status',
+  EMAIL_FORWARD_SETUP: '/api/email/forward-setup',
+  EMAIL_FORWARD_VERIFY: '/api/email/forward-verify',
 };
 
 // Logging utility - only logs in development
