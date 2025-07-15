@@ -12,6 +12,7 @@ import Login from './components/Login';
 import WelcomePage from './components/WelcomePage';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
+import ChunkErrorBoundary from './components/ChunkErrorBoundary';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './components/SharedStyles.css';
@@ -108,7 +109,7 @@ function App() {
                 <Route path="/charity/:id" element={<ProtectedRoute><Layout><SuspenseWrapper><CharityPartner /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/activity" element={<ProtectedRoute><Layout><SuspenseWrapper><Activity /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/search-charities" element={<ProtectedRoute><Layout><SuspenseWrapper><SearchCharities /></SuspenseWrapper></Layout></ProtectedRoute>} />
-                <Route path="/manage-payments" element={<ProtectedRoute><Layout><SuspenseWrapper><ManagePaymentsComponent /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/manage-payments" element={<ProtectedRoute><Layout><ChunkErrorBoundary><SuspenseWrapper><ManagePaymentsComponent /></SuspenseWrapper></ChunkErrorBoundary></Layout></ProtectedRoute>} />
                 <Route path="/your-impact" element={<ProtectedRoute><Layout><SuspenseWrapper><YourImpact /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 
                 {/* Business routes */}
