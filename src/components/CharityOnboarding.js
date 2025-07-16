@@ -22,7 +22,9 @@ function CharityOnboarding({ charity, onComplete }) {
       if (response.accountLinkUrl) {
         setAccountLinkUrl(response.accountLinkUrl);
       } else {
-        onComplete(response.accountId);
+        if (onComplete) {
+          onComplete(response.accountId);
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -34,6 +36,14 @@ function CharityOnboarding({ charity, onComplete }) {
   const handleExternalLinkClick = () => {
     // Open in new tab
     window.open(accountLinkUrl, '_blank');
+    // Note: We can't automatically detect when they complete onboarding
+    // They'll need to refresh or click a "I've completed setup" button
+  };
+  
+  const handleCheckStatus = () => {
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   return (
@@ -74,8 +84,15 @@ function CharityOnboarding({ charity, onComplete }) {
               Complete Setup with Stripe
             </button>
             <p className="link-note">
-              This will open in a new tab. Once complete, return here to continue.
+              This will open in a new tab. Once complete, return here and click the button below.
             </p>
+            <button 
+              onClick={handleCheckStatus}
+              className="setup-button"
+              style={{ marginTop: '15px' }}
+            >
+              I've Completed Setup
+            </button>
           </div>
         ) : (
           <div className="action-section">
