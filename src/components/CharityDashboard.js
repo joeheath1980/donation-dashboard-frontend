@@ -3,9 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import styles from './CharityDashboard.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
-import { FaSearch, FaLink, FaTimes, FaClock, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaLink, FaTimes, FaClock, FaCreditCard, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
+import CharityOnboarding from './CharityOnboarding';
 
 function CharityDashboard() {
   const [charityData, setCharityData] = useState(null);
@@ -22,6 +23,11 @@ function CharityDashboard() {
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [linkingStatus, setLinkingStatus] = useState(null);
   const [linkedCharity, setLinkedCharity] = useState(null);
+  
+  // Stripe states
+  const [stripeStatus, setStripeStatus] = useState(null);
+  const [showStripeOnboarding, setShowStripeOnboarding] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   useEffect(() => {
     const fetchCharityData = async () => {
@@ -51,6 +57,11 @@ function CharityDashboard() {
             setLinkedCharity(linkedResponse.data.result.records[0]);
           }
         }
+        
+        // Store charity data first, then fetch Stripe status if approved
+        if (statusResponse.data.status === 'approved' && response.data._id) {
+          fetchStripeStatus(response.data._id);
+        }
       } catch (err) {
         console.error('Error fetching charity data:', err);
         setError('Failed to load charity data. Please try again later.');
@@ -59,6 +70,31 @@ function CharityDashboard() {
 
     fetchCharityData();
   }, [user, getAuthHeaders]);
+  
+  const fetchStripeStatus = async (charityId) => {
+    try {
+      const id = charityId || charityData?._id || user?.charityId;
+      if (!id) {
+        console.error('No charity ID available for Stripe status');
+        return;
+      }
+      
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/stripe/connect/account-status/${id}`,
+        { headers: getAuthHeaders() }
+      );
+      setStripeStatus(response.data);
+    } catch (err) {
+      console.error('Error fetching Stripe status:', err);
+      // If error, assume no Stripe account
+      setStripeStatus({ hasAccount: false });
+    }
+  };
+  
+  const handleStripeOnboardingComplete = () => {
+    setShowStripeOnboarding(false);
+    fetchStripeStatus(); // Refresh status
+  };
 
   const searchCharities = useCallback(async (term) => {
     if (!term || term.length < 2) {
@@ -232,15 +268,97 @@ function CharityDashboard() {
       </div>
 
       {linkingStatus === 'approved' && (
-        <div className={styles.card}>
-          <h3 className={styles.cardTitle}>Public Page Status: Approved</h3>
-          <button
-            onClick={() => navigate(`/charity/${charityData.linkedABN}/edit`)}
-            className={styles.button}
-          >
-            Edit Public Page
-          </button>
-        </div>
+        <>
+          <div className={styles.card}>
+            <h3 className={styles.cardTitle}>Public Page Status: Approved</h3>
+            <button
+              onClick={() => navigate(`/charity/${charityData.linkedABN}/edit`)}
+              className={styles.button}
+            >
+              Edit Public Page
+            </button>
+          </div>
+
+          {/* Stripe Payment Setup Section */}
+          <div className={styles.card}>
+            <h3 className={styles.cardTitle}>
+              <FaCreditCard style={{ marginRight: '8px' }} />
+              Payment Setup
+            </h3>
+            
+            {stripeStatus ? (
+              <>
+                {stripeStatus.hasAccount ? (
+                  <div>
+                    <div className={styles.stripeStatus}>
+                      <div className={styles.statusGrid}>
+                        <div className={styles.statusItem}>
+                          <span className={styles.label}>Account Status</span>
+                          <span className={`${styles.statusBadge} ${stripeStatus.detailsSubmitted ? styles.active : styles.pending}`}>
+                            {stripeStatus.detailsSubmitted ? 'Active' : 'Pending'}
+                          </span>
+                        </div>
+                        <div className={styles.statusItem}>
+                          <span className={styles.label}>Charges Enabled</span>
+                          <span className={stripeStatus.chargesEnabled ? styles.statusYes : styles.statusNo}>
+                            {stripeStatus.chargesEnabled ? 'Yes' : 'No'}
+                          </span>
+                        </div>
+                        <div className={styles.statusItem}>
+                          <span className={styles.label}>Payouts Enabled</span>
+                          <span className={stripeStatus.payoutsEnabled ? styles.statusYes : styles.statusNo}>
+                            {stripeStatus.payoutsEnabled ? 'Yes' : 'No'}
+                          </span>
+                        </div>
+                        <div className={styles.statusItem}>
+                          <span className={styles.label}>Verification</span>
+                          <span className={stripeStatus.detailsSubmitted ? styles.statusYes : styles.statusNo}>
+                            {stripeStatus.detailsSubmitted ? 'Complete' : 'Required'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {stripeStatus.chargesEnabled ? (
+                        <div className={styles.successMessage}>
+                          <FaCheckCircle style={{ marginRight: '8px' }} />
+                          Your organization is ready to receive donations!
+                        </div>
+                      ) : (
+                        <div className={styles.warningMessage}>
+                          <FaExclamationCircle style={{ marginRight: '8px' }} />
+                          Please complete your Stripe setup to receive donations.
+                          <button
+                            onClick={() => setShowStripeOnboarding(true)}
+                            className={`${styles.button} ${styles.compact}`}
+                            style={{ marginTop: '10px' }}
+                          >
+                            Continue Setup
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.stripeSetupPrompt}>
+                    <p className={styles.description}>
+                      Set up Stripe to start receiving online donations directly to your bank account.
+                    </p>
+                    <button
+                      onClick={() => setShowStripeOnboarding(true)}
+                      className={styles.button}
+                      disabled={stripeLoading}
+                    >
+                      <FaCreditCard style={{ marginRight: '8px' }} />
+                      Start Payment Setup
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className={styles.description}>Loading payment status...</div>
+            )}
+          </div>
+        </>
       )}
 
       <div className={styles.card}>
@@ -255,22 +373,31 @@ function CharityDashboard() {
 
       <div className={styles.card}>
         <h3 className={styles.cardTitle}>Donation Statistics</h3>
-        <p className={styles.description}>Total Donations: $X,XXX</p>
-        <p className={styles.description}>Number of Donors: XXX</p>
+        <p className={styles.description}>Total Donations: ${charityData.totalDonations || '0'}</p>
+        <p className={styles.description}>Number of Donors: {charityData.donorCount || '0'}</p>
+        <p className={styles.description}>Average Donation: ${charityData.averageDonation || '0'}</p>
       </div>
 
       <div className={styles.card}>
-        <h3 className={styles.cardTitle}>Current Campaigns</h3>
-        <ul className={styles.description}>
-          <li>Campaign 1</li>
-          <li>Campaign 2</li>
-        </ul>
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardActions}>
-          <button className={styles.button}>
-            <FaPlus /> Create New Campaign
+        <h3 className={styles.cardTitle}>Quick Actions</h3>
+        <div className={styles.quickActions}>
+          <button 
+            onClick={() => navigate('/charity-profile-editor')}
+            className={styles.button}
+          >
+            Edit Profile
+          </button>
+          <button 
+            onClick={() => navigate('/charity-analytics')}
+            className={styles.button}
+          >
+            View Analytics
+          </button>
+          <button 
+            onClick={() => navigate('/charity-donors')}
+            className={styles.button}
+          >
+            Donor Management
           </button>
         </div>
       </div>
@@ -298,6 +425,29 @@ function CharityDashboard() {
                 Submit Evidence
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Stripe Onboarding Modal */}
+      {showStripeOnboarding && (
+        <div className={styles.stripeOnboardingModal}>
+          <div className={styles.modalContent}>
+            <button 
+              onClick={() => setShowStripeOnboarding(false)} 
+              className={styles.closeButton}
+            >
+              <FaTimes />
+            </button>
+            <CharityOnboarding
+              charity={{
+                _id: charityData._id,
+                email: charityData.contactEmail,
+                charityName: charityData.charityName,
+                EIN: linkedCharity?.ABN
+              }}
+              onComplete={handleStripeOnboardingComplete}
+            />
           </div>
         </div>
       )}
