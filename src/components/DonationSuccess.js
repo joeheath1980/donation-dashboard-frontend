@@ -1,8 +1,27 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './DonationSuccess.css';
 
-function DonationSuccess({ donation, onClose }) {
+function DonationSuccess({ donation: propDonation, onClose }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Get donation data from navigation state or props
+  const donation = propDonation || location.state?.donation;
+
+  // If no donation data, redirect to dashboard
+  if (!donation) {
+    return (
+      <div className="donation-success">
+        <div className="success-content">
+          <h1>No donation data found</h1>
+          <Link to="/dashboard" className="primary-button">
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

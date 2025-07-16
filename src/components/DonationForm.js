@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Elements,
   CardElement,
@@ -6,6 +7,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 import { stripePromise, apiCall } from '../utils/stripe';
+import axios from 'axios';
 import './DonationForm.css';
 
 // Card element styling
@@ -187,11 +189,77 @@ function DonationFormContent({ charity, onSuccess }) {
   );
 }
 
-// Wrapper component with Stripe Elements
-export default function DonationForm({ charity, onSuccess }) {
+// Wrapper component that fetches charity data and handles routing
+function DonationFormWrapper() {
+  const { charityId } = useParams();
+  const navigate = useNavigate();
+  const [charity, setCharity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCharity = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        setCharity(response.data.charity);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (charityId) {
+      fetchCharity();
+    }
+  }, [charityId]);
+
+  const handleSuccess = (donationData) => {
+    // Navigate to success page with donation data
+    navigate('/donation-success', { state: { donation: donationData } });
+  };
+
+  if (loading) {
+    return (
+      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+        <h2>Error</h2>
+        <p>{error}</p>
+        <button onClick={() => navigate('/search-charities')}>
+          Back to Charities
+        </button>
+      </div>
+    );
+  }
+
+  if (!charity) {
+    return (
+      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+        <h2>Charity not found</h2>
+        <button onClick={() => navigate('/search-charities')}>
+          Back to Charities
+        </button>
+      </div>
+    );
+  }
+
   return (
     <Elements stripe={stripePromise}>
-      <DonationFormContent charity={charity} onSuccess={onSuccess} />
+      <DonationFormContent charity={charity} onSuccess={handleSuccess} />
     </Elements>
   );
 }
+
+export default DonationFormWrapper;

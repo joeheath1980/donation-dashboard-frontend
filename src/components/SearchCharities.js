@@ -89,6 +89,12 @@ function SearchCharities() {
                 >
                   <FaInfoCircle /> View Details
                 </Link>
+                <Link 
+                  to={`/donate/${charity['ABN']}`} 
+                  className={styles.donateButton}
+                >
+                  💳 Donate
+                </Link>
               </div>
             </div>
           ))}
