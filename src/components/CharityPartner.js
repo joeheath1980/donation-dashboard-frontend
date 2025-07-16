@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './CharityPartner.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
@@ -16,6 +16,7 @@ const api = axios.create({
 
 function CharityPartner() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [charity, setCharity] = useState(null);
   const [programs, setPrograms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -327,9 +328,9 @@ function CharityPartner() {
           </button>
           <button
             className={styles.primaryButton}
-            onClick={() => console.log('Donate clicked')}
+            onClick={() => navigate(`/donate/${charity._id || charity.ABN}`)}
           >
-            Donate
+            Donate with Stripe
           </button>
         </div>
       </div>
