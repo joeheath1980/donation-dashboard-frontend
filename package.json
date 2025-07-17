@@ -2,7 +2,6 @@
   "name": "donation-dashboard",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://josephheath.github.io/donation-dashboard",
   "dependencies": {
     "@greatsumini/react-facebook-login": "^3.3.3",
     "@paypal/react-paypal-js": "^8.7.0",

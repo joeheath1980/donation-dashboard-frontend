@@ -169,16 +169,11 @@ const BusinessOnboarding = () => {
     setError(null);
 
     try {
-      // Prepare the complete onboarding data
+      // Prepare the complete onboarding data - backend expects these fields directly
       const onboardingData = {
-        targetingConfig: formData.targetingConfig,
-        // Include other necessary data for backend
-        primaryCharities: formData.primaryCharities,
-        charityPortfolio: formData.charityPortfolio,
-        csrProfile: {
-          givingScore: formData.givingScore,
-          annualGivingBudget: formData.annualGivingBudget
-        }
+        customerTypes: formData.targetingConfig.customerTypes,
+        geography: formData.targetingConfig.geography,
+        donationRanges: formData.targetingConfig.donationRanges
       };
       
       await businessAPI.onboarding.complete(onboardingData);
