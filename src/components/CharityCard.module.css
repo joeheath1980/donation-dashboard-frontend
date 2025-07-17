@@ -1,0 +1,287 @@
+/* CharityCard.module.css */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.trending {
+  border-left: 4px solid #f59e0b;
+}
+
+.trendingBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.charityName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.verifiedBadge {
+  color: #10b981;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.scoreDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 60px;
+}
+
+.scoreLabel {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scoreValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 2px;
+}
+
+.mainActivity {
+  margin-bottom: 16px;
+}
+
+.activityBadge {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.infoIcon {
+  color: #6b7280;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.sizeLabel,
+.establishedLabel {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pbiBadge,
+.hpcBadge,
+.typeBadge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pbiBadge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.hpcBadge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.typeBadge {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.purposeSummary {
+  margin-bottom: 16px;
+}
+
+.purposeText {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.morePurposes {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.financialSnapshot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.revenueLabel {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.revenueValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.viewDetailsButton,
+.donateButton {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.viewDetailsButton {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.viewDetailsButton:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.donateButton {
+  background: #059669;
+  color: white;
+  border: 1px solid #059669;
+}
+
+.donateButton:hover {
+  background: #047857;
+  border-color: #047857;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .charityName {
+    font-size: 16px;
+  }
+  
+  .infoGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .scoreDisplay {
+    align-self: flex-end;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .viewDetailsButton,
+  .donateButton {
+    flex: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .badges {
+    justify-content: flex-start;
+  }
+}

@@ -222,85 +222,267 @@ function CharityPartner() {
         {/* Registration Details */}
         <div className={styles.card}>
           <h2 className={styles.sectionHeader}>Registration Details</h2>
-          <p className={styles.paragraph}>
-            <strong>ABN:</strong> {charity.ABN || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Registration Date:</strong> {formatDate(charity.Registration_Date)}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Date Established:</strong> {formatDate(charity.Date_Organisation_Established)}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Status:</strong> {charity.Registration_Status || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Type:</strong> {charity.Charity_Type || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Size:</strong> {charity.Charity_Size || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Number of Responsible Persons:</strong> {charity.Number_of_Responsible_Persons || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Financial Year End:</strong> {charity.Financial_Year_End || 'N/A'}
-          </p>
+          <div className={styles.detailsGrid}>
+            <div className={styles.detailItem}>
+              <strong>ABN:</strong>
+              <span>{charity.ABN || 'N/A'}</span>
+            </div>
+            {charity.ACN && (
+              <div className={styles.detailItem}>
+                <strong>ACN:</strong>
+                <span>{charity.ACN}</span>
+              </div>
+            )}
+            <div className={styles.detailItem}>
+              <strong>Registration Date:</strong>
+              <span>{formatDate(charity.Registration_Date)}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Date Established:</strong>
+              <span>{formatDate(charity.Date_Organisation_Established)}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Status:</strong>
+              <span className={charity.Registration_Status === 'Registered' ? styles.statusActive : ''}>
+                {charity.Registration_Status || 'N/A'}
+              </span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Type:</strong>
+              <span>{charity.Charity_Type || 'N/A'}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Size:</strong>
+              <span>{charity.Charity_Size || 'N/A'}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Legal Structure:</strong>
+              <span>{charity.Legal_Structure || 'N/A'}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Responsible Persons:</strong>
+              <span>{charity.Number_of_Responsible_Persons || 'N/A'}</span>
+            </div>
+            <div className={styles.detailItem}>
+              <strong>Financial Year End:</strong>
+              <span>{charity.Financial_Year_End || 'N/A'}</span>
+            </div>
+          </div>
         </div>
 
         {/* Contact Information */}
         <div className={styles.card}>
           <h2 className={styles.sectionHeader}>Contact Information</h2>
-          <p className={styles.paragraph}>
-            <strong>Address Type:</strong> {charity.Address_Type || 'N/A'}
-          </p>
-          <p className={styles.paragraph}>
-            <strong>Address:</strong> {formatAddress(charity)}
-          </p>
-          {charity.Website && (
-            <p className={styles.paragraph}>
-              <strong>Website:</strong>{' '}
-              <a
-                href={charity.Website.startsWith('http') ? charity.Website : `https://${charity.Website}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.link}
-              >
-                Visit Website
-              </a>
-            </p>
-          )}
+          <div className={styles.contactGrid}>
+            <div className={styles.contactItem}>
+              <strong>Address Type:</strong>
+              <span>{charity.Address_Type || 'N/A'}</span>
+            </div>
+            <div className={styles.contactItem}>
+              <strong>Address:</strong>
+              <span>{formatAddress(charity)}</span>
+            </div>
+            {charity.Website && (
+              <div className={styles.contactItem}>
+                <strong>Website:</strong>
+                <a
+                  href={charity.Website.startsWith('http') ? charity.Website : `https://${charity.Website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.link}
+                >
+                  {charity.Website}
+                </a>
+              </div>
+            )}
+            {charity.Email && (
+              <div className={styles.contactItem}>
+                <strong>Email:</strong>
+                <a href={`mailto:${charity.Email}`} className={styles.link}>
+                  {charity.Email}
+                </a>
+              </div>
+            )}
+            {charity.Phone && (
+              <div className={styles.contactItem}>
+                <strong>Phone:</strong>
+                <a href={`tel:${charity.Phone}`} className={styles.link}>
+                  {charity.Phone}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Charitable Purposes */}
+        {charity.purposes && charity.purposes.length > 0 && (
+          <div className={styles.card}>
+            <h2 className={styles.sectionHeader}>Our Purposes</h2>
+            <div className={styles.purposesGrid}>
+              {charity.purposes.map((purpose, index) => (
+                <div key={index} className={styles.purposeCard}>
+                  <div className={styles.purposeIcon}>
+                    {purpose.includes('Health') ? '🏥' :
+                     purpose.includes('Education') ? '🎓' :
+                     purpose.includes('Social') ? '🤝' :
+                     purpose.includes('Religion') ? '⛪' :
+                     purpose.includes('Culture') ? '🎨' :
+                     purpose.includes('Environment') ? '🌱' :
+                     purpose.includes('Animal') ? '🐾' :
+                     purpose.includes('Human Rights') ? '⚖️' :
+                     purpose.includes('Research') ? '🔬' : '❤️'}
+                  </div>
+                  <div className={styles.purposeText}>{purpose}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Main Activities */}
+        <div className={styles.card}>
+          <h2 className={styles.sectionHeader}>What We Do</h2>
+          <div className={styles.activitiesSection}>
+            <div className={styles.mainActivity}>
+              <strong>Primary Activity:</strong> {charity.Main_Activity || 'N/A'}
+            </div>
+            {charity.activities && charity.activities.length > 0 && (
+              <div className={styles.activitiesList}>
+                <strong>All Activities:</strong>
+                <ul>
+                  {charity.activities.map((activity, index) => (
+                    <li key={index}>{activity}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Operating Locations */}
         <div className={styles.card}>
-          <h2 className={styles.sectionHeader}>Operating Locations</h2>
-          <p className={styles.paragraph}>
-            <strong>States and Territories:</strong> {formatOperatingLocations(charity)}
-          </p>
-          {charity.Operating_Countries && (
-            <p className={styles.paragraph}>
-              <strong>Operating Countries:</strong> {charity.Operating_Countries}
-            </p>
-          )}
-        </div>
-
-        {/* Beneficiaries */}
-        <div className={styles.card}>
-          <h2 className={styles.sectionHeader}>Who We Help</h2>
-          <div className={styles.beneficiariesGrid}>
-            {formatBeneficiaries(charity).map((beneficiary, index) => (
-              <div key={index} className={styles.beneficiaryTag}>
-                {beneficiary}
+          <h2 className={styles.sectionHeader}>Where We Operate</h2>
+          <div className={styles.locationsGrid}>
+            <div className={styles.locationItem}>
+              <strong>States & Territories:</strong>
+              <div className={styles.statesList}>
+                {formatOperatingLocations(charity).split(', ').map((state, index) => (
+                  <span key={index} className={styles.stateTag}>{state}</span>
+                ))}
               </div>
-            ))}
+            </div>
+            {charity.Operating_Countries && (
+              <div className={styles.locationItem}>
+                <strong>Countries:</strong>
+                <span>{charity.Operating_Countries}</span>
+              </div>
+            )}
+            {charity.PBI === 'Y' && (
+              <div className={styles.pbiIndicator}>
+                <span className={styles.pbiBadge}>Public Benevolent Institution (PBI)</span>
+              </div>
+            )}
+            {charity.HPC === 'Y' && (
+              <div className={styles.hpcIndicator}>
+                <span className={styles.hpcBadge}>Health Promotion Charity</span>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Beneficiaries & Conditions */}
+        <div className={styles.card}>
+          <h2 className={styles.sectionHeader}>Who We Help</h2>
+          <div className={styles.beneficiariesSection}>
+            {formatBeneficiaries(charity).length > 0 && (
+              <div className={styles.beneficiariesGroup}>
+                <h3>Target Groups</h3>
+                <div className={styles.beneficiariesGrid}>
+                  {formatBeneficiaries(charity).map((beneficiary, index) => (
+                    <div key={index} className={styles.beneficiaryTag}>
+                      {beneficiary}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {charity.beneficiaryDetails && charity.beneficiaryDetails.conditions && charity.beneficiaryDetails.conditions.length > 0 && (
+              <div className={styles.conditionsGroup}>
+                <h3>Conditions We Address</h3>
+                <div className={styles.conditionsGrid}>
+                  {charity.beneficiaryDetails.conditions.map((condition, index) => (
+                    <div key={index} className={styles.conditionTag}>
+                      {condition}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {charity.Other_Beneficiaries && (
+              <div className={styles.otherBeneficiaries}>
+                <strong>Other Groups:</strong> {charity.Other_Beneficiaries}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Financial Information */}
+        {(charity.Last_AIS_Fin_Year || charity.Total_Expenses_AIS || charity.Total_Revenue_AIS || charity.Donated_funds || charity.Government_grants) && (
+          <div className={styles.card}>
+            <h2 className={styles.sectionHeader}>Financial Overview</h2>
+            <div className={styles.financialGrid}>
+              {charity.Last_AIS_Fin_Year && (
+                <div className={styles.financialItem}>
+                  <strong>Latest Financial Year:</strong>
+                  <span>{charity.Last_AIS_Fin_Year}</span>
+                </div>
+              )}
+              {charity.Total_Revenue_AIS && (
+                <div className={styles.financialItem}>
+                  <strong>Total Revenue:</strong>
+                  <span>${parseInt(charity.Total_Revenue_AIS).toLocaleString()}</span>
+                </div>
+              )}
+              {charity.Total_Expenses_AIS && (
+                <div className={styles.financialItem}>
+                  <strong>Total Expenses:</strong>
+                  <span>${parseInt(charity.Total_Expenses_AIS).toLocaleString()}</span>
+                </div>
+              )}
+              {charity.Donated_funds && (
+                <div className={styles.financialItem}>
+                  <strong>Donations Received:</strong>
+                  <span>${parseInt(charity.Donated_funds).toLocaleString()}</span>
+                </div>
+              )}
+              {charity.Government_grants && (
+                <div className={styles.financialItem}>
+                  <strong>Government Grants:</strong>
+                  <span>${parseInt(charity.Government_grants).toLocaleString()}</span>
+                </div>
+              )}
+              {charity.Staff_FTE && (
+                <div className={styles.financialItem}>
+                  <strong>Staff (FTE):</strong>
+                  <span>{charity.Staff_FTE}</span>
+                </div>
+              )}
+              {charity.Staff_Volunteers && (
+                <div className={styles.financialItem}>
+                  <strong>Volunteers:</strong>
+                  <span>{charity.Staff_Volunteers}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Programs */}
         {programs.length > 0 && (
           <div className={styles.card}>
-            <h2 className={styles.sectionHeader}>Programs</h2>
+            <h2 className={styles.sectionHeader}>Our Programs</h2>
             <div className={styles.programsGrid}>
               {programs.map((program, index) => (
                 <div key={index} className={styles.programCard}>
