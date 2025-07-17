@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import styles from './SearchCharities.module.css';
-import { FaSearch, FaInfoCircle, FaCheckCircle, FaFilter, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import CharityCard from './CharityCard';
 
 const CHARITY_CATEGORIES = [
   'Health Services',
-  'Mental Health',
+  'Mental Health', 
   'Education',
   'Environmental Conservation',
   'Social Welfare',
@@ -20,7 +20,22 @@ const CHARITY_CATEGORIES = [
   'Arts & Culture',
   'Animal Welfare',
   'International Aid',
-  'Disability Services'
+  'Disability Services',
+  'Religious Activities',
+  'Research',
+  'Advancing Culture',
+  'Other Philanthropic',
+  'Advancing Health',
+  'Advancing Education',
+  'Advancing Social or Public Welfare',
+  'Advancing Religion',
+  'Advancing the Natural Environment',
+  'Advancing Security or Safety',
+  'Advancing Amateur Sport',
+  'Advancing Reconciliation',
+  'Human Rights Protection',
+  'Animal Protection',
+  'Environmental Protection'
 ];
 
 const SORT_OPTIONS = [
@@ -52,24 +67,22 @@ function SearchCharities() {
     setError(null);
 
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`, {
+      // Use the new enhanced search endpoint
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/search/${encodeURIComponent(query)}`, {
         params: { 
-          q: query,
-          categories: selectedCategories.join(','),
-          minScore,
-          verifiedOnly,
-          sortBy
+          limit: 50,
+          offset: 0
         }
       });
 
-      if (response.data.result && response.data.result.records) {
-        // Add dummy data for scores, verification, and categories
-        const enhancedResults = response.data.result.records.map(charity => ({
+      if (response.data.charities) {
+        // Use the enhanced charity data from the backend
+        const enhancedResults = response.data.charities.map(charity => ({
           ...charity,
-          score: Math.floor(Math.random() * 40) + 60, // Random score 60-100
-          isVerified: Math.random() > 0.3, // 70% chance of being verified
-          category: CHARITY_CATEGORIES[Math.floor(Math.random() * CHARITY_CATEGORIES.length)],
-          trending: Math.random() > 0.8 // 20% chance of trending
+          score: charity.impactScore || Math.floor(Math.random() * 40) + 60,
+          isVerified: charity.Registration_Status === 'Registered',
+          category: charity.Main_Activity || charity.category || 'Other Philanthropic',
+          trending: charity.trending || Math.random() > 0.8
         }));
         setResults(enhancedResults);
       } else {
@@ -318,51 +331,7 @@ function SearchCharities() {
       {filteredAndSortedResults.length > 0 && (
         <div className={styles.resultsGrid}>
           {filteredAndSortedResults.map((charity) => (
-            <div key={charity._id} className={`${styles.card} ${charity.trending ? styles.trending : ''}`}>
-              {charity.trending && (
-                <div className={styles.trendingBadge}>🔥 Trending</div>
-              )}
-              
-              <div className={styles.cardHeader}>
-                <h2 className={styles.charityName}>
-                  {charity['Charity_Legal_Name']}
-                  {charity.isVerified && (
-                    <FaCheckCircle className={styles.verifiedBadge} title="Verified Charity" />
-                  )}
-                </h2>
-                <div className={styles.scoreDisplay}>
-                  <span className={styles.scoreLabel}>Impact Score</span>
-                  <span className={styles.scoreValue}>{charity.score}</span>
-                </div>
-              </div>
-              
-              <div className={styles.charityInfo}>
-                <div className={styles.charityDetails}>
-                  <span className={styles.category}>{charity.category}</span>
-                </div>
-                <div className={styles.charityDetails}>
-                  <strong>State:</strong> {charity['State']}
-                </div>
-                <div className={styles.charityDetails}>
-                  <strong>ABN:</strong> {charity['ABN']}
-                </div>
-              </div>
-              
-              <div className={styles.actionButtons}>
-                <Link 
-                  to={`/charity/${charity['ABN']}`} 
-                  className={styles.viewDetailsButton}
-                >
-                  <FaInfoCircle /> View Details
-                </Link>
-                <Link 
-                  to={`/donate/${charity['ABN']}`} 
-                  className={styles.donateButton}
-                >
-                  💳 Donate
-                </Link>
-              </div>
-            </div>
+            <CharityCard key={charity.ABN || charity._id} charity={charity} />
           ))}
         </div>
       )}
@@ -378,8 +347,9 @@ function SearchCharities() {
           <h3>What you can do:</h3>
           <ul>
             <li>Click on "View Details" to learn more about a charity</li>
-            <li>Look for verified charities marked with the <FaCheckCircle style={{ color: '#10b981' }} /> badge</li>
+            <li>Look for verified charities marked with the ✓ badge</li>
             <li>Check impact scores to find highly effective charities</li>
+            <li>View financial information and operating locations</li>
             <li>On the charity's detail page, you can choose to follow, find matching opportunities, or make donations</li>
           </ul>
         </div>
