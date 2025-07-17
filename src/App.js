@@ -30,8 +30,13 @@ const Activity = lazy(() => import('./components/Activity'));
 const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignup = lazy(() => import('./components/CharitySignup'));
+const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
+const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor'));
 const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));
 const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCampaign'));
+const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
+const BusinessCampaignList = lazy(() => import('./components/BusinessCampaignList'));
+const BusinessCampaignAnalytics = lazy(() => import('./components/BusinessCampaignAnalytics'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const GoogleAuthCallback = lazy(() => import('./components/GoogleAuthCallback'));
 const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallback'));
@@ -70,9 +75,9 @@ const ProtectedRoute = ({ children, allowedUserTypes }) => {
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
   logger.debug('AdminRoute - Checking admin access');
-  // Check for admin role from backend, not email
-  const isAdmin = user && user.role === USER_TYPES.ADMIN;
-  logger.debug('AdminRoute - Admin access check', { hasAccess: isAdmin });
+  // Check both role and isAdmin for compatibility
+  const isAdmin = user && (user.role === USER_TYPES.ADMIN || user.isAdmin === true);
+  logger.debug('AdminRoute - Admin access check', { hasAccess: isAdmin, user });
   return isAdmin ? children : <Navigate to="/login" />;
 };
 
@@ -92,7 +97,7 @@ function App() {
                 <Route path="/signup" element={<SuspenseWrapper><SignUp /></SuspenseWrapper>} />
                 <Route path="/organization-signup" element={<SuspenseWrapper><OrganizationSignup /></SuspenseWrapper>} />
                 <Route path="/business-signup" element={<SuspenseWrapper><BusinessSignup /></SuspenseWrapper>} />
-                <Route path="/charity-signup" element={<SuspenseWrapper><CharitySignup /></SuspenseWrapper>} />
+                <Route path="/charity-signup" element={<SuspenseWrapper><CharitySignupFlow /></SuspenseWrapper>} />
                 
                 {/* Auth Callback routes */}
                 <Route path="/auth-callback" element={<SuspenseWrapper><AuthCallback /></SuspenseWrapper>} />
@@ -114,11 +119,15 @@ function App() {
                 
                 {/* Business routes */}
                 <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessDashboard /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business-onboarding" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessOnboarding /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/campaigns" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignList /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/campaigns/:campaignId/analytics" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignAnalytics /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCreateCampaign /></SuspenseWrapper></Layout></ProtectedRoute>} />
 
                 {/* Charity routes */}
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-onboarding" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityOnboarding /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
 
                 {/* Donation routes */}
                 <Route path="/donate/:charityId" element={<ProtectedRoute><Layout><SuspenseWrapper><DonationForm /></SuspenseWrapper></Layout></ProtectedRoute>} />

@@ -8,6 +8,7 @@ import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
+import DefaultBusinessLogo from './DefaultBusinessLogo';
 
 function formatDate(dateString) {
   let date;
@@ -190,52 +191,104 @@ function OneOffContributionsComponent({ displayAll }) {
         <div className={oneOffStyles.oneOffList} ref={contributionListRef}>
           {displayedContributions && displayedContributions.length > 0 ? (
             <>
-              {displayedContributions.map((contribution) => (
-                <div key={contribution._id} className={oneOffStyles.oneOffCard}>
-                  <div className={sharedStyles.cardHeader}>
-                    <h3 className={sharedStyles.cardTitle}>{contribution.charity}</h3>
-                    <div className={sharedStyles.validationButton}>
-                      <InstantTooltip text={contribution.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
-                        <FaCheckCircle className={contribution.receiptUrl ? oneOffStyles.validationIcon : oneOffStyles.validationIconPending} />
+              {displayedContributions.map((contribution) => {
+                // Calculate total impact including matches
+                const totalMatched = contribution.matches ? 
+                  contribution.matches.reduce((sum, match) => sum + match.matchAmount, 0) : 0;
+                const totalImpact = contribution.amount + totalMatched;
+                const hasMatches = contribution.matches && contribution.matches.length > 0;
+                
+                return (
+                  <div key={contribution._id} className={`${oneOffStyles.oneOffCard} ${hasMatches ? oneOffStyles.matchedContribution : ''}`}>
+                    <div className={sharedStyles.cardHeader}>
+                      <h3 className={sharedStyles.cardTitle}>
+                        {contribution.charity}
+                        {hasMatches && (
+                          <span className={oneOffStyles.matchBadge}>
+                            🎯 Matched
+                          </span>
+                        )}
+                      </h3>
+                      <div className={sharedStyles.validationButton}>
+                        <InstantTooltip text={contribution.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
+                          <FaCheckCircle className={contribution.receiptUrl ? oneOffStyles.validationIcon : oneOffStyles.validationIconPending} />
+                        </InstantTooltip>
+                      </div>
+                    </div>
+                    
+                    {/* Business Match Logos */}
+                    {hasMatches && (
+                      <div className={oneOffStyles.matchingBusinesses}>
+                        {contribution.matches.map((match, index) => (
+                          <div key={index} className={oneOffStyles.businessMatch}>
+                            {match.businessLogo ? (
+                              <img 
+                                src={match.businessLogo} 
+                                alt={match.businessName}
+                                className={oneOffStyles.businessLogo}
+                              />
+                            ) : (
+                              <DefaultBusinessLogo size={32} />
+                            )}
+                            <span className={oneOffStyles.matchInfo}>
+                              {match.businessName} matched {match.multiplier}x
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className={oneOffStyles.oneOffContent}>
+                      <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
+                      <p><strong>Your Donation:</strong> ${contribution.amount.toFixed(2)}</p>
+                      
+                      {/* Impact Summary */}
+                      {hasMatches && (
+                        <div className={oneOffStyles.impactSummary}>
+                          <p className={oneOffStyles.matchedAmount}>
+                            <strong>Matched Amount:</strong> ${totalMatched.toFixed(2)}
+                          </p>
+                          <p className={oneOffStyles.totalImpact}>
+                            <strong>Total Impact:</strong> 
+                            <span className={oneOffStyles.impactValue}>${totalImpact.toFixed(2)}</span>
+                          </p>
+                        </div>
+                      )}
+                      
+                      <p><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
+                      {contribution.receiptUrl && (
+                        <p>
+                          <strong>Receipt:</strong>
+                          <a
+                            href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={sharedStyles.link}
+                          >
+                            View Receipt
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                    <div className={sharedStyles.cardActions}>
+                      <InstantTooltip text="Edit contribution">
+                        <button onClick={() => handleEditOrValidate(contribution)} className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
+                          <FaEdit />
+                        </button>
+                      </InstantTooltip>
+                      <InstantTooltip text="Delete contribution">
+                        <button
+                          onClick={() => handleDelete(contribution._id)}
+                          className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`}
+                          aria-label="Delete Contribution"
+                        >
+                          <FaTrash />
+                        </button>
                       </InstantTooltip>
                     </div>
                   </div>
-                  <div className={oneOffStyles.oneOffContent}>
-                    <p><strong>Date:</strong> {formatDate(contribution.date)}</p>
-                    <p><strong>Amount:</strong> ${contribution.amount.toFixed(2)}</p>
-                    <p><strong>Charity Type:</strong> {contribution.charityType || 'Not specified'}</p>
-                    {contribution.receiptUrl && (
-                      <p>
-                        <strong>Receipt:</strong>
-                        <a
-                          href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={sharedStyles.link}
-                        >
-                          View Receipt
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                  <div className={sharedStyles.cardActions}>
-                    <InstantTooltip text="Edit contribution">
-                      <button onClick={() => handleEditOrValidate(contribution)} className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
-                        <FaEdit />
-                      </button>
-                    </InstantTooltip>
-                    <InstantTooltip text="Delete contribution">
-                      <button
-                        onClick={() => handleDelete(contribution._id)}
-                        className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`}
-                        aria-label="Delete Contribution"
-                      >
-                        <FaTrash />
-                      </button>
-                    </InstantTooltip>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </>
           ) : (
             <p className={sharedStyles.textCenter}>No one-off contributions found.</p>

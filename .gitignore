@@ -33,4 +33,59 @@ Thumbs.db
 
 # Backup files
 *.backup
+*_backup.*
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+*_TEMP.*
+*_temp.*
+*_fix.*
+*_FIX.*
+*_UPDATE.*
+*_update.*
+*_OLD.*
+*_old.*
+*_NEW.*
+*_new.*
+
+# Test and debugging files
+test-*.js
+debug-*.js
+fix-*.js
+temp-*.js
+script.js
+scripts/temp/
+scripts/fix/
+scripts/one-time/
+
+# Documentation (temporary)
+*_GUIDE.md
+*_INSTRUCTIONS.md
+*_DEPLOYMENT.md
+*_RESOLVED.md
+*_COMPLETE.md
+*_SUMMARY.md
+DEBUG_*.md
+RESET_*.md
+FIX_*.md
+TROUBLESHOOTING_*.md
+
+# Deployment scripts
+deploy.sh
+deploy-*.sh
+*-deploy.sh
+
+# Workspace files (except root)
+src/**/*.code-workspace
+!donation-dashboard.code-workspace
+
+# Test data
+test/data/
+*.csv
+
+# Archives
+archive/
+docs/archive/
 

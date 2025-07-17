@@ -113,6 +113,83 @@
   border-radius: 4px;
 }
 
+/* Match Badge */
+.matchBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #007bff 0%, #8b5cf6 100%);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* Matched contribution card */
+.matchedContribution {
+  border: 2px solid #007bff;
+  background: linear-gradient(to bottom right, #ffffff 0%, #f0f7ff 100%);
+}
+
+/* Business matches section */
+.matchingBusinesses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.businessMatch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.businessLogo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e0e0e0;
+}
+
+.matchInfo {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Impact summary */
+.impactSummary {
+  background: #e0f2fe;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid #7dd3fc;
+}
+
+.matchedAmount {
+  margin: 4px 0;
+  color: #0369a1;
+  font-size: 14px;
+}
+
+.totalImpact {
+  margin: 4px 0;
+  font-size: 16px;
+  color: #0c4a6e;
+}
+
+.impactValue {
+  font-size: 18px;
+  font-weight: bold;
+  color: #059669;
+  margin-left: 8px;
+}
+
 /* Card actions */
 .cardActions {
   display: flex;
