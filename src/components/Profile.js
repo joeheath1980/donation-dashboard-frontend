@@ -241,6 +241,59 @@ function Profile() {
           <SectionTitle icon={FaChartLine} title="Your Impact" />
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
           
+          {/* Total Impact Summary */}
+          {(() => {
+            const calculateTotalImpact = () => {
+              let totalDonations = 0;
+              let totalMatched = 0;
+              
+              // Calculate from regular donations
+              localDonations.forEach(donation => {
+                totalDonations += donation.amount || 0;
+                if (donation.matches) {
+                  donation.matches.forEach(match => {
+                    totalMatched += match.matchAmount || 0;
+                  });
+                }
+              });
+              
+              // Calculate from one-off contributions
+              localOneOffContributions.forEach(contribution => {
+                totalDonations += contribution.amount || 0;
+                if (contribution.matches) {
+                  contribution.matches.forEach(match => {
+                    totalMatched += match.matchAmount || 0;
+                  });
+                }
+              });
+              
+              return { totalDonations, totalMatched, totalImpact: totalDonations + totalMatched };
+            };
+            
+            const { totalDonations, totalMatched, totalImpact } = calculateTotalImpact();
+            
+            return totalMatched > 0 ? (
+              <div className={styles.totalImpactSummary}>
+                <h3>🎯 Your Amplified Impact</h3>
+                <div className={styles.impactBreakdown}>
+                  <div className={styles.impactItem}>
+                    <span className={styles.impactLabel}>Your Donations:</span>
+                    <span className={styles.impactAmount}>${totalDonations.toFixed(2)}</span>
+                  </div>
+                  <div className={styles.impactItem}>
+                    <span className={styles.impactLabel}>Business Matches:</span>
+                    <span className={styles.matchAmount}>+${totalMatched.toFixed(2)}</span>
+                  </div>
+                  <div className={styles.impactDivider}></div>
+                  <div className={styles.impactItem}>
+                    <span className={styles.impactLabel}>Total Impact:</span>
+                    <span className={styles.totalAmount}>${totalImpact.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            ) : null;
+          })()}
+          
           <div className={styles.impactContent}>
             <div className={styles.donationsGrid}>
               <div className={`${styles.donationCard} ${sharedStyles.card}`}>

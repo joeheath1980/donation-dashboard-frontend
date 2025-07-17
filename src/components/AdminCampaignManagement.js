@@ -1,128 +1,341 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { FaCheck, FaTimes, FaFileDownload } from 'react-icons/fa';
-import styles from './AdminCharityManagement.module.css';
+import { 
+  FaSearch, 
+  FaBullhorn, 
+  FaCalendarAlt, 
+  FaChartLine, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaClock,
+  FaSpinner,
+  FaDollarSign,
+  FaUsers,
+  FaEdit,
+  FaTrash,
+  FaPlus
+} from 'react-icons/fa';
+import styles from './AdminSharedStyles.module.css';
 
-function AdminCharityManagement() {
-  const [pendingRequests, setPendingRequests] = useState([]);
+const AdminCampaignManagement = () => {
+  const { getAuthHeaders } = useAuth();
+  const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getAuthHeaders } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [stats, setStats] = useState({
+    totalCampaigns: 0,
+    activeCampaigns: 0,
+    totalRaised: 0,
+    totalDonors: 0
+  });
 
-  const fetchPendingRequests = useCallback(async () => {
+  useEffect(() => {
+    fetchCampaigns();
+  }, []);
+
+  useEffect(() => {
+    if (campaigns.length > 0) {
+      const newStats = {
+        totalCampaigns: campaigns.length,
+        activeCampaigns: campaigns.filter(c => c.status === 'active').length,
+        totalRaised: campaigns.reduce((sum, c) => sum + (c.amountRaised || 0), 0),
+        totalDonors: campaigns.reduce((sum, c) => sum + (c.donorCount || 0), 0)
+      };
+      setStats(newStats);
+    }
+  }, [campaigns]);
+
+  const fetchCampaigns = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests`, {
-        headers: getAuthHeaders()
-      });
-      setPendingRequests(response.data);
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns`,
+        { headers: getAuthHeaders() }
+      );
+      setCampaigns(response.data);
     } catch (err) {
-      console.error('Error fetching pending requests:', err);
-      setError('Failed to load pending requests');
+      console.error('Error fetching campaigns:', err);
+      setError('Failed to fetch campaigns');
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  };
 
-  useEffect(() => {
-    fetchPendingRequests();
-  }, [fetchPendingRequests]);
-
-  const handleApprove = async (requestId) => {
+  const handleStatusChange = async (campaignId, newStatus) => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/approve`, {}, {
-        headers: getAuthHeaders()
-      });
-      fetchPendingRequests();
+      await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns/${campaignId}/status`,
+        { status: newStatus },
+        { headers: getAuthHeaders() }
+      );
+      setCampaigns(campaigns.map(campaign => 
+        campaign._id === campaignId ? { ...campaign, status: newStatus } : campaign
+      ));
+      setMessage({ type: 'success', text: 'Campaign status updated successfully' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (err) {
-      console.error('Error approving request:', err);
-      setError('Failed to approve request');
+      console.error('Error updating campaign status:', err);
+      setMessage({ type: 'error', text: 'Failed to update campaign status' });
     }
   };
 
-  const handleReject = async (requestId) => {
+  const handleDelete = async (campaignId) => {
+    if (!window.confirm('Are you sure you want to delete this campaign?')) return;
+    
     try {
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${requestId}/reject`, {}, {
-        headers: getAuthHeaders()
-      });
-      fetchPendingRequests();
+      await axios.delete(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns/${campaignId}`,
+        { headers: getAuthHeaders() }
+      );
+      setCampaigns(campaigns.filter(c => c._id !== campaignId));
+      setMessage({ type: 'success', text: 'Campaign deleted successfully' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (err) {
-      console.error('Error rejecting request:', err);
-      setError('Failed to reject request');
+      console.error('Error deleting campaign:', err);
+      setMessage({ type: 'error', text: 'Failed to delete campaign' });
     }
   };
 
-  const handleDownloadEvidence = async (evidencePath) => {
-    try {
-      const downloadUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${evidencePath}`;
+  const filteredCampaigns = campaigns.filter(campaign => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = campaign.name?.toLowerCase().includes(searchLower) ||
+                         campaign.charity?.name?.toLowerCase().includes(searchLower) ||
+                         campaign.description?.toLowerCase().includes(searchLower);
+    const matchesFilter = filter === 'all' || campaign.status === filter;
+    return matchesSearch && matchesFilter;
+  });
 
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Error downloading evidence:', err);
-      setError('Failed to download evidence');
-    }
+  const getStatusBadge = (status) => {
+    const badges = {
+      active: { className: styles.badgeSuccess, icon: FaCheckCircle, text: 'Active' },
+      inactive: { className: styles.badgeWarning, icon: FaClock, text: 'Inactive' },
+      completed: { className: styles.badgeInfo, icon: FaCheckCircle, text: 'Completed' },
+      cancelled: { className: styles.badgeDanger, icon: FaTimesCircle, text: 'Cancelled' }
+    };
+    const badge = badges[status] || badges.inactive;
+    const Icon = badge.icon;
+    return { ...badge, Icon };
   };
 
-  if (loading) {
-    return <div className={styles.loading}>Loading pending requests...</div>;
-  }
-
-  if (error) {
-    return <div className={styles.error}>{error}</div>;
-  }
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   return (
-    <div className={styles.container}>
-      <h2>Charity Link Requests</h2>
-      {pendingRequests.length === 0 ? (
-        <p className={styles.noRequests}>No pending requests</p>
-      ) : (
-        <div className={styles.requestsGrid}>
-          {pendingRequests.map((request) => (
-            <div key={request._id} className={styles.requestCard}>
-              <div className={styles.requestInfo}>
-                <h3>{request.charityName}</h3>
-                <p><strong>Email:</strong> {request.contactEmail}</p>
-                <p><strong>ABN to Link:</strong> {request.linkedABN}</p>
-                <p><strong>Requested:</strong> {new Date(request.linkingRequestDate).toLocaleDateString()}</p>
-              </div>
-              <div className={styles.evidence}>
-                <button
-                  onClick={() => handleDownloadEvidence(request.linkingEvidence)}
-                  className={styles.downloadButton}
-                >
-                  <FaFileDownload /> View Evidence
-                </button>
-              </div>
-              <div className={styles.actions}>
-                <button
-                  onClick={() => handleApprove(request._id)}
-                  className={`${styles.actionButton} ${styles.approve}`}
-                  title="Approve Request"
-                >
-                  <FaCheck />
-                </button>
-                <button
-                  onClick={() => handleReject(request._id)}
-                  className={`${styles.actionButton} ${styles.reject}`}
-                  title="Reject Request"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            </div>
-          ))}
+    <div className={styles.adminContainer}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Campaign Management</h1>
+        <button className={`${styles.button} ${styles.primaryButton}`}>
+          <FaPlus /> Create Campaign
+        </button>
+      </div>
+
+      {message.text && (
+        <div className={`${styles.message} ${message.type === 'error' ? styles.messageError : styles.messageSuccess}`}>
+          {message.text}
         </div>
       )}
+
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <h3><FaBullhorn /> Total Campaigns</h3>
+          <p>{stats.totalCampaigns}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3><FaCheckCircle /> Active</h3>
+          <p>{stats.activeCampaigns}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3><FaDollarSign /> Total Raised</h3>
+          <p>${stats.totalRaised.toFixed(2)}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3><FaUsers /> Total Donors</h3>
+          <p>{stats.totalDonors}</p>
+        </div>
+      </div>
+
+      <div className={styles.card}>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+            <FaSearch className={styles.searchIcon} />
+          </div>
+          
+          <div className={styles.filters}>
+            <button
+              onClick={() => setFilter('all')}
+              className={`${styles.filterButton} ${filter === 'all' ? styles.active : ''}`}
+            >
+              All Campaigns
+            </button>
+            <button
+              onClick={() => setFilter('active')}
+              className={`${styles.filterButton} ${filter === 'active' ? styles.active : ''}`}
+            >
+              <FaCheckCircle /> Active
+            </button>
+            <button
+              onClick={() => setFilter('inactive')}
+              className={`${styles.filterButton} ${filter === 'inactive' ? styles.active : ''}`}
+            >
+              <FaClock /> Inactive
+            </button>
+            <button
+              onClick={() => setFilter('completed')}
+              className={`${styles.filterButton} ${filter === 'completed' ? styles.active : ''}`}
+            >
+              Completed
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className={styles.loading}>
+            <FaSpinner className={styles.spinner} />
+            <p>Loading campaigns...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.emptyState}>
+            <h3>Error Loading Campaigns</h3>
+            <p>{error}</p>
+          </div>
+        ) : (
+          <div className={styles.table}>
+            <div className={styles.tableWrapper}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Campaign Name</th>
+                    <th>Charity</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Goal</th>
+                    <th>Raised</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCampaigns.map(campaign => {
+                    const statusBadge = getStatusBadge(campaign.status);
+                    const progress = campaign.goal ? (campaign.amountRaised / campaign.goal) * 100 : 0;
+                    
+                    return (
+                      <tr key={campaign._id}>
+                        <td>
+                          <div>
+                            <strong>{campaign.name}</strong>
+                            <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+                              {campaign.description?.substring(0, 50)}...
+                            </div>
+                          </div>
+                        </td>
+                        <td>{campaign.charity?.name || 'Unknown'}</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <FaCalendarAlt />
+                            {formatDate(campaign.startDate)}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <FaCalendarAlt />
+                            {formatDate(campaign.endDate)}
+                          </div>
+                        </td>
+                        <td>
+                          <strong>${campaign.goal?.toFixed(2) || '0.00'}</strong>
+                        </td>
+                        <td>
+                          <div>
+                            <strong style={{ color: '#10b981' }}>${campaign.amountRaised?.toFixed(2) || '0.00'}</strong>
+                            <div style={{ 
+                              marginTop: '5px',
+                              height: '6px',
+                              background: '#e9ecef',
+                              borderRadius: '3px',
+                              overflow: 'hidden'
+                            }}>
+                              <div style={{
+                                width: `${Math.min(progress, 100)}%`,
+                                height: '100%',
+                                background: '#10b981',
+                                transition: 'width 0.3s ease'
+                              }}></div>
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#6c757d', marginTop: '2px' }}>
+                              {progress.toFixed(0)}% of goal
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <select 
+                            value={campaign.status} 
+                            onChange={(e) => handleStatusChange(campaign._id, e.target.value)}
+                            className={styles.select}
+                            style={{ maxWidth: '150px' }}
+                          >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                          <span className={`${styles.badge} ${statusBadge.className}`} style={{ marginLeft: '10px' }}>
+                            <statusBadge.Icon /> {statusBadge.text}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '5px' }}>
+                            <button 
+                              className={`${styles.button} ${styles.primaryButton}`} 
+                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              title="Edit Campaign"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button 
+                              className={`${styles.button} ${styles.dangerButton}`} 
+                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              onClick={() => handleDelete(campaign._id)}
+                              title="Delete Campaign"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && filteredCampaigns.length === 0 && (
+          <div className={styles.emptyState}>
+            <h3>No campaigns found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default AdminCharityManagement;
+export default AdminCampaignManagement;

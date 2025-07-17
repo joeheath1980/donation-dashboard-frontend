@@ -18,6 +18,7 @@ import {
   FaUsers
 } from 'react-icons/fa';
 import styles from './AdminCharityManagement.module.css';
+import sharedStyles from './AdminSharedStyles.module.css';
 
 const AdminCharityManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -40,7 +41,7 @@ const AdminCharityManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/all-charities`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities`,
         {
           headers: getAuthHeaders(),
           params: { status: filter !== 'all' ? filter : undefined }
@@ -61,7 +62,7 @@ const AdminCharityManagement = () => {
     setActionLoading(true);
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${charityId}/approve`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/approve`,
         {},
         { headers: getAuthHeaders() }
       );
@@ -85,7 +86,7 @@ const AdminCharityManagement = () => {
     setActionLoading(true);
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/link-requests/${charityId}/reject`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/reject`,
         { reason: rejectionReason },
         { headers: getAuthHeaders() }
       );
@@ -106,7 +107,7 @@ const AdminCharityManagement = () => {
     setActionLoading(true);
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity/admin/send-email/${charityId}`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/send-email`,
         { emailType: type },
         { headers: getAuthHeaders() }
       );
@@ -122,18 +123,18 @@ const AdminCharityManagement = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { icon: FaClock, className: styles.pending, text: 'Pending Review' },
-      approved: { icon: FaCheckCircle, className: styles.approved, text: 'Approved' },
-      rejected: { icon: FaTimesCircle, className: styles.rejected, text: 'Rejected' },
-      active: { icon: FaCheckCircle, className: styles.active, text: 'Active' },
-      suspended: { icon: FaExclamationCircle, className: styles.suspended, text: 'Suspended' }
+      pending: { icon: FaClock, className: sharedStyles.badgeWarning, text: 'Pending Review' },
+      approved: { icon: FaCheckCircle, className: sharedStyles.badgeSuccess, text: 'Approved' },
+      rejected: { icon: FaTimesCircle, className: sharedStyles.badgeDanger, text: 'Rejected' },
+      active: { icon: FaCheckCircle, className: sharedStyles.badgeSuccess, text: 'Active' },
+      suspended: { icon: FaExclamationCircle, className: sharedStyles.badgeDanger, text: 'Suspended' }
     };
     
     const badge = badges[status] || badges.pending;
     const Icon = badge.icon;
     
     return (
-      <span className={`${styles.statusBadge} ${badge.className}`}>
+      <span className={`${sharedStyles.badge} ${badge.className}`}>
         <Icon /> {badge.text}
       </span>
     );
@@ -266,88 +267,89 @@ const AdminCharityManagement = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Charity Management</h1>
+    <div className={sharedStyles.adminContainer}>
+      <div className={sharedStyles.pageHeader}>
+        <h1 className={sharedStyles.pageTitle}>Charity Management</h1>
         <button
           onClick={() => navigate('/admin-dashboard')}
-          className={styles.backButton}
+          className={`${sharedStyles.button} ${sharedStyles.secondaryButton}`}
         >
           Back to Admin Dashboard
         </button>
       </div>
       
       {message.text && (
-        <div className={`${styles.message} ${styles[message.type]}`}>
+        <div className={`${sharedStyles.message} ${message.type === 'error' ? sharedStyles.messageError : sharedStyles.messageSuccess}`}>
           {message.text}
         </div>
       )}
       
-      <div className={styles.controls}>
-        <div className={styles.searchBar}>
-          <FaSearch className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search by name, email, or ABN..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
-          />
+      <div className={sharedStyles.card}>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <div className={sharedStyles.searchBar}>
+            <input
+              type="text"
+              placeholder="Search by name, email, or ABN..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={sharedStyles.searchInput}
+            />
+            <FaSearch className={sharedStyles.searchIcon} />
+          </div>
+          
+          <div className={sharedStyles.filters}>
+            <button
+              onClick={() => setFilter('all')}
+              className={`${sharedStyles.filterButton} ${filter === 'all' ? sharedStyles.active : ''}`}
+            >
+              All Charities
+            </button>
+            <button
+              onClick={() => setFilter('pending')}
+              className={`${sharedStyles.filterButton} ${filter === 'pending' ? sharedStyles.active : ''}`}
+            >
+              <FaClock /> Pending Review
+            </button>
+            <button
+              onClick={() => setFilter('approved')}
+              className={`${sharedStyles.filterButton} ${filter === 'approved' ? sharedStyles.active : ''}`}
+            >
+              <FaCheckCircle /> Approved
+            </button>
+            <button
+              onClick={() => setFilter('rejected')}
+              className={`${sharedStyles.filterButton} ${filter === 'rejected' ? sharedStyles.active : ''}`}
+            >
+              <FaTimesCircle /> Rejected
+            </button>
+          </div>
         </div>
-        
-        <div className={styles.filterButtons}>
-          <button
-            onClick={() => setFilter('all')}
-            className={`${styles.filterButton} ${filter === 'all' ? styles.active : ''}`}
-          >
-            All Charities
-          </button>
-          <button
-            onClick={() => setFilter('pending')}
-            className={`${styles.filterButton} ${filter === 'pending' ? styles.active : ''}`}
-          >
-            <FaClock /> Pending Review
-          </button>
-          <button
-            onClick={() => setFilter('approved')}
-            className={`${styles.filterButton} ${filter === 'approved' ? styles.active : ''}`}
-          >
-            <FaCheckCircle /> Approved
-          </button>
-          <button
-            onClick={() => setFilter('rejected')}
-            className={`${styles.filterButton} ${filter === 'rejected' ? styles.active : ''}`}
-          >
-            <FaTimesCircle /> Rejected
-          </button>
-        </div>
-      </div>
       
-      <div className={styles.stats}>
-        <div className={styles.statCard}>
+      <div className={sharedStyles.statsGrid}>
+        <div className={sharedStyles.statCard}>
           <h3><FaUsers /> Total Charities</h3>
           <p>{charities.length}</p>
         </div>
-        <div className={styles.statCard}>
+        <div className={sharedStyles.statCard}>
           <h3><FaClock /> Pending Review</h3>
           <p>{charities.filter(c => c.linkingStatus === 'pending').length}</p>
         </div>
-        <div className={styles.statCard}>
+        <div className={sharedStyles.statCard}>
           <h3><FaCheckCircle /> Approved</h3>
           <p>{charities.filter(c => c.linkingStatus === 'approved').length}</p>
         </div>
-        <div className={styles.statCard}>
+        <div className={sharedStyles.statCard}>
           <h3><FaCreditCard /> Active with Stripe</h3>
           <p>{charities.filter(c => c.stripeChargesEnabled).length}</p>
         </div>
       </div>
       
-      {loading ? (
-        <div className={styles.loading}>
-          <FaSpinner className={styles.spinner} />
-          <p>Loading charities...</p>
-        </div>
-      ) : (
+        {loading ? (
+          <div className={sharedStyles.loading}>
+            <FaSpinner className={sharedStyles.spinner} />
+            <p>Loading charities...</p>
+          </div>
+        ) : (
         <div className={styles.charityList}>
           {filteredCharities.map(charity => (
             <div key={charity._id} className={styles.charityCard}>
@@ -386,12 +388,14 @@ const AdminCharityManagement = () => {
           ))}
           
           {filteredCharities.length === 0 && (
-            <div className={styles.noResults}>
-              <p>No charities found matching your criteria</p>
+            <div className={sharedStyles.emptyState}>
+              <h3>No charities found</h3>
+              <p>Try adjusting your search or filter criteria</p>
             </div>
           )}
         </div>
-      )}
+        )}
+      </div>
       
       {showDetails && renderCharityDetails()}
     </div>

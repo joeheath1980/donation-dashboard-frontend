@@ -45,7 +45,7 @@ function BusinessSignup() {
       await businessSignup(formData);
       setSuccessMessage('Business registered successfully');
       setTimeout(() => {
-        navigate('/business-dashboard');
+        navigate('/business-onboarding');
       }, 2000);
     } catch (error) {
       console.error('Error during signup:', error);

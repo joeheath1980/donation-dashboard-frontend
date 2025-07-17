@@ -79,7 +79,7 @@ const CharityProfileEditor = () => {
   const fetchCharityProfile = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/charities/me`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`,
         { headers: getAuthHeaders() }
       );
       
@@ -174,7 +174,7 @@ const CharityProfileEditor = () => {
       }
 
       const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/charities/profile`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/profile`,
         formData,
         {
           headers: {

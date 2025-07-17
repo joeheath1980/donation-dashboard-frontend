@@ -9,7 +9,7 @@ import AdminAnalyticsReporting from './AdminAnalyticsReporting';
 import AdminContentManagement from './AdminContentManagement';
 import AdminCharityManagement from './AdminCharityManagement';
 import styles from './AdminDashboard.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const AdminDashboard = () => {
   return (
     <div className={styles.adminDashboard}>
       <div className={styles.header}>
-        <h1 className={`${styles.title} ${sharedStyles.gradientTitle}`}>Admin Dashboard</h1>
+        <h1 className={`${styles.title} gradientTitle`}>Admin Dashboard</h1>
         <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
       </div>
       <nav className={styles.nav}>

@@ -17,6 +17,41 @@ const setupAxiosDefaults = (token) => {
   }
 };
 
+// Add axios interceptor for token refresh
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const response = await axios.post(getApiUrl('/auth/refresh-token'), {
+            refreshToken
+          });
+          
+          const { accessToken } = response.data;
+          localStorage.setItem(STORAGE_KEYS.TOKEN, accessToken);
+          setupAxiosDefaults(accessToken);
+          
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return axios(originalRequest);
+        }
+      } catch (refreshError) {
+        logger.error('Token refresh failed', refreshError);
+        // Clear auth and redirect to login
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +70,10 @@ export const AuthProvider = ({ children }) => {
           } else if (userType === USER_TYPES.CHARITY) {
             response = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
             setUser({ ...response.data, isBusiness: false, isCharity: true });
+          } else if (userType === USER_TYPES.ADMIN) {
+            // For admin, try to get user profile from /api/users/me
+            response = await axios.get(getApiUrl('/users/me'));
+            setUser({ ...response.data, isAdmin: true, isBusiness: false, isCharity: false });
           } else {
             response = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
             setUser({ ...response.data, isBusiness: false, isCharity: false });
@@ -59,17 +98,43 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Regular user login
+  // Regular user login (also handles admin)
   const login = async (email, password) => {
     try {
       const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_LOGIN), { email, password });
-      const { token } = response.data;
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      
+      // Handle new token format
+      const { accessToken, refreshToken, user: userData, token } = response.data;
+      
+      // Use accessToken if available, fallback to token for backward compatibility
+      const authToken = accessToken || token;
+      
+      localStorage.setItem(STORAGE_KEYS.TOKEN, authToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+      
+      // Check if user is admin
+      if (userData && (userData.isAdmin || userData.role === USER_TYPES.ADMIN)) {
+        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.ADMIN);
+        setUser({ ...userData, isAdmin: true });
+        setupAxiosDefaults(authToken);
+        return userData;
+      }
+      
+      // Regular user flow
       localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
-      setupAxiosDefaults(token);
-      const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
-      setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
-      return userResponse.data;
+      setupAxiosDefaults(authToken);
+      
+      // If user data is in response, use it; otherwise fetch profile
+      if (userData) {
+        setUser({ ...userData, isBusiness: false, isCharity: false });
+        return userData;
+      } else {
+        const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+        setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
+        return userResponse.data;
+      }
     } catch (error) {
       logger.error('Login error', { message: error.message });
       throw error;

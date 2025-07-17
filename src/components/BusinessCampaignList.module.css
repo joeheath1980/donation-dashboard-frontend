@@ -1,0 +1,577 @@
+.container {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: #2c3e50;
+}
+
+.createButton {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.createButton:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Filters Section */
+.filtersSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filterGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.filterSelect,
+.searchInput {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.filterSelect:focus,
+.searchInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.searchInput {
+  min-width: 250px;
+}
+
+.sortControls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sortOrderButton {
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.sortOrderButton:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+/* Bulk Actions */
+.bulkActions {
+  background: #e3f2fd;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bulkActions span {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.bulkButton {
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bulkButton:hover {
+  background: #1976d2;
+  color: white;
+}
+
+.bulkButtonDanger {
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bulkButtonDanger:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Table Container */
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.campaignsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.campaignsTable thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.campaignsTable th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.campaignsTable tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background 0.2s ease;
+}
+
+.campaignsTable tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.campaignsTable td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+/* Campaign Info */
+.campaignInfo h3 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.campaignCharities {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.statusActive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusPaused {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusCompleted {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.statusDraft {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+/* Campaign Type */
+.campaignType {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Date Range */
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.dateSeparator {
+  color: #cbd5e0;
+}
+
+/* Budget Info */
+.budgetInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.budgetBar {
+  width: 120px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.budgetFill {
+  height: 100%;
+  background: #007bff;
+  transition: width 0.5s ease;
+}
+
+.budgetText {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Performance Metrics */
+.performanceMetrics {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metricValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 0.125rem;
+}
+
+.trendup {
+  color: #28a745;
+}
+
+.trenddown {
+  color: #dc3545;
+}
+
+.trendstable {
+  color: #6c757d;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.actionButton {
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.moreActions {
+  position: relative;
+}
+
+.moreButton {
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+}
+
+.moreButton:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  display: none;
+  z-index: 10;
+}
+
+.moreActions:hover .dropdown {
+  display: block;
+}
+
+.dropdown button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: background 0.2s ease;
+}
+
+.dropdown button:hover {
+  background: #f8f9fa;
+}
+
+.deleteButton {
+  color: #dc3545 !important;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.paginationButton {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pageNumber {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.pageNumber:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.pageNumber.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Summary Stats */
+.summaryStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.statCard h3 {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* Loading and Error States */
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem;
+  font-size: 18px;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.emptyState h3 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  color: #64748b;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .performanceMetrics {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .metric {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .createButton {
+    text-align: center;
+  }
+  
+  .filtersSection {
+    flex-direction: column;
+  }
+  
+  .filterGroup {
+    width: 100%;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .campaignsTable {
+    min-width: 800px;
+  }
+  
+  .summaryStats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
