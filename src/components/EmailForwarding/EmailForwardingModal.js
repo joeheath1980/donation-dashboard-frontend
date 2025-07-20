@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './EmailForwardingModal.module.css';
+import '../SharedStyles.css';
 
 const EmailForwardingModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);

@@ -1,9 +1,9 @@
 import React from 'react';
-import { FaCheckCircle, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaCheckCircle, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 import { format, parseISO, parse } from 'date-fns';
 import styles from './DonationsComponent.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 import { createLogger } from '../utils/logger';
 import DefaultBusinessLogo from './DefaultBusinessLogo';
 
@@ -31,7 +31,8 @@ const DonationItem = React.memo(({
   donation, 
   onEdit, 
   onDelete, 
-  onReceiptClick 
+  onReceiptClick,
+  onReceiptDownload 
 }) => {
   // Calculate total impact including matches
   const totalMatched = donation.matches ? 
@@ -41,8 +42,8 @@ const DonationItem = React.memo(({
 
   return (
     <div className={`${styles.donationCard} ${hasMatches ? styles.matchedDonation : ''}`}>
-      <div className={sharedStyles.cardHeader}>
-        <h3 className={sharedStyles.cardTitle}>
+      <div className="cardHeader">
+        <h3 className="cardTitle">
           {donation.charity}
           {hasMatches && (
             <span className={styles.matchBadge}>
@@ -50,7 +51,7 @@ const DonationItem = React.memo(({
             </span>
           )}
         </h3>
-        <div className={sharedStyles.validationButton}>
+        <div className="validationButton">
           <InstantTooltip text={donation.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
             <FaCheckCircle className={donation.receiptUrl ? styles.validationIcon : styles.validationIconPending} />
           </InstantTooltip>
@@ -83,7 +84,7 @@ const DonationItem = React.memo(({
         <p><strong>Date:</strong> {formatDate(donation.date)}</p>
         <p>
           <strong>Your Donation:</strong> ${donation.amount.toFixed(2)}
-          {donation.isMonthly && <span className={sharedStyles.highlight}> (Monthly)</span>}
+          {donation.isMonthly && <span className="highlight"> (Monthly)</span>}
         </p>
         
         {/* Impact Summary */}
@@ -105,7 +106,7 @@ const DonationItem = React.memo(({
             <strong>Receipt:</strong>
             <button
               onClick={() => onReceiptClick(donation.receiptUrl)}
-              className={sharedStyles.link}
+              className="link"
               style={{ 
                 background: 'none', 
                 border: 'none', 
@@ -119,12 +120,23 @@ const DonationItem = React.memo(({
           </p>
         )}
       </div>
-      <div className={sharedStyles.cardActions}>
+      <div className="cardActions">
         <InstantTooltip text="Edit donation">
           <button onClick={() => onEdit(donation)} className={styles.iconButton} aria-label="Edit Donation">
             <FaEdit />
           </button>
         </InstantTooltip>
+        {donation.receiptUrl && onReceiptDownload && (
+          <InstantTooltip text="Download receipt">
+            <button
+              onClick={() => onReceiptDownload(donation)}
+              className={styles.iconButton}
+              aria-label="Download Receipt"
+            >
+              <FaDownload />
+            </button>
+          </InstantTooltip>
+        )}
         <InstantTooltip text="Delete donation">
           <button
             onClick={() => onDelete(donation._id)}

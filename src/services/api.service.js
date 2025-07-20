@@ -147,6 +147,20 @@ export const donationService = {
   async deleteDonation(id) {
     const response = await apiClient.delete(`${API_ENDPOINTS.DONATIONS}/${id}`);
     return response.data;
+  },
+  
+  async downloadReceipt(donationId) {
+    const response = await apiClient.get(`${API_ENDPOINTS.DONATIONS}/${donationId}/receipt`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+  
+  async downloadBulkReceipts(params) {
+    const response = await apiClient.post(`${API_ENDPOINTS.DONATIONS}/bulk-receipts`, params, {
+      responseType: 'blob'
+    });
+    return response;
   }
 };
 
@@ -186,27 +200,28 @@ export const charityService = {
  * Payment API Service
  */
 export const paymentService = {
-  async getBraintreeToken() {
-    const response = await apiClient.get(API_ENDPOINTS.BRAINTREE_TOKEN);
-    return response.data;
-  },
-  
-  async processBraintreePayment(paymentMethodNonce, amount, charityId) {
-    const response = await apiClient.post(API_ENDPOINTS.BRAINTREE_CHECKOUT, {
-      paymentMethodNonce,
-      amount,
-      charityId
-    });
-    return response.data;
-  },
-  
-  async capturePayPalOrder(orderId, charityId) {
-    const response = await apiClient.post(API_ENDPOINTS.PAYPAL_CAPTURE, {
-      orderId,
-      charityId
-    });
-    return response.data;
-  }
+  // ARCHIVED: PayPal and Braintree methods - replaced with Stripe
+  // async getBraintreeToken() {
+  //   const response = await apiClient.get(API_ENDPOINTS.BRAINTREE_TOKEN);
+  //   return response.data;
+  // },
+  // 
+  // async processBraintreePayment(paymentMethodNonce, amount, charityId) {
+  //   const response = await apiClient.post(API_ENDPOINTS.BRAINTREE_CHECKOUT, {
+  //     paymentMethodNonce,
+  //     amount,
+  //     charityId
+  //   });
+  //   return response.data;
+  // },
+  // 
+  // async capturePayPalOrder(orderId, charityId) {
+  //   const response = await apiClient.post(API_ENDPOINTS.PAYPAL_CAPTURE, {
+  //     orderId,
+  //     charityId
+  //   });
+  //   return response.data;
+  // }
 };
 
 /**

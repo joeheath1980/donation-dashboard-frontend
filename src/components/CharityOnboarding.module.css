@@ -1,0 +1,432 @@
+/* Do-Nation design system variables */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+  --primary-gradient: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  --subtle-gradient: linear-gradient(135deg, #f8fafb 0%, #f0f4f7 100%);
+  --error-red: #ef5350;
+  --error-bg: #ffebee;
+  --error-border: #ffcdd2;
+}
+
+/* Main Container */
+.charityOnboarding {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 50px;
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(45, 143, 123, 0.08);
+  position: relative;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.charityOnboarding::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.charityOnboarding h2 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 40px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.onboardingContent {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Info Section */
+.infoSection {
+  background: var(--light-gray);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.infoSection::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(45, 143, 123, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.infoSection h3 {
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.infoSection ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.infoSection li {
+  padding: 12px 0;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  padding-left: 36px;
+}
+
+.infoSection li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--primary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoSection li::after {
+  content: '✓';
+  position: absolute;
+  left: 7px;
+  color: var(--white);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Charity Info */
+.charityInfo {
+  background: var(--white);
+  padding: 30px;
+  border-radius: 16px;
+  border: 2px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+.charityInfo:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 8px 24px rgba(45, 143, 123, 0.08);
+}
+
+.charityInfo h3 {
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.charityInfo p {
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.charityInfo p strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Error Message */
+.errorMessage {
+  color: var(--error-red);
+  background: var(--error-bg);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--error-border);
+  font-size: 0.95rem;
+  text-align: center;
+  font-weight: 500;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Link Section */
+.linkSection {
+  text-align: center;
+  padding: 35px;
+  background: var(--subtle-gradient);
+  border-radius: 16px;
+  border: 2px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.linkSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-gradient);
+}
+
+.linkSection p {
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.linkButton {
+  display: inline-block;
+  padding: 16px 40px;
+  background: var(--primary-gradient);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+
+.linkButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.linkButton:hover::before {
+  transform: translateX(0);
+}
+
+.linkButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45, 143, 123, 0.3);
+}
+
+.linkNote {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+/* Action Section */
+.actionSection {
+  text-align: center;
+  padding: 35px;
+}
+
+.setupButton {
+  padding: 16px 40px;
+  background: var(--primary-gradient);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 250px;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+
+.setupButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.setupButton:hover:not(:disabled)::before {
+  transform: translateX(0);
+}
+
+.setupButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45, 143, 123, 0.3);
+}
+
+.setupButton:disabled {
+  background: var(--medium-gray);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.setupButton:disabled:hover::before {
+  transform: translateX(-100%);
+}
+
+/* Security Note */
+.securityNote {
+  text-align: center;
+  padding: 20px;
+  background: var(--light-gray);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  margin-top: 10px;
+}
+
+.securityNote p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.securityNote p::before {
+  content: '🔒';
+  font-size: 1.2rem;
+}
+
+/* Loading State */
+.setupButton:disabled {
+  position: relative;
+}
+
+.setupButton:disabled::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  top: 0;
+  left: -30px;
+  bottom: 0;
+  right: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  border-top-color: var(--white);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .charityOnboarding {
+    padding: 35px 24px;
+    margin: 20px;
+    border-radius: 20px;
+  }
+  
+  .charityOnboarding h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+  
+  .infoSection,
+  .charityInfo,
+  .linkSection,
+  .actionSection {
+    padding: 24px;
+  }
+  
+  .infoSection h3,
+  .charityInfo h3 {
+    font-size: 1.2rem;
+  }
+  
+  .linkButton,
+  .setupButton {
+    width: 100%;
+    padding: 14px 24px;
+  }
+  
+  .infoSection li {
+    font-size: 1rem;
+    padding-left: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .charityOnboarding {
+    padding: 28px 20px;
+    margin: 16px;
+  }
+  
+  .charityOnboarding h2 {
+    font-size: 1.5rem;
+  }
+  
+  .onboardingContent {
+    gap: 20px;
+  }
+  
+  .infoSection,
+  .charityInfo,
+  .linkSection,
+  .actionSection {
+    padding: 20px;
+    border-radius: 12px;
+  }
+}

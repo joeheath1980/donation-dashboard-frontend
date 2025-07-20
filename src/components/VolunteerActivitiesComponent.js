@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile, FaHandsHelping } from 'react-icons/fa';
@@ -149,7 +149,7 @@ function VolunteerActivitiesComponent({ userId }) {
               value={newActivity.charityType}
               onChange={handleChange}
               required
-              className={sharedStyles.select}
+              className="select"
             >
               <option value="">Select a charity type</option>
               {CHARITY_TYPES.map(type => (
@@ -233,7 +233,7 @@ function VolunteerActivitiesComponent({ userId }) {
     <>
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <h2 className={`${styles.header} ${sharedStyles.gradientTitle}`}>
+          <h2 className={`${styles.header} gradientTitle`}>
             <FaHandsHelping className={styles.icon} /> Volunteer Activities
           </h2>
           <button 

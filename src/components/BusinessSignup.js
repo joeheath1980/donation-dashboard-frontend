@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './BusinessSignup.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 
 function BusinessSignup() {
   const navigate = useNavigate();
@@ -66,15 +66,15 @@ function BusinessSignup() {
   }
 
   return (
-    <div className={`${styles.container} ${sharedStyles.container}`}>
-      <div className={`${styles.card} ${sharedStyles.card}`}>
-        <h2 className={`${styles.title} ${sharedStyles.gradientTitle}`}>Business Signup</h2>
-        {error && <div className={`${styles.error} ${sharedStyles.error}`}>{error}</div>}
-        {successMessage && <div className={`${styles.success} ${sharedStyles.success}`}>{successMessage}</div>}
+    <div className={`${styles.container} container`}>
+      <div className={`${styles.card} card`}>
+        <h2 className={`${styles.title} gradientTitle`}>Business Signup</h2>
+        {error && <div className={`${styles.error} error`}>{error}</div>}
+        {successMessage && <div className={`${styles.success} success`}>{successMessage}</div>}
         
-        <form onSubmit={handleSubmit} className={`${styles.form} ${sharedStyles.flexColumn}`}>
+        <form onSubmit={handleSubmit} className={`${styles.form} flexColumn`}>
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} ${sharedStyles.description}`} htmlFor="companyName">Company Name</label>
+            <label className={`${styles.label} description`} htmlFor="companyName">Company Name</label>
             <input
               type="text"
               id="companyName"
@@ -87,7 +87,7 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} ${sharedStyles.description}`} htmlFor="contactEmail">Contact Email</label>
+            <label className={`${styles.label} description`} htmlFor="contactEmail">Contact Email</label>
             <input
               type="email"
               id="contactEmail"
@@ -100,7 +100,7 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} ${sharedStyles.description}`} htmlFor="password">Password</label>
+            <label className={`${styles.label} description`} htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -114,7 +114,7 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} ${sharedStyles.description}`} htmlFor="description">Company Description</label>
+            <label className={`${styles.label} description`} htmlFor="description">Company Description</label>
             <textarea
               id="description"
               name="description"
@@ -126,7 +126,7 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} ${sharedStyles.description}`} htmlFor="preferredCauses">Preferred Causes (Hold Ctrl/Cmd to select multiple)</label>
+            <label className={`${styles.label} description`} htmlFor="preferredCauses">Preferred Causes (Hold Ctrl/Cmd to select multiple)</label>
             <select
               multiple
               id="preferredCauses"
@@ -148,7 +148,7 @@ function BusinessSignup() {
 
           <button 
             type="submit" 
-            className={`${styles.button} ${sharedStyles.button}`}
+            className={`${styles.button} button`}
             disabled={loading}
           >
             {loading ? 'Signing Up...' : 'Sign Up'}

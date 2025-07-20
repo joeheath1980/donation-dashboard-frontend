@@ -1,0 +1,442 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h1 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #666;
+}
+
+/* Search Section */
+.searchSection {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.searchBar {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 20px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 20px 16px 56px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+/* Type Filters */
+.typeFilters {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.typeButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #f5f5f5;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.typeButton:hover {
+  background: #e8e8e8;
+}
+
+.typeButton.active {
+  background: #e8f5e9;
+  border-color: #4CAF50;
+  color: #2e7d32;
+}
+
+.typeButton svg {
+  font-size: 18px;
+}
+
+/* Results */
+.results {
+  min-height: 400px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.3;
+}
+
+.emptyState h3 {
+  font-size: 24px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.emptyState p {
+  font-size: 16px;
+}
+
+/* Result Sections */
+.resultSection {
+  margin-bottom: 48px;
+}
+
+.resultSection h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+/* User Grid */
+.userGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.userCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.userHeader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+}
+
+.userInfo h3 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.username {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.userStats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tierBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.score svg {
+  color: #FFD700;
+}
+
+/* Business Grid */
+.businessGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.businessCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.businessCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.businessHeader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.businessLogo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.logoPlaceholder {
+  width: 60px;
+  height: 60px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 24px;
+}
+
+.businessInfo h3 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.industry {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.businessStats {
+  display: flex;
+  gap: 20px;
+}
+
+/* Charity Grid */
+.charityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.charityCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.charityCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.charityHeader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.charityLogo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  padding: 8px;
+  background: #fff0f0;
+  border-radius: 8px;
+}
+
+.charityInfo h3 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.category {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.charityStats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.stat svg {
+  color: #999;
+}
+
+.dgrBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* No Results */
+.noResults {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.noResults h3 {
+  font-size: 24px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.noResults p {
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header h1 {
+    font-size: 28px;
+  }
+  
+  .searchSection {
+    padding: 24px;
+  }
+  
+  .typeFilters {
+    flex-wrap: wrap;
+  }
+  
+  .typeButton {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .userGrid,
+  .businessGrid,
+  .charityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchInput {
+    font-size: 16px;
+    padding: 14px 14px 14px 48px;
+  }
+  
+  .searchIcon {
+    left: 16px;
+    font-size: 18px;
+  }
+  
+  .typeButton span {
+    display: none;
+  }
+  
+  .typeButton {
+    padding: 12px;
+  }
+}

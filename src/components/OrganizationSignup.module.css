@@ -31,8 +31,8 @@
 
 .logo {
   display: block;
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   margin: 0 auto 40px;
   object-fit: contain;
 }
@@ -264,8 +264,8 @@
   }
 
   .logo {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     margin-bottom: 32px;
   }
 }

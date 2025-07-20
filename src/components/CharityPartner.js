@@ -37,8 +37,90 @@ function CharityPartner() {
 
       if (response.data?.charity) {
         console.log('[CharityPartner] Setting charity data:', response.data.charity);
-        setCharity(response.data.charity);
-        setPrograms(response.data.programs || []);
+        
+        // Map the new API response structure to the expected format
+        const mappedCharity = {
+          ABN: response.data.charity.basicInfo?.ABN,
+          Charity_Legal_Name: response.data.charity.basicInfo?.legalName,
+          Other_Organisation_Names: response.data.charity.basicInfo?.otherNames,
+          Charity_Size: response.data.charity.basicInfo?.size,
+          Date_Organisation_Established: response.data.charity.basicInfo?.establishedDate,
+          Registration_Date: response.data.charity.basicInfo?.registrationDate,
+          Financial_Year_End: response.data.charity.basicInfo?.financialYearEnd,
+          Registration_Status: response.data.charity.registrationInfo?.status || 'Registered',
+          Charity_Type: response.data.charity.registrationInfo?.type,
+          Legal_Structure: response.data.charity.registrationInfo?.subtype,
+          Number_of_Responsible_Persons: response.data.charity.registrationInfo?.responsiblePersons,
+          ACN: response.data.charity.registrationInfo?.acn,
+          
+          // Contact Info
+          Address_Type: response.data.charity.contactInfo?.addressType,
+          Address_Line_1: response.data.charity.contactInfo?.addressLine1,
+          Address_Line_2: response.data.charity.contactInfo?.addressLine2,
+          Address_Line_3: response.data.charity.contactInfo?.addressLine3,
+          Town_City: response.data.charity.contactInfo?.city,
+          State: response.data.charity.contactInfo?.state,
+          Postcode: response.data.charity.contactInfo?.postcode,
+          Country: response.data.charity.contactInfo?.country,
+          Website: response.data.charity.basicInfo?.website,
+          
+          // Operating Locations
+          Operates_in_ACT: response.data.charity.operatingLocations?.states?.ACT ? 'Y' : 'N',
+          Operates_in_NSW: response.data.charity.operatingLocations?.states?.NSW ? 'Y' : 'N',
+          Operates_in_NT: response.data.charity.operatingLocations?.states?.NT ? 'Y' : 'N',
+          Operates_in_QLD: response.data.charity.operatingLocations?.states?.QLD ? 'Y' : 'N',
+          Operates_in_SA: response.data.charity.operatingLocations?.states?.SA ? 'Y' : 'N',
+          Operates_in_TAS: response.data.charity.operatingLocations?.states?.TAS ? 'Y' : 'N',
+          Operates_in_VIC: response.data.charity.operatingLocations?.states?.VIC ? 'Y' : 'N',
+          Operates_in_WA: response.data.charity.operatingLocations?.states?.WA ? 'Y' : 'N',
+          Operating_Countries: response.data.charity.operatingLocations?.operatingCountries,
+          
+          // Beneficiaries
+          Aboriginal_or_TSI: response.data.charity.beneficiaries?.aboriginalOrTSI ? 'Y' : 'N',
+          Adults: response.data.charity.beneficiaries?.adults ? 'Y' : 'N',
+          Aged_Persons: response.data.charity.beneficiaries?.agedPersons ? 'Y' : 'N',
+          Children: response.data.charity.beneficiaries?.children ? 'Y' : 'N',
+          Early_Childhood: response.data.charity.beneficiaries?.earlyChildhood ? 'Y' : 'N',
+          Families: response.data.charity.beneficiaries?.families ? 'Y' : 'N',
+          Youth: response.data.charity.beneficiaries?.youth ? 'Y' : 'N',
+          Females: response.data.charity.beneficiaries?.females ? 'Y' : 'N',
+          Males: response.data.charity.beneficiaries?.males ? 'Y' : 'N',
+          Financially_Disadvantaged: response.data.charity.beneficiaries?.financiallyDisadvantaged ? 'Y' : 'N',
+          Migrants_Refugees_or_Asylum_Seekers: response.data.charity.beneficiaries?.migrants ? 'Y' : 'N',
+          People_at_risk_of_homelessness: response.data.charity.beneficiaries?.homeless ? 'Y' : 'N',
+          People_with_Disabilities: response.data.charity.beneficiaries?.peopleWithDisabilities ? 'Y' : 'N',
+          Rural_Regional_Remote_Communities: response.data.charity.beneficiaries?.ruralCommunities ? 'Y' : 'N',
+          Veterans_or_their_families: response.data.charity.beneficiaries?.veterans ? 'Y' : 'N',
+          Victims_of_Disasters: response.data.charity.beneficiaries?.victimsOfDisasters ? 'Y' : 'N',
+          Other_Beneficiaries: response.data.charity.beneficiaries?.otherBeneficiariesDescription,
+          
+          // Tax Status
+          PBI: response.data.charity.taxStatus?.isPBI ? 'Y' : 'N',
+          HPC: response.data.charity.taxStatus?.isHPC ? 'Y' : 'N',
+          
+          // Activities
+          Main_Activity: response.data.charity.activities?.primaryActivity,
+          
+          // Financial Info
+          Last_AIS_Fin_Year: response.data.charity.financialInfo?.lastAISYear,
+          Total_Revenue_AIS: response.data.charity.financialInfo?.revenue,
+          Total_Expenses_AIS: response.data.charity.financialInfo?.expenses,
+          Donated_funds: response.data.charity.financialInfo?.donatedFunds,
+          Government_grants: response.data.charity.financialInfo?.governmentGrants,
+          Staff_FTE: response.data.charity.financialInfo?.staffFTE,
+          Staff_Volunteers: response.data.charity.financialInfo?.volunteers,
+          
+          // Enhanced data
+          purposes: response.data.charity.charitablePurposes?.activePurposes || [],
+          activities: response.data.charity.activities?.allActivities || [],
+          beneficiaryDetails: {
+            conditions: response.data.charity.beneficiaries?.conditions || []
+          },
+          logo: response.data.charity.basicInfo?.logo
+        };
+        
+        setCharity(mappedCharity);
+        setPrograms(response.data.charity.programs || response.data.programs || []);
       } else {
         console.error('[CharityPartner] No charity data in response');
         setError('Charity not found. Please check the ID and try again.');
@@ -485,15 +567,31 @@ function CharityPartner() {
             <h2 className={styles.sectionHeader}>Our Programs</h2>
             <div className={styles.programsGrid}>
               {programs.map((program, index) => (
-                <div key={index} className={styles.programCard}>
-                  <h3>{program.title}</h3>
-                  <p>{program.description}</p>
-                  {program.impact && (
-                    <div className={styles.impactMetrics}>
-                      <h4>Impact</h4>
-                      <p>{program.impact}</p>
+                <div key={program.id || index} className={styles.programCard}>
+                  <h3>{program.name || 'Unnamed Program'}</h3>
+                  {program.classification && (
+                    <div className={styles.programClassification}>
+                      <strong>Classification:</strong> {program.classification}
                     </div>
                   )}
+                  {program.beneficiaries && (
+                    <div className={styles.programBeneficiaries}>
+                      <strong>Beneficiaries:</strong> {program.beneficiaries}
+                    </div>
+                  )}
+                  {program.operatingLocations && program.operatingLocations.length > 0 && (
+                    <div className={styles.programLocations}>
+                      <strong>Locations:</strong> {program.operatingLocations.join(', ')}
+                    </div>
+                  )}
+                  <div className={styles.programFlags}>
+                    {program.operatingOnline && (
+                      <span className={styles.onlineFlag}>🌐 Online</span>
+                    )}
+                    {program.operatingOverseas && (
+                      <span className={styles.overseasFlag}>🌍 International</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
