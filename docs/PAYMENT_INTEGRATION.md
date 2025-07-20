@@ -1,37 +1,43 @@
 # Payment Integration Documentation
 
 ## Overview
-The Donation Dashboard integrates two major payment processors - Braintree (for credit/debit cards) and PayPal - to provide flexible payment options for charitable donations. This document covers the complete payment flow, implementation details, and security considerations.
+The Do-Nation platform uses **Stripe** as its primary payment processor to handle charitable donations. This document covers the complete payment flow, implementation details, security considerations, and Stripe Connect integration for charity payouts.
 
 ## Table of Contents
 1. [Payment Architecture](#payment-architecture)
-2. [Braintree Integration](#braintree-integration)
-3. [PayPal Integration](#paypal-integration)
-4. [Payment Flow](#payment-flow)
+2. [Stripe Integration](#stripe-integration)
+3. [Payment Flow](#payment-flow)
+4. [Stripe Connect for Charities](#stripe-connect-for-charities)
 5. [Security Measures](#security-measures)
-6. [Testing Guide](#testing-guide)
-7. [Error Handling](#error-handling)
-8. [Best Practices](#best-practices)
+6. [Webhook Integration](#webhook-integration)
+7. [Testing Guide](#testing-guide)
+8. [Error Handling](#error-handling)
+9. [Platform Fees](#platform-fees)
 
 ## Payment Architecture
 
 ### Core Components
 
-1. **ManagePaymentsComponent.js** - Main payment interface
-   - Location: `/src/components/Donations/ManagePaymentsComponent.js`
-   - Handles payment method selection
-   - Manages amount input and charity selection
-   - Integrates both payment providers
+1. **Stripe Configuration** (`/src/config/stripe.js`)
+   - Centralized Stripe SDK initialization
+   - API key management
+   - Currency configuration
 
-2. **DonationModal.js** - Donation recording interface
-   - Location: `/src/components/Donations/DonationModal.js`
-   - Records donation details after payment
-   - Handles receipt uploads
-   - Manages recurring donation settings
+2. **Payment Routes** (`/src/routes/stripeRoutes.js`)
+   - Payment intent creation
+   - Payment method management
+   - Refund processing
+   - Receipt generation
 
-3. **Payment Providers**
-   - Braintree Web Drop-in React
-   - React PayPal JS SDK
+3. **Stripe Connect Routes** (`/src/routes/stripeConnectRoutes.js`)
+   - Charity onboarding
+   - Account verification
+   - Payout management
+
+4. **Webhook Handler** (`/src/routes/stripeWebhooks.js`)
+   - Payment confirmation
+   - Failed payment handling
+   - Refund notifications
 
 ### System Architecture
 
@@ -40,408 +46,459 @@ The Donation Dashboard integrates two major payment processors - Braintree (for 
 │                   Frontend (React)                   │
 ├─────────────────────────────────────────────────────┤
 │  ┌─────────────────┐    ┌─────────────────────┐   │
-│  │ ManagePayments  │    │   DonationModal     │   │
-│  │   Component     │    │                     │   │
-│  │                 │    │ - Record donation   │   │
-│  │ - Amount input  │    │ - Upload receipt    │   │
-│  │ - Charity select│    │ - Set recurring     │   │
-│  │ - Payment UI    │    │                     │   │
+│  │ Donation Form   │    │ Payment Methods     │   │
+│  │                 │    │ Management          │   │
+│  │ - Amount input  │    │ - Save cards        │   │
+│  │ - Charity select│    │ - Remove cards      │   │
+│  │ - Payment UI    │    │ - Set default       │   │
 │  └────────┬────────┘    └─────────────────────┘   │
 │           │                                         │
 │  ┌────────┴────────────────────────────┐          │
-│  │         Payment Providers           │          │
-│  ├──────────────────┬──────────────────┤          │
-│  │    Braintree     │     PayPal       │          │
-│  │   Drop-in UI     │    JS SDK        │          │
-│  └──────────────────┴──────────────────┘          │
-└─────────────────────┬───────────────────────────────┘
+│  │     Stripe Elements/SDK             │          │
+│  │  - Card input                       │          │
+│  │  - Payment processing               │          │
+│  │  - 3D Secure handling               │          │
+│  └──────────────────┬──────────────────┘          │
+└─────────────────────┴───────────────────────────────┘
                       │ API Calls
 ┌─────────────────────┴───────────────────────────────┐
-│                  Backend API                         │
+│                  Backend API (Node.js)               │
 ├─────────────────────────────────────────────────────┤
 │  ┌─────────────────┐    ┌─────────────────────┐   │
-│  │   Braintree     │    │      PayPal         │   │
-│  │   Endpoints     │    │    Endpoints        │   │
-│  │                 │    │                     │   │
-│  │ - Client token  │    │ - Create order      │   │
-│  │ - Process       │    │ - Capture order     │   │
-│  │   payment       │    │                     │   │
+│  │ Stripe Routes   │    │ Stripe Connect      │   │
+│  │                 │    │ Routes              │   │
+│  │ - Create PI     │    │ - Onboard charity   │   │
+│  │ - Process       │    │ - Verify account    │   │
+│  │ - Refund        │    │ - Transfer funds    │   │
 │  └────────┬────────┘    └──────────┬──────────┘   │
 │           │                         │               │
-└───────────┴─────────────────────────┴───────────────┘
-            │                         │
-┌───────────┴───────────┐ ┌───────────┴───────────┐
-│   Braintree Gateway   │ │    PayPal Gateway     │
-└───────────────────────┘ └───────────────────────┘
+│  ┌────────┴─────────────────────────┴──────────┐  │
+│  │           Stripe Configuration               │  │
+│  │         Platform fee calculation             │  │
+│  │          Currency management                 │  │
+│  └──────────────────┬──────────────────────────┘  │
+└─────────────────────┴───────────────────────────────┘
+                      │
+         ┌────────────┴────────────┐
+         │    Stripe Platform      │
+         │  - Payment processing   │
+         │  - Connect accounts     │
+         │  - Webhook events       │
+         └─────────────────────────┘
 ```
 
-## Braintree Integration
+## Stripe Integration
 
-### Setup and Configuration
+### Configuration
 
 ```javascript
-import DropIn from "braintree-web-drop-in-react";
+// src/config/stripe.js
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Component state
-const [clientToken, setClientToken] = useState(null);
-const [instance, setInstance] = useState(null);
+// Platform fee configuration
+const PLATFORM_FEE_PERCENTAGE = process.env.PLATFORM_FEE_PERCENTAGE || 2.9;
 
-// Fetch client token on mount
-useEffect(() => {
-  const fetchClientToken = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL}/api/braintree/client_token`
-      );
-      setClientToken(response.data.clientToken);
-    } catch (error) {
-      console.error("Error fetching client token:", error);
-    }
-  };
-  fetchClientToken();
-}, []);
+// Supported currencies
+const SUPPORTED_CURRENCIES = ['usd', 'cad', 'eur', 'gbp', 'aud'];
+
+module.exports = { stripe, PLATFORM_FEE_PERCENTAGE, SUPPORTED_CURRENCIES };
 ```
 
-### Braintree Drop-in UI Implementation
+### Payment Intent Creation
 
 ```javascript
-{clientToken && (
-  <DropIn
-    options={{
-      authorization: clientToken,
-      paypal: {
-        flow: "vault"
-      }
-    }}
-    onInstance={(instance) => setInstance(instance)}
-  />
-)}
-```
-
-### Payment Processing
-
-```javascript
-const handleBraintreePayment = async () => {
+// Create payment intent endpoint
+router.post('/create-payment-intent', async (req, res) => {
+  const { amount, currency = 'usd', charityId, savePaymentMethod } = req.body;
+  
   try {
-    // Request payment method from Drop-in UI
-    const { nonce } = await instance.requestPaymentMethod();
-    
-    // Send nonce to backend
-    const response = await axios.post(
-      `${process.env.REACT_APP_API_BASE_URL}/api/braintree/checkout`,
-      {
-        paymentMethodNonce: nonce,
-        amount: donationAmount,
-        charityId: selectedCharity
-      }
-    );
-    
-    if (response.data.success) {
-      alert("Payment successful!");
-      // Record donation in system
-      // Navigate to success page
+    // Fetch charity's Stripe account
+    const charity = await Charity.findById(charityId);
+    if (!charity.stripeAccountId) {
+      return res.status(400).json({ error: 'Charity not setup for payments' });
     }
-  } catch (error) {
-    console.error("Payment failed:", error);
-    alert("Payment failed. Please try again.");
-  }
-};
-```
-
-### Test Credit Card Numbers
-
-For development and testing:
-```
-Valid Cards:
-- 4111111111111111 (Visa)
-- 5555555555554444 (Mastercard)
-- 378282246310005 (American Express)
-
-Invalid Cards:
-- 4000111111111115 (Processor declined)
-- 4000000000000002 (Luhn invalid)
-
-3D Secure:
-- 4000000000001091 (Authentication required)
-```
-
-## PayPal Integration
-
-### Setup and Configuration
-
-```javascript
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-
-// PayPal Script Provider wrapper
-<PayPalScriptProvider
-  options={{
-    "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID,
-    currency: "USD"
-  }}
->
-  {/* PayPal buttons component */}
-</PayPalScriptProvider>
-```
-
-### PayPal Buttons Implementation
-
-```javascript
-<PayPalButtons
-  disabled={!donationAmount || !selectedCharity}
-  forceReRender={[donationAmount, selectedCharity]}
-  fundingSource={undefined}
-  createOrder={(data, actions) => {
-    return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: donationAmount,
-            currency_code: "USD",
-          },
-          description: `Donation to ${selectedCharityName}`,
-        },
-      ],
-      application_context: {
-        shipping_preference: "NO_SHIPPING",
+    
+    // Calculate platform fee
+    const platformFee = Math.round(amount * PLATFORM_FEE_PERCENTAGE / 100);
+    
+    // Create payment intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      application_fee_amount: platformFee,
+      transfer_data: {
+        destination: charity.stripeAccountId,
       },
-    });
-  }}
-  onApprove={async (data, actions) => {
-    try {
-      // Capture the order
-      const order = await actions.order.capture();
-      
-      // Send order details to backend
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/paypal/capture-order`,
-        {
-          orderId: order.id,
-          charityId: selectedCharity,
-        }
-      );
-      
-      if (response.data.success) {
-        alert("PayPal payment successful!");
-        // Record donation
-        // Navigate to success
+      metadata: {
+        charityId,
+        donorId: req.user?.id,
+        type: 'donation'
       }
-    } catch (error) {
-      console.error("PayPal capture failed:", error);
-      alert("Payment capture failed");
+    });
+    
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+```
+
+### Saved Payment Methods
+
+```javascript
+// Save payment method for future use
+router.post('/save-payment-method', async (req, res) => {
+  const { paymentMethodId } = req.body;
+  
+  try {
+    // Attach payment method to customer
+    await stripe.paymentMethods.attach(paymentMethodId, {
+      customer: req.user.stripeCustomerId,
+    });
+    
+    // Set as default if requested
+    if (req.body.setAsDefault) {
+      await stripe.customers.update(req.user.stripeCustomerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId,
+        },
+      });
     }
-  }}
-  onError={(err) => {
-    console.error("PayPal error:", err);
-    alert("PayPal payment failed");
-  }}
-/>
+    
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 ```
 
 ## Payment Flow
 
-### Complete Payment Process
+### Complete Donation Process
 
 ```mermaid
 graph TD
-    A[User Enters Amount] --> B{Select Charity}
-    B --> C{Choose Payment Method}
-    C -->|Credit Card| D[Braintree Drop-in UI]
-    C -->|PayPal| E[PayPal Checkout]
-    
-    D --> F[Enter Card Details]
-    F --> G[Generate Payment Nonce]
-    G --> H[Send to Backend]
-    
-    E --> I[PayPal Login]
-    I --> J[Approve Payment]
-    J --> K[Capture Order]
-    
-    H --> L[Process Payment]
-    K --> L
-    
-    L --> M{Payment Success?}
-    M -->|Yes| N[Record Donation]
-    M -->|No| O[Show Error]
-    
-    N --> P[Update Impact Score]
-    P --> Q[Show Success Message]
-    
-    O --> R[Allow Retry]
+    A[User Selects Amount/Charity] --> B[Create Payment Intent]
+    B --> C[Frontend Receives Client Secret]
+    C --> D[User Enters Card Details]
+    D --> E[Stripe Processes Payment]
+    E --> F{3D Secure Required?}
+    F -->|Yes| G[3D Secure Challenge]
+    F -->|No| H[Payment Confirmed]
+    G --> I{3D Secure Success?}
+    I -->|Yes| H
+    I -->|No| J[Payment Failed]
+    H --> K[Webhook Confirmation]
+    K --> L[Create Donation Record]
+    L --> M[Transfer to Charity]
+    M --> N[Update Impact Scores]
+    N --> O[Send Confirmation Email]
+    J --> P[Show Error Message]
 ```
 
 ### API Endpoints
 
-#### Braintree Endpoints
+#### Payment Endpoints (`/api/stripe/*`)
 ```javascript
-// Get client token
-GET /api/braintree/client_token
-Response: { clientToken: "eyJ2ZXJzaW9uIjoyLC..." }
-
-// Process payment
-POST /api/braintree/checkout
+// Create payment intent
+POST /api/stripe/create-payment-intent
 Body: {
-  paymentMethodNonce: "tokencc_bf_xyz...",
-  amount: "50.00",
-  charityId: "charity123"
+  amount: 5000, // Amount in cents
+  currency: "usd",
+  charityId: "charity_123",
+  savePaymentMethod: true
 }
-Response: { 
-  success: true,
-  transaction: { id: "trans_123", status: "submitted_for_settlement" }
+
+// Process refund
+POST /api/stripe/process-refund
+Body: {
+  donationId: "donation_123",
+  amount: 5000, // Optional partial refund
+  reason: "requested_by_customer"
 }
+
+// Get payment methods
+GET /api/stripe/payment-methods
+
+// Delete payment method
+DELETE /api/stripe/payment-methods/:id
+
+// Generate receipt
+GET /api/stripe/receipt/:donationId
 ```
 
-#### PayPal Endpoints
+## Stripe Connect for Charities
+
+### Charity Onboarding Flow
+
+1. **Account Creation**
 ```javascript
-// Capture order
-POST /api/paypal/capture-order
-Body: {
-  orderId: "ORDER-123456789",
-  charityId: "charity123"
-}
-Response: { 
-  success: true,
-  captureId: "CAPTURE-123456789"
-}
+router.post('/create-connect-account', async (req, res) => {
+  const { charityId } = req.body;
+  
+  const account = await stripe.accounts.create({
+    type: 'express',
+    country: 'US',
+    capabilities: {
+      card_payments: { requested: true },
+      transfers: { requested: true },
+    },
+    metadata: {
+      charityId
+    }
+  });
+  
+  // Save account ID to charity record
+  await Charity.findByIdAndUpdate(charityId, {
+    stripeAccountId: account.id
+  });
+  
+  res.json({ accountId: account.id });
+});
+```
+
+2. **Onboarding Link Generation**
+```javascript
+router.post('/create-account-link', async (req, res) => {
+  const { accountId, refreshUrl, returnUrl } = req.body;
+  
+  const accountLink = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: refreshUrl,
+    return_url: returnUrl,
+    type: 'account_onboarding',
+  });
+  
+  res.json({ url: accountLink.url });
+});
+```
+
+3. **Account Verification**
+```javascript
+router.get('/account-status/:accountId', async (req, res) => {
+  const account = await stripe.accounts.retrieve(req.params.accountId);
+  
+  res.json({
+    detailsSubmitted: account.details_submitted,
+    chargesEnabled: account.charges_enabled,
+    payoutsEnabled: account.payouts_enabled,
+    requirements: account.requirements
+  });
+});
 ```
 
 ## Security Measures
 
 ### PCI Compliance
-
-1. **No Card Data Storage**: Credit card details never touch our servers
-2. **Tokenization**: All payments use tokens/nonces instead of raw card data
-3. **SSL/TLS**: All payment communications encrypted in transit
-4. **Hosted Fields**: Payment forms hosted by payment providers
+- **No Card Storage**: Card details never touch our servers
+- **Tokenization**: All payments use Stripe tokens
+- **SSL/TLS**: All payment communications encrypted
+- **Stripe Elements**: Secure, PCI-compliant card input
 
 ### Implementation Security
 
 ```javascript
-// Validate amount on frontend
-const validateAmount = (amount) => {
-  const numAmount = parseFloat(amount);
-  return !isNaN(numAmount) && numAmount > 0 && numAmount <= 10000;
-};
+// Webhook signature verification
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// Sanitize inputs
-const sanitizeInput = (input) => {
-  return input.replace(/[<>]/g, '');
-};
-
-// Secure headers for API calls
-const secureHeaders = {
-  'Content-Type': 'application/json',
-  'X-Requested-With': 'XMLHttpRequest',
-  'Authorization': `Bearer ${token}`
-};
+router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  
+  try {
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      endpointSecret
+    );
+    
+    // Handle event
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        await handlePaymentSuccess(event.data.object);
+        break;
+      case 'payment_intent.payment_failed':
+        await handlePaymentFailure(event.data.object);
+        break;
+      // ... other events
+    }
+    
+    res.json({ received: true });
+  } catch (err) {
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
 ```
 
-### Backend Validation
+### Input Validation
 
 ```javascript
-// Example backend validation (conceptual)
-const validatePaymentRequest = (req) => {
-  const { amount, charityId, paymentMethodNonce } = req.body;
+// Amount validation middleware
+const validateAmount = (req, res, next) => {
+  const { amount } = req.body;
   
-  // Validate amount
-  if (!amount || parseFloat(amount) <= 0) {
-    throw new Error('Invalid amount');
+  if (!amount || amount < 100) { // Minimum $1.00
+    return res.status(400).json({ error: 'Invalid amount' });
   }
   
-  // Validate charity exists
-  if (!isValidCharity(charityId)) {
-    throw new Error('Invalid charity');
+  if (amount > 999999) { // Maximum $9,999.99
+    return res.status(400).json({ error: 'Amount exceeds maximum' });
   }
   
-  // Validate nonce format
-  if (!isValidNonce(paymentMethodNonce)) {
-    throw new Error('Invalid payment method');
+  next();
+};
+
+// Charity validation
+const validateCharity = async (req, res, next) => {
+  const { charityId } = req.body;
+  
+  const charity = await Charity.findById(charityId);
+  if (!charity || !charity.stripeAccountId) {
+    return res.status(400).json({ error: 'Invalid charity' });
   }
   
-  return true;
+  req.charity = charity;
+  next();
 };
 ```
+
+## Webhook Integration
+
+### Event Handling
+
+```javascript
+// src/routes/stripeWebhooks.js
+const handlePaymentSuccess = async (paymentIntent) => {
+  const { metadata } = paymentIntent;
+  
+  // Create donation record
+  const donation = new Donation({
+    donor: metadata.donorId,
+    charity: metadata.charityId,
+    amount: paymentIntent.amount,
+    currency: paymentIntent.currency,
+    stripePaymentIntentId: paymentIntent.id,
+    stripeChargeId: paymentIntent.latest_charge,
+    paymentStatus: 'succeeded',
+    platformFee: paymentIntent.application_fee_amount,
+    netAmount: paymentIntent.amount - paymentIntent.application_fee_amount
+  });
+  
+  await donation.save();
+  
+  // Update impact scores
+  await updateCharityImpactScore(metadata.charityId);
+  await updateDonorImpactScore(metadata.donorId);
+  
+  // Send confirmation email
+  await sendDonationConfirmation(donation);
+};
+
+const handlePaymentFailure = async (paymentIntent) => {
+  // Log failure
+  logger.error('Payment failed:', {
+    paymentIntentId: paymentIntent.id,
+    error: paymentIntent.last_payment_error
+  });
+  
+  // Update donation record if exists
+  await Donation.findOneAndUpdate(
+    { stripePaymentIntentId: paymentIntent.id },
+    { paymentStatus: 'failed' }
+  );
+};
+```
+
+### Webhook Events
+
+Key events handled:
+- `payment_intent.succeeded` - Payment completed
+- `payment_intent.payment_failed` - Payment failed
+- `charge.refunded` - Refund processed
+- `account.updated` - Connect account status change
+- `transfer.created` - Funds transferred to charity
 
 ## Testing Guide
 
-### Development Environment Setup
+### Test Mode Setup
 
-1. **Environment Variables**
 ```bash
-# .env.local
-REACT_APP_API_BASE_URL=http://localhost:3002
-REACT_APP_PAYPAL_CLIENT_ID=your_sandbox_client_id
-REACT_APP_BRAINTREE_MERCHANT_ID=your_sandbox_merchant_id
+# .env.development
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_test_...
 ```
 
-2. **Sandbox Accounts**
-- Braintree: https://sandbox.braintreegateway.com
-- PayPal: https://developer.paypal.com/developer/accounts
+### Test Cards
 
-### Test Scenarios
-
-#### Successful Payment Flow
 ```javascript
-// Test data
-const testPayment = {
-  amount: "25.00",
-  charity: "Red Cross",
-  cardNumber: "4111111111111111",
-  expiry: "12/25",
-  cvv: "123"
-};
+// Successful payment
+4242 4242 4242 4242 (Visa)
+5555 5555 5555 4444 (Mastercard)
 
-// Expected: Payment processes successfully
+// 3D Secure required
+4000 0025 0000 3155
+
+// Declined cards
+4000 0000 0000 9995 (Insufficient funds)
+4000 0000 0000 0002 (Generic decline)
+
+// Error testing
+4000 0000 0000 0119 (Processing error)
 ```
-
-#### Failed Payment Scenarios
-1. **Insufficient Funds**
-   - Card: 4000111111111115
-   - Expected: "Insufficient Funds" error
-
-2. **Invalid Card**
-   - Card: 4000000000000002
-   - Expected: "Invalid card number" error
-
-3. **Network Timeout**
-   - Simulate slow network
-   - Expected: Timeout error with retry option
 
 ### Integration Testing
 
 ```javascript
-// Example integration test
-describe('Payment Integration', () => {
-  it('should process Braintree payment successfully', async () => {
-    // Mock client token response
-    axios.get.mockResolvedValueOnce({ 
-      data: { clientToken: 'mock_token' } 
+describe('Stripe Payment Integration', () => {
+  it('should create payment intent successfully', async () => {
+    const response = await request(app)
+      .post('/api/stripe/create-payment-intent')
+      .send({
+        amount: 5000,
+        currency: 'usd',
+        charityId: testCharity._id
+      })
+      .expect(200);
+    
+    expect(response.body).toHaveProperty('clientSecret');
+    expect(response.body.clientSecret).toMatch(/^pi_/);
+  });
+  
+  it('should handle webhook events', async () => {
+    const payload = {
+      id: 'evt_test',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_test',
+          amount: 5000,
+          metadata: {
+            charityId: testCharity._id,
+            donorId: testUser._id
+          }
+        }
+      }
+    };
+    
+    const signature = stripe.webhooks.generateTestHeaderString({
+      payload: JSON.stringify(payload),
+      secret: process.env.STRIPE_WEBHOOK_SECRET
     });
     
-    // Mock payment processing
-    axios.post.mockResolvedValueOnce({ 
-      data: { success: true } 
+    await request(app)
+      .post('/api/stripe/webhook')
+      .set('stripe-signature', signature)
+      .send(payload)
+      .expect(200);
+    
+    // Verify donation was created
+    const donation = await Donation.findOne({
+      stripePaymentIntentId: 'pi_test'
     });
-    
-    // Render component and simulate payment
-    const { getByText, getByLabelText } = render(<ManagePaymentsComponent />);
-    
-    // Enter amount
-    fireEvent.change(getByLabelText('Amount'), { 
-      target: { value: '50' } 
-    });
-    
-    // Select charity
-    fireEvent.change(getByLabelText('Select Charity'), { 
-      target: { value: 'charity123' } 
-    });
-    
-    // Click pay button
-    fireEvent.click(getByText('Pay with Card'));
-    
-    // Assert success message
-    await waitFor(() => {
-      expect(getByText('Payment successful!')).toBeInTheDocument();
-    });
+    expect(donation).toBeTruthy();
   });
 });
 ```
@@ -451,202 +508,138 @@ describe('Payment Integration', () => {
 ### Frontend Error Handling
 
 ```javascript
-const PaymentErrorBoundary = ({ children }) => {
-  const [hasError, setHasError] = useState(false);
-  const [error, setError] = useState(null);
-  
-  const resetError = () => {
-    setHasError(false);
-    setError(null);
+const handlePaymentError = (error) => {
+  switch (error.code) {
+    case 'card_declined':
+      return 'Your card was declined. Please try a different card.';
+    case 'insufficient_funds':
+      return 'Your card has insufficient funds.';
+    case 'processing_error':
+      return 'An error occurred processing your card. Please try again.';
+    case 'expired_card':
+      return 'Your card has expired.';
+    case 'incorrect_cvc':
+      return 'Your card\'s security code is incorrect.';
+    default:
+      return 'An unexpected error occurred. Please try again.';
+  }
+};
+```
+
+### Backend Error Responses
+
+```javascript
+// Standardized error response
+const sendErrorResponse = (res, statusCode, error) => {
+  const response = {
+    error: {
+      message: error.message,
+      code: error.code,
+      type: error.type
+    }
   };
   
-  if (hasError) {
-    return (
-      <div className="error-container">
-        <h3>Payment Error</h3>
-        <p>{error?.message || 'An unexpected error occurred'}</p>
-        <button onClick={resetError}>Try Again</button>
-      </div>
-    );
+  if (process.env.NODE_ENV === 'development') {
+    response.error.stack = error.stack;
   }
   
-  return children;
+  res.status(statusCode).json(response);
 };
 ```
 
-### Common Error Messages
+## Platform Fees
+
+### Fee Structure
+- **Default Platform Fee**: 2.9% of donation amount
+- **Stripe Processing Fee**: Passed to donor or absorbed by platform
+- **Minimum Donation**: $1.00 (100 cents)
+- **Maximum Donation**: $9,999.99 (999,999 cents)
+
+### Fee Calculation
 
 ```javascript
-const errorMessages = {
-  'NETWORK_ERROR': 'Network connection failed. Please check your internet connection.',
-  'INVALID_AMOUNT': 'Please enter a valid donation amount.',
-  'NO_CHARITY_SELECTED': 'Please select a charity before proceeding.',
-  'PAYMENT_DECLINED': 'Your payment was declined. Please try a different payment method.',
-  'INSUFFICIENT_FUNDS': 'Insufficient funds. Please try a different payment method.',
-  'EXPIRED_CARD': 'Your card has expired. Please use a different card.',
-  'INVALID_CVV': 'Invalid security code. Please check your card details.',
-  'TIMEOUT': 'Payment request timed out. Please try again.',
-  'SERVER_ERROR': 'Server error. Please try again later.',
+const calculateFees = (amount, coverFees = false) => {
+  const platformFeePercentage = 2.9;
+  const stripeFeePercentage = 2.9;
+  const stripeFixedFee = 30; // 30 cents
+  
+  let donationAmount = amount;
+  let platformFee = Math.round(amount * platformFeePercentage / 100);
+  let stripeFee = Math.round(amount * stripeFeePercentage / 100) + stripeFixedFee;
+  
+  if (coverFees) {
+    // Donor covers all fees
+    const totalFees = platformFee + stripeFee;
+    donationAmount = amount + totalFees;
+  }
+  
+  return {
+    donationAmount,
+    platformFee,
+    stripeFee,
+    netToCharity: amount - platformFee
+  };
 };
 ```
 
-### Error Recovery Strategies
+## Monitoring and Analytics
 
-1. **Automatic Retry**
+### Key Metrics to Track
+- Payment success rate
+- Average donation amount
+- Failed payment reasons
+- Refund rate
+- Platform fee revenue
+- Time to charity payout
+
+### Logging
+
 ```javascript
-const retryPayment = async (paymentFunction, maxRetries = 3) => {
-  let attempt = 0;
-  
-  while (attempt < maxRetries) {
-    try {
-      return await paymentFunction();
-    } catch (error) {
-      attempt++;
-      if (attempt === maxRetries) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-};
+// Payment logging
+logger.info('Payment processed', {
+  paymentIntentId: paymentIntent.id,
+  amount: paymentIntent.amount,
+  currency: paymentIntent.currency,
+  charityId: paymentIntent.metadata.charityId,
+  donorId: paymentIntent.metadata.donorId,
+  platformFee: paymentIntent.application_fee_amount
+});
 ```
 
-2. **Fallback Payment Methods**
-```javascript
-const handlePaymentFailure = (error, currentMethod) => {
-  if (currentMethod === 'braintree') {
-    setShowPayPalOption(true);
-    setMessage('Card payment failed. Try PayPal instead?');
-  }
-};
-```
+## Compliance
 
-## Best Practices
+### Regulatory Requirements
+- **KYC/AML**: Handled by Stripe Connect for charities
+- **Tax Reporting**: 1099-K forms generated by Stripe
+- **Data Protection**: PCI DSS Level 1 compliance via Stripe
+- **Charity Verification**: 501(c)(3) status verification
 
-### 1. Amount Validation
-```javascript
-const formatAmount = (value) => {
-  // Remove non-numeric characters
-  const cleaned = value.replace(/[^\d.]/g, '');
-  
-  // Ensure only one decimal point
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    return parts[0] + '.' + parts.slice(1).join('');
-  }
-  
-  // Limit to 2 decimal places
-  if (parts[1]?.length > 2) {
-    return parts[0] + '.' + parts[1].slice(0, 2);
-  }
-  
-  return cleaned;
-};
-```
-
-### 2. Loading States
-```javascript
-const PaymentButton = ({ loading, disabled, onClick, children }) => (
-  <button 
-    onClick={onClick} 
-    disabled={disabled || loading}
-    className={`payment-button ${loading ? 'loading' : ''}`}
-  >
-    {loading ? <Spinner /> : children}
-  </button>
-);
-```
-
-### 3. Success Feedback
-```javascript
-const PaymentSuccess = ({ amount, charity, transactionId }) => (
-  <div className="success-message">
-    <CheckCircleIcon />
-    <h3>Thank you for your donation!</h3>
-    <p>Your ${amount} donation to {charity} has been processed.</p>
-    <p>Transaction ID: {transactionId}</p>
-    <button onClick={() => navigate('/donations')}>
-      View Your Donations
-    </button>
-  </div>
-);
-```
-
-### 4. Accessibility
-```javascript
-// ARIA labels for payment forms
-<label htmlFor="donation-amount">
-  Donation Amount
-  <span className="required" aria-label="required">*</span>
-</label>
-<input
-  id="donation-amount"
-  type="number"
-  aria-describedby="amount-error"
-  aria-invalid={!!amountError}
-  aria-required="true"
-/>
-{amountError && (
-  <span id="amount-error" role="alert">
-    {amountError}
-  </span>
-)}
-```
-
-### 5. Mobile Optimization
-```css
-/* Responsive payment forms */
-.payment-container {
-  max-width: 100%;
-  padding: 1rem;
-}
-
-@media (max-width: 768px) {
-  .payment-buttons {
-    flex-direction: column;
-  }
-  
-  .payment-button {
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-}
-```
-
-## Compliance and Regulations
-
-### PCI DSS Compliance
-- Level 4 compliance through hosted payment fields
-- No direct handling of card data
-- Regular security assessments
-- Secure coding practices
-
-### Data Protection
-- GDPR compliance for EU users
-- Minimal data collection
-- Secure data transmission
-- Right to deletion support
-
-### Financial Regulations
-- Anti-money laundering checks
-- Transaction limits
-- Charity verification
-- Tax receipt generation
+### Receipts and Tax Documentation
+- Automatic receipt generation for all donations
+- PDF receipts with tax-deductible information
+- Annual giving statements for donors
+- IRS-compliant documentation
 
 ## Future Enhancements
 
-1. **Additional Payment Methods**
-   - Apple Pay integration
-   - Google Pay support
+1. **Recurring Donations**
+   - Stripe Subscriptions integration
+   - Donation scheduling
+   - Automated retry logic
+
+2. **Alternative Payment Methods**
+   - Apple Pay / Google Pay
+   - ACH bank transfers
    - Cryptocurrency donations
-   - Bank transfer options
 
-2. **Enhanced Features**
-   - Recurring donation management
-   - Payment method vault
-   - Multi-currency support
-   - Gift donation options
+3. **Enhanced Features**
+   - Donation campaigns
+   - Peer-to-peer fundraising
+   - Corporate matching integration
+   - Multi-currency optimization
 
-3. **Analytics and Reporting**
-   - Payment success rates
-   - Average donation amounts
-   - Payment method preferences
-   - Failed payment analysis
+4. **Advanced Analytics**
+   - Donor lifetime value
+   - Conversion funnel analysis
+   - A/B testing for donation forms
+   - Predictive analytics for donor behavior

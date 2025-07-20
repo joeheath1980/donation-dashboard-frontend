@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 import oneOffStyles from './OneOffContributions.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
@@ -160,7 +160,7 @@ function OneOffContributionsComponent({ displayAll }) {
   const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
 
   if (!user) {
-    return <div className={sharedStyles.card}>Please log in to view your one-off contributions.</div>;
+    return <div className="card">Please log in to view your one-off contributions.</div>;
   }
 
   const modalContent = showModal && (
@@ -176,15 +176,15 @@ function OneOffContributionsComponent({ displayAll }) {
   );
 
   return (
-    <div className={`${sharedStyles.container} ${oneOffStyles.oneOffComponentContainer}`}>
+    <div className={`container ${oneOffStyles.oneOffComponentContainer}`}>
       <div className={oneOffStyles.oneOffSection}>
-        <div className={sharedStyles.flexBetween}>
+        <div className="flexBetween">
           <button onClick={handleAddNew} className={oneOffStyles.addNewContributionButton}>
             <FaPlus /> Add New One-Off Contribution
           </button>
         </div>
         {error && (
-          <div className={`${sharedStyles.alert} ${sharedStyles.error}`}>
+          <div className="alert error">
             {error}
           </div>
         )}
@@ -200,8 +200,8 @@ function OneOffContributionsComponent({ displayAll }) {
                 
                 return (
                   <div key={contribution._id} className={`${oneOffStyles.oneOffCard} ${hasMatches ? oneOffStyles.matchedContribution : ''}`}>
-                    <div className={sharedStyles.cardHeader}>
-                      <h3 className={sharedStyles.cardTitle}>
+                    <div className="cardHeader">
+                      <h3 className="cardTitle">
                         {contribution.charity}
                         {hasMatches && (
                           <span className={oneOffStyles.matchBadge}>
@@ -209,7 +209,7 @@ function OneOffContributionsComponent({ displayAll }) {
                           </span>
                         )}
                       </h3>
-                      <div className={sharedStyles.validationButton}>
+                      <div className="validationButton">
                         <InstantTooltip text={contribution.receiptUrl ? "Receipt uploaded" : "No receipt uploaded"}>
                           <FaCheckCircle className={contribution.receiptUrl ? oneOffStyles.validationIcon : oneOffStyles.validationIconPending} />
                         </InstantTooltip>
@@ -263,23 +263,23 @@ function OneOffContributionsComponent({ displayAll }) {
                             href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={sharedStyles.link}
+                            className="link"
                           >
                             View Receipt
                           </a>
                         </p>
                       )}
                     </div>
-                    <div className={sharedStyles.cardActions}>
+                    <div className="cardActions">
                       <InstantTooltip text="Edit contribution">
-                        <button onClick={() => handleEditOrValidate(contribution)} className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
+                        <button onClick={() => handleEditOrValidate(contribution)} className={`iconButton ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
                           <FaEdit />
                         </button>
                       </InstantTooltip>
                       <InstantTooltip text="Delete contribution">
                         <button
                           onClick={() => handleDelete(contribution._id)}
-                          className={`${sharedStyles.iconButton} ${oneOffStyles.tealIcon}`}
+                          className={`iconButton ${oneOffStyles.tealIcon}`}
                           aria-label="Delete Contribution"
                         >
                           <FaTrash />
@@ -291,13 +291,13 @@ function OneOffContributionsComponent({ displayAll }) {
               })}
             </>
           ) : (
-            <p className={sharedStyles.textCenter}>No one-off contributions found.</p>
+            <p className="textCenter">No one-off contributions found.</p>
           )}
-          {showScrollIndicator && <div className={sharedStyles.scrollIndicator} />}
+          {showScrollIndicator && <div className="scrollIndicator" />}
         </div>
-        <div className={sharedStyles.flexBetween}>
+        <div className="flexBetween">
           {!displayAll && localContributions.length > 5 && (
-            <button onClick={() => {}} className={`${sharedStyles.button} ${sharedStyles.secondary}`}>
+            <button onClick={() => {}} className="button secondary">
               See All
             </button>
           )}

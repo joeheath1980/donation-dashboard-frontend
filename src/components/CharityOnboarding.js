@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiCall } from '../utils/stripe';
-import './CharityOnboarding.css';
+import styles from './CharityOnboarding.module.css';
 
 function CharityOnboarding({ charity, onComplete }) {
   const [loading, setLoading] = useState(false);
@@ -47,21 +47,21 @@ function CharityOnboarding({ charity, onComplete }) {
   };
 
   return (
-    <div className="charity-onboarding">
+    <div className={styles.charityOnboarding}>
       <h2>Complete Your Stripe Setup</h2>
       
-      <div className="onboarding-content">
-        <div className="info-section">
+      <div className={styles.onboardingContent}>
+        <div className={styles.infoSection}>
           <h3>Why do we need this?</h3>
           <ul>
-            <li>🏦 Receive donations directly to your bank account</li>
-            <li>🔒 Secure payment processing through Stripe</li>
-            <li>📊 Access detailed payment analytics</li>
-            <li>⚡ Instant payment confirmations</li>
+            <li>Receive donations directly to your bank account</li>
+            <li>Secure payment processing through Stripe</li>
+            <li>Access detailed payment analytics</li>
+            <li>Instant payment confirmations</li>
           </ul>
         </div>
 
-        <div className="charity-info">
+        <div className={styles.charityInfo}>
           <h3>Organization Details</h3>
           <p><strong>Name:</strong> {charity.charityName || charity.Charity_Legal_Name}</p>
           <p><strong>Email:</strong> {charity.email}</p>
@@ -69,46 +69,46 @@ function CharityOnboarding({ charity, onComplete }) {
         </div>
 
         {error && (
-          <div className="error-message">
+          <div className={styles.errorMessage}>
             {error}
           </div>
         )}
 
         {accountLinkUrl ? (
-          <div className="link-section">
+          <div className={styles.linkSection}>
             <p>Please complete your Stripe account setup:</p>
             <button 
               onClick={handleExternalLinkClick}
-              className="link-button"
+              className={styles.linkButton}
             >
               Complete Setup with Stripe
             </button>
-            <p className="link-note">
+            <p className={styles.linkNote}>
               This will open in a new tab. Once complete, return here and click the button below.
             </p>
             <button 
               onClick={handleCheckStatus}
-              className="setup-button"
+              className={styles.setupButton}
               style={{ marginTop: '15px' }}
             >
               I've Completed Setup
             </button>
           </div>
         ) : (
-          <div className="action-section">
+          <div className={styles.actionSection}>
             <button 
               onClick={createStripeAccount}
               disabled={loading}
-              className="setup-button"
+              className={styles.setupButton}
             >
               {loading ? 'Creating Account...' : 'Set Up Stripe Account'}
             </button>
           </div>
         )}
 
-        <div className="security-note">
+        <div className={styles.securityNote}>
           <p>
-            🔒 Your information is secure and encrypted. 
+            Your information is secure and encrypted. 
             We partner with Stripe for secure payment processing.
           </p>
         </div>

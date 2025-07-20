@@ -1,240 +1,298 @@
 import React, { useState, useEffect } from 'react';
+import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { stripePromise } from '../utils/stripe';
 import axios from 'axios';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import DropIn from 'braintree-web-drop-in-react';
+import { useAuth } from '../contexts/AuthContext';
 import './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
+import { FaCreditCard, FaTrash, FaPlus, FaCheck, FaSpinner } from 'react-icons/fa';
 
-const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
+// Payment Methods List Component
+const PaymentMethodsList = ({ methods, onRemove, onSetDefault, defaultMethodId, loading }) => {
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FaSpinner className={styles.spinner} />
+        <p>Loading payment methods...</p>
+      </div>
+    );
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
+  if (!methods || methods.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <FaCreditCard className={styles.emptyIcon} />
+        <p>No payment methods saved</p>
+        <p className={styles.emptyDescription}>Add a payment method to make donations easier</p>
+      </div>
+    );
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error('PayPal Error Boundary caught an error:', error, errorInfo);
-  }
+  return (
+    <div className={styles.methodsList}>
+      {methods.map((method) => (
+        <div key={method.id} className={`${styles.methodCard} ${method.id === defaultMethodId ? styles.defaultMethod : ''}`}>
+          <div className={styles.methodInfo}>
+            <FaCreditCard className={styles.cardIcon} />
+            <div className={styles.methodDetails}>
+              <span className={styles.cardBrand}>{method.card.brand.toUpperCase()}</span>
+              <span className={styles.cardLast4}>•••• {method.card.last4}</span>
+              <span className={styles.cardExpiry}>Expires {method.card.exp_month}/{method.card.exp_year}</span>
+            </div>
+            {method.id === defaultMethodId && (
+              <span className={styles.defaultBadge}>
+                <FaCheck /> Default
+              </span>
+            )}
+          </div>
+          <div className={styles.methodActions}>
+            {method.id !== defaultMethodId && (
+              <button
+                onClick={() => onSetDefault(method.id)}
+                className={styles.actionButton}
+                title="Set as default"
+              >
+                Set Default
+              </button>
+            )}
+            <button
+              onClick={() => onRemove(method.id)}
+              className={`${styles.actionButton} ${styles.deleteButton}`}
+              title="Remove payment method"
+            >
+              <FaTrash />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
-  render() {
-    if (this.state.hasError) {
-    return <h3 className="error">Sorry, there was a problem loading the PayPal button.</h3>;
-    }
-    return this.props.children;
-  }
-}
-
-const ManagePaymentsComponent = () => {
-  const [clientToken, setClientToken] = useState(null);
-  const [instance, setInstance] = useState(null);
-  const [amount, setAmount] = useState('');
-  const [selectedCharity, setSelectedCharity] = useState('');
-  const [charities, setCharities] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Add Payment Method Form Component
+const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { user, getAuthHeaders } = useAuth();
   const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
+    // Create a SetupIntent when component mounts
+    const createSetupIntent = async () => {
       try {
-        const [tokenResponse, charitiesResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/braintree/client_token`),
-          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities`)
-        ]);
-        setClientToken(tokenResponse.data.clientToken);
-        setCharities(charitiesResponse.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Failed to load necessary data. Please try again later.');
-      } finally {
-        setLoading(false);
+        const response = await axios.post(
+          `${API_BASE_URL}/api/stripe/create-setup-intent`,
+          {},
+          { headers: getAuthHeaders() }
+        );
+        setClientSecret(response.data.clientSecret);
+      } catch (err) {
+        console.error('Error creating setup intent:', err);
+        setError('Failed to initialize payment form');
       }
     };
 
-    fetchData();
-  }, []);
+    createSetupIntent();
+  }, [getAuthHeaders]);
 
-  const handleBraintreePayment = async () => {
-    if (instance) {
-      try {
-        const { nonce } = await instance.requestPaymentMethod();
-        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/braintree/checkout`, {
-          paymentMethodNonce: nonce,
-          amount: amount,
-          charityId: selectedCharity
-        });
-        if (response.data.success) {
-          alert('Payment successful!');
-        } else {
-          alert('Payment failed. Please try again.');
-        }
-      } catch (error) {
-        console.error('Payment error:', error);
-        alert('An error occurred while processing the payment. Please try again.');
-      }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements || !clientSecret) {
+      return;
     }
-  };
 
-  const validateAndFormatAmount = (value) => {
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue) || numericValue <= 0) {
-      return null;
-    }
-    return numericValue.toFixed(2);
-  };
+    setProcessing(true);
+    setError(null);
 
-  const createOrder = (data, actions) => {
-    const validAmount = validateAndFormatAmount(amount);
-    if (!validAmount) {
-      return Promise.reject(new Error('Invalid amount'));
-    }
-    return actions.order.create({
-      purchase_units: [{
-        amount: {
-          value: validAmount,
-        },
-      }],
-    });
-  };
-
-  const onApprove = async (data, actions) => {
     try {
-      await actions.order.capture();
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/paypal/capture-order`, {
-        orderId: data.orderID,
-        charityId: selectedCharity
+      const { error: confirmError } = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/manage-payments`,
+        },
+        redirect: 'if_required'
       });
-      if (response.data.success) {
-        alert('Payment successful!');
+
+      if (confirmError) {
+        setError(confirmError.message);
       } else {
-        alert('Payment failed. Please try again.');
+        // Payment method added successfully
+        onSuccess();
       }
-    } catch (error) {
-      console.error('PayPal payment error:', error);
-      alert('An error occurred while processing the PayPal payment. Please try again.');
+    } catch (err) {
+      console.error('Error confirming setup:', err);
+      setError('Failed to add payment method');
+    } finally {
+      setProcessing(false);
     }
   };
 
-  if (loading) {
-    return <div className={styles.loadingContainer}>Loading...</div>;
+  if (!clientSecret) {
+    return (
+      <div className={styles.loadingContainer}>
+        <FaSpinner className={styles.spinner} />
+        <p>Initializing payment form...</p>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
+      <form onSubmit={handleSubmit} className={styles.paymentForm}>
+        <PaymentElement />
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        <div className={styles.formActions}>
+          <button
+            type="button"
+            onClick={onCancel}
+            className={`${styles.button} ${styles.secondaryButton}`}
+            disabled={processing}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={`${styles.button} ${styles.primaryButton}`}
+            disabled={!stripe || processing}
+          >
+            {processing ? (
+              <>
+                <FaSpinner className={styles.buttonSpinner} />
+                Adding...
+              </>
+            ) : (
+              'Add Payment Method'
+            )}
+          </button>
+        </div>
+      </form>
+    </Elements>
+  );
+};
 
-  if (charities.length === 0) {
-    return <div className={styles.message}>No charities available. Please check back later.</div>;
-  }
+// Main Component
+const ManagePaymentsComponent = () => {
+  const { user, getAuthHeaders } = useAuth();
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [defaultMethodId, setDefaultMethodId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const paypalOptions = {
-    "client-id": PAYPAL_CLIENT_ID,
-    currency: "USD",
-    intent: "capture",
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, [refreshKey]);
+
+  const fetchPaymentMethods = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/stripe/payment-methods`,
+        { headers: getAuthHeaders() }
+      );
+      
+      setPaymentMethods(response.data.paymentMethods || []);
+      setDefaultMethodId(response.data.defaultMethodId);
+    } catch (err) {
+      console.error('Error fetching payment methods:', err);
+      setError('Failed to load payment methods');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const isAmountValid = validateAndFormatAmount(amount) !== null;
+  const handleRemoveMethod = async (methodId) => {
+    if (!window.confirm('Are you sure you want to remove this payment method?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/api/stripe/payment-methods/${methodId}`,
+        { headers: getAuthHeaders() }
+      );
+      
+      // Refresh the list
+      setRefreshKey(prev => prev + 1);
+    } catch (err) {
+      console.error('Error removing payment method:', err);
+      alert('Failed to remove payment method');
+    }
+  };
+
+  const handleSetDefault = async (methodId) => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/stripe/payment-methods/${methodId}/set-default`,
+        {},
+        { headers: getAuthHeaders() }
+      );
+      
+      setDefaultMethodId(methodId);
+    } catch (err) {
+      console.error('Error setting default payment method:', err);
+      alert('Failed to set default payment method');
+    }
+  };
+
+  const handleAddSuccess = () => {
+    setShowAddForm(false);
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div className="container">
-      <h1 className="heading">Make a Donation</h1>
-
-      <div className={`card ${styles.formLayout}`}>
-        <div className="formGroup">
-          <label htmlFor="amount" className="label">Donation Amount</label>
-          <div className={styles.inputGroup}>
-            <span className={styles.currencySymbol}>$</span>
-            <input
-              type="number"
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              step="0.01"
-              min="0.01"
-              className="input"
-            />
-          </div>
+      <h1 className="heading">Manage Payment Methods</h1>
+      
+      {error && (
+        <div className={`alert error`}>
+          {error}
         </div>
+      )}
 
-        <div className="formGroup">
-          <label htmlFor="charity" className="label">Select Charity</label>
-            <select
-              id="charity"
-              value={selectedCharity}
-              onChange={(e) => setSelectedCharity(e.target.value)}
-              className="select"
-            >
-            <option value="">Select a charity</option>
-            {charities.map((charity) => (
-              <option key={charity.id} value={charity.id}>
-                {charity.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className={`card ${styles.paymentSection}`}>
-        <h2 className="subheading">Credit Card Payment</h2>
-        {clientToken ? (
-          <>
-            <div className={styles.dropInContainer}>
-              <DropIn
-                options={{
-                  authorization: clientToken,
-                  paypal: false
-                }}
-                onInstance={(dropinInstance) => setInstance(dropinInstance)}
-              />
-            </div>
+      <div className="card">
+        <div className={styles.cardHeader}>
+          <h2 className="cardTitle">Your Payment Methods</h2>
+          {!showAddForm && (
             <button
-              onClick={handleBraintreePayment}
-              disabled={!instance || !isAmountValid || !selectedCharity}
-              className="button"
+              onClick={() => setShowAddForm(true)}
+              className={`button primary`}
             >
-              Complete Donation
+              <FaPlus /> Add Payment Method
             </button>
-          </>
+          )}
+        </div>
+
+        {showAddForm ? (
+          <AddPaymentMethodForm
+            onSuccess={handleAddSuccess}
+            onCancel={() => setShowAddForm(false)}
+          />
         ) : (
-          <div className={styles.message}>Loading payment options...</div>
+          <PaymentMethodsList
+            methods={paymentMethods}
+            onRemove={handleRemoveMethod}
+            onSetDefault={handleSetDefault}
+            defaultMethodId={defaultMethodId}
+            loading={loading}
+          />
         )}
       </div>
 
-      <div className={`card ${styles.paymentSection}`}>
-        <h2 className="subheading">PayPal Payment</h2>
-        {PAYPAL_CLIENT_ID ? (
-          <ErrorBoundary>
-            <div className={styles.paypalContainer}>
-              <PayPalScriptProvider options={paypalOptions}>
-                <PayPalButtons
-                  createOrder={createOrder}
-                  onApprove={onApprove}
-                  disabled={!isAmountValid || !selectedCharity}
-                  style={{ layout: "horizontal" }}
-                />
-              </PayPalScriptProvider>
-            </div>
-          </ErrorBoundary>
-        ) : (
-          <div className="error">
-            PayPal integration is currently unavailable. Please try another payment method.
-          </div>
-        )}
-      </div>
-
-      <div className={`card ${styles.infoSection}`}>
-        <h3 className="subheading">Test Payment Information</h3>
-        <ul className={styles.list}>
-          <li>Visa: 4111 1111 1111 1111</li>
-          <li>MasterCard: 5555 5555 5555 4444</li>
-          <li>American Express: 3714 496353 98431</li>
-        </ul>
-        <p className={styles.note}>Use any future expiration date and any CVV for testing.</p>
+      <div className="card">
+        <h3 className="cardTitle">About Payment Methods</h3>
+        <div className={styles.infoSection}>
+          <p>• Payment methods are securely stored by Stripe</p>
+          <p>• Your card details are never stored on our servers</p>
+          <p>• You can remove payment methods at any time</p>
+          <p>• Set a default payment method for faster donations</p>
+        </div>
       </div>
     </div>
   );

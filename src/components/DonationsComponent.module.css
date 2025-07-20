@@ -215,6 +215,20 @@
   color: var(--primary-dark);
 }
 
+/* Header Section */
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* Add New Donation button styles */
 .addNewDonationButton {
   background: var(--primary-gradient);
@@ -237,6 +251,157 @@
 
 .addNewDonationButton svg {
   margin-right: 8px;
+}
+
+/* Filter Button */
+.filterButton {
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterButton:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.filterButton.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Download Button */
+.downloadButton {
+  background: white;
+  color: var(--text-primary);
+  border: 2px solid #ddd;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.downloadButton:hover {
+  background: #f5f5f5;
+  border-color: #bbb;
+}
+
+.downloadButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Summary Statistics */
+.summaryStats {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* Filter Panel */
+.filterPanel {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterGroup label svg {
+  color: var(--primary-color);
+}
+
+.filterSelect,
+.filterInput {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.clearFiltersButton {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.3s ease;
+}
+
+.clearFiltersButton:hover {
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {

@@ -28,6 +28,19 @@ This repository contains the frontend of the Donation Dashboard. The backend is 
    npm start
    ```
 
+## Deployment
+
+### Quick Deploy
+Use the automated deployment script:
+```bash
+./deploy.sh
+```
+
+### Manual Deploy
+See the detailed deployment guide at `docs/deployment/FRONTEND_DEPLOYMENT_GUIDE.md`
+
+**Important**: The build files must be deployed to `/var/www/donation-dashboard/build` on the server, NOT `/home/ubuntu/build`.
+
 ## Available Scripts
 
 In the project directory, you can run:

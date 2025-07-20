@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './DonationModal.module.css';
+import './SharedStyles.css';
 
 const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
   const [editedDonation, setEditedDonation] = useState(donation || {

@@ -4,7 +4,7 @@ import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 import { FaChartBar } from 'react-icons/fa';
 import styles from './ImpactVisualization.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 
 Chart.register(...registerables);
 
@@ -506,14 +506,14 @@ function ImpactVisualization({ hideTitle = false }) {
 
   if (!dataPoints || dataPoints.length === 0) {
     console.log('No data available for visualization');
-    return <div className={sharedStyles.textCenter}>No data available for visualization</div>;
+    return <div className="textCenter">No data available for visualization</div>;
   }
 
   return (
     <div className={styles.container}>
       {!hideTitle && (
         <div className={styles.header}>
-          <h2 className={`${styles.title} ${sharedStyles.gradientTitle}`}>
+          <h2 className={`${styles.title} gradientTitle`}>
             <FaChartBar style={{ marginRight: '10px', color: '#2d8f7b' }} /> Impact Journey
           </h2>
           <div className={styles.controls}>

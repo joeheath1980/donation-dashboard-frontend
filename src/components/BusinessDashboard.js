@@ -29,14 +29,23 @@ function BusinessDashboard() {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`, 
-          { headers: getAuthHeaders() }
-        );
+        const apiUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`;
+        console.log('Fetching business data from:', apiUrl);
+        
+        const response = await axios.get(apiUrl, { headers: getAuthHeaders() });
+        
+        console.log('Business data received:', {
+          hasOnboardingCompleted: 'onboardingCompleted' in response.data,
+          onboardingCompleted: response.data.onboardingCompleted,
+          csrProfile: response.data.csrProfile,
+          verificationStatus: response.data.csrProfile?.verificationStatus
+        });
+        
         setBusinessData(response.data);
         
         // Check if business has completed onboarding
         if (!response.data.onboardingCompleted) {
+          console.log('Redirecting to onboarding - onboardingCompleted is false');
           navigate('/business-onboarding');
         }
       } catch (err) {

@@ -3,6 +3,7 @@ import { apiClient } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/api.config';
 import { createLogger } from '../../utils/logger';
 import styles from './ForwardingStatus.module.css';
+import '../SharedStyles.css';
 
 const logger = createLogger('ForwardingStatus');
 

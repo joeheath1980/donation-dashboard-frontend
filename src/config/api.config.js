@@ -55,9 +55,10 @@ export const API_ENDPOINTS = {
   DONATIONS: '/api/donations',
   
   // Payment endpoints
-  BRAINTREE_TOKEN: '/api/braintree/client_token',
-  BRAINTREE_CHECKOUT: '/api/braintree/checkout',
-  PAYPAL_CAPTURE: '/api/paypal/capture-order',
+  // ARCHIVED: PayPal and Braintree endpoints - replaced with Stripe
+  // BRAINTREE_TOKEN: '/api/braintree/client_token',
+  // BRAINTREE_CHECKOUT: '/api/braintree/checkout',
+  // PAYPAL_CAPTURE: '/api/paypal/capture-order',
   
   // Admin endpoints
   ADMIN_USERS: '/api/admin/users',

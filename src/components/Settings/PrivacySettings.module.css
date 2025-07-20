@@ -1,0 +1,352 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h2 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+}
+
+.loadingIcon {
+  font-size: 48px;
+  color: #4CAF50;
+  animation: pulse 2s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Profile Preview */
+.profilePreview {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.profilePreview h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.urlBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.urlBox svg {
+  color: #4CAF50;
+  font-size: 20px;
+}
+
+.urlBox a {
+  color: #2196F3;
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.urlBox a:hover {
+  text-decoration: underline;
+}
+
+.previewNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.previewNote svg {
+  color: #999;
+}
+
+/* Sections */
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.section h3 {
+  margin: 0 0 24px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+/* Visibility Options */
+.visibilityOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.visibilityOption {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.visibilityOption:hover {
+  border-color: #4CAF50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.visibilityOption.active {
+  background: #e8f5e9;
+  border-color: #4CAF50;
+}
+
+.optionIcon {
+  font-size: 32px;
+  color: #4CAF50;
+  margin-bottom: 12px;
+}
+
+.visibilityOption h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.visibilityOption p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.checkIcon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #4CAF50;
+  font-size: 20px;
+}
+
+/* Privacy List */
+.privacyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.privacyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.privacyItem:hover {
+  background: #f0f0f0;
+}
+
+.privacyInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.privacyIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.privacyIcon svg {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.privacyInfo h4 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.privacyInfo p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Toggle Button */
+.toggleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 36px;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggleOn {
+  color: #4CAF50;
+}
+
+.toggleOff {
+  color: #ccc;
+}
+
+.toggleButton:hover:not(:disabled) .toggleOff {
+  color: #999;
+}
+
+/* Privacy Notice */
+.privacyNotice {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  background: #f0f7ff;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.privacyNotice > svg {
+  font-size: 24px;
+  color: #2196F3;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.privacyNotice h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.privacyNotice p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.saveButton {
+  padding: 16px 32px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.saveButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .section {
+    padding: 24px;
+  }
+  
+  .visibilityOptions {
+    grid-template-columns: 1fr;
+  }
+  
+  .privacyInfo {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .privacyItem {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .toggleButton {
+    align-self: center;
+  }
+}
+
+/* Import statements fix */
+.privacyIcon .FaTrophy,
+.privacyIcon .FaHeart,
+.privacyIcon .FaGlobeAfrica,
+.privacyIcon .FaChartLine,
+.privacyIcon .FaMedal,
+.privacyIcon .FaFire,
+.privacyIcon .FaCalendar,
+.privacyIcon .FaSearch,
+.privacyIcon .FaHandshake {
+  color: #4CAF50;
+}

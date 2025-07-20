@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './TierProgressModal.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 import { 
   FaChartLine, 
   FaArrowUp,
@@ -25,9 +25,9 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
   const pointsToNextTier = nextTier ? nextTier.minScore - impactScore : 0;
 
   return (
-    <div className={`${styles.modalContent} ${sharedStyles.card}`}>
+    <div className={`${styles.modalContent} card`}>
       {!hideTitle && (
-        <h2 className={sharedStyles.title}>
+        <h2 className="title">
           <FaChartLine className={styles.titleIcon} />
           Your Current Tier: {currentTier}
         </h2>
@@ -58,12 +58,12 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
           );
         })}
       </div>
-      <div className={`${styles.currentScore} ${sharedStyles.description}`}>
+      <div className={`${styles.currentScore} description`}>
         <FaChartLine className={styles.scoreIcon} />
         <span>Your Impact Score: {impactScore}</span>
       </div>
       {nextTier && (
-        <div className={`${styles.nextTier} ${sharedStyles.highlight}`}>
+        <div className={`${styles.nextTier} highlight`}>
           <FaArrowUp className={styles.scoreIcon} />
           <span>Points needed for {nextTier.name}: {pointsToNextTier}</span>
         </div>

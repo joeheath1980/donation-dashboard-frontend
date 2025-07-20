@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
@@ -12,7 +12,8 @@ import {
   FaCheckCircle,
   FaArrowRight,
   FaArrowLeft,
-  FaSpinner
+  FaSpinner,
+  FaSearch
 } from 'react-icons/fa';
 import styles from './CharitySignupFlow.module.css';
 import logo from '../assets/logo.png';
@@ -23,6 +24,17 @@ const CharitySignupFlow = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  
+  // ACNC charity search states
+  const [charitySearchTerm, setCharitySearchTerm] = useState('');
+  const [charitySearchResults, setCharitySearchResults] = useState([]);
+  const [searchingCharity, setSearchingCharity] = useState(false);
+  const [selectedCharity, setSelectedCharity] = useState(null);
+  
+  // Address autocomplete states
+  const [addressSearchTerm, setAddressSearchTerm] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [searchingAddress, setSearchingAddress] = useState(false);
   
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
@@ -73,6 +85,151 @@ const CharitySignupFlow = () => {
     'NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'
   ];
   
+  // Search ACNC charity database
+  const searchACNCCharities = useCallback(async (searchTerm) => {
+    if (searchTerm.length < 3) {
+      setCharitySearchResults([]);
+      return;
+    }
+    
+    setSearchingCharity(true);
+    try {
+      // Using the Australian charity database API
+      const response = await axios.get('https://data.gov.au/data/api/3/action/datastore_search', {
+        params: {
+          resource_id: 'eb1e6be4-5b13-4feb-b28e-388bf7c26f93',
+          q: searchTerm,
+          limit: 10
+        }
+      });
+      
+      if (response.data.success && response.data.result) {
+        const charities = response.data.result.records.map(record => ({
+          ABN: record.ABN,
+          name: record.Charity_Legal_Name,
+          tradingName: record.Other_Organisation_Names,
+          category: record.Main_Activity || 'Other',
+          state: record.State,
+          postcode: record.Postcode,
+          website: record.Charity_Website,
+          address: {
+            street: record.Address_Line_1,
+            city: record.Town_City,
+            state: record.State,
+            postalCode: record.Postcode
+          }
+        }));
+        setCharitySearchResults(charities);
+      }
+    } catch (error) {
+      console.error('Error searching ACNC:', error);
+    } finally {
+      setSearchingCharity(false);
+    }
+  }, []);
+  
+  // Debounced charity search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (charitySearchTerm) {
+        searchACNCCharities(charitySearchTerm);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [charitySearchTerm, searchACNCCharities]);
+  
+  // Australian address autocomplete using free service
+  const searchAddresses = useCallback(async (searchTerm) => {
+    if (searchTerm.length < 5) {
+      setAddressSuggestions([]);
+      return;
+    }
+    
+    setSearchingAddress(true);
+    try {
+      // Using OpenStreetMap Nominatim for free address search
+      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: {
+          q: searchTerm + ', Australia',
+          format: 'json',
+          addressdetails: 1,
+          limit: 5,
+          countrycodes: 'au'
+        }
+      });
+      
+      const suggestions = response.data.map(result => ({
+        display: result.display_name,
+        street: result.address?.road || '',
+        city: result.address?.city || result.address?.town || result.address?.suburb || '',
+        state: result.address?.state || '',
+        postcode: result.address?.postcode || ''
+      }));
+      
+      setAddressSuggestions(suggestions);
+    } catch (error) {
+      console.error('Error searching addresses:', error);
+    } finally {
+      setSearchingAddress(false);
+    }
+  }, []);
+  
+  // Debounced address search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (addressSearchTerm) {
+        searchAddresses(addressSearchTerm);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [addressSearchTerm, searchAddresses]);
+  
+  // Handle charity selection from ACNC search
+  const handleCharitySelect = (charity) => {
+    setSelectedCharity(charity);
+    setFormData(prev => ({
+      ...prev,
+      charityName: charity.name,
+      abn: charity.ABN,
+      category: charity.category,
+      website: charity.website || '',
+      address: {
+        ...prev.address,
+        ...charity.address,
+        country: 'Australia'
+      }
+    }));
+    setCharitySearchTerm('');
+    setCharitySearchResults([]);
+  };
+  
+  // Handle address selection from autocomplete
+  const handleAddressSelect = (address) => {
+    setFormData(prev => ({
+      ...prev,
+      address: {
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        postalCode: address.postcode,
+        country: 'Australia'
+      }
+    }));
+    setAddressSearchTerm('');
+    setAddressSuggestions([]);
+  };
+  
+  // Format ABN for display (XX XXX XXX XXX)
+  const formatABN = (abn) => {
+    const cleaned = abn.replace(/\s/g, '');
+    if (cleaned.length <= 2) return cleaned;
+    if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+    if (cleaned.length <= 8) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+    return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 11)}`;
+  };
+  
   const validateStep = (stepNumber) => {
     const errors = {};
     
@@ -112,7 +269,8 @@ const CharitySignupFlow = () => {
         if (!formData.address.street) errors.street = 'Street address is required';
         if (!formData.address.city) errors.city = 'City is required';
         if (!formData.address.state) errors.state = 'State is required';
-        if (!formData.address.postalCode) errors.postalCode = 'Postal code is required';
+        if (!formData.address.postalCode) errors.postalCode = 'Postcode is required';
+        if (!formData.abn) errors.abn = 'ABN is required';
         if (!formData.termsAccepted) errors.terms = 'You must accept the terms and conditions';
         if (!formData.privacyAccepted) errors.privacy = 'You must accept the privacy policy';
         break;
@@ -133,6 +291,12 @@ const CharitySignupFlow = () => {
           ...prev[parent],
           [child]: value
         }
+      }));
+    } else if (name === 'abn') {
+      // Format ABN as user types
+      setFormData(prev => ({
+        ...prev,
+        abn: formatABN(value)
       }));
     } else {
       setFormData(prev => ({
@@ -166,12 +330,34 @@ const CharitySignupFlow = () => {
     setError('');
     
     try {
+      // Prepare data for submission
+      const submitData = {
+        charityName: formData.charityName,
+        contactEmail: formData.contactEmail,
+        password: formData.password,
+        contactPhone: formData.contactPhone,
+        category: formData.category,
+        website: formData.website,
+        description: formData.description,
+        missionStatement: formData.missionStatement,
+        foundedYear: formData.foundedYear,
+        address: formData.address,
+        taxId: formData.abn.replace(/\s/g, ''), // Backend expects taxId, remove spaces from ABN
+        registrationNumber: formData.registrationNumber
+      };
+      
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/signup`,
-        formData
+        submitData
       );
       
       setSuccess(true);
+      
+      // Store token if provided
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userType', 'charity');
+      }
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
@@ -179,7 +365,13 @@ const CharitySignupFlow = () => {
       }, 3000);
     } catch (err) {
       console.error('Signup error:', err);
-      setError(err.response?.data?.message || 'Failed to create account. Please try again.');
+      
+      // Handle specific error messages
+      if (err.response?.data?.missingFields) {
+        setError(`Missing required fields: ${err.response.data.missingFields.join(', ')}`);
+      } else {
+        setError(err.response?.data?.message || 'Failed to create account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -219,8 +411,52 @@ const CharitySignupFlow = () => {
     <div className={styles.stepContent}>
       <h2>Let's get started with your basic information</h2>
       <p className={styles.stepDescription}>
-        This information will be used to create your charity account and for communication purposes.
+        Search for your charity in the ACNC database or enter details manually.
       </p>
+      
+      {/* ACNC Charity Search */}
+      <div className={styles.searchSection}>
+        <div className={styles.formGroup}>
+          <label>
+            <FaSearch /> Search ACNC Charity Database
+          </label>
+          <input
+            type="text"
+            placeholder="Search by charity name or ABN..."
+            value={charitySearchTerm}
+            onChange={(e) => setCharitySearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+          {searchingCharity && (
+            <div className={styles.searchingIndicator}>
+              <FaSpinner className={styles.spinner} /> Searching...
+            </div>
+          )}
+        </div>
+        
+        {charitySearchResults.length > 0 && (
+          <div className={styles.searchResults}>
+            {charitySearchResults.map((charity, index) => (
+              <div 
+                key={index} 
+                className={styles.searchResult}
+                onClick={() => handleCharitySelect(charity)}
+              >
+                <div className={styles.charityName}>{charity.name}</div>
+                <div className={styles.charityDetails}>
+                  ABN: {charity.ABN} | {charity.state} | {charity.category}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {selectedCharity && (
+        <div className={styles.selectedCharity}>
+          <FaCheckCircle /> Selected: {selectedCharity.name}
+        </div>
+      )}
       
       <div className={styles.formGroup}>
         <label htmlFor="charityName">
@@ -250,7 +486,7 @@ const CharitySignupFlow = () => {
           name="contactEmail"
           value={formData.contactEmail}
           onChange={handleInputChange}
-          placeholder="primary@yourcharity.org"
+          placeholder="primary@yourcharity.org.au"
           className={validation.contactEmail ? styles.error : ''}
         />
         {validation.contactEmail && (
@@ -268,7 +504,7 @@ const CharitySignupFlow = () => {
           name="contactPhone"
           value={formData.contactPhone}
           onChange={handleInputChange}
-          placeholder="+61 2 1234 5678"
+          placeholder="02 1234 5678"
         />
       </div>
       
@@ -350,7 +586,7 @@ const CharitySignupFlow = () => {
           name="website"
           value={formData.website}
           onChange={handleInputChange}
-          placeholder="https://yourcharity.org"
+          placeholder="https://yourcharity.org.au"
         />
       </div>
       
@@ -423,6 +659,41 @@ const CharitySignupFlow = () => {
         We need this information for verification and legal compliance.
       </p>
       
+      {/* Address Autocomplete */}
+      <div className={styles.searchSection}>
+        <div className={styles.formGroup}>
+          <label>
+            <FaSearch /> Search for Address
+          </label>
+          <input
+            type="text"
+            placeholder="Start typing your address..."
+            value={addressSearchTerm}
+            onChange={(e) => setAddressSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+          {searchingAddress && (
+            <div className={styles.searchingIndicator}>
+              <FaSpinner className={styles.spinner} /> Searching...
+            </div>
+          )}
+        </div>
+        
+        {addressSuggestions.length > 0 && (
+          <div className={styles.searchResults}>
+            {addressSuggestions.map((address, index) => (
+              <div 
+                key={index} 
+                className={styles.searchResult}
+                onClick={() => handleAddressSelect(address)}
+              >
+                <div className={styles.addressDisplay}>{address.display}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
       <div className={styles.formGroup}>
         <label htmlFor="street">
           <FaMapMarkerAlt /> Street Address *
@@ -443,7 +714,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
-          <label htmlFor="city">City *</label>
+          <label htmlFor="city">City/Suburb *</label>
           <input
             type="text"
             id="city"
@@ -478,7 +749,7 @@ const CharitySignupFlow = () => {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="postalCode">Postal Code *</label>
+          <label htmlFor="postalCode">Postcode *</label>
           <input
             type="text"
             id="postalCode"
@@ -497,7 +768,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
-          <label htmlFor="abn">ABN (Australian Business Number)</label>
+          <label htmlFor="abn">ABN (Australian Business Number) *</label>
           <input
             type="text"
             id="abn"
@@ -505,12 +776,17 @@ const CharitySignupFlow = () => {
             value={formData.abn}
             onChange={handleInputChange}
             placeholder="12 345 678 901"
+            maxLength="14"
+            className={validation.abn ? styles.error : ''}
           />
+          {validation.abn && (
+            <span className={styles.errorText}>{validation.abn}</span>
+          )}
         </div>
         
         <div className={styles.formGroup}>
           <label htmlFor="registrationNumber">
-            Charity Registration Number
+            ACNC Registration Number
           </label>
           <input
             type="text"

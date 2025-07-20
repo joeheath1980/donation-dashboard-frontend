@@ -29,7 +29,6 @@ const SearchCharities = lazy(() => import('./components/SearchCharities'));
 const Activity = lazy(() => import('./components/Activity'));
 const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
-const CharitySignup = lazy(() => import('./components/CharitySignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
 const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor'));
 const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));

@@ -169,9 +169,13 @@ const BusinessOnboarding = () => {
     setError(null);
 
     try {
-      // Prepare the complete onboarding data - backend expects these fields directly
+      // Prepare the complete onboarding data - transform customerTypes to match backend schema
       const onboardingData = {
-        customerTypes: formData.targetingConfig.customerTypes,
+        customerTypes: {
+          highValue: { enabled: formData.targetingConfig.customerTypes.highValue },
+          frequency: { enabled: formData.targetingConfig.customerTypes.frequent },
+          newCustomers: { enabled: formData.targetingConfig.customerTypes.new }
+        },
         geography: formData.targetingConfig.geography,
         donationRanges: formData.targetingConfig.donationRanges
       };
@@ -207,24 +211,36 @@ const BusinessOnboarding = () => {
   return (
     <div className={styles.onboardingContainer}>
       <div className={styles.progressBar}>
-        {steps.map((step, index) => (
-          <div key={step.id} className={styles.progressStep}>
-            <div 
-              className={`${styles.stepCircle} ${currentStep >= step.id ? styles.active : ''} ${currentStep > step.id ? styles.completed : ''}`}
-              onClick={() => currentStep > step.id && setCurrentStep(step.id)}
-            >
-              <span className={styles.stepIcon}>{step.icon}</span>
+        <div className={styles.progressSteps}>
+          <div 
+            className={styles.progressLine} 
+            style={{'--progress': `${((currentStep - 1) / (steps.length - 1)) * 100}%`}}
+          />
+          {steps.map((step, index) => (
+            <div key={step.id} className={styles.progressStep}>
+              <div 
+                className={`${styles.stepCircle} ${currentStep === step.id ? styles.active : ''} ${currentStep > step.id ? styles.completed : ''}`}
+                onClick={() => currentStep > step.id && setCurrentStep(step.id)}
+              >
+                <span className={styles.stepIcon}>{step.icon}</span>
+              </div>
+              <span className={`${styles.stepTitle} ${currentStep === step.id ? styles.active : ''}`}>
+                {step.title}
+              </span>
             </div>
-            <span className={styles.stepTitle}>{step.title}</span>
-            {index < steps.length - 1 && (
-              <div className={`${styles.stepLine} ${currentStep > step.id ? styles.completed : ''}`} />
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div className={styles.contentContainer}>
         <h2 className={styles.stepHeading}>{steps[currentStep - 1].title}</h2>
+        <p className={styles.stepSubheading}>
+          {currentStep === 1 && 'Tell us about your business and contact information'}
+          {currentStep === 2 && 'Upload your CSR report to unlock AI-powered charity matching'}
+          {currentStep === 3 && 'Select charities that align with your company values'}
+          {currentStep === 4 && 'Build your personalized charity portfolio'}
+          {currentStep === 5 && 'Configure how you want to target your donation matching'}
+        </p>
         
         {error && (
           <div className={styles.error}>
@@ -241,7 +257,7 @@ const BusinessOnboarding = () => {
               onClick={handlePrevious}
               disabled={loading}
             >
-              Previous
+              ← Previous
             </button>
           )}
           
@@ -250,7 +266,7 @@ const BusinessOnboarding = () => {
             onClick={handleNext}
             disabled={loading}
           >
-            {loading ? 'Processing...' : currentStep === 5 ? 'Complete Setup' : 'Next'}
+            {loading ? 'Processing...' : currentStep === 5 ? 'Complete Setup' : 'Next →'}
           </button>
         </div>
       </div>
@@ -443,7 +459,7 @@ const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading }) => {
 
         {loading && (
           <div className={styles.progressContainer}>
-            <div className={styles.progressBar}>
+            <div className={styles.uploadProgressBar}>
               <div 
                 className={styles.progressFill} 
                 style={{ width: `${uploadProgress}%` }}

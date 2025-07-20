@@ -3,7 +3,7 @@ import { ImpactContext } from '../contexts/ImpactContext';
 import { useUser } from '../contexts/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Activity.module.css';
-import sharedStyles from './SharedStyles.css';
+import './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
@@ -667,7 +667,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     const isCommitted = status?.type?.startsWith('committed');
     const isDeleted = status?.type === 'deleted';
 
-    const cardClassName = `${styles.emailResultItem} ${sharedStyles.card} ${
+    const cardClassName = `${styles.emailResultItem} card ${
       isCommitted ? styles.committedDonation : ''
     } ${isDeleted ? styles.deletedDonation : ''} ${isClearing ? styles.clearing : ''}`;
 
@@ -713,7 +713,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             </select>
             <button
               onClick={() => handleCommit(donation, source === 'outlook')}
-              className={`${styles.saveButton} ${sharedStyles.button}`}
+              className={`${styles.saveButton} button`}
               disabled={!selectedTypes[donation.id] || !selectedCharityTypes[donation.id]}
             >
               Commit
@@ -733,14 +733,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             {isCommitted && status?.resultId && (
               <button
                 onClick={() => navigateToDonation(donation, status.type === 'committed-regular' ? 'regular' : 'one-off')}
-                className={`${styles.linkButton} ${sharedStyles.button}`}
+                className={`${styles.linkButton} button`}
               >
                 View Details
               </button>
             )}
             <button
               onClick={() => handleRestore(donation.id)}
-              className={`${styles.restoreButton} ${sharedStyles.button}`}
+              className={`${styles.restoreButton} button`}
             >
               Restore
             </button>
@@ -754,7 +754,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
       {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
-          <h5 className={sharedStyles.heading}>
+          <h5 className="heading">
             Search Results from {entry.source.toUpperCase()} - {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
           </h5>
           <ul className={styles.emailResultsList}>
@@ -766,42 +766,42 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   ), [searchHistory, isClearing, renderDonationCard]);
 
   return (
-    <div className={`${styles.container} ${sharedStyles.container}`}>
-      <h1 className={`${styles.activityHeader} ${sharedStyles.heading}`}>
+    <div className={`${styles.container} container`}>
+      <h1 className={`${styles.activityHeader} heading`}>
         Discover your donations and start tracking your impact
       </h1>
 
-      <div className={`${styles.emailSection} ${sharedStyles.card}`}>
+      <div className={`${styles.emailSection} card`}>
         <div className={styles.buttonContainer}>
           <button
             id="start-search-btn"
             onClick={() => handleSearchEmails()}  // Change to use an arrow function
             disabled={loading || isClearing}
-            className={`${styles.scrapeButton} ${sharedStyles.button}`}
+            className={`${styles.scrapeButton} button`}
           >
             {loading ? 'Searching...' : 'Search Gmail for Donations'}
           </button>
           <button
             onClick={handleSearchOutlookEmails}
             disabled={loading || isClearing}
-            className={`${styles.scrapeButton} ${sharedStyles.button}`}
+            className={`${styles.scrapeButton} button`}
           >
             {loading ? 'Searching...' : 'Search Outlook for Donations'}
           </button>
           <button
             onClick={() => setShowEmailForwarding(true)}
-            className={`${styles.scrapeButton} ${sharedStyles.button}`}
+            className={`${styles.scrapeButton} button`}
           >
             📧 Email Forwarding
           </button>
-          <Link to="/profile" className={`${styles.toggleButton} ${sharedStyles.button}`}>
+          <Link to="/profile" className={`${styles.toggleButton} button`}>
             Check Out Your Impact
           </Link>
           {searchHistory.length > 0 && (
             <button
               onClick={handleClearAll}
               disabled={isClearing}
-              className={`${styles.clearButton} ${sharedStyles.button}`}
+              className={`${styles.clearButton} button`}
               aria-label="Clear all search results"
             >
               {isClearing ? 'Clearing...' : 'Clear All'}
@@ -830,12 +830,12 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       </div>
 
       {/* Email Forwarding Status Section */}
-      <div className={`${styles.emailSection} ${sharedStyles.card}`} style={{ marginTop: '20px' }}>
+      <div className={`${styles.emailSection} card`} style={{ marginTop: '20px' }}>
         <div className={styles.sectionHeader}>
           <h2>📧 Forwarded Email Status</h2>
           <button
             onClick={() => setShowForwardingStatus(!showForwardingStatus)}
-            className={`${styles.toggleButton} ${sharedStyles.button}`}
+            className={`${styles.toggleButton} button`}
           >
             {showForwardingStatus ? 'Hide' : 'Show'} Forwarded Emails
           </button>

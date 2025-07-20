@@ -53,11 +53,6 @@
   border-top: 1px solid var(--border-color);
 }
 
-/* PayPal Button Container */
-.paypalContainer {
-  margin: 1rem 0;
-}
-
 /* Loading and Error States */
 .loadingContainer {
   display: flex;
@@ -118,6 +113,217 @@
   color: var(--primary-color);
 }
 
+/* Stripe Payment Methods Styles */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.methodsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.methodCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: var(--background-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: var(--transition-standard);
+}
+
+.methodCard:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-medium);
+}
+
+.defaultMethod {
+  border-color: var(--primary-color);
+  background: rgba(45, 143, 123, 0.05);
+}
+
+.methodInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.methodDetails {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.cardBrand {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 60px;
+}
+
+.cardLast4 {
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+.cardExpiry {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.defaultBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: var(--radius-round);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.methodActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.actionButton:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.deleteButton {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+  padding: 0.5rem;
+}
+
+.deleteButton:hover {
+  background: var(--danger-color);
+  color: white;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}
+
+.emptyDescription {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Add Payment Form */
+.paymentForm {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.primaryButton {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.secondaryButton {
+  background: var(--background-light);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+
+.secondaryButton:hover {
+  background: var(--background-white);
+  border-color: var(--primary-color);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+.buttonSpinner {
+  animation: spin 1s linear infinite;
+  font-size: 0.875rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.errorMessage {
+  color: var(--danger-color);
+  background: rgba(220, 53, 69, 0.1);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .formLayout {
@@ -131,5 +337,30 @@
   .dropInContainer {
     margin: 1rem 0;
     padding: 0.5rem;
+  }
+  
+  .methodCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .methodInfo {
+    width: 100%;
+  }
+  
+  .methodDetails {
+    flex-wrap: wrap;
+  }
+  
+  .methodActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .cardHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
   }
 }

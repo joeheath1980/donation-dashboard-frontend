@@ -1,0 +1,388 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h2 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Address Section */
+.addressSection {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.addressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.addressHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.addressBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f5f5f5;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.address {
+  flex: 1;
+  font-size: 16px;
+  font-family: 'Courier New', monospace;
+  color: #333;
+  word-break: break-all;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  background: #f5f5f5;
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+.copyButton.copied {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
+}
+
+.addressInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Test Section */
+.testSection {
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+  text-align: center;
+}
+
+.testButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.testButton:hover:not(:disabled) {
+  background: #1976D2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.testButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.testInfo {
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Provider Section */
+.providerSection {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.providerSection h3 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.providerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background: #f8f8f8;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.providerCard:hover {
+  border-color: #4CAF50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.providerCard.active {
+  background: white;
+  border-color: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.providerIcon {
+  font-size: 32px;
+}
+
+.providerName {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Instructions Section */
+.instructionsSection {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.instructionsSection h3 {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.steps h4,
+.tips h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.steps ol {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.step {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  color: #555;
+  position: relative;
+}
+
+.inlineCopy {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  margin-left: 8px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inlineCopy:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.tips {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.tips ul {
+  margin: 0;
+  padding-left: 24px;
+  list-style: none;
+}
+
+.tips li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.tips li:before {
+  content: '💡';
+  position: absolute;
+  left: 0;
+}
+
+/* Queries Section */
+.queriesSection {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.queriesSection h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.queriesInfo {
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.queryList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.queryItem code {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #333;
+}
+
+.queryCopy {
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.queryCopy:hover {
+  color: #4CAF50;
+  transform: scale(1.1);
+}
+
+/* Toast Overrides */
+:global(.Toastify__toast) {
+  font-family: inherit;
+  border-radius: 8px;
+}
+
+:global(.Toastify__toast--success) {
+  background: #4CAF50;
+}
+
+:global(.Toastify__toast--error) {
+  background: #f44336;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .addressSection,
+  .providerSection,
+  .instructionsSection,
+  .queriesSection {
+    padding: 20px;
+  }
+  
+  .addressBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .copyButton {
+    justify-content: center;
+  }
+  
+  .providerGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import styles from './CharityDashboard.module.css';
+import './SharedStyles.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { FaSearch, FaLink, FaTimes, FaClock, FaCreditCard, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import logo from '../assets/logo.png';
