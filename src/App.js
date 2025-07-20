@@ -47,6 +47,15 @@ const DonationForm = lazy(() => import('./components/DonationForm'));
 const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
 const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
 
+// Public profile components
+const PublicUserProfile = lazy(() => import('./components/Profile/PublicUserProfile'));
+const PublicBusinessProfile = lazy(() => import('./components/Profile/PublicBusinessProfile'));
+const PublicCharityProfile = lazy(() => import('./components/Profile/PublicCharityProfile'));
+const ProfileSearch = lazy(() => import('./components/Search/ProfileSearch'));
+const PrivacySettings = lazy(() => import('./components/Settings/PrivacySettings'));
+const PaymentMethods = lazy(() => import('./components/PaymentMethods/PaymentMethods'));
+const EmailForwardingSetup = lazy(() => import('./components/EmailForwarding/EmailForwardingSetup'));
+
 const logger = createLogger('App');
 
 // Suspense wrapper component
@@ -103,6 +112,12 @@ function App() {
                 <Route path="/auth/google/callback" element={<SuspenseWrapper><GoogleAuthCallback /></SuspenseWrapper>} />
                 <Route path="/microsoft-callback" element={<SuspenseWrapper><MicrosoftAuthCallback /></SuspenseWrapper>} />
                 
+                {/* Public profile routes (no auth required) */}
+                <Route path="/profile/:username" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/business/:slug" element={<Layout><SuspenseWrapper><PublicBusinessProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/charity/:abn" element={<Layout><SuspenseWrapper><PublicCharityProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/search" element={<Layout><SuspenseWrapper><ProfileSearch /></SuspenseWrapper></Layout>} />
+                
                 {/* Protected routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Layout><SuspenseWrapper><Profile /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
@@ -113,7 +128,9 @@ function App() {
                 <Route path="/charity/:id" element={<ProtectedRoute><Layout><SuspenseWrapper><CharityPartner /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/activity" element={<ProtectedRoute><Layout><SuspenseWrapper><Activity /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/search-charities" element={<ProtectedRoute><Layout><SuspenseWrapper><SearchCharities /></SuspenseWrapper></Layout></ProtectedRoute>} />
-                <Route path="/manage-payments" element={<ProtectedRoute><Layout><ChunkErrorBoundary><SuspenseWrapper><ManagePaymentsComponent /></SuspenseWrapper></ChunkErrorBoundary></Layout></ProtectedRoute>} />
+                <Route path="/manage-payments" element={<ProtectedRoute><Layout><ChunkErrorBoundary><SuspenseWrapper><PaymentMethods /></SuspenseWrapper></ChunkErrorBoundary></Layout></ProtectedRoute>} />
+                <Route path="/privacy-settings" element={<ProtectedRoute><Layout><SuspenseWrapper><PrivacySettings /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/email-forwarding" element={<ProtectedRoute><Layout><SuspenseWrapper><EmailForwardingSetup /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-impact" element={<ProtectedRoute><Layout><SuspenseWrapper><YourImpact /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 
                 {/* Business routes */}
