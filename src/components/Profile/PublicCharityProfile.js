@@ -84,7 +84,19 @@ const PublicCharityProfile = () => {
     );
   }
 
-  const { charity, stats, campaigns, supporters, ratings } = profile;
+  const { charity, stats, campaigns, supporters, ratings } = profile || {};
+  
+  // Ensure charity exists before rendering
+  if (!charity) {
+    return (
+      <div className={styles.errorContainer}>
+        <h2>Charity Data Not Available</h2>
+        <p>Unable to load charity information. Please try again later.</p>
+        <button onClick={() => navigate('/charities')}>Browse Charities</button>
+      </div>
+    );
+  }
+  
   const metaTags = profileService.generateMetaTags(charity, 'charity');
   const structuredData = profileService.generateStructuredData(charity, 'charity');
 
@@ -113,8 +125,8 @@ const PublicCharityProfile = () => {
           <div className={styles.headerContent}>
             <div className={styles.charityInfo}>
               <div className={styles.logo}>
-                {charity.logo ? (
-                  <img src={charity.logo} alt={charity.name} />
+                {charity?.logo ? (
+                  <img src={charity.logo} alt={charity?.name || 'Charity'} />
                 ) : (
                   <div className={styles.logoPlaceholder}>
                     <FaHeart />
@@ -122,11 +134,11 @@ const PublicCharityProfile = () => {
                 )}
               </div>
               <div className={styles.charityDetails}>
-                <h1>{charity.name}</h1>
-                <p className={styles.category}>{charity.category}</p>
+                <h1>{charity?.name || 'Unknown Charity'}</h1>
+                <p className={styles.category}>{charity?.category || 'Uncategorized'}</p>
                 <div className={styles.abn}>
-                  ABN: {charity.abn}
-                  {charity.dgrStatus && (
+                  ABN: {charity?.abn || 'N/A'}
+                  {charity?.dgrStatus && (
                     <span className={styles.dgrBadge}>
                       <FaCheckCircle /> DGR Registered
                     </span>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import styles from './SearchCharities.module.css';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import CharityCard from './CharityCard';
+import { mapNormalizedToACNC } from '../utils/charityDataMapper';
 
 const CHARITY_CATEGORIES = [
   'Health Services',
@@ -76,37 +77,23 @@ function SearchCharities() {
       });
 
       if (response.data.charities && response.data.charities.records) {
-        // Use the enhanced charity data from the backend
-        const enhancedResults = response.data.charities.records.map(charity => ({
-          ...charity,
-          // Map the API response fields to display fields
-          ABN: charity.ABN,
-          Charity_Legal_Name: charity.name,
-          State: charity.state,
-          Town_City: charity.state, // API doesn't return city separately
-          Charity_Size: charity.size,
-          Main_Activity: charity.category || 'Other Philanthropic',
-          Registration_Status: 'Registered', // All results are registered
-          Operates_in_ACT: charity.operatingStates?.includes('ACT') ? 'Y' : 'N',
-          Operates_in_NSW: charity.operatingStates?.includes('NSW') ? 'Y' : 'N',
-          Operates_in_NT: charity.operatingStates?.includes('NT') ? 'Y' : 'N',
-          Operates_in_QLD: charity.operatingStates?.includes('QLD') ? 'Y' : 'N',
-          Operates_in_SA: charity.operatingStates?.includes('SA') ? 'Y' : 'N',
-          Operates_in_TAS: charity.operatingStates?.includes('TAS') ? 'Y' : 'N',
-          Operates_in_VIC: charity.operatingStates?.includes('VIC') ? 'Y' : 'N',
-          Operates_in_WA: charity.operatingStates?.includes('WA') ? 'Y' : 'N',
-          PBI: charity.isPBI ? 'Y' : 'N',
-          // Add display properties
-          score: charity.impactScore || Math.floor(Math.random() * 40) + 60,
-          isVerified: true, // All results from API are verified
-          category: charity.category || 'Other Philanthropic',
-          trending: charity.trending || Math.random() > 0.8,
-          // Add purpose summary for display
-          purposeSummary: charity.purposes ? Object.entries(charity.purposes)
-            .filter(([key, value]) => value)
-            .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
-            .slice(0, 3) : []
-        }));
+        // Use the mapper to handle backend normalized data
+        const enhancedResults = response.data.charities.records.map(charity => {
+          const mappedCharity = mapNormalizedToACNC(charity);
+          return {
+            ...mappedCharity,
+            // Add display properties
+            score: charity.impactScore || Math.floor(Math.random() * 40) + 60,
+            isVerified: true, // All results from API are verified
+            category: charity.category || 'Other Philanthropic',
+            trending: charity.trending || Math.random() > 0.8,
+            // Add purpose summary for display
+            purposeSummary: charity.purposes ? Object.entries(charity.purposes)
+              .filter(([key, value]) => value)
+              .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
+              .slice(0, 3) : []
+          };
+        });
         setResults(enhancedResults);
       } else {
         setError('Failed to fetch results. Please try again.');
