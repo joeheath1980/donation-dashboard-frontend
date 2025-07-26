@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useRef, useMemo, useState } from 'react';
-import { Chart, registerables } from 'chart.js';
+import Chart from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 import { FaChartBar } from 'react-icons/fa';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
 
-Chart.register(...registerables);
+// Global chart instances tracking
+if (!window.__chartInstances) {
+  window.__chartInstances = new Map();
+}
 
 const TIME_PERIODS = {
   ALL: 'all',
@@ -281,25 +284,146 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
 function ImpactVisualization({ hideTitle = false }) {
   const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore } = useContext(ImpactContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
+  const [isVisible, setIsVisible] = useState(false);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
+  const containerRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const chartIdRef = useRef(null);
+  
+  // Track mounted state
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      // Cleanup chart on unmount
+      if (chartInstance.current) {
+        console.log('Component unmounting, destroying chart');
+        try {
+          chartInstance.current.destroy();
+          // Remove from global registry
+          if (window.__chartInstances && chartIdRef.current) {
+            window.__chartInstances.delete(chartIdRef.current);
+            console.log(`Removed chart ${chartIdRef.current} from global registry`);
+          }
+          // Clear the canvas attribute
+          if (chartRef.current) {
+            chartRef.current.removeAttribute('data-chart-id');
+          }
+        } catch (error) {
+          console.error('Error destroying chart on unmount:', error);
+        }
+        chartInstance.current = null;
+        chartIdRef.current = null;
+      }
+    };
+  }, []);
 
   const dataPoints = useMemo(() => {
     console.log('Recalculating data points for period:', timePeriod);
+    console.log('Raw data:', {
+      donations,
+      oneOffContributions,
+      volunteerActivities,
+      fundraisingCampaigns,
+      impactScore
+    });
     return processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns);
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
 
+  // Set up intersection observer to detect visibility
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) {
+      console.log('Chart not visible, skipping creation');
+      return;
+    }
+
     if (!chartRef.current || !dataPoints || dataPoints.length === 0) {
       console.log('No data points or chart ref available');
       return;
     }
 
-    console.log('Creating chart with', dataPoints.length, 'data points');
-    const ctx = chartRef.current.getContext('2d');
+    // Delay chart creation to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      // Check if component is still mounted
+      if (!isMountedRef.current) {
+        console.log('Component unmounted, skipping chart creation');
+        return;
+      }
+      
+      if (!chartRef.current) {
+        console.warn('Chart ref lost during timeout');
+        return;
+      }
+
+      // Ensure canvas element is in the DOM
+      if (!chartRef.current.parentNode) {
+        console.warn('Chart canvas is not attached to DOM');
+        return;
+      }
+
+      console.log('Creating chart with', dataPoints.length, 'data points');
+      
+      try {
+        if (!chartRef.current) {
+          console.error('Chart ref is null');
+          return;
+        }
+        
+        // Extra safety check for Chart.js
+        if (!Chart || !Chart.defaults) {
+          console.error('Chart.js not properly loaded or initialized');
+          return;
+        }
+        
+        const ctx = chartRef.current.getContext('2d');
+        if (!ctx) {
+          console.error('Could not get 2D context from canvas');
+          return;
+        }
+
+    // Check for any existing chart on this canvas
+    const existingChartId = chartRef.current.getAttribute('data-chart-id');
+    if (existingChartId && window.__chartInstances.has(existingChartId)) {
+      const existingChart = window.__chartInstances.get(existingChartId);
+      console.log('Found existing chart on canvas, destroying it');
+      try {
+        existingChart.destroy();
+        window.__chartInstances.delete(existingChartId);
+      } catch (error) {
+        console.error('Error destroying existing chart from global registry:', error);
+      }
+    }
 
     if (chartInstance.current) {
-      chartInstance.current.destroy();
+      console.log('Destroying existing chart before creating new one');
+      try {
+        chartInstance.current.destroy();
+        chartInstance.current = null;
+      } catch (error) {
+        console.error('Error destroying existing chart:', error);
+      }
     }
 
     const maxScore = Math.max(impactScore, ...dataPoints.map(point => point.y));
@@ -323,19 +447,45 @@ function ImpactVisualization({ hideTitle = false }) {
     gradient.addColorStop(0, '#5ecfb6');
     gradient.addColorStop(1, '#2d8f7b');
 
-    chartInstance.current = new Chart(ctx, {
+    // Double-check the canvas is still valid before creating chart
+    if (!chartRef.current || !document.body.contains(chartRef.current)) {
+      console.warn('Canvas element is no longer in document');
+      return;
+    }
+
+    // Generate unique ID for this chart
+    const chartId = `impact-viz-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Ensure Chart.js is properly loaded
+    if (!Chart || typeof Chart !== 'function') {
+      console.error('Chart.js is not properly loaded');
+      return;
+    }
+    
+    let newChart;
+    try {
+      // Store chart instance with cleanup check
+      newChart = new Chart(ctx, {
       type: 'line',
       data: {
+        labels: dataPoints.map(point => {
+          const date = new Date(point.x);
+          return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+          });
+        }),
         datasets: [{
           label: 'Personal Impact Score',
-          data: dataPoints,
+          data: dataPoints.map(point => point.y),
           borderColor: gradient,
           backgroundColor: 'rgba(94, 207, 182, 0.1)',
           borderWidth: 3,
           tension: 0.1,
           fill: true,
           pointBackgroundColor: function(context) {
-            const point = context.dataset.data[context.dataIndex];
+            const point = dataPoints[context.dataIndex];
             if (point.isDense) {
               return COLORS.DENSE;
             }
@@ -349,15 +499,15 @@ function ImpactVisualization({ hideTitle = false }) {
             }
           },
           pointRadius: function(context) {
-            const point = context.dataset.data[context.dataIndex];
+            const point = dataPoints[context.dataIndex];
             return point.isDense ? 8 : 6;
           },
           pointHoverRadius: function(context) {
-            const point = context.dataset.data[context.dataIndex];
+            const point = dataPoints[context.dataIndex];
             return point.isDense ? 10 : 8;
           },
           pointStyle: function(context) {
-            const point = context.dataset.data[context.dataIndex];
+            const point = dataPoints[context.dataIndex];
             return point.isDense ? 'rectRot' : 'circle';
           }
         }]
@@ -444,17 +594,15 @@ function ImpactVisualization({ hideTitle = false }) {
         },
         scales: {
           x: {
-            type: 'time',
-            time: {
-              unit: timePeriod === TIME_PERIODS.WEEK ? 'day' :
-                    timePeriod === TIME_PERIODS.MONTH ? 'week' :
-                    timePeriod === TIME_PERIODS.YEAR ? 'month' : 'month',
-              displayFormats: {
-                day: 'MMM d',
-                week: 'MMM d',
-                month: 'MMM yyyy'
-              }
-            },
+            type: 'category',
+            labels: dataPoints.map(point => {
+              const date = new Date(point.x);
+              return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+              });
+            }),
             title: {
               display: false
             },
@@ -465,8 +613,8 @@ function ImpactVisualization({ hideTitle = false }) {
               color: '#2d8f7b',
               maxRotation: 45,
               minRotation: 45,
-              autoSkip: false,
-              source: 'data'
+              autoSkip: true,
+              maxTicksLimit: 10
             }
           },
           y: {
@@ -494,23 +642,96 @@ function ImpactVisualization({ hideTitle = false }) {
         }
       }
     });
-
-    console.log('Chart created successfully');
+    } catch (chartError) {
+      console.error('Error creating Chart.js instance:', chartError);
+      console.error('Error stack:', chartError.stack);
+      console.error('Chart.js version:', Chart.version);
+      console.error('Chart.js registries:', Chart.registry);
+      
+      // Clean up any partial instance
+      if (newChart) {
+        try {
+          newChart.destroy();
+        } catch (destroyError) {
+          console.error('Error destroying partial chart:', destroyError);
+        }
+      }
+      return;
+    }
+    
+    // Only store if still mounted
+    if (isMountedRef.current) {
+      chartInstance.current = newChart;
+      chartIdRef.current = chartId;
+      // Store chart ID on canvas element
+      chartRef.current.setAttribute('data-chart-id', chartId);
+      // Register in global registry
+      if (window.__chartInstances) {
+        window.__chartInstances.set(chartId, newChart);
+        console.log(`Chart created successfully and registered with ID: ${chartId}`);
+      } else {
+        console.log('Chart created successfully (no global registry available)');
+      }
+    } else {
+      console.log('Component unmounted during chart creation, destroying');
+      newChart.destroy();
+    }
+      } catch (error) {
+        console.error('Error in chart creation:', error);
+        if (chartInstance.current) {
+          try {
+            chartInstance.current.destroy();
+          } catch (destroyError) {
+            console.error('Error destroying chart after error:', destroyError);
+          }
+        }
+      }
+    }, 100); // 100ms delay to ensure DOM is ready
   
     return () => {
+      clearTimeout(timeoutId);
       if (chartInstance.current) {
-        chartInstance.current.destroy();
+        try {
+          chartInstance.current.destroy();
+          // Remove from global registry
+          if (window.__chartInstances && chartIdRef.current) {
+            window.__chartInstances.delete(chartIdRef.current);
+            console.log(`Removed chart ${chartIdRef.current} from global registry on effect cleanup`);
+          }
+          // Clear the canvas attribute
+          if (chartRef.current) {
+            chartRef.current.removeAttribute('data-chart-id');
+          }
+        } catch (error) {
+          console.error('Error destroying chart on cleanup:', error);
+        }
+        chartInstance.current = null;
+        chartIdRef.current = null;
       }
     };
-  }, [dataPoints, impactScore, timePeriod]);
+  }, [dataPoints, impactScore, timePeriod, isVisible]);
 
   if (!dataPoints || dataPoints.length === 0) {
-    console.log('No data available for visualization');
+    console.log('No data available for visualization', {
+      dataPoints,
+      donations,
+      oneOffContributions,
+      volunteerActivities,
+      fundraisingCampaigns,
+      impactScore
+    });
     return <div className="textCenter">No data available for visualization</div>;
   }
 
+  console.log('Rendering ImpactVisualization with data:', {
+    dataPoints: dataPoints.length,
+    isVisible,
+    chartRef: chartRef.current ? 'exists' : 'null',
+    containerRef: containerRef.current ? 'exists' : 'null'
+  });
+
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       {!hideTitle && (
         <div className={styles.header}>
           <h2 className={`${styles.title} gradientTitle`}>

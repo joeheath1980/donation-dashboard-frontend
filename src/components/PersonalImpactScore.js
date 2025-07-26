@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaUserCircle } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './PersonalImpactScore.module.css';
 
 const tierColors = {
@@ -114,6 +115,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
 };
 
 const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier }) => {
+  const { user } = useAuth();
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
   const [animate, setAnimate] = useState(false);
 
@@ -153,6 +155,11 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier 
         <Link to="/activity" className={styles.discoverButton}>
           Discover Your Contributions
         </Link>
+        {user && user._id && (
+          <Link to={`/profile/${user._id}`} className={styles.profileButton}>
+            <FaUserCircle /> View Public Profile
+          </Link>
+        )}
       </div>
     </div>
   );

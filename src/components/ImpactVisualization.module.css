@@ -71,6 +71,7 @@
 .chartContainer {
   position: relative;
   height: 400px;
+  min-height: 400px;
   width: 100%;
   margin-bottom: 20px;
   background-color: white;
@@ -79,6 +80,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
   isolation: isolate;
+}
+
+.chartContainer canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 360px;
 }
 
 .legend {

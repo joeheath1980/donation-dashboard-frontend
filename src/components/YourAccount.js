@@ -19,7 +19,7 @@ const YourAccount = () => {
               <h2 className="cardTitle">Profile</h2>
             </div>
             <p className="cardText">Manage your personal information and preferences.</p>
-            <button className="button">Edit Profile</button>
+            <Link to="/dashboard" className="button">Edit Profile</Link>
             <span className={`${styles.ctaTip} tip`}>Keep your profile updated for a better experience!</span>
           </div>
 
@@ -31,7 +31,7 @@ const YourAccount = () => {
               <h2 className="cardTitle">Privacy</h2>
             </div>
             <p className="cardText">Control your privacy settings and data sharing preferences.</p>
-            <button className="button">Manage Privacy</button>
+            <Link to="/privacy-settings" className="button">Manage Privacy</Link>
             <span className={`${styles.ctaTip} tip`}>Your privacy matters. Review your settings regularly.</span>
           </div>
 

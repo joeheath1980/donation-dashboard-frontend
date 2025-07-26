@@ -12,6 +12,9 @@ import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
+import MatchOpportunityFeed from './matching/MatchOpportunityFeed';
+import MatchSuccessModal from './matching/MatchSuccessModal';
+import MatchingDetailModal from './matching/MatchingDetailModal';
 import { 
   FaRegHandshake, 
   FaRegCalendarAlt, 
@@ -21,9 +24,10 @@ import {
   FaPlus,
   FaHandshake,
   FaProjectDiagram,
-  FaChartLine
+  FaChartLine,
+  FaBolt
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -52,6 +56,7 @@ function Profile() {
   } = useContext(ImpactContext);
 
   const { getAuthHeaders } = useAuth();
+  const navigate = useNavigate();
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
   const [localOneOffContributions, setLocalOneOffContributions] = useState(contextOneOffContributions || []);
@@ -64,6 +69,11 @@ function Profile() {
   const [matchingOpportunitiesLoading, setMatchingOpportunitiesLoading] = useState(true);
   const [matchingOpportunitiesError, setMatchingOpportunitiesError] = useState(null);
   const [activeImpactSection, setActiveImpactSection] = useState(0);
+  const [showMatchingFeed, setShowMatchingFeed] = useState(false);
+  const [showMatchSuccess, setShowMatchSuccess] = useState(false);
+  const [matchSuccessData, setMatchSuccessData] = useState(null);
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [showMatchingDetail, setShowMatchingDetail] = useState(false);
 
   const impactSections = [
     { title: 'Impact Journey', component: 'ImpactVisualization' },
@@ -184,6 +194,19 @@ function Profile() {
     }
   };
 
+  const handleSelectOpportunity = (opportunity) => {
+    // Show the detail modal instead of navigating directly
+    setSelectedOpportunity(opportunity);
+    setShowMatchingDetail(true);
+    setShowMatchingFeed(false);
+  };
+
+  const handleFindNextMatch = () => {
+    setShowMatchSuccess(false);
+    setMatchSuccessData(null);
+    setShowMatchingFeed(true);
+  };
+
   if (isLoading) return <div className="textCenter">Loading your impact data...</div>;
   if (impactError) return <div className="textCenter">{impactError}</div>;
   if (!isAuthenticated) return <div className="textCenter">Please log in to view your profile and impact data.</div>;
@@ -213,22 +236,36 @@ function Profile() {
         <section className={styles.section}>
           <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
-          <CarouselComponent 
-            items={matchingOpportunities.map(opportunity => ({
-              title: opportunity.message,
-              charity: opportunity.charity,
-              businessName: opportunity.businessName,
-              contribution: `$${opportunity.contribution}`,
-              multiplier: '2x',
-              validUntil: new Date(opportunity.endDate).toLocaleDateString(),
-              id: opportunity._id,
-              accepted: opportunity.accepted,
-              cause: opportunity.cause,
-              onMatch: () => handleMatch(opportunity._id)
-            }))}
-            isLoading={matchingOpportunitiesLoading}
-            error={matchingOpportunitiesError}
-          />
+          
+          {!showMatchingFeed ? (
+            <div className={styles.matchingOpportunitiesPreview}>
+              <button 
+                className={styles.exploreMatchesButton}
+                onClick={() => setShowMatchingFeed(true)}
+              >
+                <FaBolt className={styles.buttonIcon} />
+                Explore Active Matches
+              </button>
+              <p className={styles.matchesAvailable}>
+                {matchingOpportunities.length > 0 
+                  ? `${matchingOpportunities.length} active matching opportunities available!`
+                  : 'Check for new matching opportunities'
+                }
+              </p>
+            </div>
+          ) : (
+            <div className={styles.matchingFeedContainer}>
+              <button 
+                className={styles.closeMatchingButton}
+                onClick={() => setShowMatchingFeed(false)}
+              >
+                <FaTimes /> Close
+              </button>
+              <MatchOpportunityFeed 
+                onSelectOpportunity={handleSelectOpportunity}
+              />
+            </div>
+          )}
         </section>
 
         <section className={styles.section}>
@@ -374,6 +411,35 @@ function Profile() {
           </div>
         </section>
       </div>
+      
+      {/* Match Success Modal */}
+      {showMatchSuccess && matchSuccessData && (
+        <MatchSuccessModal
+          donation={matchSuccessData.donation}
+          matches={matchSuccessData.matches}
+          onClose={() => {
+            setShowMatchSuccess(false);
+            setMatchSuccessData(null);
+          }}
+          onFindNext={handleFindNextMatch}
+        />
+      )}
+      
+      {/* Matching Detail Modal */}
+      {showMatchingDetail && selectedOpportunity && (
+        <MatchingDetailModal
+          opportunity={selectedOpportunity}
+          onClose={() => {
+            setShowMatchingDetail(false);
+            setSelectedOpportunity(null);
+            setShowMatchingFeed(true);
+          }}
+          onConfirm={() => {
+            setShowMatchingDetail(false);
+            setSelectedOpportunity(null);
+          }}
+        />
+      )}
     </div>
   );
 }

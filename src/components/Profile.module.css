@@ -134,12 +134,14 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  align-items: start; /* Changed from default stretch to start */
 }
 
 .activitiesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
+  align-items: start; /* Prevent columns from affecting each other */
 }
 
 .donationCard, .activityCard {
@@ -151,6 +153,7 @@
   flex-direction: column;
   min-height: 200px;
   box-sizing: border-box;
+  align-self: start; /* Ensures each card aligns to the top independently */
 }
 
 .cardTitle {
@@ -318,4 +321,68 @@
     padding: 8px 20px;
     font-size: 14px;
   }
+}
+
+/* Matching Opportunities Styles */
+.matchingOpportunitiesPreview {
+  text-align: center;
+  padding: 2rem;
+}
+
+.exploreMatchesButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.exploreMatchesButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.buttonIcon {
+  font-size: 1.25rem;
+}
+
+.matchesAvailable {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.matchingFeedContainer {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.closeMatchingButton {
+  position: absolute;
+  top: -2rem;
+  right: 0;
+  background: #f3f4f6;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  transition: background 0.2s;
+  z-index: 10;
+}
+
+.closeMatchingButton:hover {
+  background: #e5e7eb;
 }

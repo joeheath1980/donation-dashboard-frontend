@@ -17,6 +17,8 @@ import {
 import styles from './PaymentMethods.module.css';
 import api from '../../services/api.service';
 
+const apiClient = api.client || api;
+
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const PaymentMethods = () => {
@@ -32,7 +34,7 @@ const PaymentMethods = () => {
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/payment-methods');
+      const response = await apiClient.get('/payment-methods');
       setPaymentMethods(response.data.paymentMethods || []);
       setDefaultMethodId(response.data.defaultMethodId);
     } catch (error) {
@@ -44,7 +46,7 @@ const PaymentMethods = () => {
 
   const handleSetDefault = async (methodId) => {
     try {
-      await api.post(`/payment-methods/${methodId}/set-default`);
+      await apiClient.post(`/payment-methods/${methodId}/set-default`);
       setDefaultMethodId(methodId);
       // Update local state
       setPaymentMethods(methods => 
@@ -65,7 +67,7 @@ const PaymentMethods = () => {
     }
 
     try {
-      await api.delete(`/payment-methods/${methodId}`);
+      await apiClient.delete(`/payment-methods/${methodId}`);
       setPaymentMethods(methods => methods.filter(m => m.id !== methodId));
     } catch (error) {
       console.error('Error deleting payment method:', error);
@@ -206,7 +208,7 @@ const AddPaymentMethodModal = ({ onClose, onSuccess }) => {
 
   const setupPaymentMethod = async () => {
     try {
-      const response = await api.post('/payment-methods/setup-intent');
+      const response = await apiClient.post('/payment-methods/setup-intent');
       setClientSecret(response.data.clientSecret);
     } catch (error) {
       console.error('Error setting up payment method:', error);

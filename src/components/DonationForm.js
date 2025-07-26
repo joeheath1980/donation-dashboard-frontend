@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Elements,
   CardElement,
@@ -119,11 +119,11 @@ const MatchConfirmationModal = ({ isOpen, onClose, donation, matches }) => {
 };
 
 // Main donation form component
-function DonationFormContent({ charity, onSuccess }) {
+function DonationFormContent({ charity, onSuccess, matchingOpportunity }) {
   const stripe = useStripe();
   const elements = useElements();
   
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(matchingOpportunity?.suggestedAmount?.toString() || '');
   const [isMonthly, setIsMonthly] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -201,7 +201,8 @@ function DonationFormContent({ charity, onSuccess }) {
           currency: 'usd',
           charityId: charity._id,
           isMonthly,
-          includeMatching: true
+          includeMatching: true,
+          ...(matchingOpportunity?.campaignId && { campaignId: matchingOpportunity.campaignId })
         }
       );
 
@@ -257,6 +258,20 @@ function DonationFormContent({ charity, onSuccess }) {
     <>
       <form onSubmit={handleSubmit} className="donation-form">
         <h2>Donate to {charity.charityName || charity.Charity_Legal_Name}</h2>
+        
+        {/* Show matching opportunity info if coming from match feed */}
+        {matchingOpportunity && (
+          <div className="match-opportunity-info">
+            <div className="match-info-header">
+              <span className="match-badge">🎯 Matched Donation</span>
+              <span className="match-business">{matchingOpportunity.businessName}</span>
+            </div>
+            <p className="match-info-text">
+              {matchingOpportunity.businessName} will match your donation {matchingOpportunity.multiplier}x 
+              as part of their {matchingOpportunity.campaignName}!
+            </p>
+          </div>
+        )}
         
         {/* Amount Selection */}
         <div className="form-section">
@@ -364,9 +379,13 @@ function DonationFormContent({ charity, onSuccess }) {
 function DonationFormWrapper() {
   const { charityId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [charity, setCharity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Get matching opportunity data from navigation state
+  const matchingOpportunity = location.state?.matchingOpportunity;
 
   useEffect(() => {
     const fetchCharity = async () => {
@@ -411,8 +430,8 @@ function DonationFormWrapper() {
       <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
         <h2>Error</h2>
         <p>{error}</p>
-        <button onClick={() => navigate('/search-charities')}>
-          Back to Charities
+        <button onClick={() => navigate(-1)}>
+          Go Back
         </button>
       </div>
     );
@@ -422,8 +441,8 @@ function DonationFormWrapper() {
     return (
       <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
         <h2>Charity not found</h2>
-        <button onClick={() => navigate('/search-charities')}>
-          Back to Charities
+        <button onClick={() => navigate(-1)}>
+          Go Back
         </button>
       </div>
     );
@@ -431,7 +450,11 @@ function DonationFormWrapper() {
 
   return (
     <Elements stripe={stripePromise}>
-      <DonationFormContent charity={charity} onSuccess={handleSuccess} />
+      <DonationFormContent 
+        charity={charity} 
+        onSuccess={handleSuccess}
+        matchingOpportunity={matchingOpportunity}
+      />
     </Elements>
   );
 }

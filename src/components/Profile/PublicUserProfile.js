@@ -13,7 +13,20 @@ import {
   FaLinkedin,
   FaLink,
   FaFire,
-  FaGlobeAfrica
+  FaGlobeAfrica,
+  FaHeartbeat, 
+  FaGraduationCap, 
+  FaTree, 
+  FaHandHoldingHeart, 
+  FaGlobeAmericas, 
+  FaWater, 
+  FaBook, 
+  FaPaw, 
+  FaLeaf, 
+  FaBriefcaseMedical, 
+  FaUtensils, 
+  FaHome, 
+  FaSeedling
 } from 'react-icons/fa';
 import { format } from 'date-fns';
 import styles from './PublicUserProfile.module.css';
@@ -21,24 +34,46 @@ import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
 
 const PublicUserProfile = () => {
-  const { username } = useParams();
+  const { userId } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    fetchProfile();
-  }, [username]);
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchProfile();
+    }
+  }, [userId, mounted]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const data = await profileService.getUserPublicProfile(username);
+      console.log('Fetching profile for userId:', userId);
+      const data = await profileService.getUserPublicProfile(userId);
+      console.log('Profile data received:', data);
+      console.log('Profile data details:', {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        userDisplayName: data?.user?.displayName,
+        userTier: data?.user?.tier,
+        hasStats: !!data?.stats,
+        hasRecentActivity: !!data?.recentActivity,
+        recentActivityLength: data?.recentActivity?.length,
+        hasCharityPortfolio: !!data?.charityPortfolio,
+        charityPortfolioLength: data?.charityPortfolio?.length
+      });
       setProfile(data);
     } catch (err) {
+      console.error('Profile fetch error in component:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -46,8 +81,9 @@ const PublicUserProfile = () => {
   };
 
   const handleShare = (platform) => {
-    const url = profileService.generateProfileUrl('user', username);
-    const text = `Check out ${profile.user.displayName}'s giving profile on Do-Nation!`;
+    const url = profileService.generateProfileUrl('user', userId);
+    const displayName = profile?.user?.displayName || 'this';
+    const text = `Check out ${displayName}'s giving profile on Do-Nation!`;
 
     switch (platform) {
       case 'twitter':
@@ -67,7 +103,8 @@ const PublicUserProfile = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (!mounted || loading) return <LoadingSpinner />;
+  
   if (error) {
     return (
       <div className={styles.errorContainer}>
@@ -78,57 +115,118 @@ const PublicUserProfile = () => {
     );
   }
 
-  const { user, stats, activity, charities } = profile;
-  const metaTags = profileService.generateMetaTags(user, 'user');
-  const structuredData = profileService.generateStructuredData(user, 'user');
+  if (!profile || !profile.user) {
+    return (
+      <div className={styles.errorContainer}>
+        <h2>Profile Not Found</h2>
+        <p>The profile you're looking for doesn't exist or is private.</p>
+        <button onClick={() => navigate('/')}>Return Home</button>
+      </div>
+    );
+  }
 
-  // Tier configurations
+  const { user, stats, recentActivity, charityPortfolio } = profile;
+  
+  // Ensure user object has required properties
+  const safeUser = {
+    displayName: user?.displayName || 'Anonymous User',
+    tier: user?.tier || 'Giver',
+    joinDate: user?.joinDate || new Date().toISOString(),
+    avatar: user?.avatar,
+    publicScore: user?.publicScore !== undefined ? user.publicScore : (user?.impactScore !== undefined ? user.impactScore : 0),
+    impactStatement: user?.impactStatement,
+    badges: user?.badges || [],
+    ...user
+  };
+  
+  const safeStats = {
+    totalDonations: 0,
+    charitiesSupported: 0,
+    currentStreak: 0,
+    matchesReceived: 0,
+    ...stats
+  };
+  
+  const userData = { ...safeUser, stats: safeStats };
+  const metaTags = profileService.generateMetaTags(userData, 'user');
+  const structuredData = profileService.generateStructuredData(userData, 'user');
+
+  // Tier configurations - aligned with dashboard tiers
   const tierConfig = {
-    Bronze: { color: '#CD7F32', icon: '🥉' },
-    Silver: { color: '#C0C0C0', icon: '🥈' },
-    Gold: { color: '#FFD700', icon: '🥇' },
-    Platinum: { color: '#E5E4E2', icon: '💎' }
+    Giver: { color: '#E74C3C', icon: '❤️' },
+    Altruist: { color: '#2ECC71', icon: '🏆' },
+    Philanthropist: { color: '#CD7F32', icon: '🏅' },
+    Champion: { color: '#C0C0C0', icon: '🥈' },
+    Visionary: { color: '#FFD700', icon: '👑' }
+  };
+
+  // Badge icons mapping - aligned with ScrollableImpactSection
+  const badgeIcons = {
+    'Healthcare Hero': { icon: FaHeartbeat, color: '#FF6B6B' },
+    'Education Champion': { icon: FaGraduationCap, color: '#4ECDC4' },
+    'Environmental Guardian': { icon: FaTree, color: '#45B649' },
+    'Humanitarian Helper': { icon: FaHandHoldingHeart, color: '#FF8C00' },
+    'Global Impact': { icon: FaGlobeAmericas, color: '#3498DB' },
+    'Clean Water Advocate': { icon: FaWater, color: '#00CED1' },
+    'Literacy Promoter': { icon: FaBook, color: '#9B59B6' },
+    'Animal Welfare Champion': { icon: FaPaw, color: '#E67E22' },
+    'Sustainability Steward': { icon: FaLeaf, color: '#27AE60' },
+    'Medical Research Supporter': { icon: FaBriefcaseMedical, color: '#E74C3C' },
+    'Hunger Fighter': { icon: FaUtensils, color: '#F39C12' },
+    'Housing Hero': { icon: FaHome, color: '#8E44AD' },
+    'Community Grower': { icon: FaSeedling, color: '#2ECC71' },
+    'Disaster Relief Ally': { icon: FaHandHoldingHeart, color: '#D35400' },
+    'Child Welfare Protector': { icon: FaHeartbeat, color: '#C0392B' },
+    'Arts and Culture Patron': { icon: FaBook, color: '#1ABC9C' },
+    'Climate Action Advocate': { icon: FaGlobeAmericas, color: '#16A085' },
+    'STEM Education Booster': { icon: FaBook, color: '#2980B9' },
+    'Elder Care Supporter': { icon: FaHandHoldingHeart, color: '#7F8C8D' },
+    'Conservation Champion': { icon: FaLeaf, color: '#27AE60' }
   };
 
   return (
     <>
-      <Helmet>
-        <title>{metaTags.title}</title>
-        <meta name="description" content={metaTags.description} />
-        <meta property="og:title" content={metaTags.title} />
-        <meta property="og:description" content={metaTags.description} />
-        <meta property="og:image" content={metaTags.image} />
-        <meta property="og:url" content={metaTags.url} />
-        <meta property="og:type" content={metaTags.type} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={metaTags.title} />
-        <meta name="twitter:description" content={metaTags.description} />
-        <meta name="twitter:image" content={metaTags.image} />
-        <link rel="canonical" href={metaTags.url} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </Helmet>
+      {metaTags && (
+        <Helmet>
+          <title>{metaTags.title}</title>
+          <meta name="description" content={metaTags.description} />
+          <meta property="og:title" content={metaTags.title} />
+          <meta property="og:description" content={metaTags.description} />
+          <meta property="og:image" content={metaTags.image} />
+          <meta property="og:url" content={metaTags.url} />
+          <meta property="og:type" content={metaTags.type} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={metaTags.title} />
+          <meta name="twitter:description" content={metaTags.description} />
+          <meta name="twitter:image" content={metaTags.image} />
+          <link rel="canonical" href={metaTags.url} />
+          {structuredData && (
+            <script type="application/ld+json">
+              {JSON.stringify(structuredData)}
+            </script>
+          )}
+        </Helmet>
+      )}
 
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.userInfo}>
               <div className={styles.avatar}>
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.displayName} />
+                {safeUser.avatar ? (
+                  <img src={safeUser.avatar} alt={safeUser.displayName} />
                 ) : (
                   <div className={styles.avatarPlaceholder}>
-                    {user.displayName.charAt(0).toUpperCase()}
+                    {safeUser.displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
               <div className={styles.userDetails}>
-                <h1>{user.displayName}</h1>
-                <p className={styles.username}>@{user.username}</p>
+                <h1>{safeUser.displayName}</h1>
+                <p className={styles.tierBadge}>{safeUser.tier} Tier</p>
                 <div className={styles.joinDate}>
                   <FaCalendar />
-                  Member since {format(new Date(user.joinDate), 'MMMM yyyy')}
+                  Member since {format(new Date(safeUser.joinDate), 'MMMM yyyy')}
                 </div>
               </div>
             </div>
@@ -150,9 +248,9 @@ const PublicUserProfile = () => {
             </div>
           </div>
 
-          <div className={styles.tierBadge} style={{ backgroundColor: tierConfig[user.tier].color }}>
-            <span className={styles.tierIcon}>{tierConfig[user.tier].icon}</span>
-            <span className={styles.tierName}>{user.tier} Tier</span>
+          <div className={styles.tierBadge} style={{ backgroundColor: tierConfig[safeUser.tier]?.color || '#CD7F32' }}>
+            <span className={styles.tierIcon}>{tierConfig[safeUser.tier]?.icon || '🥉'}</span>
+            <span className={styles.tierName}>{safeUser.tier} Tier</span>
           </div>
         </div>
 
@@ -160,8 +258,8 @@ const PublicUserProfile = () => {
           <div className={styles.statCard}>
             <FaTrophy className={styles.statIcon} />
             <div className={styles.statValue}>
-              {user.publicScore !== 'Private' ? (
-                <>{user.publicScore.toLocaleString()} <span>points</span></>
+              {safeUser.publicScore !== 'Private' ? (
+                <>{safeUser.publicScore.toLocaleString()} <span>points</span></>
               ) : (
                 <FaLock className={styles.privateLock} />
               )}
@@ -169,11 +267,11 @@ const PublicUserProfile = () => {
             <div className={styles.statLabel}>Impact Score</div>
           </div>
 
-          {stats.totalDonations !== null && (
+          {safeStats.totalDonations > 0 && (
             <div className={styles.statCard}>
               <FaHeart className={styles.statIcon} />
               <div className={styles.statValue}>
-                {stats.totalDonations} <span>donations</span>
+                {safeStats.totalDonations} <span>donations</span>
               </div>
               <div className={styles.statLabel}>Total Donations</div>
             </div>
@@ -182,26 +280,26 @@ const PublicUserProfile = () => {
           <div className={styles.statCard}>
             <FaGlobeAfrica className={styles.statIcon} />
             <div className={styles.statValue}>
-              {stats.charitiesSupported} <span>charities</span>
+              {safeStats.charitiesSupported} <span>charities</span>
             </div>
             <div className={styles.statLabel}>Supported</div>
           </div>
 
-          {stats.currentStreak > 0 && (
+          {safeStats.currentStreak > 0 && (
             <div className={styles.statCard}>
               <FaFire className={styles.statIcon} />
               <div className={styles.statValue}>
-                {stats.currentStreak} <span>days</span>
+                {safeStats.currentStreak} <span>days</span>
               </div>
               <div className={styles.statLabel}>Current Streak</div>
             </div>
           )}
         </div>
 
-        {user.impactStatement && (
+        {safeUser.impactStatement && (
           <div className={styles.impactStatement}>
             <h3>Impact Statement</h3>
-            <p>"{user.impactStatement}"</p>
+            <p>"{safeUser.impactStatement}"</p>
           </div>
         )}
 
@@ -216,13 +314,13 @@ const PublicUserProfile = () => {
             className={activeTab === 'charities' ? styles.activeTab : ''}
             onClick={() => setActiveTab('charities')}
           >
-            Charities ({charities?.length || 0})
+            Charities Following ({charityPortfolio?.length || 0})
           </button>
           <button 
             className={activeTab === 'badges' ? styles.activeTab : ''}
             onClick={() => setActiveTab('badges')}
           >
-            Badges ({user.badges?.length || 0})
+            Badges ({safeUser.badges?.length || 0})
           </button>
           <button 
             className={activeTab === 'activity' ? styles.activeTab : ''}
@@ -243,12 +341,12 @@ const PublicUserProfile = () => {
                     <p>Ranked in top 10% of donors</p>
                   </div>
                 </div>
-                {stats.matchesReceived > 0 && (
+                {safeStats.matchesReceived > 0 && (
                   <div className={styles.achievement}>
                     <FaHeart className={styles.achievementIcon} />
                     <div>
                       <h4>Matched Donations</h4>
-                      <p>{stats.matchesReceived} matches received</p>
+                      <p>{safeStats.matchesReceived} matches received</p>
                     </div>
                   </div>
                 )}
@@ -258,9 +356,9 @@ const PublicUserProfile = () => {
 
           {activeTab === 'charities' && (
             <div className={styles.charitiesSection}>
-              {charities && charities.length > 0 ? (
+              {charityPortfolio && charityPortfolio.length > 0 ? (
                 <div className={styles.charityGrid}>
-                  {charities.map((charity) => (
+                  {charityPortfolio.map((charity) => (
                     <div key={charity.id} className={styles.charityCard}>
                       {charity.logo && (
                         <img src={charity.logo} alt={charity.name} className={styles.charityLogo} />
@@ -268,7 +366,7 @@ const PublicUserProfile = () => {
                       <h4>{charity.name}</h4>
                       <p>{charity.category}</p>
                       <button 
-                        onClick={() => navigate(`/charity/${charity.abn}`)}
+                        onClick={() => navigate(`/charity/${charity.abn || charity.ABN}`)}
                         className={styles.viewCharityBtn}
                       >
                         View Charity
@@ -284,18 +382,24 @@ const PublicUserProfile = () => {
 
           {activeTab === 'badges' && (
             <div className={styles.badgesSection}>
-              {user.badges && user.badges.length > 0 ? (
+              {safeUser.badges && safeUser.badges.length > 0 ? (
                 <div className={styles.badgeGrid}>
-                  {user.badges.map((badge) => (
-                    <div key={badge.id} className={styles.badgeCard}>
-                      <div className={styles.badgeIcon}>{badge.icon}</div>
-                      <h4>{badge.name}</h4>
-                      <p>{badge.description}</p>
-                      <span className={styles.badgeDate}>
-                        Earned {format(new Date(badge.earnedDate), 'MMM d, yyyy')}
-                      </span>
-                    </div>
-                  ))}
+                  {safeUser.badges.map((badge) => {
+                    const badgeConfig = badgeIcons[badge.name] || badgeIcons[badge.title] || { icon: FaTrophy, color: '#FFD700' };
+                    const BadgeIcon = badgeConfig.icon;
+                    return (
+                      <div key={badge.id || badge.name} className={styles.badgeCard}>
+                        <div className={styles.badgeIcon}>
+                          <BadgeIcon size={30} color={badgeConfig.color} />
+                        </div>
+                        <h4>{badge.name || badge.title}</h4>
+                        <p>{badge.description}</p>
+                        <span className={styles.badgeDate}>
+                          Earned {badge.earnedDate ? format(new Date(badge.earnedDate), 'MMM d, yyyy') : 'recently'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className={styles.emptyState}>No badges earned yet</p>
@@ -305,9 +409,9 @@ const PublicUserProfile = () => {
 
           {activeTab === 'activity' && (
             <div className={styles.activitySection}>
-              {activity && activity.length > 0 ? (
+              {recentActivity && recentActivity.length > 0 ? (
                 <div className={styles.activityFeed}>
-                  {activity.map((item, index) => (
+                  {recentActivity.map((item, index) => (
                     <div key={index} className={styles.activityItem}>
                       <div className={styles.activityIcon}>
                         {item.type === 'donation' && <FaHeart />}
@@ -317,7 +421,7 @@ const PublicUserProfile = () => {
                       <div className={styles.activityContent}>
                         <p>{item.description}</p>
                         <span className={styles.activityDate}>
-                          {format(new Date(item.date), 'MMM d, yyyy')}
+                          {item.date ? format(new Date(item.date), 'MMM d, yyyy') : 'Unknown date'}
                         </span>
                       </div>
                     </div>

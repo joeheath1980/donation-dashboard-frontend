@@ -1,5 +1,11 @@
 # Charity Features Tracker - Do-Nation Platform
 
+## Recent Updates (July 25, 2025)
+- ✅ **Match Notifications**: Charities receive email when donations are matched
+- ✅ **Business Partnership Display**: Shows business partners in opportunities
+- ✅ **Match Tracking**: Complete visibility of matched vs direct donations
+- 🔄 **Beneficiary**: Charities benefit from the new matching system
+
 ## Implementation Status Legend
 - ✅ **Fully Built**: Feature is completely implemented and functional
 - 🟨 **Partially Built**: Frontend exists but missing backend or has limited functionality  
@@ -93,6 +99,7 @@
 |---------|--------|-------|----------|
 | Donation tracking | ✅ Fully Built | Complete donation records | - |
 | Micro matched vs direct | ✅ Fully Built | Matching opportunity tracking | - |
+| Match notification receipt | ✅ Fully Built | Email notifications when matched | - |
 | Donor information capture | ✅ Fully Built | Full user profiles | - |
 | Thank you automation | ✅ Fully Built | Queued email confirmations | - |
 | Receipt generation | ✅ Fully Built | Tax receipts with numbers | - |
@@ -108,7 +115,7 @@
 
 | Feature | Status | Notes | Priority |
 |---------|--------|-------|----------|
-| Business match display | 🟨 Partially Built | Shows in opportunities | MEDIUM |
+| Business match display | ✅ Fully Built | Shows in matching opportunities | - |
 | Partnership management | ❌ Not Built | No partnership tools | MEDIUM |
 | Match campaign participation | 🟨 Partially Built | Passive only | MEDIUM |
 | Co-marketing tools | ❌ Not Built | No collaboration features | LOW |
@@ -177,12 +184,14 @@
 
 ## Summary
 
-### Fully Built (Core Working): 30%
+### Fully Built (Core Working): 35%
 - ACNC integration and verification
 - Public profile pages with data
 - Basic dashboard structure
 - Stripe Connect setup
 - Category and search basics
+- Match notification system
+- Business partnership display
 
 ### Partially Built (Needs Backend): 25%
 - Profile editing capabilities
