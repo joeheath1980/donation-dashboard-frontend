@@ -65,8 +65,8 @@ const DonationFlow = ({ charity, businessMatch = null, onClose }) => {
       setLoading(true);
       const response = await apiClient.post('/donations/create-payment-intent', {
         amount: donationData.amount,
-        charityId: charity.id,
-        businessMatchId: businessMatch?.id
+        charityId: charity._id || charity.id,
+        businessMatchId: businessMatch?._id || businessMatch?.id
       });
       setClientSecret(response.data.clientSecret);
     } catch (error) {
