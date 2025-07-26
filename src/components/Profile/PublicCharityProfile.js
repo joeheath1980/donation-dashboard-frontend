@@ -53,7 +53,8 @@ const PublicCharityProfile = () => {
 
   const handleShare = (platform) => {
     const url = profileService.generateProfileUrl('charity', abn);
-    const text = `Support ${profile.charity.name} on Do-Nation!`;
+    const charity = profile?.normalizedCharity || profile?.charity;
+    const text = `Support ${charity?.name || 'this charity'} on Do-Nation!`;
 
     switch (platform) {
       case 'twitter':
@@ -84,7 +85,9 @@ const PublicCharityProfile = () => {
     );
   }
 
-  const { charity, stats, campaigns, supporters, ratings } = profile || {};
+  // Use normalizedCharity if available, fallback to charity
+  const charity = profile?.normalizedCharity || profile?.charity;
+  const { stats, campaigns, supporters, ratings } = profile || {};
   
   // Ensure charity exists before rendering
   if (!charity) {

@@ -399,7 +399,8 @@ function DonationFormWrapper() {
             }
           }
         );
-        setCharity(response.data.charity || response.data);
+        // Use normalizedCharity if available, fallback to charity or raw data
+        setCharity(response.data.normalizedCharity || response.data.charity || response.data);
       } catch (err) {
         setError(err.message);
       } finally {

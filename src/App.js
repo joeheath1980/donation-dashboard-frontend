@@ -207,7 +207,7 @@ function App() {
                 {/* Public profile routes (no auth required) */}
                 <Route path="/profile/:userId" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/business/:slug" element={<Layout><SuspenseWrapper><PublicBusinessProfile /></SuspenseWrapper></Layout>} />
-                <Route path="/charity/:abn" element={<Layout><SuspenseWrapper><PublicCharityProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/charity/profile/:abn" element={<Layout><SuspenseWrapper><PublicCharityProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/search" element={<Layout><SuspenseWrapper><ProfileSearch /></SuspenseWrapper></Layout>} />
                 
                 {/* Protected routes */}
@@ -217,7 +217,7 @@ function App() {
                 <Route path="/about" element={<ProtectedRoute><Layout><SuspenseWrapper><About /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-perks" element={<ProtectedRoute><Layout><SuspenseWrapper><YourPerks /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/partners" element={<ProtectedRoute><Layout><SuspenseWrapper><Partners /></SuspenseWrapper></Layout></ProtectedRoute>} />
-                <Route path="/charity/:id" element={<ProtectedRoute><Layout><SuspenseWrapper><CharityPartner /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/charity/:abn" element={<ProtectedRoute><Layout><SuspenseWrapper><CharityPartner /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/activity" element={<ProtectedRoute><Layout><SuspenseWrapper><Activity /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/search-charities" element={<ProtectedRoute><Layout><SuspenseWrapper><SearchCharities /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/manage-payments" element={<ProtectedRoute><Layout><ChunkErrorBoundary><SuspenseWrapper><PaymentMethods /></SuspenseWrapper></ChunkErrorBoundary></Layout></ProtectedRoute>} />
