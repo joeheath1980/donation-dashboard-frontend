@@ -15,7 +15,7 @@ const api = axios.create({
 });
 
 function CharityPartner() {
-  const { id } = useParams();
+  const { abn } = useParams();
   const navigate = useNavigate();
   const [charity, setCharity] = useState(null);
   const [programs, setPrograms] = useState([]);
@@ -30,97 +30,111 @@ function CharityPartner() {
     setError(null);
 
     try {
-      console.log(`[CharityPartner] Fetching charity details for ID: ${id}`);
-      const response = await api.get(`/api/charities/${id}`);
+      console.log(`[CharityPartner] Fetching charity details for ABN: ${abn}`);
+      const response = await api.get(`/api/charities/${abn}`);
 
       console.log('[CharityPartner] API Response:', response.data);
 
-      if (response.data?.charity) {
-        console.log('[CharityPartner] Setting charity data:', response.data.charity);
+      // Use normalizedCharity if available, fallback to charity
+      const charityData = response.data?.normalizedCharity || response.data?.charity;
+      
+      if (charityData) {
+        console.log('[CharityPartner] Setting charity data:', charityData);
         
-        // Map the new API response structure to the expected format
-        const mappedCharity = {
-          ABN: response.data.charity.basicInfo?.ABN,
-          Charity_Legal_Name: response.data.charity.basicInfo?.legalName,
-          Other_Organisation_Names: response.data.charity.basicInfo?.otherNames,
-          Charity_Size: response.data.charity.basicInfo?.size,
-          Date_Organisation_Established: response.data.charity.basicInfo?.establishedDate,
-          Registration_Date: response.data.charity.basicInfo?.registrationDate,
-          Financial_Year_End: response.data.charity.basicInfo?.financialYearEnd,
-          Registration_Status: response.data.charity.registrationInfo?.status || 'Registered',
-          Charity_Type: response.data.charity.registrationInfo?.type,
-          Legal_Structure: response.data.charity.registrationInfo?.subtype,
-          Number_of_Responsible_Persons: response.data.charity.registrationInfo?.responsiblePersons,
-          ACN: response.data.charity.registrationInfo?.acn,
+        // If normalizedCharity is available, use it directly; otherwise map the data
+        // If we have normalizedCharity, map it to ACNC format for display
+        const mappedCharity = response.data?.normalizedCharity ? {
+          // Map normalizedCharity to ACNC format
+          ABN: charityData.abn || charityData.ABN,
+          Charity_Legal_Name: charityData.name,
+          Website: charityData.website,
+          Town_City: charityData.city || charityData.state,
+          State: charityData.state,
+          logo: charityData.logo,
+          // Add other normalized fields as needed
+          ...charityData
+        } : {
+          ABN: charityData.basicInfo?.ABN,
+          Charity_Legal_Name: charityData.basicInfo?.legalName,
+          Other_Organisation_Names: charityData.basicInfo?.otherNames,
+          Charity_Size: charityData.basicInfo?.size,
+          Date_Organisation_Established: charityData.basicInfo?.establishedDate,
+          Registration_Date: charityData.basicInfo?.registrationDate,
+          Financial_Year_End: charityData.basicInfo?.financialYearEnd,
+          Registration_Status: charityData.registrationInfo?.status || 'Registered',
+          Charity_Type: charityData.registrationInfo?.type,
+          Legal_Structure: charityData.registrationInfo?.subtype,
+          Number_of_Responsible_Persons: charityData.registrationInfo?.responsiblePersons,
+          ACN: charityData.registrationInfo?.acn,
           
           // Contact Info
-          Address_Type: response.data.charity.contactInfo?.addressType,
-          Address_Line_1: response.data.charity.contactInfo?.addressLine1,
-          Address_Line_2: response.data.charity.contactInfo?.addressLine2,
-          Address_Line_3: response.data.charity.contactInfo?.addressLine3,
-          Town_City: response.data.charity.contactInfo?.city,
-          State: response.data.charity.contactInfo?.state,
-          Postcode: response.data.charity.contactInfo?.postcode,
-          Country: response.data.charity.contactInfo?.country,
-          Website: response.data.charity.basicInfo?.website,
+          Address_Type: charityData.contactInfo?.addressType,
+          Address_Line_1: charityData.contactInfo?.addressLine1,
+          Address_Line_2: charityData.contactInfo?.addressLine2,
+          Address_Line_3: charityData.contactInfo?.addressLine3,
+          Town_City: charityData.contactInfo?.city,
+          State: charityData.contactInfo?.state,
+          Postcode: charityData.contactInfo?.postcode,
+          Country: charityData.contactInfo?.country,
+          Website: charityData.basicInfo?.website,
           
           // Operating Locations
-          Operates_in_ACT: response.data.charity.operatingLocations?.states?.ACT ? 'Y' : 'N',
-          Operates_in_NSW: response.data.charity.operatingLocations?.states?.NSW ? 'Y' : 'N',
-          Operates_in_NT: response.data.charity.operatingLocations?.states?.NT ? 'Y' : 'N',
-          Operates_in_QLD: response.data.charity.operatingLocations?.states?.QLD ? 'Y' : 'N',
-          Operates_in_SA: response.data.charity.operatingLocations?.states?.SA ? 'Y' : 'N',
-          Operates_in_TAS: response.data.charity.operatingLocations?.states?.TAS ? 'Y' : 'N',
-          Operates_in_VIC: response.data.charity.operatingLocations?.states?.VIC ? 'Y' : 'N',
-          Operates_in_WA: response.data.charity.operatingLocations?.states?.WA ? 'Y' : 'N',
-          Operating_Countries: response.data.charity.operatingLocations?.operatingCountries,
+          Operates_in_ACT: charityData.operatingLocations?.states?.ACT ? 'Y' : 'N',
+          Operates_in_NSW: charityData.operatingLocations?.states?.NSW ? 'Y' : 'N',
+          Operates_in_NT: charityData.operatingLocations?.states?.NT ? 'Y' : 'N',
+          Operates_in_QLD: charityData.operatingLocations?.states?.QLD ? 'Y' : 'N',
+          Operates_in_SA: charityData.operatingLocations?.states?.SA ? 'Y' : 'N',
+          Operates_in_TAS: charityData.operatingLocations?.states?.TAS ? 'Y' : 'N',
+          Operates_in_VIC: charityData.operatingLocations?.states?.VIC ? 'Y' : 'N',
+          Operates_in_WA: charityData.operatingLocations?.states?.WA ? 'Y' : 'N',
+          Operating_Countries: charityData.operatingLocations?.operatingCountries,
           
           // Beneficiaries
-          Aboriginal_or_TSI: response.data.charity.beneficiaries?.aboriginalOrTSI ? 'Y' : 'N',
-          Adults: response.data.charity.beneficiaries?.adults ? 'Y' : 'N',
-          Aged_Persons: response.data.charity.beneficiaries?.agedPersons ? 'Y' : 'N',
-          Children: response.data.charity.beneficiaries?.children ? 'Y' : 'N',
-          Early_Childhood: response.data.charity.beneficiaries?.earlyChildhood ? 'Y' : 'N',
-          Families: response.data.charity.beneficiaries?.families ? 'Y' : 'N',
-          Youth: response.data.charity.beneficiaries?.youth ? 'Y' : 'N',
-          Females: response.data.charity.beneficiaries?.females ? 'Y' : 'N',
-          Males: response.data.charity.beneficiaries?.males ? 'Y' : 'N',
-          Financially_Disadvantaged: response.data.charity.beneficiaries?.financiallyDisadvantaged ? 'Y' : 'N',
-          Migrants_Refugees_or_Asylum_Seekers: response.data.charity.beneficiaries?.migrants ? 'Y' : 'N',
-          People_at_risk_of_homelessness: response.data.charity.beneficiaries?.homeless ? 'Y' : 'N',
-          People_with_Disabilities: response.data.charity.beneficiaries?.peopleWithDisabilities ? 'Y' : 'N',
-          Rural_Regional_Remote_Communities: response.data.charity.beneficiaries?.ruralCommunities ? 'Y' : 'N',
-          Veterans_or_their_families: response.data.charity.beneficiaries?.veterans ? 'Y' : 'N',
-          Victims_of_Disasters: response.data.charity.beneficiaries?.victimsOfDisasters ? 'Y' : 'N',
-          Other_Beneficiaries: response.data.charity.beneficiaries?.otherBeneficiariesDescription,
+          Aboriginal_or_TSI: charityData.beneficiaries?.aboriginalOrTSI ? 'Y' : 'N',
+          Adults: charityData.beneficiaries?.adults ? 'Y' : 'N',
+          Aged_Persons: charityData.beneficiaries?.agedPersons ? 'Y' : 'N',
+          Children: charityData.beneficiaries?.children ? 'Y' : 'N',
+          Early_Childhood: charityData.beneficiaries?.earlyChildhood ? 'Y' : 'N',
+          Families: charityData.beneficiaries?.families ? 'Y' : 'N',
+          Youth: charityData.beneficiaries?.youth ? 'Y' : 'N',
+          Females: charityData.beneficiaries?.females ? 'Y' : 'N',
+          Males: charityData.beneficiaries?.males ? 'Y' : 'N',
+          Financially_Disadvantaged: charityData.beneficiaries?.financiallyDisadvantaged ? 'Y' : 'N',
+          Migrants_Refugees_or_Asylum_Seekers: charityData.beneficiaries?.migrants ? 'Y' : 'N',
+          People_at_risk_of_homelessness: charityData.beneficiaries?.homeless ? 'Y' : 'N',
+          People_with_Disabilities: charityData.beneficiaries?.peopleWithDisabilities ? 'Y' : 'N',
+          Rural_Regional_Remote_Communities: charityData.beneficiaries?.ruralCommunities ? 'Y' : 'N',
+          Veterans_or_their_families: charityData.beneficiaries?.veterans ? 'Y' : 'N',
+          Victims_of_Disasters: charityData.beneficiaries?.victimsOfDisasters ? 'Y' : 'N',
+          Other_Beneficiaries: charityData.beneficiaries?.otherBeneficiariesDescription,
           
           // Tax Status
-          PBI: response.data.charity.taxStatus?.isPBI ? 'Y' : 'N',
-          HPC: response.data.charity.taxStatus?.isHPC ? 'Y' : 'N',
+          PBI: charityData.taxStatus?.isPBI ? 'Y' : 'N',
+          HPC: charityData.taxStatus?.isHPC ? 'Y' : 'N',
           
           // Activities
-          Main_Activity: response.data.charity.activities?.primaryActivity,
+          Main_Activity: charityData.activities?.primaryActivity,
           
           // Financial Info
-          Last_AIS_Fin_Year: response.data.charity.financialInfo?.lastAISYear,
-          Total_Revenue_AIS: response.data.charity.financialInfo?.revenue,
-          Total_Expenses_AIS: response.data.charity.financialInfo?.expenses,
-          Donated_funds: response.data.charity.financialInfo?.donatedFunds,
-          Government_grants: response.data.charity.financialInfo?.governmentGrants,
-          Staff_FTE: response.data.charity.financialInfo?.staffFTE,
-          Staff_Volunteers: response.data.charity.financialInfo?.volunteers,
+          Last_AIS_Fin_Year: charityData.financialInfo?.lastAISYear,
+          Total_Revenue_AIS: charityData.financialInfo?.revenue,
+          Total_Expenses_AIS: charityData.financialInfo?.expenses,
+          Donated_funds: charityData.financialInfo?.donatedFunds,
+          Government_grants: charityData.financialInfo?.governmentGrants,
+          Staff_FTE: charityData.financialInfo?.staffFTE,
+          Staff_Volunteers: charityData.financialInfo?.volunteers,
           
           // Enhanced data
-          purposes: response.data.charity.charitablePurposes?.activePurposes || [],
-          activities: response.data.charity.activities?.allActivities || [],
+          purposes: charityData.charitablePurposes?.activePurposes || [],
+          activities: charityData.activities?.allActivities || [],
           beneficiaryDetails: {
-            conditions: response.data.charity.beneficiaries?.conditions || []
+            conditions: charityData.beneficiaries?.conditions || []
           },
-          logo: response.data.charity.basicInfo?.logo
+          logo: charityData.basicInfo?.logo
         };
         
         setCharity(mappedCharity);
-        setPrograms(response.data.charity.programs || response.data.programs || []);
+        setPrograms(charityData.programs || response.data.programs || []);
       } else {
         console.error('[CharityPartner] No charity data in response');
         setError('Charity not found. Please check the ID and try again.');
@@ -146,7 +160,7 @@ function CharityPartner() {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [abn]);
 
   useEffect(() => {
     console.log('[CharityPartner] Component mounted, fetching details');
@@ -284,6 +298,10 @@ function CharityPartner() {
       </div>
     );
   }
+
+  // Extract normalizedCharity for easy access to common fields
+  const normalizedCharity = charity.normalizedCharity || charity;
+  const hasNormalizedData = !!charity.normalizedCharity;
 
   return (
     <div className={styles.container}>
