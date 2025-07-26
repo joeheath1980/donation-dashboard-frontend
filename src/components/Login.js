@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_CONFIG, STORAGE_KEYS } from '../config/api.config';
 import { createLogger } from '../utils/logger';
+import { useDemoMode } from '../hooks/useDemoMode';
+import DemoQuickLogin from './DemoQuickLogin';
+import axios from 'axios';
 import styles from './Login.module.css';
 import logo from '../assets/logo.png';
 
@@ -11,7 +14,9 @@ const logger = createLogger('Login');
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login, businessLogin, charityLogin, socialLogin } = useAuth();
+  const { demoMode } = useDemoMode();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -49,7 +54,40 @@ function Login() {
     if (token) {
       handleSocialLoginCallback(token);
     }
-  }, [location, handleSocialLoginCallback]);
+
+    // Handle demo mode auto-fill
+    const demoType = searchParams.get('demo');
+    const demoCategory = searchParams.get('category');
+    if (demoType && demoMode?.enabled) {
+      handleDemoAutoFill(demoType, demoCategory);
+    }
+  }, [location, handleSocialLoginCallback, searchParams, demoMode]);
+
+  const handleDemoAutoFill = async (type, category) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/quick-login`,
+        { userType: type, category: category || 'user' }
+      );
+      
+      setFormData({
+        email: response.data.email,
+        password: response.data.password,
+        accountType: category || 'user'
+      });
+    } catch (error) {
+      console.error('Error loading demo credentials:', error);
+    }
+  };
+
+  const handleCredentialsFill = (email, password, accountType) => {
+    setFormData(prev => ({
+      ...prev,
+      email,
+      password,
+      accountType: accountType || prev.accountType
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,8 +127,14 @@ function Login() {
         default:
           loginResult = await login(formData.email, formData.password);
           // For regular user logins, set the currentUserId using either _id or id
-          logger.debug('User login successful');
-          localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.id);
+          logger.debug('User login successful', { loginResult });
+          const userId = loginResult._id || loginResult.id;
+          if (userId) {
+            localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+            localStorage.setItem('currentUserId', userId); // Also set with direct key for compatibility
+          } else {
+            logger.error('No user ID found in login result', { loginResult });
+          }
           navigate(loginResult?.isAdmin ? '/admin' : '/profile');
       }
     } catch (err) {
@@ -236,6 +280,10 @@ function Login() {
             Register as a Charity or Organization
           </Link>
         </div>
+
+        {demoMode?.enabled && (
+          <DemoQuickLogin onCredentialsFill={handleCredentialsFill} />
+        )}
       </div>
     </div>
   );

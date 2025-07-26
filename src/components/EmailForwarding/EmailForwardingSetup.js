@@ -11,7 +11,7 @@ import {
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './EmailForwardingSetup.module.css';
-import api from '../../services/api.service';
+import { apiClient } from '../../services/api.service';
 
 const EmailForwardingSetup = () => {
   const { user } = useAuth();
@@ -39,7 +39,7 @@ const EmailForwardingSetup = () => {
 
   const checkVerificationStatus = async () => {
     try {
-      const response = await api.get('/email-forwarding/verify');
+      const response = await apiClient.get('/email-forwarding/verify');
       setVerificationStatus(response.data.status || 'pending');
     } catch (error) {
       console.error('Error checking verification status:', error);
@@ -67,7 +67,7 @@ const EmailForwardingSetup = () => {
   const sendTestReceipt = async () => {
     setSendingTest(true);
     try {
-      await api.post('/email-forwarding/send-test', {
+      await apiClient.post('/email-forwarding/send-test', {
         email: forwardingEmail
       });
       setTestEmailSent(true);

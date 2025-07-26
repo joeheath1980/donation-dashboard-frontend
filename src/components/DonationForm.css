@@ -467,3 +467,39 @@
     font-size: 36px;
   }
 }
+
+/* Matching Opportunity Info */
+.match-opportunity-info {
+  background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.match-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.match-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.match-business {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.match-info-text {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+}

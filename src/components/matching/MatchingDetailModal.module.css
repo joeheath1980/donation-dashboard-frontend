@@ -1,0 +1,310 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 1rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: #f3f4f6;
+  color: #1a1a1a;
+}
+
+.loadingContainer {
+  padding: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.timeRemaining {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f59e0b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.section {
+  padding: 1.5rem 2rem;
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sectionIcon {
+  font-size: 1.5rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.sectionContent {
+  flex: 1;
+}
+
+.sectionContent h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.sectionContent p {
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.multiplier {
+  color: #10b981;
+  font-size: 1.25rem;
+}
+
+.charityDescription {
+  margin-bottom: 1rem;
+}
+
+.programs {
+  margin-top: 1rem;
+}
+
+.programs h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.programs ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #6b7280;
+}
+
+.programs li {
+  margin-bottom: 0.25rem;
+}
+
+.impactSection {
+  padding: 1.5rem 2rem;
+  background: #f9fafb;
+}
+
+.impactHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.impactHeader svg {
+  color: #3b82f6;
+}
+
+.impactHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.impactDetails {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.impactRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  font-size: 0.9375rem;
+}
+
+.impactRow span {
+  color: #6b7280;
+}
+
+.impactRow strong {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.matchAmount {
+  color: #10b981;
+}
+
+.totalRow {
+  border-top: 2px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.totalAmount {
+  font-size: 1.25rem;
+  color: #3b82f6;
+}
+
+.campaignMessage {
+  padding: 1.5rem 2rem;
+  background: #f9fafb;
+  font-style: italic;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.actions {
+  padding: 2rem;
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.cancelButton:hover {
+  background: #e5e7eb;
+}
+
+.confirmButton {
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.confirmButton:hover {
+  background: #2563eb;
+}
+
+.charitySelector {
+  margin-top: 1rem;
+}
+
+.selectedCharityInfo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.selectedCharityInfo h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.selectedCharityInfo p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.charityMeta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.categoryBadge,
+.stateBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+}
+
+.categoryBadge {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.stateBadge {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+@media (max-width: 640px) {
+  .modalContent {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+  
+  .section,
+  .impactSection,
+  .campaignMessage,
+  .actions {
+    padding: 1rem 1.5rem;
+  }
+}

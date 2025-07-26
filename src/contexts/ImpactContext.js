@@ -226,6 +226,9 @@ export const ImpactProvider = ({ children }) => {
 
     try {
       console.log('Fetching impact data...');
+      console.log('Using API URL:', process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002');
+      console.log('Headers:', headers);
+      
       const [
         donationsRes,
         oneOffRes,
@@ -238,10 +241,18 @@ export const ImpactProvider = ({ children }) => {
         axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`, { headers })
       ]);
 
-      setDonations(donationsRes.data);
-      setOneOffContributions(oneOffRes.data);
-      setVolunteerActivities(volunteerRes.data);
-      setFundraisingCampaigns(fundraisingRes.data);
+      console.log('API Responses:', {
+        donations: donationsRes.data,
+        oneOff: oneOffRes.data,
+        volunteer: volunteerRes.data,
+        fundraising: fundraisingRes.data
+      });
+
+      // Ensure arrays even if API returns null/undefined
+      setDonations(Array.isArray(donationsRes.data) ? donationsRes.data : []);
+      setOneOffContributions(Array.isArray(oneOffRes.data) ? oneOffRes.data : []);
+      setVolunteerActivities(Array.isArray(volunteerRes.data) ? volunteerRes.data : []);
+      setFundraisingCampaigns(Array.isArray(fundraisingRes.data) ? fundraisingRes.data : []);
 
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -255,8 +266,18 @@ export const ImpactProvider = ({ children }) => {
       setLastYearImpactScore(lastYearScoreResult.totalScore);
     } catch (error) {
       console.error('Error fetching impact data:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       setError('Failed to fetch impact data.');
       setScoreDetails(defaultScoreDetails);
+      // Set empty arrays to avoid visualization breaking
+      setDonations([]);
+      setOneOffContributions([]);
+      setVolunteerActivities([]);
+      setFundraisingCampaigns([]);
     }
   }, [getAuthHeaders]);
 
@@ -448,6 +469,7 @@ export const ImpactProvider = ({ children }) => {
   }, [user, clearFollowedCharities]);
 
   useEffect(() => {
+    console.log('Auth check effect:', { isAuthenticated, isInitialLoad, user });
     if (isAuthenticated && isInitialLoad) {
       console.log('Initial load, fetching impact data...');
       fetchImpactData();

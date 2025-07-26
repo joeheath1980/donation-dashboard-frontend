@@ -1,0 +1,212 @@
+.quickLoginContainer {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin: 0 0 1.5rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Category Tabs */
+.categoryTabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.categoryTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.categoryTab:hover {
+  color: #4b5563;
+}
+
+.categoryTab.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.categoryIcon {
+  font-size: 1rem;
+}
+
+/* Account Grid */
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.accountCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.accountCard:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Tier Badges */
+.tierBadge,
+.businessType,
+.charityCategory,
+.adminBadge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tierBadge {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.accountCard.bronze .tierBadge {
+  background: #92400e;
+  color: white;
+}
+
+.accountCard.silver .tierBadge {
+  background: #6b7280;
+  color: white;
+}
+
+.accountCard.gold .tierBadge {
+  background: #d97706;
+  color: white;
+}
+
+.accountCard.platinum .tierBadge {
+  background: #7c3aed;
+  color: white;
+}
+
+.businessType {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.charityCategory {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.adminBadge {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Account Info */
+.accountInfo h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  padding-right: 5rem; /* Space for badge */
+}
+
+.accountDescription {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.accountDetails {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.accountDetails span {
+  display: flex;
+  align-items: center;
+}
+
+/* Admin Card Special Styling */
+.adminCard {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #fca5a5;
+}
+
+.adminCard:hover {
+  border-color: #f87171;
+}
+
+/* Disclaimer */
+.disclaimer {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f3f4f6;
+  border-radius: 0.375rem;
+  text-align: center;
+}
+
+.disclaimer p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .categoryTabs {
+    flex-wrap: wrap;
+  }
+
+  .categoryTab {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .accountGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9,7 +9,7 @@ import {
 import { FaArrowLeft, FaArrowRight, FaCheck, FaCreditCard, FaUniversity } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './DonationFlow.module.css';
-import api from '../../services/api.service';
+import { apiClient } from '../../services/api.service';
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -46,7 +46,7 @@ const DonationFlow = ({ charity, businessMatch = null, onClose }) => {
 
   const fetchSavedPaymentMethods = async () => {
     try {
-      const response = await api.get('/payment-methods');
+      const response = await apiClient.get('/payment-methods');
       setSavedPaymentMethods(response.data || []);
     } catch (error) {
       console.error('Error fetching payment methods:', error);
@@ -63,7 +63,7 @@ const DonationFlow = ({ charity, businessMatch = null, onClose }) => {
   const createPaymentIntent = async () => {
     try {
       setLoading(true);
-      const response = await api.post('/donations/create-payment-intent', {
+      const response = await apiClient.post('/donations/create-payment-intent', {
         amount: donationData.amount,
         charityId: charity.id,
         businessMatchId: businessMatch?.id
@@ -300,7 +300,7 @@ const PaymentStep = ({ donationData, setDonationData, savedPaymentMethods, onBac
         });
       } else {
         // Process with saved payment method
-        const response = await api.post('/donations/confirm-with-saved-method', {
+        const response = await apiClient.post('/donations/confirm-with-saved-method', {
           paymentMethodId: selectedMethodId,
           amount: donationData.amount,
           charityId: donationData.charityId
@@ -479,7 +479,7 @@ const SuccessStep = ({ charity, donationData, businessMatch, matchAmount, onClos
 
   const generateReceipt = async () => {
     try {
-      const response = await api.post('/donations/generate-receipt', {
+      const response = await apiClient.post('/donations/generate-receipt', {
         donationId: donationData.donationId
       });
       setReceiptUrl(response.data.receiptUrl);

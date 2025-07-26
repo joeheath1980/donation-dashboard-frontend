@@ -1,35 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
+import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import './SharedStyles.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile, FaHandsHelping } from 'react-icons/fa';
 
-const CHARITY_TYPES = [
-  { value: "Health Services", label: "Health Services" },
-  { value: "Mental Health", label: "Mental Health" },
-  { value: "Education", label: "Education" },
-  { value: "Environmental Conservation", label: "Environmental Conservation" },
-  { value: "Social Welfare", label: "Social Welfare" },
-  { value: "Emergency Relief", label: "Emergency Relief" },
-  { value: "Food Security", label: "Food Security" },
-  { value: "Child Welfare", label: "Child Welfare" },
-  { value: "Indigenous Support", label: "Indigenous Support" },
-  { value: "Housing", label: "Housing" },
-  { value: "Community Building", label: "Community Building" },
-  { value: "Rural Support", label: "Rural Support" }
-];
-
 function VolunteerActivitiesComponent({ userId }) {
   const [activities, setActivities] = useState([]);
   const [newActivity, setNewActivity] = useState({
     organization: '',
+    organizationABN: '',
     hours: '',
     date: '',
     description: '',
     charityType: ''
   });
+  const [abnStatus, setAbnStatus] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [isAddActivityModalOpen, setIsAddActivityModalOpen] = useState(false);
@@ -54,7 +42,26 @@ function VolunteerActivitiesComponent({ userId }) {
   };
 
   const handleChange = (e) => {
-    setNewActivity({ ...newActivity, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Handle ABN formatting
+    if (name === 'organizationABN') {
+      const formattedABN = formatABN(value);
+      setNewActivity({ ...newActivity, organizationABN: formattedABN });
+      
+      // Validate ABN
+      if (value.length > 0) {
+        if (validateABN(value)) {
+          setAbnStatus('✓ Valid ABN format');
+        } else {
+          setAbnStatus('ABN should be 11 digits');
+        }
+      } else {
+        setAbnStatus('');
+      }
+    } else {
+      setNewActivity({ ...newActivity, [name]: value });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -81,6 +88,7 @@ function VolunteerActivitiesComponent({ userId }) {
     const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('organization', newActivity.organization);
+    formData.append('organizationABN', newActivity.organizationABN);
     formData.append('hours', newActivity.hours);
     formData.append('date', newActivity.date);
     formData.append('description', newActivity.description);
@@ -95,9 +103,10 @@ function VolunteerActivitiesComponent({ userId }) {
         },
       });
       setActivities([...activities, response.data]);
-      setNewActivity({ organization: '', hours: '', date: '', description: '', charityType: '' });
+      setNewActivity({ organization: '', organizationABN: '', hours: '', date: '', description: '', charityType: '' });
       setSelectedFile(null);
       setError('');
+      setAbnStatus('');
       setIsAddActivityModalOpen(false);
     } catch (error) {
       console.error('Error adding volunteer activity:', error);
@@ -143,6 +152,20 @@ function VolunteerActivitiesComponent({ userId }) {
             />
           </div>
           <div className={modalStyles.formGroup}>
+            <label>Organization ABN (optional)</label>
+            <input 
+              type="text" 
+              name="organizationABN" 
+              placeholder="XX XXX XXX XXX"
+              value={newActivity.organizationABN} 
+              onChange={handleChange} 
+              maxLength="14"
+            />
+            <small className={modalStyles.helperText}>
+              {abnStatus || ABN_HELPER_TEXT}
+            </small>
+          </div>
+          <div className={modalStyles.formGroup}>
             <label>Charity Type</label>
             <select
               name="charityType"
@@ -152,9 +175,9 @@ function VolunteerActivitiesComponent({ userId }) {
               className="select"
             >
               <option value="">Select a charity type</option>
-              {CHARITY_TYPES.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              {CHARITY_CATEGORIES.map(category => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </select>
@@ -259,11 +282,7 @@ function VolunteerActivitiesComponent({ userId }) {
                 <div className={styles.cardContent}>
                   <p><strong>Hours:</strong> {activity.hours}</p>
                   <p><strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}</p>
-                  <p><strong>Charity Type:</strong> {
-                    CHARITY_TYPES.find(type => type.value === activity.charityType)?.label || 
-                    activity.charityType || 
-                    'Not specified'
-                  }</p>
+                  <p><strong>Charity Type:</strong> {activity.charityType || 'Not specified'}</p>
                   <p><strong>Description:</strong> {activity.description}</p>
                   {activity.evidence && (
                     <a 

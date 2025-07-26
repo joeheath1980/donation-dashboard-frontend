@@ -73,9 +73,11 @@ export const AuthProvider = ({ children }) => {
           } else if (userType === USER_TYPES.ADMIN) {
             // For admin, try to get user profile from /api/users/me
             response = await axios.get(getApiUrl('/users/me'));
+            localStorage.setItem(STORAGE_KEYS.USER_ID, response.data._id || response.data.id);
             setUser({ ...response.data, isAdmin: true, isBusiness: false, isCharity: false });
           } else {
             response = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+            localStorage.setItem(STORAGE_KEYS.USER_ID, response.data._id || response.data.id);
             setUser({ ...response.data, isBusiness: false, isCharity: false });
           }
         } catch (error) {
@@ -128,10 +130,12 @@ export const AuthProvider = ({ children }) => {
       
       // If user data is in response, use it; otherwise fetch profile
       if (userData) {
+        localStorage.setItem(STORAGE_KEYS.USER_ID, userData._id || userData.id);
         setUser({ ...userData, isBusiness: false, isCharity: false });
         return userData;
       } else {
         const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+        localStorage.setItem(STORAGE_KEYS.USER_ID, userResponse.data._id || userResponse.data.id);
         setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
         return userResponse.data;
       }
@@ -155,6 +159,7 @@ export const AuthProvider = ({ children }) => {
         setupAxiosDefaults(response.data.token);
 
         const validatedUser = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+        localStorage.setItem(STORAGE_KEYS.USER_ID, validatedUser.data._id || validatedUser.data.id);
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
       } else {
@@ -272,6 +277,13 @@ export const AuthProvider = ({ children }) => {
       logger.debug('Social login: Fetching user data from API');
       const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
       logger.debug('Social login: User data received');
+
+      // Store user ID in localStorage
+      const userId = userResponse.data._id || userResponse.data.id;
+      if (userId) {
+        localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+        logger.debug('Social login: User ID stored', { userId });
+      }
 
       setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
       logger.debug('Social login: User state updated');

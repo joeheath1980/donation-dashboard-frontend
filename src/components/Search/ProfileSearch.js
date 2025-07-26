@@ -110,7 +110,7 @@ const ProfileSearch = () => {
           <FaSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search by name, username, or keyword..."
+            placeholder="Search by name or keyword..."
             value={query}
             onChange={handleQueryChange}
             className={styles.searchInput}
@@ -152,9 +152,9 @@ const ProfileSearch = () => {
                 <div className={styles.userGrid}>
                   {results.users.map((user) => (
                     <div 
-                      key={user.username}
+                      key={user._id || user.id}
                       className={styles.userCard}
-                      onClick={() => navigateToProfile('user', user.username)}
+                      onClick={() => navigateToProfile('user', user._id || user.id)}
                     >
                       <div className={styles.userHeader}>
                         <div className={styles.avatar}>
@@ -168,7 +168,7 @@ const ProfileSearch = () => {
                         </div>
                         <div className={styles.userInfo}>
                           <h3>{user.displayName}</h3>
-                          <p className={styles.username}>@{user.username}</p>
+                          <p className={styles.username}>{user.tier} Tier</p>
                         </div>
                       </div>
                       <div className={styles.userStats}>

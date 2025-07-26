@@ -1,10 +1,15 @@
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Chart, registerables } from 'chart.js';
+import 'chartjs-adapter-date-fns';
 import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Eagerly loaded components (used frequently)
 import Layout from './components/Layout';
@@ -13,9 +18,23 @@ import WelcomePage from './components/WelcomePage';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import ChunkErrorBoundary from './components/ChunkErrorBoundary';
+import DemoBanner from './components/DemoBanner';
+import DemoBadge from './components/DemoBadge';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './components/SharedStyles.css';
+
+// Register Chart.js components globally BEFORE any components use them
+try {
+  if (!Chart.defaults) {
+    Chart.register(...registerables);
+    console.log('Chart.js components registered successfully in App.js, version:', Chart.version);
+  } else {
+    console.log('Chart.js components already registered, version:', Chart.version);
+  }
+} catch (error) {
+  console.error('Failed to register Chart.js components in App.js:', error);
+}
 
 // Lazy loaded components for code splitting
 const Profile = lazy(() => import('./components/Profile'));
@@ -89,16 +108,89 @@ const AdminRoute = ({ children }) => {
   return isAdmin ? children : <Navigate to="/login" />;
 };
 
+// Global chart registry
+window.__chartInstances = window.__chartInstances || new Map();
+
+// Route change handler component
+const RouteChangeHandler = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Small delay to ensure we catch all charts
+    const timeoutId = setTimeout(() => {
+      console.log('Route changed to:', location.pathname);
+      
+      // Get all chart instances from our global registry
+      const chartCount = window.__chartInstances.size;
+      console.log(`Found ${chartCount} active Chart.js instances in registry`);
+      
+      // Destroy all charts
+      window.__chartInstances.forEach((chart, id) => {
+        try {
+          console.log(`Destroying chart instance ${id}`);
+          if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+          }
+        } catch (error) {
+          console.error(`Error destroying chart ${id}:`, error);
+        }
+      });
+      
+      // Clear the registry
+      window.__chartInstances.clear();
+      
+      // Also destroy any Chart.js instances not in our registry
+      if (Chart && Chart.instances) {
+        const instances = Chart.instances;
+        if (instances && typeof instances === 'object') {
+          Object.values(instances).forEach((chart, index) => {
+            try {
+              if (chart && typeof chart.destroy === 'function') {
+                console.log(`Destroying unregistered chart instance ${index + 1}`);
+                chart.destroy();
+              }
+            } catch (error) {
+              console.error(`Error destroying unregistered chart ${index + 1}:`, error);
+            }
+          });
+          Chart.instances = {};
+        }
+      }
+      
+      // Clean up any lingering tooltips
+      const tooltips = document.querySelectorAll('#chartjs-tooltip');
+      tooltips.forEach(tooltip => {
+        tooltip.remove();
+      });
+      
+      // Force garbage collection hint
+      if (window.gc) {
+        window.gc();
+      }
+      
+      console.log('Chart cleanup completed');
+    }, 50); // 50ms delay to catch charts created during render
+    
+    return () => clearTimeout(timeoutId);
+  }, [location]);
+  
+  return null;
+};
+
 function App() {
   return (
     <ErrorBoundary name="App">
       <AuthProvider>
-        <UserProvider> {/* Add UserProvider here */}
-          <ImpactProvider>
-            <Router>
-              <ErrorBoundary name="Router">
-                <div className={styles.app}>
-                  <Routes>
+        <UserProvider>
+          <WebSocketProvider>
+            <ImpactProvider>
+              <Router>
+                <RouteChangeHandler />
+                <ErrorBoundary name="Router">
+                  <DemoBanner />
+                  <DemoBadge />
+                  <div className={styles.app}>
+                    <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/login" element={<Login />} />
@@ -113,7 +205,7 @@ function App() {
                 <Route path="/microsoft-callback" element={<SuspenseWrapper><MicrosoftAuthCallback /></SuspenseWrapper>} />
                 
                 {/* Public profile routes (no auth required) */}
-                <Route path="/profile/:username" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/profile/:userId" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/business/:slug" element={<Layout><SuspenseWrapper><PublicBusinessProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/charity/:abn" element={<Layout><SuspenseWrapper><PublicCharityProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/search" element={<Layout><SuspenseWrapper><ProfileSearch /></SuspenseWrapper></Layout>} />
@@ -154,10 +246,22 @@ function App() {
               </Routes>
             </div>
           </ErrorBoundary>
+          <ToastContainer 
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </Router>
       </ImpactProvider>
-    </UserProvider>
-  </AuthProvider>
+    </WebSocketProvider>
+  </UserProvider>
+</AuthProvider>
 </ErrorBoundary>
 );
 }

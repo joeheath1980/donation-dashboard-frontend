@@ -1,12 +1,37 @@
-import api from './api.service';
+import apiServices from './api.service';
+
+const api = apiServices.client;
 
 class ProfileService {
   // User Profile Methods
-  async getUserPublicProfile(username) {
+  async getUserPublicProfile(userId) {
     try {
-      const response = await api.get(`/public/user/${username}`);
-      return response.data;
+      const response = await api.get(`/api/public/user/${userId}`);
+      console.log('Profile API response:', response.data);
+      
+      // Check if the response has the expected structure
+      if (!response.data || !response.data.success) {
+        console.error('Invalid API response structure:', response.data);
+        throw new Error('Invalid response from server');
+      }
+      
+      // Extract the profile data from the response
+      if (response.data.profile) {
+        console.log('Profile data structure:', {
+          hasUser: !!response.data.profile.user,
+          hasStats: !!response.data.profile.stats,
+          hasRecentActivity: !!response.data.profile.recentActivity,
+          hasCharityPortfolio: !!response.data.profile.charityPortfolio,
+          userProperties: response.data.profile.user ? Object.keys(response.data.profile.user) : []
+        });
+        console.log('Returning profile data:', response.data.profile);
+        return response.data.profile;
+      }
+      
+      console.error('No profile data in response:', response.data);
+      throw new Error('Profile data not found in response');
     } catch (error) {
+      console.error('Profile fetch error:', error);
       if (error.response?.status === 404) {
         throw new Error('User not found');
       }
@@ -15,19 +40,19 @@ class ProfileService {
   }
 
   async updateUserPrivacySettings(settings) {
-    const response = await api.put('/users/privacy', settings);
+    const response = await api.put('/api/users/privacy', settings);
     return response.data;
   }
 
   async getUserPrivacySettings() {
-    const response = await api.get('/users/privacy');
+    const response = await api.get('/api/users/privacy');
     return response.data;
   }
 
   // Business Profile Methods
   async getBusinessPublicProfile(slug) {
     try {
-      const response = await api.get(`/public/business/${slug}`);
+      const response = await api.get(`/api/public/business/${slug}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -40,7 +65,7 @@ class ProfileService {
   // Charity Profile Methods
   async getCharityPublicProfile(abn) {
     try {
-      const response = await api.get(`/public/charity/${abn}`);
+      const response = await api.get(`/api/public/charity/${abn}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -52,7 +77,7 @@ class ProfileService {
 
   // Search Methods
   async searchProfiles(query, type = 'all') {
-    const response = await api.get('/public/search', {
+    const response = await api.get('/api/public/search', {
       params: { q: query, type }
     });
     return response.data;
@@ -60,7 +85,7 @@ class ProfileService {
 
   // Activity Methods
   async getPublicActivity(profileType, profileId, page = 1) {
-    const response = await api.get(`/public/${profileType}/${profileId}/activity`, {
+    const response = await api.get(`/api/public/${profileType}/${profileId}/activity`, {
       params: { page, limit: 10 }
     });
     return response.data;
@@ -86,15 +111,25 @@ class ProfileService {
     const baseUrl = process.env.REACT_APP_PUBLIC_URL || 'https://do-nation.space';
     const defaultImage = `${baseUrl}/og-image-default.png`;
 
+    if (!profileData) {
+      return {
+        title: 'Do-Nation Profile',
+        description: 'View profiles on Do-Nation',
+        image: defaultImage,
+        url: baseUrl,
+        type: 'website'
+      };
+    }
+
     switch (type) {
       case 'user':
         return {
-          title: `${profileData.displayName} - Do-Nation Giving Profile`,
-          description: `${profileData.displayName} is a ${profileData.tier} tier donor supporting ${profileData.stats?.charitiesSupported || 0} charities on Do-Nation.`,
+          title: `${profileData.displayName || 'User'} - Do-Nation Giving Profile`,
+          description: `${profileData.displayName || 'User'} is a ${profileData.tier || 'Bronze'} tier donor supporting ${profileData.stats?.charitiesSupported || 0} charities on Do-Nation.`,
           image: profileData.avatar || defaultImage,
-          url: this.generateProfileUrl('user', profileData.username),
+          url: this.generateProfileUrl('user', profileData._id || profileData.id),
           type: 'profile',
-          'og:profile:username': profileData.username
+          'og:profile:username': profileData._id || profileData.id
         };
       
       case 'business':
@@ -124,14 +159,18 @@ class ProfileService {
   generateStructuredData(profileData, type) {
     const baseUrl = process.env.REACT_APP_PUBLIC_URL || 'https://do-nation.space';
 
+    if (!profileData) {
+      return null;
+    }
+
     switch (type) {
       case 'user':
         return {
           '@context': 'https://schema.org',
           '@type': 'Person',
-          name: profileData.displayName,
-          url: this.generateProfileUrl('user', profileData.username),
-          description: `${profileData.tier} tier donor on Do-Nation`,
+          name: profileData.displayName || 'User',
+          url: this.generateProfileUrl('user', profileData._id || profileData.id),
+          description: `${profileData.tier || 'Bronze'} tier donor on Do-Nation`,
           memberOf: {
             '@type': 'Organization',
             name: 'Do-Nation',
@@ -177,4 +216,5 @@ class ProfileService {
   }
 }
 
-export default new ProfileService();
+const profileService = new ProfileService();
+export default profileService;

@@ -1,47 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
+import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import styles from './DonationModal.module.css';
 import './SharedStyles.css';
+
+const CharitySearch = lazy(() => import('./CharitySearch/CharitySearch'));
 
 const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
   const [editedDonation, setEditedDonation] = useState(donation || {
     charity: '',
+    charityABN: '',
+    charityId: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
     charityType: '',
     isMonthly: false,
     receipt: null
   });
+  const [abnStatus, setAbnStatus] = useState('');
+  const [selectedCharity, setSelectedCharity] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    setEditedDonation(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : 
-               type === 'file' ? files[0] :
-               value
-    }));
+    
+    // Handle ABN formatting
+    if (name === 'charityABN') {
+      const formattedABN = formatABN(value);
+      setEditedDonation(prev => ({
+        ...prev,
+        charityABN: formattedABN
+      }));
+      
+      // Validate ABN
+      if (value.length > 0) {
+        if (validateABN(value)) {
+          setAbnStatus('✓ Valid ABN format');
+        } else {
+          setAbnStatus('ABN should be 11 digits');
+        }
+      } else {
+        setAbnStatus('');
+      }
+    } else {
+      setEditedDonation(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : 
+                 type === 'file' ? files[0] :
+                 value
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onConfirm(editedDonation);
+    const submissionData = {
+      ...editedDonation,
+      charityId: selectedCharity?._id || editedDonation.charityId
+    };
+    onConfirm(submissionData);
   };
 
-  const charityTypes = [
-    { value: "Health Services", label: "Health Services" },
-    { value: "Mental Health", label: "Mental Health" },
-    { value: "Education", label: "Education" },
-    { value: "Environmental Conservation", label: "Environmental Conservation" },
-    { value: "Social Welfare", label: "Social Welfare" },
-    { value: "Emergency Relief", label: "Emergency Relief" },
-    { value: "Food Security", label: "Food Security" },
-    { value: "Child Welfare", label: "Child Welfare" },
-    { value: "Indigenous Support", label: "Indigenous Support" },
-    { value: "Housing", label: "Housing" },
-    { value: "Community Building", label: "Community Building" },
-    { value: "Rural Support", label: "Rural Support" }
-  ];
+  const handleCharitySelect = (charity) => {
+    setSelectedCharity(charity);
+    setEditedDonation(prev => ({
+      ...prev,
+      charity: charity.name,
+      charityABN: formatABN(charity.abn || charity.ABN || ''),
+      charityId: charity._id,
+      charityType: charity.category || ''
+    }));
+    // Update ABN status if ABN exists
+    if (charity.abn) {
+      setAbnStatus('✓ Valid ABN format');
+    }
+  };
+
 
   const modalContent = (
     <div className={styles.modalOverlay}>
@@ -54,15 +87,31 @@ const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="charity" className={styles.label}>Charity:</label>
+            <Suspense fallback={<div>Loading search...</div>}>
+              <CharitySearch
+                onCharitySelect={handleCharitySelect}
+                initialValue={editedDonation.charity}
+                placeholder="Search for a charity..."
+                required
+              />
+            </Suspense>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="charityABN" className={styles.label}>Charity ABN:</label>
             <input
               type="text"
-              id="charity"
-              name="charity"
-              value={editedDonation.charity}
+              id="charityABN"
+              name="charityABN"
+              placeholder="XX XXX XXX XXX"
+              value={editedDonation.charityABN}
               onChange={handleChange}
-              required
               className={styles.input}
+              maxLength="14" // 11 digits + 3 spaces
+              readOnly={!!selectedCharity?.abn}
             />
+            <small className={styles.helperText}>
+              {abnStatus || ABN_HELPER_TEXT}
+            </small>
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="amount" className={styles.label}>Amount:</label>
@@ -99,11 +148,12 @@ const DonationModal = ({ donation, onConfirm, onCancel, type = 'regular' }) => {
               onChange={handleChange}
               required
               className={styles.select}
+              disabled={!!selectedCharity?.category}
             >
               <option value="">Select a charity type</option>
-              {charityTypes.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              {CHARITY_CATEGORIES.map(category => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </select>

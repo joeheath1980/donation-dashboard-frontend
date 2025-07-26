@@ -11,7 +11,7 @@ import {
   FaExclamationTriangle
 } from 'react-icons/fa';
 import styles from './ReceiptDashboard.module.css';
-import api from '../../services/api.service';
+import { apiClient } from '../../services/api.service';
 import { format } from 'date-fns';
 
 const ReceiptDashboard = () => {
@@ -36,7 +36,7 @@ const ReceiptDashboard = () => {
 
   const fetchReceipts = async () => {
     try {
-      const response = await api.get('/receipts/processing-queue');
+      const response = await apiClient.get('/receipts/processing-queue');
       setReceipts(response.data.receipts || []);
       setStats(response.data.stats || {
         total: 0,
@@ -70,7 +70,7 @@ const ReceiptDashboard = () => {
 
   const handleApprove = async (receiptId) => {
     try {
-      await api.post(`/receipts/${receiptId}/approve`, {
+      await apiClient.post(`/receipts/${receiptId}/approve`, {
         corrections: editingReceipt?.corrections || {}
       });
       await fetchReceipts();
@@ -85,7 +85,7 @@ const ReceiptDashboard = () => {
     if (!window.confirm('Are you sure you want to reject this receipt?')) return;
     
     try {
-      await api.post(`/receipts/${receiptId}/reject`);
+      await apiClient.post(`/receipts/${receiptId}/reject`);
       await fetchReceipts();
     } catch (error) {
       console.error('Error rejecting receipt:', error);
@@ -100,7 +100,7 @@ const ReceiptDashboard = () => {
     }
 
     try {
-      await api.post('/receipts/bulk-action', {
+      await apiClient.post('/receipts/bulk-action', {
         action,
         receiptIds: selectedReceipts
       });

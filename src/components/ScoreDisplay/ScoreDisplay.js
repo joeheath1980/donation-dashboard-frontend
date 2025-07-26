@@ -11,7 +11,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import io from 'socket.io-client';
 import styles from './ScoreDisplay.module.css';
-import api from '../../services/api.service';
+import { apiClient } from '../../services/api.service';
 import CelebrationModal from './CelebrationModal';
 
 const ScoreDisplay = () => {
@@ -51,7 +51,7 @@ const ScoreDisplay = () => {
 
   const fetchCurrentScore = async () => {
     try {
-      const response = await api.get('/users/score');
+      const response = await apiClient.get('/users/score');
       const { score, tier, badges } = response.data;
       setScore(score);
       setDisplayScore(score);

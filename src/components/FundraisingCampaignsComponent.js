@@ -2,25 +2,11 @@ import React, { useEffect, useState, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import './SharedStyles.css';
 import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign, FaBullhorn } from 'react-icons/fa';
-
-const CHARITY_TYPES = [
-  { value: "Health Services", label: "Health Services" },
-  { value: "Mental Health", label: "Mental Health" },
-  { value: "Education", label: "Education" },
-  { value: "Environmental Conservation", label: "Environmental Conservation" },
-  { value: "Social Welfare", label: "Social Welfare" },
-  { value: "Emergency Relief", label: "Emergency Relief" },
-  { value: "Food Security", label: "Food Security" },
-  { value: "Child Welfare", label: "Child Welfare" },
-  { value: "Indigenous Support", label: "Indigenous Support" },
-  { value: "Housing", label: "Housing" },
-  { value: "Community Building", label: "Community Building" },
-  { value: "Rural Support", label: "Rural Support" }
-];
 
 function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const {
@@ -37,10 +23,13 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     startDate: '',
     endDate: '',
     campaignUrl: '',
-    charityType: ''
+    charityType: '',
+    beneficiaryCharity: '',
+    beneficiaryCharityABN: ''
   });
   const [error, setError] = useState('');
   const [urlError, setUrlError] = useState('');
+  const [abnStatus, setAbnStatus] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [updatingCampaign, setUpdatingCampaign] = useState(null);
   const [tempRaisedAmounts, setTempRaisedAmounts] = useState({});
@@ -74,7 +63,25 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewCampaign({ ...newCampaign, [name]: value });
+    
+    // Handle ABN formatting
+    if (name === 'beneficiaryCharityABN') {
+      const formattedABN = formatABN(value);
+      setNewCampaign({ ...newCampaign, beneficiaryCharityABN: formattedABN });
+      
+      // Validate ABN
+      if (value.length > 0) {
+        if (validateABN(value)) {
+          setAbnStatus('✓ Valid ABN format');
+        } else {
+          setAbnStatus('ABN should be 11 digits');
+        }
+      } else {
+        setAbnStatus('');
+      }
+    } else {
+      setNewCampaign({ ...newCampaign, [name]: value });
+    }
     
     // Clear general error when user types
     setError('');
@@ -129,10 +136,13 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         startDate: '',
         endDate: '',
         campaignUrl: '',
-        charityType: ''
+        charityType: '',
+        beneficiaryCharity: '',
+        beneficiaryCharityABN: ''
       });
       setError('');
       setUrlError('');
+      setAbnStatus('');
       setIsCreateModalOpen(false);
       if (isAuthenticated) {
         fetchImpactData();
@@ -301,12 +311,37 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
               className="select"
             >
               <option value="">Select a charity type</option>
-              {CHARITY_TYPES.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              {CHARITY_CATEGORIES.map(category => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </select>
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Beneficiary Charity</label>
+            <input
+              type="text"
+              name="beneficiaryCharity"
+              value={newCampaign.beneficiaryCharity}
+              onChange={handleChange}
+              placeholder="Name of charity that will receive funds"
+              required
+            />
+          </div>
+          <div className={modalStyles.formGroup}>
+            <label>Beneficiary Charity ABN (optional)</label>
+            <input
+              type="text"
+              name="beneficiaryCharityABN"
+              placeholder="XX XXX XXX XXX"
+              value={newCampaign.beneficiaryCharityABN}
+              onChange={handleChange}
+              maxLength="14"
+            />
+            <small className={modalStyles.helperText}>
+              {abnStatus || ABN_HELPER_TEXT}
+            </small>
           </div>
           <div className={modalStyles.formGroup}>
             <label>Goal Amount</label>
@@ -395,11 +430,10 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
                 <div className={styles.cardContent}>
                   <p>{campaign.description}</p>
                   <p><strong>Goal:</strong> ${campaign.goalAmount}</p>
-                  <p><strong>Charity Type:</strong> {
-                    CHARITY_TYPES.find(type => type.value === campaign.charityType)?.label || 
-                    campaign.charityType || 
-                    'Not specified'
-                  }</p>
+                  <p><strong>Charity Type:</strong> {campaign.charityType || 'Not specified'}</p>
+                  {campaign.beneficiaryCharity && (
+                    <p><strong>Benefiting:</strong> {campaign.beneficiaryCharity}</p>
+                  )}
                   <div className={styles.raisedAmount}>
                     <strong>Raised:</strong>
                     {updatingCampaign === campaign._id ? (
@@ -466,11 +500,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
                     <div className={styles.archivedInfo}>
                       <span><FaDollarSign /> Raised: ${campaign.raisedAmount || 0}</span>
                       <span><FaCalendar /> Completed: {new Date(campaign.completedDate).toLocaleDateString()}</span>
-                      <span>Type: {
-                        CHARITY_TYPES.find(type => type.value === campaign.charityType)?.label || 
-                        campaign.charityType || 
-                        'Not specified'
-                      }</span>
+                      <span>Type: {campaign.charityType || 'Not specified'}</span>
                       {campaign.campaignUrl && (
                         <a 
                           href={campaign.campaignUrl}
