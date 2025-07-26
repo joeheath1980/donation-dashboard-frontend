@@ -311,7 +311,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.error === 'Google authentication required' && errorData.action === 'google_auth') {
-          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/auth/google`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
         }
@@ -550,8 +550,8 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       charity: donation.charity,
       date: formattedDate,
       charityType: selectedCharityTypes[donation.id] || 'Social Welfare',
-      needsValidation: true,
-      subject: donation.subject
+      needsValidation: true
+      // Remove subject field as it doesn't exist in backend
     };
   }, [selectedCharityTypes]);
 
@@ -686,7 +686,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         <div className={styles.donationContent}>
           <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
           <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br/>
-          <strong>Subject:</strong> {donation.subject} <br/>
         </div>
 
         {!isCommitted && !isDeleted && (
