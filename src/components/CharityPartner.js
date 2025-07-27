@@ -40,19 +40,61 @@ function CharityPartner() {
       
       if (charityData) {
         console.log('[CharityPartner] Setting charity data:', charityData);
+        console.log('[CharityPartner] Charity data fields:', {
+          Main_Activity: charityData.Main_Activity,
+          mainActivity: charityData.mainActivity,
+          primaryActivity: charityData.primaryActivity,
+          Legal_Structure: charityData.Legal_Structure,
+          legalStructure: charityData.legalStructure,
+          subtype: charityData.subtype,
+          Address_Type: charityData.Address_Type,
+          addressType: charityData.addressType
+        });
         
         // If normalizedCharity is available, use it directly; otherwise map the data
         // If we have normalizedCharity, map it to ACNC format for display
         const mappedCharity = response.data?.normalizedCharity ? {
-          // Map normalizedCharity to ACNC format
-          ABN: charityData.abn || charityData.ABN,
-          Charity_Legal_Name: charityData.name,
-          Website: charityData.website,
-          Town_City: charityData.city || charityData.state,
-          State: charityData.state,
-          logo: charityData.logo || null,
-          // Add other normalized fields as needed
-          ...charityData
+          // Keep original data
+          ...charityData,
+          // Map normalizedCharity to ACNC format for display components
+          ABN: charityData?.abn || charityData?.ABN,
+          Charity_Legal_Name: charityData?.name || charityData?.Charity_Legal_Name,
+          Website: charityData?.website,
+          Address_Line_1: charityData?.addressLine1 || charityData?.address?.line1,
+          Address_Line_2: charityData?.addressLine2 || charityData?.address?.line2,
+          Address_Line_3: charityData?.addressLine3 || charityData?.address?.line3,
+          Town_City: charityData?.city || charityData?.address?.city,
+          State: charityData?.state || charityData?.address?.state,
+          Postcode: charityData?.postcode || charityData?.address?.postcode,
+          Country: charityData?.country || charityData?.address?.country || 'Australia',
+          logo: charityData?.logo || null,
+          Registration_Status: charityData?.registrationStatus || charityData?.Registration_Status || 'Registered',
+          Main_Activity: charityData?.mainActivity || charityData?.primaryActivity || charityData?.Main_Activity,
+          Charity_Size: charityData?.size || charityData?.Charity_Size,
+          Charity_Type: charityData?.type || charityData?.Charity_Type,
+          Legal_Structure: charityData?.legalStructure || charityData?.subtype || charityData?.Legal_Structure,
+          Address_Type: charityData?.addressType || charityData?.Address_Type,
+          ACN: charityData?.acn || charityData?.ACN,
+          Number_of_Responsible_Persons: charityData?.responsiblePersons || charityData?.Number_of_Responsible_Persons,
+          PBI: charityData?.isPBI === true || charityData?.PBI === 'Y' ? 'Y' : 'N',
+          HPC: charityData?.isHPC === true || charityData?.HPC === 'Y' ? 'Y' : 'N',
+          // Dates
+          Registration_Date: charityData?.registrationDate || charityData?.Registration_Date,
+          Date_Organisation_Established: charityData?.establishedDate || charityData?.Date_Organisation_Established,
+          Financial_Year_End: charityData?.financialYearEnd || charityData?.Financial_Year_End,
+          // Operating states - check both array format and existing Y/N format
+          Operates_in_ACT: charityData?.operatingStates?.includes('ACT') ? 'Y' : (charityData?.Operates_in_ACT || 'N'),
+          Operates_in_NSW: charityData?.operatingStates?.includes('NSW') ? 'Y' : (charityData?.Operates_in_NSW || 'N'),
+          Operates_in_NT: charityData?.operatingStates?.includes('NT') ? 'Y' : (charityData?.Operates_in_NT || 'N'),
+          Operates_in_QLD: charityData?.operatingStates?.includes('QLD') ? 'Y' : (charityData?.Operates_in_QLD || 'N'),
+          Operates_in_SA: charityData?.operatingStates?.includes('SA') ? 'Y' : (charityData?.Operates_in_SA || 'N'),
+          Operates_in_TAS: charityData?.operatingStates?.includes('TAS') ? 'Y' : (charityData?.Operates_in_TAS || 'N'),
+          Operates_in_VIC: charityData?.operatingStates?.includes('VIC') ? 'Y' : (charityData?.Operates_in_VIC || 'N'),
+          Operates_in_WA: charityData?.operatingStates?.includes('WA') ? 'Y' : (charityData?.Operates_in_WA || 'N'),
+          // Financial info
+          Total_Revenue_AIS: charityData?.revenue,
+          Total_Expenses_AIS: charityData?.expenses,
+          Last_AIS_Fin_Year: charityData?.lastFinancialYear
         } : {
           ABN: charityData.basicInfo?.ABN,
           Charity_Legal_Name: charityData.basicInfo?.legalName,
@@ -181,11 +223,13 @@ function CharityPartner() {
       if (isFollowed) {
         removeFollowedCharity(charity.ABN);
       } else {
-        addFollowedCharity({
-          ABN: charity.ABN || '',
-          name: charity.Charity_Legal_Name || charity.name || 'Unknown Charity',
-          logo: charity.logo || null
-        });
+        // Safely access charity properties with proper null checks
+        const charityData = {
+          ABN: charity?.ABN || '',
+          name: charity?.Charity_Legal_Name || charity?.name || 'Unknown Charity',
+          logo: charity?.logo || null
+        };
+        addFollowedCharity(charityData);
       }
       setIsFollowed(!isFollowed);
     }
@@ -216,7 +260,7 @@ function CharityPartner() {
         charity['State'],
         charity['Postcode'],
         charity['Country']
-      ].filter(Boolean).join(', ');
+      ].filter(Boolean);
       return addressParts.length > 0 ? addressParts.join(', ') : 'N/A';
     } catch (err) {
       console.error('[CharityPartner] Error formatting address:', err);
@@ -626,7 +670,7 @@ function CharityPartner() {
           </button>
           <button
             className={styles.primaryButton}
-            onClick={() => navigate(`/donate/${charity._id || charity.ABN}`)}
+            onClick={() => navigate(`/donate/${charity?._id || charity?.ABN || abn}`)}
           >
             Donate with Stripe
           </button>

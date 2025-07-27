@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { matchingAPI } from '../../services/api/matchingAPI';
-import { FaClock, FaHeart, FaTimes, FaArrowRight, FaChevronRight, FaChevronLeft } from 'react-icons/fa';
+import axios from 'axios';
+import { FaClock, FaHeart, FaTimes, FaArrowRight, FaChevronRight, FaChevronLeft, FaTrophy, FaMedal, FaAward, FaStar, FaSearch } from 'react-icons/fa';
 import LoadingSpinner from '../LoadingSpinner';
+import CharitySearch from '../CharitySearch/CharitySearch';
 import styles from './MatchOpportunityFeed.module.css';
 
 const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
@@ -12,6 +14,10 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAmount, setSelectedAmount] = useState(null);
+  const [selectedCharityId, setSelectedCharityId] = useState(null);
+  const [charityOptions, setCharityOptions] = useState({});
+  const [showCharitySearch, setShowCharitySearch] = useState(false);
+  const [loadingCharities, setLoadingCharities] = useState(false);
   const websocket = useWebSocket();
 
   useEffect(() => {
@@ -25,6 +31,48 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
     };
   }, []);
 
+  // Fetch charity details for P3 charity options
+  const fetchCharityNames = async (charityIds) => {
+    if (!charityIds || charityIds.length === 0) return {};
+    
+    setLoadingCharities(true);
+    const charityMap = {};
+    
+    try {
+      // Fetch charity details for each ID
+      const promises = charityIds.map(async (id) => {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          return { id, charity: response.data?.normalizedCharity || response.data?.charity || response.data };
+        } catch (error) {
+          console.error(`Failed to fetch charity ${id}:`, error);
+          return { id, charity: null };
+        }
+      });
+      
+      const results = await Promise.all(promises);
+      
+      // Build the charity map
+      results.forEach(({ id, charity }) => {
+        if (charity) {
+          charityMap[id] = charity.name || charity.Charity_Legal_Name || `Charity ${id}`;
+        }
+      });
+      
+      setCharityOptions(prev => ({ ...prev, ...charityMap }));
+    } catch (error) {
+      console.error('Error fetching charity names:', error);
+    } finally {
+      setLoadingCharities(false);
+    }
+    
+    return charityMap;
+  };
+
   const fetchOpportunities = async () => {
     try {
       setLoading(true);
@@ -35,37 +83,60 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       
       // Map the API response to the expected format
       const mappedOpportunities = rawOpportunities.map(opp => {
-        // Check if this opportunity allows charity selection
-        const hasSpecificCharity = opp.charityId || opp.charity?._id || (opp.targetCharities && opp.targetCharities.length > 0 && opp.targetCharities[0]?._id);
+        // Map based on the new priority system
+        const matchType = opp.matchType || 'open';
+        const priority = opp.priority || 25;
         
         console.log('Mapping opportunity:', {
           id: opp._id,
-          hasSpecificCharity,
-          charityId: opp.charityId,
-          charity: opp.charity,
-          targetCharities: opp.targetCharities
+          matchType,
+          priority,
+          matchDetails: opp.matchDetails
         });
         
         return {
           id: opp._id || opp.id || opp.campaignId,
           businessName: opp.businessName || opp.business?.name,
           businessLogo: opp.businessLogo || opp.business?.logo,
-          charityName: hasSpecificCharity ? (opp.charityName || opp.charity?.name || (opp.targetCharities && opp.targetCharities[0]?.name)) : null,
-          charityId: hasSpecificCharity ? (opp.charityId || opp.charity?._id || (opp.targetCharities && opp.targetCharities[0]?._id)) : null,
-          multiplier: opp.multiplier || opp.matchingDetails?.multiplier || 1,
-          endDate: opp.endDate || opp.campaignEndDate,
+          charityName: opp.charity || null,
+          charityId: opp.charityId || null,
+          multiplier: opp.multiplier || 2,
+          multiplierText: opp.multiplierText || '2x',
+          contribution: opp.contribution || 50,
+          endDate: opp.validUntil || opp.endDate || opp.campaignEndDate,
           remainingBudget: opp.remainingBudget || opp.budget?.remaining || opp.budget || 0,
           totalBudget: opp.totalBudget || opp.budget?.total || opp.budget || 0,
-          message: opp.message || opp.description || opp.campaign?.description,
-          campaignId: opp.campaignId || opp._id || opp.id,
+          message: opp.description || opp.message || opp.campaign?.description,
+          campaignId: opp.campaign || opp.campaignId || opp._id || opp.id,
+          businessId: opp.business || opp.businessId,
           minDonation: opp.minDonation || opp.matchingDetails?.minDonation,
           maxDonation: opp.maxDonation || opp.matchingDetails?.maxDonation,
-          allowsCharitySelection: !hasSpecificCharity || opp.allowsCharitySelection
+          // New 4-tier priority system fields
+          matchType: matchType,
+          priority: priority,
+          cause: opp.cause || null,
+          matchDetails: opp.matchDetails || {},
+          // Determine if charity selection is needed
+          needsCharitySelection: matchType === 'category_choice' || matchType === 'open',
+          charityOptions: opp.matchDetails?.charityOptions || []
         };
       });
       
       setOpportunities(mappedOpportunities);
       setError(null);
+      
+      // Fetch charity names for all P3 opportunities
+      const p3Opportunities = mappedOpportunities.filter(opp => opp.matchType === 'category_choice');
+      const allCharityIds = new Set();
+      p3Opportunities.forEach(opp => {
+        if (opp.charityOptions && opp.charityOptions.length > 0) {
+          opp.charityOptions.forEach(id => allCharityIds.add(id));
+        }
+      });
+      
+      if (allCharityIds.size > 0) {
+        fetchCharityNames(Array.from(allCharityIds));
+      }
     } catch (error) {
       console.error('Failed to fetch opportunities:', error);
       setError('Failed to load matching opportunities');
@@ -92,13 +163,26 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
         alert('Please select a donation amount first');
         return;
       }
+      
+      // Check if charity selection is required
+      if (currentOpp.needsCharitySelection && !selectedCharityId) {
+        alert('Please select a charity for this match');
+        return;
+      }
+      
       if (onSelectOpportunity) {
-        onSelectOpportunity({ ...currentOpp, suggestedAmount: selectedAmount });
+        onSelectOpportunity({ 
+          ...currentOpp, 
+          suggestedAmount: selectedAmount,
+          selectedCharityId: selectedCharityId || currentOpp.charityId
+        });
       }
     }
     
-    // Reset selected amount for next card
+    // Reset selected amount and charity for next card
     setSelectedAmount(null);
+    setSelectedCharityId(null);
+    setShowCharitySearch(false);
     
     if (currentIndex < opportunities.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -140,6 +224,24 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       </div>
     );
   }
+
+  // Get priority badge info
+  const getPriorityBadge = (matchType, priority) => {
+    switch (matchType) {
+      case 'direct':
+        return { icon: <FaTrophy />, text: 'Perfect Match', className: styles.priorityGold };
+      case 'category_auto':
+        return { icon: <FaMedal />, text: 'Category Match', className: styles.prioritySilver };
+      case 'category_choice':
+        return { icon: <FaAward />, text: 'Choose Your Charity', className: styles.priorityBronze };
+      case 'open':
+        return { icon: <FaStar />, text: 'Open Match', className: styles.priorityStandard };
+      default:
+        return { icon: <FaStar />, text: 'Match', className: styles.priorityStandard };
+    }
+  };
+
+  const priorityBadge = getPriorityBadge(currentOpp.matchType, currentOpp.priority);
 
   return (
     <div className={styles.feedContainer}>
@@ -185,6 +287,12 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
             }}
           >
             <div className={styles.cardContent}>
+              {/* Priority Badge */}
+              <div className={`${styles.priorityBadge} ${priorityBadge.className}`}>
+                {priorityBadge.icon}
+                <span>{priorityBadge.text}</span>
+              </div>
+
               {/* Business Info */}
               <div className={styles.businessInfo}>
                 {currentOpp.businessLogo && (
@@ -196,19 +304,78 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 )}
                 <div className={styles.businessDetails}>
                   <h3>{currentOpp.businessName}</h3>
-                  <p>will match your donation</p>
+                  <p>will match your donation {currentOpp.multiplierText || '2x'}</p>
                 </div>
               </div>
 
               {/* Match Details */}
               <div className={styles.matchDetails}>
+                {/* P1/P2: Direct or Auto-selected charity */}
+                {(currentOpp.matchType === 'direct' || currentOpp.matchType === 'category_auto') && (
+                  <>
+                    <div className={styles.detailRow}>
+                      <span>Benefiting:</span>
+                      <strong>{currentOpp.charityName}</strong>
+                    </div>
+                    {currentOpp.matchDetails?.matchReason && (
+                      <p className={styles.matchReason}>{currentOpp.matchDetails.matchReason}</p>
+                    )}
+                  </>
+                )}
+
+                {/* P3: Category choice */}
+                {currentOpp.matchType === 'category_choice' && (
+                  <>
+                    <div className={styles.detailRow}>
+                      <span>Category:</span>
+                      <strong>{currentOpp.cause || currentOpp.matchDetails?.matchedCategory}</strong>
+                    </div>
+                    <div className={styles.charitySelection}>
+                      <p>Choose a charity from {currentOpp.businessName}'s approved list:</p>
+                      <select 
+                        value={selectedCharityId || ''}
+                        onChange={(e) => setSelectedCharityId(e.target.value)}
+                        className={styles.charityDropdown}
+                      >
+                        <option value="">Select a charity...</option>
+                        {currentOpp.charityOptions.map((charityId) => (
+                          <option key={charityId} value={charityId}>
+                            {charityOptions[charityId] || `Loading...`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                {/* P4: Open match */}
+                {currentOpp.matchType === 'open' && (
+                  <div className={styles.openMatchSection}>
+                    <p>{currentOpp.businessName} will match ${currentOpp.contribution} to any registered charity</p>
+                    {!showCharitySearch ? (
+                      <button 
+                        className={styles.selectCharityButton}
+                        onClick={() => setShowCharitySearch(true)}
+                      >
+                        <FaSearch /> Select a Charity
+                      </button>
+                    ) : (
+                      <div className={styles.charitySearchWrapper}>
+                        <CharitySearch 
+                          onSelect={(charity) => {
+                            setSelectedCharityId(charity._id || charity.ABN);
+                            setShowCharitySearch(false);
+                          }}
+                          compact={true}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className={styles.detailRow}>
-                  <span>Benefiting:</span>
-                  <strong>{currentOpp.charityName || 'Choose any registered charity'}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Match Rate:</span>
-                  <strong className={styles.multiplier}>{currentOpp.multiplier || 2}x</strong>
+                  <span>Match Amount:</span>
+                  <strong className={styles.contribution}>${currentOpp.contribution}</strong>
                 </div>
               </div>
 
