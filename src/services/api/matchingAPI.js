@@ -120,5 +120,23 @@ export const matchingAPI = {
       console.error('Error fetching campaigns for charity:', error);
       throw error;
     }
+  },
+
+  // Accept a matching opportunity
+  acceptMatchingOpportunity: async (opportunityId, selectedCharityId = null) => {
+    try {
+      const body = {};
+      
+      // Include selectedCharityId for P3 and P4 matches
+      if (selectedCharityId) {
+        body.selectedCharityId = selectedCharityId;
+      }
+      
+      const response = await api.post(`/api/matchingOpportunities/${opportunityId}/accept`, body);
+      return response.data;
+    } catch (error) {
+      console.error('Error accepting matching opportunity:', error);
+      throw error;
+    }
   }
 };
