@@ -142,6 +142,13 @@
   font-style: italic;
 }
 
+.matchDescription {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
 /* Charity selection for P3 */
 .charitySelection {
   margin-top: 1rem;

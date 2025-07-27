@@ -79,7 +79,6 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       const data = await matchingAPI.getActiveOpportunities();
       // Handle both array response and object with opportunities property
       const rawOpportunities = Array.isArray(data) ? data : (data.opportunities || []);
-      console.log('Fetched opportunities:', rawOpportunities); // Debug log
       
       // Map the API response to the expected format
       const mappedOpportunities = rawOpportunities.map(opp => {
@@ -87,19 +86,14 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
         const matchType = opp.matchType || 'open';
         const priority = opp.priority || 25;
         
-        console.log('Mapping opportunity:', {
-          id: opp._id,
-          matchType,
-          priority,
-          matchDetails: opp.matchDetails
-        });
         
         return {
           id: opp._id || opp.id || opp.campaignId,
           businessName: opp.businessName || opp.business?.name,
           businessLogo: opp.businessLogo || opp.business?.logo,
-          charityName: opp.charity || null,
-          charityId: opp.charityId || null,
+          // Handle various formats for charity name
+          charityName: opp.charityName || opp.charity || opp.matchDetails?.matchedCharityName || null,
+          charityId: opp.charityId || opp.matchDetails?.matchedCharity || null,
           multiplier: opp.multiplier || 2,
           multiplierText: opp.multiplierText || '2x',
           contribution: opp.contribution || 50,
@@ -314,9 +308,12 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 {(currentOpp.matchType === 'direct' || currentOpp.matchType === 'category_auto') && (
                   <>
                     <div className={styles.detailRow}>
-                      <span>Benefiting:</span>
-                      <strong>{currentOpp.charityName}</strong>
+                      <span>Charity:</span>
+                      <strong>{currentOpp.charityName || 'Unknown Charity'}</strong>
                     </div>
+                    <p className={styles.matchDescription}>
+                      {currentOpp.businessName} will match your donation to {currentOpp.charityName || 'this charity'}
+                    </p>
                     {currentOpp.matchDetails?.matchReason && (
                       <p className={styles.matchReason}>{currentOpp.matchDetails.matchReason}</p>
                     )}
