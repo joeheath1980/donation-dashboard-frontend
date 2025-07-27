@@ -50,7 +50,7 @@ function CharityPartner() {
           Website: charityData.website,
           Town_City: charityData.city || charityData.state,
           State: charityData.state,
-          logo: charityData.logo,
+          logo: charityData.logo || null,
           // Add other normalized fields as needed
           ...charityData
         } : {
@@ -130,7 +130,7 @@ function CharityPartner() {
           beneficiaryDetails: {
             conditions: charityData.beneficiaries?.conditions || []
           },
-          logo: charityData.basicInfo?.logo
+          logo: charityData.basicInfo?.logo || null
         };
         
         setCharity(mappedCharity);
@@ -182,9 +182,9 @@ function CharityPartner() {
         removeFollowedCharity(charity.ABN);
       } else {
         addFollowedCharity({
-          ABN: charity.ABN,
-          name: charity.Charity_Legal_Name,
-          logo: charity.logo
+          ABN: charity.ABN || '',
+          name: charity.Charity_Legal_Name || charity.name || 'Unknown Charity',
+          logo: charity.logo || null
         });
       }
       setIsFollowed(!isFollowed);
