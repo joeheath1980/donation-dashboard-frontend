@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
+import CharitySearch from './CharitySearch/CharitySearch';
 import './SharedStyles.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
@@ -17,6 +18,7 @@ function VolunteerActivitiesComponent({ userId }) {
     description: '',
     charityType: ''
   });
+  const [selectedCharity, setSelectedCharity] = useState(null);
   const [abnStatus, setAbnStatus] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
@@ -78,6 +80,18 @@ function VolunteerActivitiesComponent({ userId }) {
     }
   };
 
+  const handleCharitySelect = (charity) => {
+    setSelectedCharity(charity);
+    setNewActivity({
+      ...newActivity,
+      organization: charity.name,
+      organizationABN: formatABN(charity.abn || charity.ABN || ''),
+      charityType: charity.category || ''
+    });
+    // Clear ABN status as we now have a valid charity
+    setAbnStatus('✓ Valid charity selected');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedFile) {
@@ -104,6 +118,7 @@ function VolunteerActivitiesComponent({ userId }) {
       });
       setActivities([...activities, response.data]);
       setNewActivity({ organization: '', organizationABN: '', hours: '', date: '', description: '', charityType: '' });
+      setSelectedCharity(null);
       setSelectedFile(null);
       setError('');
       setAbnStatus('');
@@ -142,46 +157,65 @@ function VolunteerActivitiesComponent({ userId }) {
         <h3 className={modalStyles.modalHeader}>Add New Activity</h3>
         <form onSubmit={handleSubmit} className={modalStyles.form}>
           <div className={modalStyles.formGroup}>
-            <label>Organization</label>
-            <input 
-              type="text" 
-              name="organization" 
-              value={newActivity.organization} 
-              onChange={handleChange} 
-              required 
-            />
-          </div>
-          <div className={modalStyles.formGroup}>
-            <label>Organization ABN (optional)</label>
-            <input 
-              type="text" 
-              name="organizationABN" 
-              placeholder="XX XXX XXX XXX"
-              value={newActivity.organizationABN} 
-              onChange={handleChange} 
-              maxLength="14"
-            />
-            <small className={modalStyles.helperText}>
-              {abnStatus || ABN_HELPER_TEXT}
-            </small>
-          </div>
-          <div className={modalStyles.formGroup}>
-            <label>Charity Type</label>
-            <select
-              name="charityType"
-              value={newActivity.charityType}
-              onChange={handleChange}
+            <label>Search Organization</label>
+            <CharitySearch
+              onCharitySelect={handleCharitySelect}
+              placeholder="Search for a registered charity..."
               required
-              className="select"
-            >
-              <option value="">Select a charity type</option>
-              {CHARITY_CATEGORIES.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
+            {selectedCharity && (
+              <div className={modalStyles.selectedCharityInfo}>
+                <h4>{selectedCharity.name}</h4>
+                <p>ABN: {formatABN(selectedCharity.abn || selectedCharity.ABN || '')}</p>
+                {selectedCharity.category && <p>Category: {selectedCharity.category}</p>}
+              </div>
+            )}
           </div>
+          
+          {/* Show manual input only if they want to enter a non-registered organization */}
+          <details className={modalStyles.manualEntrySection}>
+            <summary>Organization not found? Enter manually</summary>
+            <div className={modalStyles.formGroup}>
+              <label>Organization Name</label>
+              <input 
+                type="text" 
+                name="organization" 
+                value={newActivity.organization} 
+                onChange={handleChange} 
+                placeholder="Organization name"
+              />
+            </div>
+            <div className={modalStyles.formGroup}>
+              <label>Organization ABN (optional)</label>
+              <input 
+                type="text" 
+                name="organizationABN" 
+                placeholder="XX XXX XXX XXX"
+                value={newActivity.organizationABN} 
+                onChange={handleChange} 
+                maxLength="14"
+              />
+              <small className={modalStyles.helperText}>
+                {abnStatus || ABN_HELPER_TEXT}
+              </small>
+            </div>
+            <div className={modalStyles.formGroup}>
+              <label>Charity Type</label>
+              <select
+                name="charityType"
+                value={newActivity.charityType}
+                onChange={handleChange}
+                className="select"
+              >
+                <option value="">Select a charity type</option>
+                {CHARITY_CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </details>
           <div className={modalStyles.formGroup}>
             <label>Hours</label>
             <input 

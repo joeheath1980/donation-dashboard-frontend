@@ -15,11 +15,20 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
 
   useEffect(() => {
     console.log('MatchingDetailModal - opportunity:', opportunity);
-    if (opportunity?.charityId) {
-      console.log('Fetching charity details for ID:', opportunity.charityId);
-      fetchCharityDetails();
+    
+    // For P1/P2 matches with a charity assigned
+    if (opportunity?.charityId && (opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto')) {
+      // If we already have the charity name from the opportunity, use it
+      if (opportunity.charityName) {
+        setCharity({ name: opportunity.charityName, id: opportunity.charityId });
+        setLoading(false);
+      } else {
+        console.log('Fetching charity details for ID:', opportunity.charityId);
+        fetchCharityDetails();
+      }
     } else {
-      console.log('No charityId, showing charity search');
+      // For P3/P4 matches where user needs to choose
+      console.log('Match type requires charity selection:', opportunity.matchType);
       setLoading(false);
     }
   }, [opportunity]);
@@ -132,10 +141,18 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                   <FaHandHoldingHeart />
                 </div>
                 <div className={styles.sectionContent}>
-                  {charity ? (
+                  {/* Show different content based on match type */}
+                  {(opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity ? (
                     <>
                       <h3>{charity.name}</h3>
-                      <p className={styles.charityDescription}>{charity.description}</p>
+                      <p className={styles.charityDescription}>
+                        {opportunity.matchType === 'direct' 
+                          ? `${opportunity.businessName} has selected this charity for their perfect match.`
+                          : `${opportunity.businessName} has chosen this charity based on your interests in ${opportunity.cause || 'this cause'}.`}
+                      </p>
+                      {charity.description && (
+                        <p className={styles.charityDescription}>{charity.description}</p>
+                      )}
                       {charity.programs && charity.programs.length > 0 && (
                         <div className={styles.programs}>
                           <h4>Programs:</h4>
@@ -147,11 +164,46 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                         </div>
                       )}
                     </>
-                  ) : (
+                  ) : opportunity.matchType === 'category_choice' ? (
                     <>
                       <h3>Choose Your Charity</h3>
                       <p className={styles.charityDescription}>
-                        Search for a registered charity to support:
+                        Select a charity in the <strong>{opportunity.cause}</strong> category:
+                      </p>
+                      <div className={styles.charitySelector}>
+                        <CharitySearch 
+                          onSelect={handleCharitySelect}
+                          selectedCharity={selectedCharity}
+                          placeholder={`Search ${opportunity.cause} charities...`}
+                          category={opportunity.cause}
+                        />
+                        {selectedCharity && (
+                          <div className={styles.selectedCharityInfo}>
+                            <h4>{selectedCharity.name}</h4>
+                            {selectedCharity.description && (
+                              <p>{selectedCharity.description}</p>
+                            )}
+                            {selectedCharity.category && (
+                              <div className={styles.charityMeta}>
+                                <span className={styles.categoryBadge}>
+                                  {selectedCharity.category}
+                                </span>
+                                {selectedCharity.state && (
+                                  <span className={styles.stateBadge}>
+                                    {selectedCharity.state}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3>Choose Any Charity</h3>
+                      <p className={styles.charityDescription}>
+                        {opportunity.businessName} will match your donation to any registered charity:
                       </p>
                       <div className={styles.charitySelector}>
                         <CharitySearch 
@@ -225,7 +277,11 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 </button>
                 <button className={styles.confirmButton} onClick={handleConfirm}>
                   <FaHeart />
-                  {charity ? 'Continue to Donation' : 'Choose a Charity'}
+                  {(opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity 
+                    ? 'Continue to Donation' 
+                    : selectedCharity 
+                      ? 'Continue with Selected Charity'
+                      : 'Select Charity to Continue'}
                 </button>
               </div>
             </>

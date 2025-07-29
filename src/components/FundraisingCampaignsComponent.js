@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
+import CharitySearch from './CharitySearch/CharitySearch';
 import './SharedStyles.css';
 import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
@@ -30,6 +31,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const [error, setError] = useState('');
   const [urlError, setUrlError] = useState('');
   const [abnStatus, setAbnStatus] = useState('');
+  const [selectedCharity, setSelectedCharity] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [updatingCampaign, setUpdatingCampaign] = useState(null);
   const [tempRaisedAmounts, setTempRaisedAmounts] = useState({});
@@ -59,6 +61,18 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
     } catch (err) {
       return false;
     }
+  };
+
+  const handleCharitySelect = (charity) => {
+    setSelectedCharity(charity);
+    setNewCampaign({
+      ...newCampaign,
+      beneficiaryCharity: charity.name,
+      beneficiaryCharityABN: formatABN(charity.abn || charity.ABN || ''),
+      charityType: charity.category || ''
+    });
+    // Clear ABN status as we now have a valid charity
+    setAbnStatus('✓ Valid charity selected');
   };
 
   const handleChange = (e) => {
@@ -140,6 +154,7 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
         beneficiaryCharity: '',
         beneficiaryCharityABN: ''
       });
+      setSelectedCharity(null);
       setError('');
       setUrlError('');
       setAbnStatus('');
@@ -302,47 +317,65 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
             ></textarea>
           </div>
           <div className={modalStyles.formGroup}>
-            <label>Charity Type</label>
-            <select
-              name="charityType"
-              value={newCampaign.charityType}
-              onChange={handleChange}
-              required
-              className="select"
-            >
-              <option value="">Select a charity type</option>
-              {CHARITY_CATEGORIES.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className={modalStyles.formGroup}>
-            <label>Beneficiary Charity</label>
-            <input
-              type="text"
-              name="beneficiaryCharity"
-              value={newCampaign.beneficiaryCharity}
-              onChange={handleChange}
-              placeholder="Name of charity that will receive funds"
+            <label>Search Beneficiary Charity</label>
+            <CharitySearch
+              onCharitySelect={handleCharitySelect}
+              placeholder="Search for a registered charity..."
               required
             />
+            {selectedCharity && (
+              <div className={modalStyles.selectedCharityInfo}>
+                <h4>{selectedCharity.name}</h4>
+                <p>ABN: {formatABN(selectedCharity.abn || selectedCharity.ABN || '')}</p>
+                {selectedCharity.category && <p>Category: {selectedCharity.category}</p>}
+              </div>
+            )}
           </div>
-          <div className={modalStyles.formGroup}>
-            <label>Beneficiary Charity ABN (optional)</label>
-            <input
-              type="text"
-              name="beneficiaryCharityABN"
-              placeholder="XX XXX XXX XXX"
-              value={newCampaign.beneficiaryCharityABN}
-              onChange={handleChange}
-              maxLength="14"
-            />
-            <small className={modalStyles.helperText}>
-              {abnStatus || ABN_HELPER_TEXT}
-            </small>
-          </div>
+          
+          {/* Show manual input only if they want to enter a non-registered charity */}
+          <details className={modalStyles.manualEntrySection}>
+            <summary>Charity not found? Enter manually</summary>
+            <div className={modalStyles.formGroup}>
+              <label>Charity Type</label>
+              <select
+                name="charityType"
+                value={newCampaign.charityType}
+                onChange={handleChange}
+                className="select"
+              >
+                <option value="">Select a charity type</option>
+                {CHARITY_CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={modalStyles.formGroup}>
+              <label>Beneficiary Charity</label>
+              <input
+                type="text"
+                name="beneficiaryCharity"
+                value={newCampaign.beneficiaryCharity}
+                onChange={handleChange}
+                placeholder="Name of charity that will receive funds"
+              />
+            </div>
+            <div className={modalStyles.formGroup}>
+              <label>Beneficiary Charity ABN (optional)</label>
+              <input
+                type="text"
+                name="beneficiaryCharityABN"
+                placeholder="XX XXX XXX XXX"
+                value={newCampaign.beneficiaryCharityABN}
+                onChange={handleChange}
+                maxLength="14"
+              />
+              <small className={modalStyles.helperText}>
+                {abnStatus || ABN_HELPER_TEXT}
+              </small>
+            </div>
+          </details>
           <div className={modalStyles.formGroup}>
             <label>Goal Amount</label>
             <input
