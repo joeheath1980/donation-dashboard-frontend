@@ -143,6 +143,29 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       subject: `Completed fundraising campaign: ${campaign.description}`
     }));
 
+  // Calculate volunteer long-term bonus
+  let volunteerLongTermBonus = 0;
+  if (volunteerActivities && volunteerActivities.length > 0) {
+    let earliestStartDate = new Date();
+    let latestEndDate = new Date(0);
+
+    volunteerActivities.forEach(activity => {
+      const startDate = new Date(activity.startDate);
+      const endDate = activity.endDate ? new Date(activity.endDate) : new Date();
+      if (startDate < earliestStartDate) earliestStartDate = startDate;
+      if (endDate > latestEndDate) latestEndDate = endDate;
+    });
+
+    const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + 
+                           (latestEndDate.getMonth() - earliestStartDate.getMonth());
+
+    if (durationInMonths >= 12) {
+      volunteerLongTermBonus = 3;
+    } else if (durationInMonths >= 6) {
+      volunteerLongTermBonus = 1.5;
+    }
+  }
+
   // Combine all activities into a single array
   const allActivities = [
     ...donations.map(d => ({
@@ -170,7 +193,9 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       ...v,
       type: 'volunteer',
       date: new Date(v.date),
-      hours: Number(v.hours) || 0
+      hours: Number(v.hours) || 0,
+      startDate: v.startDate,
+      endDate: v.endDate
     }))
   ].filter(activity => activity.date && !isNaN(activity.date.getTime()));
 
@@ -262,6 +287,25 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     });
   });
 
+  // Add volunteer long-term bonus to the final cumulative score
+  cumulativeScore += volunteerLongTermBonus;
+  
+  // Add fundraising event and campaign bonuses
+  if (fundraisingCampaigns) {
+    const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
+    const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
+    cumulativeScore += totalEventsOrganized * 1.5;
+    cumulativeScore += totalOnlineCampaignsInitiated * 0.75;
+  }
+  
+  // Round the cumulative score to match ImpactContext behavior
+  cumulativeScore = Math.round(cumulativeScore);
+
+  // Update the last data point with the bonus if there are any data points
+  if (processedData.length > 0) {
+    processedData[processedData.length - 1].y = cumulativeScore;
+  }
+
   // Verify total score matches
   const totalImpactScore = calculateComplexImpactScore({
     regularDonations: donations,
@@ -274,7 +318,8 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     console.warn('Cumulative score does not match total impact score', {
       cumulativeScore,
       totalImpactScore,
-      difference: Math.abs(cumulativeScore - totalImpactScore)
+      difference: Math.abs(cumulativeScore - totalImpactScore),
+      volunteerLongTermBonus
     });
   }
 
