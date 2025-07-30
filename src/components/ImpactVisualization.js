@@ -300,6 +300,9 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   
   // Round the cumulative score to match ImpactContext behavior
   cumulativeScore = Math.round(cumulativeScore);
+  
+  // Apply the 90 point cap to match ImpactContext behavior
+  cumulativeScore = Math.min(cumulativeScore, 90);
 
   // Update the last data point with the bonus if there are any data points
   if (processedData.length > 0) {
@@ -314,12 +317,26 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     fundraisingCampaigns: fundraisingCampaigns
   }).totalScore;
 
+  // Calculate detailed scores for debugging
+  const scoreBreakdown = calculateComplexImpactScore({
+    regularDonations: donations,
+    oneOffDonations: oneOffContributions,
+    volunteeringActivities: volunteerActivities,
+    fundraisingCampaigns: fundraisingCampaigns
+  });
+
   if (Math.abs(cumulativeScore - totalImpactScore) > 0.01) {
     console.warn('Cumulative score does not match total impact score', {
       cumulativeScore,
       totalImpactScore,
       difference: Math.abs(cumulativeScore - totalImpactScore),
-      volunteerLongTermBonus
+      volunteerLongTermBonus,
+      fundraisingEvents: fundraisingCampaigns?.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0) || 0,
+      onlineCampaigns: fundraisingCampaigns?.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0) || 0,
+      scoreBreakdown,
+      cumulativeDonationAmount,
+      cumulativeVolunteerHours,
+      cumulativeFundsRaised
     });
   }
 
