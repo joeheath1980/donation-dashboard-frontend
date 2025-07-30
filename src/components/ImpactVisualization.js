@@ -70,9 +70,9 @@ function calculateVolunteerPointsIncremental(hours, cumulativeHoursBefore) {
   let totalHoursSoFar = cumulativeHoursBefore;
 
   const tiers = [
-    { limit: 50, rate: 0.6 },      // Up to 50 hours
-    { limit: 200, rate: 0.4 },     // Up to 200 hours
-    { limit: Infinity, rate: 0.2 }  // Above 200 hours
+    { limit: 40, rate: 0.5 },      // Up to 40 hours
+    { limit: 120, rate: 0.3 },     // Up to 120 hours (40 + 80)
+    { limit: Infinity, rate: 0.1 }  // Above 120 hours
   ];
 
   for (const tier of tiers) {
@@ -98,8 +98,8 @@ function calculateFundraisingPointsIncremental(amount, cumulativeTotalBefore) {
 
   const tiers = [
     { limit: 2000, rate: 1 / 100 },    // Up to $2,000
-    { limit: 10000, rate: 1 / 200 },   // Up to $10,000
-    { limit: Infinity, rate: 1 / 500 }  // Above $10,000
+    { limit: 8000, rate: 1 / 300 },   // Up to $8,000 (2000 + 6000)
+    { limit: Infinity, rate: 1 / 600 }  // Above $8,000
   ];
 
   for (const tier of tiers) {
