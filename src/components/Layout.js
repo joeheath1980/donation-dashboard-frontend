@@ -12,7 +12,13 @@ function Layout({ children }) {
   const { logout, user } = useAuth();
   
   const handleLogoClick = () => {
-    navigate('/profile');
+    if (user?.isBusiness) {
+      navigate('/business-dashboard');
+    } else if (user?.isCharity) {
+      navigate('/charity-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
   };
   
   const handleLogout = () => {
@@ -36,7 +42,12 @@ function Layout({ children }) {
           ☰
         </button>
         <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
-          <NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Dashboard</NavLink>
+          <NavLink 
+            to={user?.isBusiness ? "/business-dashboard" : user?.isCharity ? "/charity-dashboard" : "/dashboard"} 
+            className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+          >
+            Dashboard
+          </NavLink>
           <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
           {!user?.isBusiness && (
             <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
