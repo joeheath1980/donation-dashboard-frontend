@@ -5,6 +5,8 @@
   background-color: var(--background-light, #f9fafb);
   border-radius: 16px;
   margin-top: 20px;
+  position: relative;
+  overflow: visible;
 }
 
 .header {
@@ -36,11 +38,10 @@
 }
 
 .impactScoreContainer {
-  margin-bottom: 50px;
-  overflow: hidden;
+  margin: 0 0 50px 0;
   position: relative;
   width: 100%;
-  contain: layout style paint;
+  z-index: 1;
 }
 
 /* Grid Layout for Perks */

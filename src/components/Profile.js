@@ -214,13 +214,15 @@ function Profile() {
   return (
     <div className={styles.profileBackground}>
       <div className={styles.profileContainer}>
-        <PersonalImpactScore
-          impactScore={impactScore}
-          scoreChange={scoreChange}
-          arrow={arrow}
-          tier={tier}
-          pointsToNextTier={pointsToNextTier}
-        />
+        <div className={styles.impactScoreWrapper}>
+          <PersonalImpactScore
+            impactScore={impactScore}
+            scoreChange={scoreChange}
+            arrow={arrow}
+            tier={tier}
+            pointsToNextTier={pointsToNextTier}
+          />
+        </div>
         
         <ScrollableImpactSection 
           impactScore={impactScore}
