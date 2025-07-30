@@ -1,13 +1,16 @@
 /* Main container */
 .mainContainer {
   width: 100%;
-  background-color: white;
+  background-color: #f5f5f5;
   border-radius: 12px;
   padding: 2.5rem 3.5rem 2.5rem 4.5rem; /* Increased left padding from 2rem to 4.5rem */
   margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  position: relative;
+  contain: layout style paint;
+  clear: both;
 }
 
 /* Content row - circle and header */
@@ -16,6 +19,15 @@
   align-items: center;
   margin-bottom: 2rem;
   justify-content: center; /* Added to center content with slight right bias */
+  position: relative;
+  z-index: 1;
+}
+
+/* Clearfix for container */
+.mainContainer::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 .circleColumn {
@@ -106,7 +118,7 @@
   transform: translateY(20px);
   opacity: 0;
   transition: transform 0.6s ease-out 0.4s, opacity 0.6s ease-out 0.4s;
-  margin-right: -2rem; /* Added to keep button aligned with the balanced content above */
+  margin-right: 0; /* Removed negative margin to prevent overflow */
 }
 
 .buttonRow.animate {
@@ -194,6 +206,8 @@
   height: 300px;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
   transition: transform 0.3s ease;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .circularProgressBar:hover {
@@ -266,6 +280,8 @@
   opacity: 0;
   transform: translateY(5px);
   transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .circleTooltip {
