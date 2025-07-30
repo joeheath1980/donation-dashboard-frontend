@@ -9,7 +9,7 @@ import './NavReset.css';
 function Layout({ children }) {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   
   const handleLogoClick = () => {
     navigate('/profile');
@@ -38,7 +38,9 @@ function Layout({ children }) {
         <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Dashboard</NavLink>
           <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
-          <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
+          {!user?.isBusiness && (
+            <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
+          )}
           <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
           <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
           <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
