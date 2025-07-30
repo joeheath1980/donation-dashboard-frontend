@@ -39,7 +39,7 @@ Use the automated deployment script:
 ### Manual Deploy
 See the detailed deployment guide at `docs/deployment/FRONTEND_DEPLOYMENT_GUIDE.md`
 
-**Important**: The build files must be deployed to `/var/www/donation-dashboard/build` on the server, NOT `/home/ubuntu/build`.
+**Important**: The build files must be deployed to `/var/www/donation-dashboard/` on the server, NOT `/var/www/donation-dashboard/build/`.
 
 ## Available Scripts
 
