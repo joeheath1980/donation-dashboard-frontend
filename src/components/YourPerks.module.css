@@ -1,12 +1,11 @@
 /* Perks Container - Improved Layout */
 .perksContainer {
   width: 100%;
-  padding: 32px;
+  padding: 48px 32px;
   background-color: var(--background-light, #f9fafb);
   border-radius: 16px;
   margin-top: 20px;
   position: relative;
-  overflow: visible;
 }
 
 .header {
@@ -38,10 +37,12 @@
 }
 
 .impactScoreContainer {
-  margin: 0 0 50px 0;
+  margin: 2rem 0 3rem 0;
   position: relative;
   width: 100%;
-  z-index: 1;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Grid Layout for Perks */
