@@ -5,6 +5,7 @@ import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactCo
 import { FaChartBar } from 'react-icons/fa';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
+import './ImpactVisualization.css';
 
 // Global chart instances tracking
 if (!window.__chartInstances) {
@@ -19,11 +20,17 @@ const TIME_PERIODS = {
 };
 
 const COLORS = {
-  REGULAR_DONATION: '#5ecfb6',
-  ONE_OFF_DONATION: '#2d8f7b',
-  FUNDRAISING_CAMPAIGN: '#9370db',
-  VOLUNTEER: '#ff7f50',
-  DENSE: '#ff7f50'
+  REGULAR_DONATION: 'linear-gradient(135deg, #5ecfb6 0%, #4ebfa6 100%)',
+  ONE_OFF_DONATION: 'linear-gradient(135deg, #2d8f7b 0%, #1d7f6b 100%)',
+  FUNDRAISING_CAMPAIGN: 'linear-gradient(135deg, #9370db 0%, #8360cb 100%)',
+  VOLUNTEER: 'linear-gradient(135deg, #ff7f50 0%, #ef6f40 100%)',
+  DENSE: 'linear-gradient(135deg, #ff7f50 0%, #ef6f40 100%)',
+  // Simple colors for Chart.js compatibility
+  REGULAR_DONATION_SIMPLE: '#5ecfb6',
+  ONE_OFF_DONATION_SIMPLE: '#2d8f7b',
+  FUNDRAISING_CAMPAIGN_SIMPLE: '#9370db',
+  VOLUNTEER_SIMPLE: '#ff7f50',
+  DENSE_SIMPLE: '#ff7f50'
 };
 
 function calculateDonationPointsIncremental(amount, cumulativeTotalBefore, frequency) {
@@ -505,9 +512,16 @@ function ImpactVisualization({ hideTitle = false }) {
       stepSize = yAxisMax / 5;
     }
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, '#5ecfb6');
-    gradient.addColorStop(1, '#2d8f7b');
+    // Create multiple gradients for enhanced visual effect
+    const lineGradient = ctx.createLinearGradient(0, 0, chartRef.current.width, 0);
+    lineGradient.addColorStop(0, 'rgba(94, 207, 182, 0.6)');
+    lineGradient.addColorStop(0.5, '#5ecfb6');
+    lineGradient.addColorStop(1, '#2d8f7b');
+    
+    const fillGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    fillGradient.addColorStop(0, 'rgba(94, 207, 182, 0.3)');
+    fillGradient.addColorStop(0.5, 'rgba(94, 207, 182, 0.1)');
+    fillGradient.addColorStop(1, 'rgba(94, 207, 182, 0.01)');
 
     // Double-check the canvas is still valid before creating chart
     if (!chartRef.current || !document.body.contains(chartRef.current)) {
@@ -541,36 +555,90 @@ function ImpactVisualization({ hideTitle = false }) {
         datasets: [{
           label: 'Personal Impact Score',
           data: dataPoints.map(point => point.y),
-          borderColor: gradient,
-          backgroundColor: 'rgba(94, 207, 182, 0.1)',
-          borderWidth: 3,
-          tension: 0.1,
+          borderColor: lineGradient,
+          backgroundColor: fillGradient,
+          borderWidth: function(context) {
+            const index = context.dataIndex;
+            const total = context.dataset.data.length;
+            // Progressive line thickness from 2px to 4px
+            return 2 + (index / total) * 2;
+          },
+          tension: 0.4,
           fill: true,
+          segment: {
+            borderColor: function(context) {
+              // Create gradient effect along the line
+              const index = context.p1DataIndex;
+              const total = dataPoints.length;
+              const progress = index / total;
+              const r = Math.round(45 + (progress * 49));  // 45-94
+              const g = Math.round(143 + (progress * 64)); // 143-207
+              const b = Math.round(123 + (progress * 59)); // 123-182
+              return `rgb(${r}, ${g}, ${b})`;
+            }
+          },
           pointBackgroundColor: function(context) {
             const point = dataPoints[context.dataIndex];
             if (point.isDense) {
-              return COLORS.DENSE;
+              return COLORS.DENSE_SIMPLE;
             }
             const activity = point.activities[0];
             switch (activity.type) {
-              case 'donation': return COLORS.REGULAR_DONATION;
-              case 'oneOff': return COLORS.ONE_OFF_DONATION;
-              case 'fundraisingCampaign': return COLORS.FUNDRAISING_CAMPAIGN;
-              case 'volunteer': return COLORS.VOLUNTEER;
-              default: return COLORS.REGULAR_DONATION;
+              case 'donation': return COLORS.REGULAR_DONATION_SIMPLE;
+              case 'oneOff': return COLORS.ONE_OFF_DONATION_SIMPLE;
+              case 'fundraisingCampaign': return COLORS.FUNDRAISING_CAMPAIGN_SIMPLE;
+              case 'volunteer': return COLORS.VOLUNTEER_SIMPLE;
+              default: return COLORS.REGULAR_DONATION_SIMPLE;
             }
           },
+          pointBorderColor: function(context) {
+            return 'rgba(255, 255, 255, 0.8)';
+          },
+          pointBorderWidth: 2,
+          pointHoverBorderWidth: 3,
           pointRadius: function(context) {
             const point = dataPoints[context.dataIndex];
-            return point.isDense ? 8 : 6;
+            // Milestone points are larger
+            if (point.isDense) return 10;
+            // Special activities get medium size
+            const activity = point.activities[0];
+            if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
+              return 8;
+            }
+            return 6;
           },
           pointHoverRadius: function(context) {
             const point = dataPoints[context.dataIndex];
-            return point.isDense ? 10 : 8;
+            if (point.isDense) return 12;
+            const activity = point.activities[0];
+            if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
+              return 10;
+            }
+            return 8;
+          },
+          pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
+          pointHoverBackgroundColor: function(context) {
+            const point = dataPoints[context.dataIndex];
+            if (point.isDense) {
+              return '#ff6b3d';
+            }
+            const activity = point.activities[0];
+            switch (activity.type) {
+              case 'donation': return '#4ebfa6';
+              case 'oneOff': return '#1d7f6b';
+              case 'fundraisingCampaign': return '#8360cb';
+              case 'volunteer': return '#ef6f40';
+              default: return '#4ebfa6';
+            }
           },
           pointStyle: function(context) {
             const point = dataPoints[context.dataIndex];
-            return point.isDense ? 'rectRot' : 'circle';
+            if (point.isDense) return 'rectRot';
+            const activity = point.activities[0];
+            // Different shapes for different milestone types
+            if (activity.type === 'fundraisingCampaign') return 'triangle';
+            if (activity.type === 'volunteer') return 'rect';
+            return 'circle';
           }
         }]
       },
@@ -580,9 +648,30 @@ function ImpactVisualization({ hideTitle = false }) {
         animation: {
           duration: 0
         },
+        layout: {
+          padding: {
+            left: 30,
+            right: 20,
+            top: 10,
+            bottom: 10
+          }
+        },
         plugins: {
           legend: {
             display: false
+          },
+          crosshair: {
+            line: {
+              color: 'rgba(94, 207, 182, 0.3)',
+              width: 1,
+              dashPattern: [5, 5]
+            },
+            sync: {
+              enabled: false
+            },
+            zoom: {
+              enabled: false
+            }
           },
           tooltip: {
             enabled: false,
@@ -624,7 +713,7 @@ function ImpactVisualization({ hideTitle = false }) {
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Points Earned:</span>
-                    <span class="${styles.tooltipValue}">${activity.pointsEarned.toFixed(2)}</span>
+                    <span class="${styles.tooltipValue}">+${activity.pointsEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
 
@@ -638,7 +727,7 @@ function ImpactVisualization({ hideTitle = false }) {
                       ${activitiesHtml}
                       <div class="${styles.tooltipRow} ${styles.totalScore}">
                         <span class="${styles.tooltipLabel}">Total Impact Score:</span>
-                        <span class="${styles.tooltipValue}">${dataPoint.y.toFixed(2)}</span>
+                        <span class="${styles.tooltipValue}">${dataPoint.y.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </div>
@@ -676,7 +765,21 @@ function ImpactVisualization({ hideTitle = false }) {
               maxRotation: 45,
               minRotation: 45,
               autoSkip: true,
-              maxTicksLimit: 10
+              maxTicksLimit: 10,
+              padding: 10,
+              font: {
+                weight: '500',
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              },
+              callback: function(value, index) {
+                const date = new Date(dataPoints[index].x);
+                const label = value;
+                // Add year markers for January or first point
+                if (date.getMonth() === 0 || index === 0) {
+                  return [label, `(${date.getFullYear()})`];
+                }
+                return label;
+              }
             }
           },
           y: {
@@ -686,21 +789,55 @@ function ImpactVisualization({ hideTitle = false }) {
             min: 0,
             max: yAxisMax,
             grid: {
-              color: 'rgba(94, 207, 182, 0.1)'
+              color: 'rgba(94, 207, 182, 0.1)',
+              drawBorder: false
             },
             ticks: {
               color: '#2d8f7b',
-              padding: 5,
+              padding: 15,
               stepSize: stepSize,
+              font: {
+                weight: '600',
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              },
               callback: function(value) {
-                return value;
+                return value.toLocaleString('en-US');
               }
-            }
+            },
+            position: 'left',
+            offset: true
           }
         },
         hover: {
           mode: 'nearest',
-          intersect: true
+          intersect: true,
+          animationDuration: 200
+        },
+        onHover: function(event, activeElements) {
+          chartRef.current.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+          
+          // Add vertical guide line
+          if (activeElements.length > 0) {
+            const activePoint = activeElements[0];
+            const ctx = newChart.ctx;
+            const x = activePoint.element.x;
+            const topY = newChart.scales.y.top;
+            const bottomY = newChart.scales.y.bottom;
+            
+            // Clear previous drawings
+            newChart.render();
+            
+            // Draw vertical line
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x, topY);
+            ctx.lineTo(x, bottomY);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(94, 207, 182, 0.3)';
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.restore();
+          }
         }
       }
     });
@@ -815,26 +952,46 @@ function ImpactVisualization({ hideTitle = false }) {
       )}
       <div className={styles.chartContainer}>
         <canvas ref={chartRef} />
+        {/* Progress indicator */}
+        {dataPoints.length > 0 && (
+          <div className={styles.progressIndicator}>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill} 
+                style={{ 
+                  width: `${Math.min((impactScore / 90) * 100, 100)}%`,
+                  background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min((impactScore / 90) * 100, 100)}%)`
+                }}
+              />
+            </div>
+            <div className={styles.progressText}>
+              {impactScore < 25 ? 'Keep going! You\'re making an impact' :
+               impactScore < 50 ? 'Great progress! Your impact is growing' :
+               impactScore < 75 ? 'Amazing! You\'re making a significant difference' :
+               'Incredible! You\'re a champion for change'}
+            </div>
+          </div>
+        )}
       </div>
       <div className={styles.legend}>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ backgroundColor: COLORS.REGULAR_DONATION }}></span>
+          <span className={styles.legendDot} style={{ background: COLORS.REGULAR_DONATION }}></span>
           <span>Regular Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ backgroundColor: COLORS.ONE_OFF_DONATION }}></span>
+          <span className={styles.legendDot} style={{ background: COLORS.ONE_OFF_DONATION }}></span>
           <span>One-off Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ backgroundColor: COLORS.FUNDRAISING_CAMPAIGN }}></span>
+          <span className={styles.legendDot} style={{ background: COLORS.FUNDRAISING_CAMPAIGN }}></span>
           <span>Fundraising Campaigns</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ backgroundColor: COLORS.VOLUNTEER }}></span>
+          <span className={styles.legendDot} style={{ background: COLORS.VOLUNTEER }}></span>
           <span>Volunteer Hours</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ backgroundColor: COLORS.DENSE, transform: 'rotate(45deg)' }}></span>
+          <span className={styles.legendDot} style={{ background: COLORS.DENSE, transform: 'rotate(45deg)' }}></span>
           <span>Multiple Activities</span>
         </div>
       </div>

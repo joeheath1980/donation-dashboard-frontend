@@ -45,27 +45,36 @@
 }
 
 .periodSelect {
-  padding: 8px 12px;
-  border: 2px solid #5ecfb6;
-  border-radius: 6px;
-  background-color: white;
-  color: #2d8f7b;
+  padding: 10px 16px;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #5ecfb6 0%, #2d8f7b 100%);
+  color: white;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   position: relative;
   z-index: 3;
+  box-shadow: 0 2px 8px rgba(94, 207, 182, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .periodSelect:hover {
-  border-color: #2d8f7b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(94, 207, 182, 0.4);
+  background: linear-gradient(135deg, #6ddfc6 0%, #3d9f8b 100%);
 }
 
 .periodSelect:focus {
-  border-color: #2d8f7b;
-  box-shadow: 0 0 0 2px rgba(45, 143, 123, 0.1);
+  box-shadow: 0 0 0 3px rgba(94, 207, 182, 0.3), 0 4px 16px rgba(94, 207, 182, 0.4);
+}
+
+.periodSelect:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(94, 207, 182, 0.3);
 }
 
 .chartContainer {
@@ -74,12 +83,24 @@
   min-height: 400px;
   width: 100%;
   margin-bottom: 20px;
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 3px rgba(255, 255, 255, 0.5);
   z-index: 2;
   isolation: isolate;
+  overflow: hidden;
+}
+
+.chartContainer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(94, 207, 182, 0.03) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .chartContainer canvas {
@@ -91,14 +112,15 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   margin-top: 20px;
   justify-content: center;
-  padding: 15px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(94, 207, 182, 0.2);
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 250, 250, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(94, 207, 182, 0.15);
   position: relative;
   z-index: 2;
 }
@@ -125,17 +147,37 @@
 }
 
 .legendDot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 12px;
   display: inline-block;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.legendDot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.legendItem:hover .legendDot::after {
+  width: 100%;
+  height: 100%;
 }
 
 .legendDot[style*="rotate"] {
-  border-radius: 2px;
+  border-radius: 3px;
   transform-origin: center;
 }
 
@@ -148,16 +190,29 @@
 
 /* Tooltip styles */
 .tooltipContent {
-  background-color: white;
-  border: 1px solid #5ecfb6;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-  min-width: 250px;
-  max-width: 320px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 250, 0.98) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(94, 207, 182, 0.3);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-width: 280px;
+  max-width: 360px;
   position: relative;
   z-index: 1000;
+  animation: tooltipFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tooltipHeader {
@@ -209,8 +264,9 @@
 }
 
 .tooltipValue {
-  font-weight: 400;
+  font-weight: 500;
   color: #333;
+  font-variant-numeric: tabular-nums;
 }
 
 .totalScore {
@@ -223,6 +279,12 @@
 .totalScore .tooltipValue {
   font-weight: 700;
   color: #2d8f7b;
+  font-size: 16px;
+}
+
+.totalScore .tooltipValue {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
 }
 
 /* Graph styles */
@@ -259,6 +321,70 @@
 
 :global(.recharts-active-dot) {
   fill: #2d8f7b;
+}
+
+/* Progress indicator styles */
+.progressIndicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  z-index: 10;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(94, 207, 182, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2d8f7b;
+  opacity: 0.8;
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
