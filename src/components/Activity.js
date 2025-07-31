@@ -101,6 +101,8 @@ function Activity() {
   const [progress, setProgress] = useState(0);
   const [showEmailForwarding, setShowEmailForwarding] = useState(false);
   const [showForwardingStatus, setShowForwardingStatus] = useState(false);
+  const [hasGmailAuth, setHasGmailAuth] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(false);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -254,6 +256,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     auditLocalStorage();
   }, [clearOtherUsersData, auditLocalStorage]);
 
+  useEffect(() => {
+    checkGmailAuth();
+  }, [checkGmailAuth]);
+
   const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');
     setIsClearing(true);
@@ -282,6 +288,41 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     console.error(message, error);
     setError(`${message}: ${error.message}`);
   }, []);
+
+  const checkGmailAuth = useCallback(async () => {
+    setCheckingAuth(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setHasGmailAuth(false);
+        return false;
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-auth-status`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setHasGmailAuth(data.hasGmailAuth);
+        return data.hasGmailAuth;
+      }
+      
+      setHasGmailAuth(false);
+      return false;
+    } catch (error) {
+      console.error('Error checking Gmail auth status:', error);
+      setHasGmailAuth(false);
+      return false;
+    } finally {
+      setCheckingAuth(false);
+    }
+  }, []);
   
   const handleSearchEmails = useCallback(async () => {
     setLoading(true);
@@ -295,7 +336,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -303,15 +344,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ source: 'gmail' })
+          }
         }
       );
       
       if (!response.ok) {
         const errorData = await response.json();
-        if (errorData.error === 'Google authentication required' && errorData.action === 'google_auth') {
-          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/auth/google`;
+        if (response.status === 401 && errorData.action === 'google_auth') {
+          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
         }
@@ -774,11 +814,20 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         <div className={styles.buttonContainer}>
           <button
             id="start-search-btn"
-            onClick={() => handleSearchEmails()}  // Change to use an arrow function
-            disabled={loading || isClearing}
+            onClick={async () => {
+              if (!hasGmailAuth) {
+                const hasAuth = await checkGmailAuth();
+                if (!hasAuth) {
+                  window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+                  return;
+                }
+              }
+              handleSearchEmails();
+            }}
+            disabled={loading || isClearing || checkingAuth}
             className={`${styles.scrapeButton} button`}
           >
-            {loading ? 'Searching...' : 'Search Gmail for Donations'}
+            {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail for Donations' : 'Connect Gmail & Search'}
           </button>
           <button
             onClick={handleSearchOutlookEmails}
