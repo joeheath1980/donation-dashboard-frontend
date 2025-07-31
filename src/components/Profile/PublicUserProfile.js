@@ -141,26 +141,13 @@ const PublicUserProfile = () => {
 
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
-  // Debug: Log the actual data structure
-  console.log('Profile data structure:', {
-    profile,
-    user,
-    stats,
-    impactScore: profile?.impactScore,
-    userImpactScore: user?.impactScore,
-    profileTier: profile?.tier,
-    userTier: user?.tier,
-    profilePointsToNextTier: profile?.pointsToNextTier,
-    userPointsToNextTier: user?.pointsToNextTier
-  });
-  
   // Ensure user object has required properties
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
-    tier: profile?.tier || user?.tier || 'Giver',
+    tier: user?.tier || 'Giver',
     joinDate: user?.joinDate || new Date().toISOString(),
     avatar: user?.avatar,
-    publicScore: profile?.impactScore !== undefined ? profile.impactScore : (user?.publicScore !== undefined ? user.publicScore : (user?.impactScore !== undefined ? user.impactScore : 0)),
+    publicScore: user?.impactScore !== undefined ? user.impactScore : 0,
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
     ...user
@@ -176,9 +163,21 @@ const PublicUserProfile = () => {
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
 
+  // Calculate pointsToNextTier based on tier thresholds
+  const tierThresholds = {
+    Giver: 100,
+    Altruist: 500,
+    Philanthropist: 1000,
+    Champion: 5000,
+    Visionary: 10000
+  };
+  
+  const currentTierThreshold = tierThresholds[safeUser.tier] || 0;
+  const nextTier = Object.entries(tierThresholds).find(([tier, threshold]) => threshold > currentTierThreshold);
+  const pointsToNextTier = nextTier ? nextTier[1] - safeUser.publicScore : 0;
+  
   // Use actual data from profile
   const scoreChange = profile?.scoreChange || 0;
-  const pointsToNextTier = profile?.pointsToNextTier || user?.pointsToNextTier || 1000;
   
   // Check if viewing own profile
   const isOwnProfile = currentUser && currentUser._id === userId;
