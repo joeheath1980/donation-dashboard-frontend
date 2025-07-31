@@ -38,6 +38,7 @@ import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -51,6 +52,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 const PublicUserProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -161,16 +163,22 @@ const PublicUserProfile = () => {
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
 
-  // Calculate score change (for public profile we don't have last year's score)
-  const scoreChange = 0;
-  const arrow = '';
-  const pointsToNextTier = 1000; // Default value for public profile
+  // Use actual data from profile
+  const scoreChange = profile?.scoreChange || 0;
+  const pointsToNextTier = profile?.pointsToNextTier || profile?.user?.pointsToNextTier || 1000;
+  
+  // Check if viewing own profile
+  const isOwnProfile = currentUser && currentUser._id === userId;
 
   const getDisplayedFollowedCharities = () => {
     return showAllFollowedCharities ? charityPortfolio : (charityPortfolio || []).slice(0, 3);
   };
 
   const toggleFollowedCharities = () => setShowAllFollowedCharities(!showAllFollowedCharities);
+  
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
 
   return (
     <>
@@ -243,6 +251,8 @@ const PublicUserProfile = () => {
               scoreChange={scoreChange}
               tier={safeUser.tier}
               pointsToNextTier={pointsToNextTier}
+              isPublicProfile={true}
+              onBackToDashboard={isOwnProfile ? handleBackToDashboard : null}
             />
           </div>
           
