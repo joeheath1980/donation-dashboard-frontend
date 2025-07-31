@@ -11,12 +11,14 @@ function Layout({ children }) {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   
-  // Check if user is a business
-  const userType = localStorage.getItem('userType');
-  const isBusiness = userType === 'business' || user?.isBusiness;
-  
   const handleLogoClick = () => {
-    navigate('/profile');
+    if (user?.isBusiness) {
+      navigate('/business-dashboard');
+    } else if (user?.isCharity) {
+      navigate('/charity-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
   };
   
   const handleLogout = () => {
@@ -40,24 +42,19 @@ function Layout({ children }) {
           ☰
         </button>
         <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
-          {/* Only show these navigation items for business users */}
-          {isBusiness ? (
-            <>
-              <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
-              <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
-              <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
-              <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
-            </>
-          ) : (
-            <>
-              <NavLink to="/dashboard" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Dashboard</NavLink>
-              <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
-              <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
-              <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
-              <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
-              <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
-            </>
+          <NavLink 
+            to={user?.isBusiness ? "/business-dashboard" : user?.isCharity ? "/charity-dashboard" : "/dashboard"} 
+            className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+          >
+            Dashboard
+          </NavLink>
+          <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
+          {!user?.isBusiness && (
+            <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
           )}
+          <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
+          <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
+          <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>
       </nav>
       <div className={layoutStyles.content}>
