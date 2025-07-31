@@ -140,10 +140,8 @@ const PublicUserProfile = () => {
   };
   
   const safeStats = {
-    totalDonations: 0,
     charitiesSupported: 0,
     currentStreak: 0,
-    matchesReceived: 0,
     ...stats
   };
   
@@ -267,15 +265,6 @@ const PublicUserProfile = () => {
             <div className={styles.statLabel}>Impact Score</div>
           </div>
 
-          {safeStats.totalDonations > 0 && (
-            <div className={styles.statCard}>
-              <FaHeart className={styles.statIcon} />
-              <div className={styles.statValue}>
-                {safeStats.totalDonations} <span>donations</span>
-              </div>
-              <div className={styles.statLabel}>Total Donations</div>
-            </div>
-          )}
 
           <div className={styles.statCard}>
             <FaGlobeAfrica className={styles.statIcon} />
@@ -341,15 +330,6 @@ const PublicUserProfile = () => {
                     <p>Ranked in top 10% of donors</p>
                   </div>
                 </div>
-                {safeStats.matchesReceived > 0 && (
-                  <div className={styles.achievement}>
-                    <FaHeart className={styles.achievementIcon} />
-                    <div>
-                      <h4>Matched Donations</h4>
-                      <p>{safeStats.matchesReceived} matches received</p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -411,10 +391,11 @@ const PublicUserProfile = () => {
             <div className={styles.activitySection}>
               {recentActivity && recentActivity.length > 0 ? (
                 <div className={styles.activityFeed}>
-                  {recentActivity.map((item, index) => (
+                  {recentActivity
+                    .filter(item => item.type !== 'donation')
+                    .map((item, index) => (
                     <div key={index} className={styles.activityItem}>
                       <div className={styles.activityIcon}>
-                        {item.type === 'donation' && <FaHeart />}
                         {item.type === 'badge' && <FaMedal />}
                         {item.type === 'milestone' && <FaTrophy />}
                       </div>
