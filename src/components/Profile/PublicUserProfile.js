@@ -39,6 +39,7 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
 import { useAuth } from '../../contexts/AuthContext';
+import { calculateComplexImpactScore } from '../../contexts/ImpactContext';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -85,6 +86,14 @@ const PublicUserProfile = () => {
       console.log('Fetching profile for userId:', userId);
       const data = await profileService.getUserPublicProfile(userId);
       console.log('Profile data received:', data);
+      console.log('Full profile details:', {
+        user: data?.user,
+        stats: data?.stats,
+        privacy: data?.privacy,
+        impactScore: data?.impactScore,
+        tier: data?.tier,
+        pointsToNextTier: data?.pointsToNextTier
+      });
       setProfile(data);
     } catch (err) {
       console.error('Profile fetch error in component:', err);
@@ -141,13 +150,72 @@ const PublicUserProfile = () => {
 
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
-  // Ensure user object has required properties
+  // Debug: Check all available score and tier fields
+  console.log('Checking all score/tier fields:', {
+    profileLevel: {
+      impactScore: profile?.impactScore,
+      tier: profile?.tier,
+      actualImpactScore: profile?.actualImpactScore,
+      publicImpactScore: profile?.publicImpactScore
+    },
+    userLevel: {
+      impactScore: user?.impactScore,
+      tier: user?.tier,
+      actualImpactScore: user?.actualImpactScore,
+      publicImpactScore: user?.publicImpactScore
+    },
+    statsLevel: {
+      impactScore: stats?.impactScore,
+      totalScore: stats?.totalScore
+    },
+    activities: {
+      donations: profile?.donations,
+      oneOffContributions: profile?.oneOffContributions,
+      volunteerActivities: profile?.volunteerActivities,
+      fundraisingCampaigns: profile?.fundraisingCampaigns
+    }
+  });
+  
+  // Calculate the actual score based on user activities if available
+  let actualScore = 0;
+  let actualTier = 'Giver';
+  
+  // Try to calculate score from activities if available
+  if (profile?.donations || profile?.oneOffContributions || profile?.volunteerActivities || profile?.fundraisingCampaigns) {
+    const userData = {
+      regularDonations: profile?.donations || [],
+      oneOffDonations: profile?.oneOffContributions || [],
+      volunteeringActivities: profile?.volunteerActivities || [],
+      fundraisingCampaigns: profile?.fundraisingCampaigns || []
+    };
+    
+    const calculatedScore = calculateComplexImpactScore(userData);
+    actualScore = calculatedScore.totalScore;
+    console.log('Calculated score from activities:', actualScore);
+    
+    // Determine tier based on calculated score
+    if (actualScore >= 90) actualTier = 'Visionary';
+    else if (actualScore >= 70) actualTier = 'Champion';
+    else if (actualScore >= 50) actualTier = 'Philanthropist';
+    else if (actualScore >= 30) actualTier = 'Altruist';
+    else actualTier = 'Giver';
+  } else {
+    // Fallback to API provided values
+    actualScore = profile?.impactScore || profile?.actualImpactScore || 
+                 stats?.impactScore || stats?.totalScore ||
+                 user?.actualImpactScore || user?.impactScore || 0;
+                 
+    actualTier = profile?.tier || stats?.tier || user?.tier || 'Giver';
+  }
+  
+  console.log('Final score and tier:', { actualScore, actualTier });
+  
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
-    tier: user?.tier || 'Giver',
+    tier: actualTier,
     joinDate: user?.joinDate || new Date().toISOString(),
     avatar: user?.avatar,
-    publicScore: user?.impactScore !== undefined ? user.impactScore : 0,
+    publicScore: actualScore,
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
     ...user
@@ -163,18 +231,12 @@ const PublicUserProfile = () => {
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
 
-  // Calculate pointsToNextTier based on tier thresholds
-  const tierThresholds = {
-    Giver: 100,
-    Altruist: 500,
-    Philanthropist: 1000,
-    Champion: 5000,
-    Visionary: 10000
-  };
-  
-  const currentTierThreshold = tierThresholds[safeUser.tier] || 0;
-  const nextTier = Object.entries(tierThresholds).find(([tier, threshold]) => threshold > currentTierThreshold);
-  const pointsToNextTier = nextTier ? nextTier[1] - safeUser.publicScore : 0;
+  // Calculate pointsToNextTier based on actual score
+  let pointsToNextTier = 0;
+  if (actualScore < 30) pointsToNextTier = 30 - actualScore;
+  else if (actualScore < 50) pointsToNextTier = 50 - actualScore;
+  else if (actualScore < 70) pointsToNextTier = 70 - actualScore;
+  else if (actualScore < 90) pointsToNextTier = 90 - actualScore;
   
   // Use actual data from profile
   const scoreChange = profile?.scoreChange || 0;
