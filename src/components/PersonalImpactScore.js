@@ -114,7 +114,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   );
 };
 
-const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier }) => {
+const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard }) => {
   const { user } = useAuth();
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
   const [animate, setAnimate] = useState(false);
@@ -151,16 +151,24 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier 
         </div>
       </div>
       
-      <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>
-        <Link to="/activity" className={styles.discoverButton}>
-          Discover Your Contributions
-        </Link>
-        {user && user._id && (
-          <Link to={`/profile/${user._id}`} className={styles.profileButton}>
-            <FaUserCircle /> View Public Profile
+      {!isPublicProfile ? (
+        <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>
+          <Link to="/activity" className={styles.discoverButton}>
+            Discover Your Contributions
           </Link>
-        )}
-      </div>
+          {user && user._id && (
+            <Link to={`/profile/${user._id}`} className={styles.profileButton}>
+              <FaUserCircle /> View Public Profile
+            </Link>
+          )}
+        </div>
+      ) : onBackToDashboard ? (
+        <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>
+          <button onClick={onBackToDashboard} className={styles.discoverButton}>
+            Back to Dashboard
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };
