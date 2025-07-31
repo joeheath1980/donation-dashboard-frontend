@@ -141,13 +141,26 @@ const PublicUserProfile = () => {
 
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
+  // Debug: Log the actual data structure
+  console.log('Profile data structure:', {
+    profile,
+    user,
+    stats,
+    impactScore: profile?.impactScore,
+    userImpactScore: user?.impactScore,
+    profileTier: profile?.tier,
+    userTier: user?.tier,
+    profilePointsToNextTier: profile?.pointsToNextTier,
+    userPointsToNextTier: user?.pointsToNextTier
+  });
+  
   // Ensure user object has required properties
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
-    tier: user?.tier || 'Giver',
+    tier: profile?.tier || user?.tier || 'Giver',
     joinDate: user?.joinDate || new Date().toISOString(),
     avatar: user?.avatar,
-    publicScore: user?.publicScore !== undefined ? user.publicScore : (user?.impactScore !== undefined ? user.impactScore : 0),
+    publicScore: profile?.impactScore !== undefined ? profile.impactScore : (user?.publicScore !== undefined ? user.publicScore : (user?.impactScore !== undefined ? user.impactScore : 0)),
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
     ...user
@@ -165,7 +178,7 @@ const PublicUserProfile = () => {
 
   // Use actual data from profile
   const scoreChange = profile?.scoreChange || 0;
-  const pointsToNextTier = profile?.pointsToNextTier || profile?.user?.pointsToNextTier || 1000;
+  const pointsToNextTier = profile?.pointsToNextTier || user?.pointsToNextTier || 1000;
   
   // Check if viewing own profile
   const isOwnProfile = currentUser && currentUser._id === userId;
