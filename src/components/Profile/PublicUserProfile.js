@@ -67,6 +67,18 @@ const PublicUserProfile = () => {
   const [mounted, setMounted] = useState(false);
   const [activeImpactSection, setActiveImpactSection] = useState(0);
   const [showAllFollowedCharities, setShowAllFollowedCharities] = useState(false);
+  
+  // Debug context on mount
+  useEffect(() => {
+    console.log('=== CONTEXT DEBUG ON MOUNT ===');
+    console.log('ImpactContext values:', {
+      contextImpactScore,
+      lastYearImpactScore,
+      contextTier,
+      contextPointsToNextTier,
+      hasContext: contextImpactScore !== undefined
+    });
+  }, [contextImpactScore, lastYearImpactScore, contextTier, contextPointsToNextTier]);
 
   const impactSections = [
     { title: 'Impact Journey', component: 'ImpactVisualization' },
@@ -82,6 +94,9 @@ const PublicUserProfile = () => {
 
   useEffect(() => {
     if (mounted) {
+      console.log('=== EFFECT TRIGGERED ===');
+      console.log('Mounted:', mounted);
+      console.log('UserId:', userId);
       fetchProfile();
     }
   }, [userId, mounted]);
@@ -89,10 +104,23 @@ const PublicUserProfile = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      console.log('Fetching profile for userId:', userId);
+      console.log('=== PUBLIC PROFILE DEBUG ===');
+      console.log('1. Fetching profile for userId:', userId);
+      console.log('2. Current user from auth:', currentUser);
+      console.log('3. Current user ID:', currentUser?._id);
+      console.log('4. Type of userId param:', typeof userId);
+      console.log('5. Type of currentUser._id:', typeof currentUser?._id);
+      console.log('6. Are they equal?', currentUser?._id === userId);
+      console.log('7. Context values:', {
+        contextImpactScore,
+        contextTier,
+        contextPointsToNextTier,
+        lastYearImpactScore
+      });
+      
       const data = await profileService.getUserPublicProfile(userId);
-      console.log('Profile data received:', data);
-      console.log('Full profile details:', {
+      console.log('8. Profile data received:', data);
+      console.log('9. Full profile details:', {
         user: data?.user,
         stats: data?.stats,
         privacy: data?.privacy,
@@ -157,33 +185,40 @@ const PublicUserProfile = () => {
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
   // Debug: Check all available score and tier fields
-  console.log('Checking all score/tier fields:', {
-    profileLevel: {
-      impactScore: profile?.impactScore,
-      tier: profile?.tier,
-      actualImpactScore: profile?.actualImpactScore,
-      publicImpactScore: profile?.publicImpactScore
-    },
-    userLevel: {
-      impactScore: user?.impactScore,
-      tier: user?.tier,
-      actualImpactScore: user?.actualImpactScore,
-      publicImpactScore: user?.publicImpactScore
-    },
-    statsLevel: {
-      impactScore: stats?.impactScore,
-      totalScore: stats?.totalScore
-    },
-    activities: {
-      donations: profile?.donations,
-      oneOffContributions: profile?.oneOffContributions,
-      volunteerActivities: profile?.volunteerActivities,
-      fundraisingCampaigns: profile?.fundraisingCampaigns
-    }
+  console.log('=== API DATA STRUCTURE ===');
+  console.log('Profile object:', profile);
+  console.log('User object:', user);
+  console.log('Stats object:', stats);
+  console.log('All score fields:', {
+    'profile.impactScore': profile?.impactScore,
+    'profile.actualImpactScore': profile?.actualImpactScore,
+    'profile.tier': profile?.tier,
+    'user.impactScore': user?.impactScore,
+    'user.actualImpactScore': user?.actualImpactScore,
+    'user.publicScore': user?.publicScore,
+    'user.tier': user?.tier,
+    'stats.impactScore': stats?.impactScore,
+    'stats.totalScore': stats?.totalScore,
+    'stats.tier': stats?.tier
   });
   
   // Check if viewing own profile
-  const isOwnProfile = currentUser && currentUser._id === userId;
+  console.log('=== PROFILE COMPARISON DEBUG ===');
+  console.log('currentUser:', currentUser);
+  console.log('currentUser._id:', currentUser?._id);
+  console.log('userId from params:', userId);
+  console.log('Type of currentUser._id:', typeof currentUser?._id);
+  console.log('Type of userId:', typeof userId);
+  
+  // Try multiple ways to check if it's own profile
+  const isOwnProfile = currentUser && (
+    currentUser._id === userId || 
+    currentUser.id === userId ||
+    currentUser._id?.toString() === userId ||
+    currentUser.id?.toString() === userId
+  );
+  
+  console.log('isOwnProfile result:', isOwnProfile);
   
   // Use context data for own profile, otherwise use API data
   let actualScore = 0;
@@ -191,13 +226,18 @@ const PublicUserProfile = () => {
   let scoreChange = 0;
   let pointsToNextTier = 0;
   
+  console.log('=== SCORE CALCULATION DEBUG ===');
+  console.log('Context Impact Score defined?', contextImpactScore !== undefined);
+  console.log('Context Impact Score value:', contextImpactScore);
+  console.log('Should use context?', isOwnProfile && contextImpactScore !== undefined);
+  
   if (isOwnProfile && contextImpactScore !== undefined) {
     // Use the authoritative data from ImpactContext for own profile
     actualScore = contextImpactScore;
     actualTier = contextTier;
     pointsToNextTier = contextPointsToNextTier;
     scoreChange = contextImpactScore - lastYearImpactScore;
-    console.log('Using context data for own profile:', { actualScore, actualTier, pointsToNextTier, scoreChange });
+    console.log('USING CONTEXT DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
   } else {
     // Fallback to API provided values for other profiles
     actualScore = profile?.impactScore || profile?.actualImpactScore || 
@@ -214,10 +254,15 @@ const PublicUserProfile = () => {
     else if (actualScore < 90) pointsToNextTier = 90 - actualScore;
     else pointsToNextTier = 0;
     
-    console.log('Using API data for public profile:', { actualScore, actualTier, pointsToNextTier, scoreChange });
+    console.log('USING API DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
+    console.log('Reason:', isOwnProfile ? 'Context score undefined' : 'Not own profile');
   }
   
-  console.log('Final score and tier:', { actualScore, actualTier, pointsToNextTier });
+  console.log('=== FINAL VALUES ===');
+  console.log('Final score:', actualScore);
+  console.log('Final tier:', actualTier);
+  console.log('Final pointsToNextTier:', pointsToNextTier);
+  console.log('Final scoreChange:', scoreChange);
   
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
@@ -317,6 +362,15 @@ const PublicUserProfile = () => {
 
           {/* Impact Score Section */}
           <div className={styles.impactScoreWrapper}>
+            {console.log('=== RENDERING PersonalImpactScore ===')}
+            {console.log('Props being passed:', {
+              impactScore: actualScore,
+              scoreChange,
+              tier: actualTier,
+              pointsToNextTier,
+              isPublicProfile: true,
+              isOwnProfile
+            })}
             <PersonalImpactScore
               impactScore={actualScore}
               scoreChange={scoreChange}
