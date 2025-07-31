@@ -735,11 +735,46 @@ function ImpactVisualization({ hideTitle = false }) {
               }
 
               const position = context.chart.canvas.getBoundingClientRect();
+              const chartContainer = chartRef.current.parentElement.getBoundingClientRect();
+              
+              // Calculate tooltip dimensions (estimate based on content)
+              const tooltipWidth = 320; // max-width from CSS
+              const tooltipHeight = 200; // estimated height
+              
+              // Calculate initial position
+              let left = position.left + window.pageXOffset + tooltipModel.caretX;
+              let top = position.top + window.pageYOffset + tooltipModel.caretY;
+              
+              // Adjust horizontal position to keep tooltip within chart bounds
+              const rightEdge = left + tooltipWidth;
+              const chartRightEdge = chartContainer.left + window.pageXOffset + chartContainer.width;
+              
+              if (rightEdge > chartRightEdge) {
+                // Position tooltip to the left of the cursor
+                left = left - tooltipWidth - 20;
+              }
+              
+              // Ensure tooltip doesn't go off the left edge
+              const chartLeftEdge = chartContainer.left + window.pageXOffset;
+              if (left < chartLeftEdge) {
+                left = chartLeftEdge + 10;
+              }
+              
+              // Adjust vertical position if needed
+              const bottomEdge = top + tooltipHeight;
+              const chartBottomEdge = chartContainer.top + window.pageYOffset + chartContainer.height;
+              
+              if (bottomEdge > chartBottomEdge) {
+                // Position tooltip above the cursor
+                top = top - tooltipHeight - 20;
+              }
+              
               tooltipEl.style.opacity = 1;
               tooltipEl.style.position = 'absolute';
-              tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-              tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+              tooltipEl.style.left = left + 'px';
+              tooltipEl.style.top = top + 'px';
               tooltipEl.style.pointerEvents = 'none';
+              tooltipEl.style.zIndex = '9999';
             }
           }
         },
