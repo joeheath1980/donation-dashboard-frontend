@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
@@ -39,7 +39,7 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
 import { useAuth } from '../../contexts/AuthContext';
-import { calculateComplexImpactScore } from '../../contexts/ImpactContext';
+import { ImpactContext } from '../../contexts/ImpactContext';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -54,6 +54,12 @@ const PublicUserProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const { 
+    impactScore: contextImpactScore,
+    lastYearImpactScore,
+    tier: contextTier,
+    pointsToNextTier: contextPointsToNextTier
+  } = useContext(ImpactContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -176,39 +182,42 @@ const PublicUserProfile = () => {
     }
   });
   
-  // Calculate the actual score based on user activities if available
+  // Check if viewing own profile
+  const isOwnProfile = currentUser && currentUser._id === userId;
+  
+  // Use context data for own profile, otherwise use API data
   let actualScore = 0;
   let actualTier = 'Giver';
+  let scoreChange = 0;
+  let pointsToNextTier = 0;
   
-  // Try to calculate score from activities if available
-  if (profile?.donations || profile?.oneOffContributions || profile?.volunteerActivities || profile?.fundraisingCampaigns) {
-    const userData = {
-      regularDonations: profile?.donations || [],
-      oneOffDonations: profile?.oneOffContributions || [],
-      volunteeringActivities: profile?.volunteerActivities || [],
-      fundraisingCampaigns: profile?.fundraisingCampaigns || []
-    };
-    
-    const calculatedScore = calculateComplexImpactScore(userData);
-    actualScore = calculatedScore.totalScore;
-    console.log('Calculated score from activities:', actualScore);
-    
-    // Determine tier based on calculated score
-    if (actualScore >= 90) actualTier = 'Visionary';
-    else if (actualScore >= 70) actualTier = 'Champion';
-    else if (actualScore >= 50) actualTier = 'Philanthropist';
-    else if (actualScore >= 30) actualTier = 'Altruist';
-    else actualTier = 'Giver';
+  if (isOwnProfile && contextImpactScore !== undefined) {
+    // Use the authoritative data from ImpactContext for own profile
+    actualScore = contextImpactScore;
+    actualTier = contextTier;
+    pointsToNextTier = contextPointsToNextTier;
+    scoreChange = contextImpactScore - lastYearImpactScore;
+    console.log('Using context data for own profile:', { actualScore, actualTier, pointsToNextTier, scoreChange });
   } else {
-    // Fallback to API provided values
+    // Fallback to API provided values for other profiles
     actualScore = profile?.impactScore || profile?.actualImpactScore || 
                  stats?.impactScore || stats?.totalScore ||
                  user?.actualImpactScore || user?.impactScore || 0;
                  
     actualTier = profile?.tier || stats?.tier || user?.tier || 'Giver';
+    scoreChange = profile?.scoreChange || 0;
+    
+    // Calculate pointsToNextTier based on actual score
+    if (actualScore < 30) pointsToNextTier = 30 - actualScore;
+    else if (actualScore < 50) pointsToNextTier = 50 - actualScore;
+    else if (actualScore < 70) pointsToNextTier = 70 - actualScore;
+    else if (actualScore < 90) pointsToNextTier = 90 - actualScore;
+    else pointsToNextTier = 0;
+    
+    console.log('Using API data for public profile:', { actualScore, actualTier, pointsToNextTier, scoreChange });
   }
   
-  console.log('Final score and tier:', { actualScore, actualTier });
+  console.log('Final score and tier:', { actualScore, actualTier, pointsToNextTier });
   
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
@@ -231,18 +240,6 @@ const PublicUserProfile = () => {
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
 
-  // Calculate pointsToNextTier based on actual score
-  let pointsToNextTier = 0;
-  if (actualScore < 30) pointsToNextTier = 30 - actualScore;
-  else if (actualScore < 50) pointsToNextTier = 50 - actualScore;
-  else if (actualScore < 70) pointsToNextTier = 70 - actualScore;
-  else if (actualScore < 90) pointsToNextTier = 90 - actualScore;
-  
-  // Use actual data from profile
-  const scoreChange = profile?.scoreChange || 0;
-  
-  // Check if viewing own profile
-  const isOwnProfile = currentUser && currentUser._id === userId;
 
   const getDisplayedFollowedCharities = () => {
     return showAllFollowedCharities ? charityPortfolio : (charityPortfolio || []).slice(0, 3);
@@ -321,9 +318,9 @@ const PublicUserProfile = () => {
           {/* Impact Score Section */}
           <div className={styles.impactScoreWrapper}>
             <PersonalImpactScore
-              impactScore={safeUser.publicScore !== 'Private' ? safeUser.publicScore : 0}
+              impactScore={actualScore}
               scoreChange={scoreChange}
-              tier={safeUser.tier}
+              tier={actualTier}
               pointsToNextTier={pointsToNextTier}
               isPublicProfile={true}
               onBackToDashboard={isOwnProfile ? handleBackToDashboard : null}
@@ -332,9 +329,9 @@ const PublicUserProfile = () => {
           
           {/* Scrollable Impact Section */}
           <ScrollableImpactSection 
-            impactScore={safeUser.publicScore !== 'Private' ? safeUser.publicScore : 0}
+            impactScore={actualScore}
             scoreDetails={null}
-            tier={safeUser.tier}
+            tier={actualTier}
             pointsToNextTier={pointsToNextTier}
             activeSection={activeImpactSection}
             setActiveSection={setActiveImpactSection}
