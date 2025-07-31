@@ -7,7 +7,7 @@ import './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
-import { EmailForwardingModal, ForwardingStatus } from './EmailForwarding';
+import { EmailForwardingModal } from './EmailForwarding';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -100,7 +100,9 @@ function Activity() {
   const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showEmailForwarding, setShowEmailForwarding] = useState(false);
-  const [showForwardingStatus, setShowForwardingStatus] = useState(false);
+  const [hasGmailAuth, setHasGmailAuth] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(false);
+  const [loadingForwarded, setLoadingForwarded] = useState(false);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -249,10 +251,120 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     });
   }, [currentUserId]);
 
+  const logError = useCallback((message, error) => {
+    console.error(message, error);
+    setError(`${message}: ${error.message}`);
+  }, []);
+
+  const checkGmailAuth = useCallback(async () => {
+    setCheckingAuth(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setHasGmailAuth(false);
+        return false;
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-auth-status`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setHasGmailAuth(data.hasGmailAuth);
+        return data.hasGmailAuth;
+      }
+      
+      setHasGmailAuth(false);
+      return false;
+    } catch (error) {
+      console.error('Error checking Gmail auth status:', error);
+      setHasGmailAuth(false);
+      return false;
+    } finally {
+      setCheckingAuth(false);
+    }
+  }, []);
+
+  const fetchForwardedEmails = useCallback(async () => {
+    setLoadingForwarded(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token for forwarded emails');
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/forward-status`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Transform forwarded emails to match Gmail scraping format
+        const transformedEmails = (data.emails || [])
+          .filter(email => email.status === 'processed' && email.parsed)
+          .map(email => ({
+            id: `forwarded-${email._id}`,
+            charity: email.parsed.charity,
+            amount: `${email.parsed.currency || '$'}${email.parsed.amount}`,
+            date: email.parsed.date || email.createdAt,
+            source: 'forwarded',
+            originalEmail: email
+          }));
+        
+        // Add to search history with a special entry
+        if (transformedEmails.length > 0) {
+          setSearchHistory(prev => {
+            // Check if we already have a forwarded emails entry
+            const existingIndex = prev.findIndex(entry => entry.source === 'forwarded');
+            const newEntry = {
+              timestamp: new Date(),
+              source: 'forwarded',
+              results: transformedEmails
+            };
+            
+            if (existingIndex >= 0) {
+              // Update existing entry
+              const updated = [...prev];
+              updated[existingIndex] = newEntry;
+              return updated;
+            } else {
+              // Add new entry at the beginning
+              return [newEntry, ...prev];
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching forwarded emails:', error);
+    } finally {
+      setLoadingForwarded(false);
+    }
+  }, []);
+
   useEffect(() => {
     clearOtherUsersData();
     auditLocalStorage();
   }, [clearOtherUsersData, auditLocalStorage]);
+
+  useEffect(() => {
+    checkGmailAuth();
+  }, [checkGmailAuth]);
+
+  useEffect(() => {
+    fetchForwardedEmails();
+  }, [fetchForwardedEmails]);
 
   const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');
@@ -277,11 +389,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setIsClearing(false);
     }, 300);
   }, [clearState]);
-
-  const logError = useCallback((message, error) => {
-    console.error(message, error);
-    setError(`${message}: ${error.message}`);
-  }, []);
   
   const handleSearchEmails = useCallback(async () => {
     setLoading(true);
@@ -295,7 +402,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/start-email-search`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -303,15 +410,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ source: 'gmail' })
+          }
         }
       );
       
       if (!response.ok) {
         const errorData = await response.json();
-        if (errorData.error === 'Google authentication required' && errorData.action === 'google_auth') {
-          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/auth/google`;
+        if (response.status === 401 && errorData.action === 'google_auth') {
+          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
         }
@@ -754,7 +860,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className="heading">
-            Search Results from {entry.source.toUpperCase()} - {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
+            {entry.source === 'forwarded' 
+              ? `Forwarded Email Donations - Last Updated: ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
+              : `Search Results from ${entry.source.toUpperCase()} - ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
+            }
           </h5>
           <ul className={styles.emailResultsList}>
             {(entry.results || []).map(result => renderDonationCard(result, entry.source))}
@@ -774,11 +883,20 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         <div className={styles.buttonContainer}>
           <button
             id="start-search-btn"
-            onClick={() => handleSearchEmails()}  // Change to use an arrow function
-            disabled={loading || isClearing}
+            onClick={async () => {
+              if (!hasGmailAuth) {
+                const hasAuth = await checkGmailAuth();
+                if (!hasAuth) {
+                  window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+                  return;
+                }
+              }
+              handleSearchEmails();
+            }}
+            disabled={loading || isClearing || checkingAuth}
             className={`${styles.scrapeButton} button`}
           >
-            {loading ? 'Searching...' : 'Search Gmail for Donations'}
+            {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail for Donations' : 'Connect Gmail & Search'}
           </button>
           <button
             onClick={handleSearchOutlookEmails}
@@ -792,6 +910,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             className={`${styles.scrapeButton} button`}
           >
             📧 Email Forwarding
+          </button>
+          <button
+            onClick={fetchForwardedEmails}
+            disabled={loadingForwarded}
+            className={`${styles.scrapeButton} button`}
+          >
+            {loadingForwarded ? 'Loading...' : '🔄 Refresh Forwarded'}
           </button>
           <Link to="/profile" className={`${styles.toggleButton} button`}>
             Check Out Your Impact
@@ -828,25 +953,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {searchHistory.length > 0 && renderSearchResults()}
       </div>
 
-      {/* Email Forwarding Status Section */}
-      <div className={`${styles.emailSection} card`} style={{ marginTop: '20px' }}>
-        <div className={styles.sectionHeader}>
-          <h2>📧 Forwarded Email Status</h2>
-          <button
-            onClick={() => setShowForwardingStatus(!showForwardingStatus)}
-            className={`${styles.toggleButton} button`}
-          >
-            {showForwardingStatus ? 'Hide' : 'Show'} Forwarded Emails
-          </button>
-        </div>
-        
-        {showForwardingStatus && (
-          <div style={{ marginTop: '20px' }}>
-            <ForwardingStatus refreshTrigger={showForwardingStatus} />
-          </div>
-        )}
-      </div>
-      
       <EmailForwardingModal 
         isOpen={showEmailForwarding} 
         onClose={() => setShowEmailForwarding(false)} 
