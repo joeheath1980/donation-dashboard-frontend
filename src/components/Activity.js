@@ -7,7 +7,7 @@ import './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
-import { EmailForwardingModal, ForwardingStatus } from './EmailForwarding';
+import { EmailForwardingModal } from './EmailForwarding';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -100,9 +100,9 @@ function Activity() {
   const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showEmailForwarding, setShowEmailForwarding] = useState(false);
-  const [showForwardingStatus, setShowForwardingStatus] = useState(false);
   const [hasGmailAuth, setHasGmailAuth] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(false);
+  const [loadingForwarded, setLoadingForwarded] = useState(false);
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -291,6 +291,68 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     }
   }, []);
 
+  const fetchForwardedEmails = useCallback(async () => {
+    setLoadingForwarded(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token for forwarded emails');
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/forward-status`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Transform forwarded emails to match Gmail scraping format
+        const transformedEmails = (data.emails || [])
+          .filter(email => email.status === 'processed' && email.parsed)
+          .map(email => ({
+            id: `forwarded-${email._id}`,
+            charity: email.parsed.charity,
+            amount: `${email.parsed.currency || '$'}${email.parsed.amount}`,
+            date: email.parsed.date || email.createdAt,
+            source: 'forwarded',
+            originalEmail: email
+          }));
+        
+        // Add to search history with a special entry
+        if (transformedEmails.length > 0) {
+          setSearchHistory(prev => {
+            // Check if we already have a forwarded emails entry
+            const existingIndex = prev.findIndex(entry => entry.source === 'forwarded');
+            const newEntry = {
+              timestamp: new Date(),
+              source: 'forwarded',
+              results: transformedEmails
+            };
+            
+            if (existingIndex >= 0) {
+              // Update existing entry
+              const updated = [...prev];
+              updated[existingIndex] = newEntry;
+              return updated;
+            } else {
+              // Add new entry at the beginning
+              return [newEntry, ...prev];
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching forwarded emails:', error);
+    } finally {
+      setLoadingForwarded(false);
+    }
+  }, []);
+
   useEffect(() => {
     clearOtherUsersData();
     auditLocalStorage();
@@ -299,6 +361,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   useEffect(() => {
     checkGmailAuth();
   }, [checkGmailAuth]);
+
+  useEffect(() => {
+    fetchForwardedEmails();
+  }, [fetchForwardedEmails]);
 
   const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');
@@ -794,7 +860,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className="heading">
-            Search Results from {entry.source.toUpperCase()} - {safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}
+            {entry.source === 'forwarded' 
+              ? `Forwarded Email Donations - Last Updated: ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
+              : `Search Results from ${entry.source.toUpperCase()} - ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
+            }
           </h5>
           <ul className={styles.emailResultsList}>
             {(entry.results || []).map(result => renderDonationCard(result, entry.source))}
@@ -842,6 +911,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           >
             📧 Email Forwarding
           </button>
+          <button
+            onClick={fetchForwardedEmails}
+            disabled={loadingForwarded}
+            className={`${styles.scrapeButton} button`}
+          >
+            {loadingForwarded ? 'Loading...' : '🔄 Refresh Forwarded'}
+          </button>
           <Link to="/profile" className={`${styles.toggleButton} button`}>
             Check Out Your Impact
           </Link>
@@ -877,25 +953,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {searchHistory.length > 0 && renderSearchResults()}
       </div>
 
-      {/* Email Forwarding Status Section */}
-      <div className={`${styles.emailSection} card`} style={{ marginTop: '20px' }}>
-        <div className={styles.sectionHeader}>
-          <h2>📧 Forwarded Email Status</h2>
-          <button
-            onClick={() => setShowForwardingStatus(!showForwardingStatus)}
-            className={`${styles.toggleButton} button`}
-          >
-            {showForwardingStatus ? 'Hide' : 'Show'} Forwarded Emails
-          </button>
-        </div>
-        
-        {showForwardingStatus && (
-          <div style={{ marginTop: '20px' }}>
-            <ForwardingStatus refreshTrigger={showForwardingStatus} />
-          </div>
-        )}
-      </div>
-      
       <EmailForwardingModal 
         isOpen={showEmailForwarding} 
         onClose={() => setShowEmailForwarding(false)} 
