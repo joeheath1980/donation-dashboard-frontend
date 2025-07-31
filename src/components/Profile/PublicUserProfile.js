@@ -70,7 +70,7 @@ const PublicUserProfile = () => {
   
   // Debug context on mount
   useEffect(() => {
-    console.log('=== CONTEXT DEBUG ON MOUNT ===');
+    console.log('=== CONTEXT DEBUG ON MOUNT === v2', new Date().toISOString());
     console.log('ImpactContext values:', {
       contextImpactScore,
       lastYearImpactScore,
@@ -94,9 +94,11 @@ const PublicUserProfile = () => {
 
   useEffect(() => {
     if (mounted) {
-      console.log('=== EFFECT TRIGGERED ===');
+      console.log('=== EFFECT TRIGGERED === v2');
       console.log('Mounted:', mounted);
       console.log('UserId:', userId);
+      // Temporary alert to confirm new version
+      console.warn('🚀 NEW VERSION DEPLOYED - PublicUserProfile v2');
       fetchProfile();
     }
   }, [userId, mounted]);
@@ -104,7 +106,7 @@ const PublicUserProfile = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      console.log('=== PUBLIC PROFILE DEBUG ===');
+      console.log('=== PUBLIC PROFILE DEBUG === v2', new Date().toISOString());
       console.log('1. Fetching profile for userId:', userId);
       console.log('2. Current user from auth:', currentUser);
       console.log('3. Current user ID:', currentUser?._id);
@@ -185,7 +187,7 @@ const PublicUserProfile = () => {
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
   // Debug: Check all available score and tier fields
-  console.log('=== API DATA STRUCTURE ===');
+  console.log('=== API DATA STRUCTURE === v2', new Date().toISOString());
   console.log('Profile object:', profile);
   console.log('User object:', user);
   console.log('Stats object:', stats);
@@ -203,7 +205,7 @@ const PublicUserProfile = () => {
   });
   
   // Check if viewing own profile
-  console.log('=== PROFILE COMPARISON DEBUG ===');
+  console.log('=== PROFILE COMPARISON DEBUG === v2', new Date().toISOString());
   console.log('currentUser:', currentUser);
   console.log('currentUser._id:', currentUser?._id);
   console.log('userId from params:', userId);
@@ -258,7 +260,7 @@ const PublicUserProfile = () => {
     console.log('Reason:', isOwnProfile ? 'Context score undefined' : 'Not own profile');
   }
   
-  console.log('=== FINAL VALUES ===');
+  console.log('=== FINAL VALUES === v2', new Date().toISOString());
   console.log('Final score:', actualScore);
   console.log('Final tier:', actualTier);
   console.log('Final pointsToNextTier:', pointsToNextTier);
@@ -362,7 +364,7 @@ const PublicUserProfile = () => {
 
           {/* Impact Score Section */}
           <div className={styles.impactScoreWrapper}>
-            {console.log('=== RENDERING PersonalImpactScore ===')}
+            {console.log('=== RENDERING PersonalImpactScore === v2', new Date().toISOString())}
             {console.log('Props being passed:', {
               impactScore: actualScore,
               scoreChange,
