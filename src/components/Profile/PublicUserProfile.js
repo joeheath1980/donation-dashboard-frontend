@@ -4,10 +4,8 @@ import { Helmet } from 'react-helmet-async';
 import { 
   FaTrophy, 
   FaMedal, 
-  FaHeart,
   FaCalendar,
   FaLock,
-  FaShare,
   FaTwitter,
   FaFacebook,
   FaLinkedin,
@@ -26,12 +24,29 @@ import {
   FaBriefcaseMedical, 
   FaUtensils, 
   FaHome, 
-  FaSeedling
+  FaSeedling,
+  FaChartLine,
+  FaRegHeart,
+  FaTimes,
+  FaChevronRight
 } from 'react-icons/fa';
 import { format } from 'date-fns';
-import styles from './PublicUserProfile.module.css';
+import styles from '../Profile.module.css';
+import publicStyles from './PublicUserProfile.module.css';
+import '../SharedStyles.css';
 import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
+import PersonalImpactScore from '../PersonalImpactScore';
+import ScrollableImpactSection from '../ScrollableImpactSection';
+
+const SectionTitle = ({ icon: Icon, title }) => (
+  <div className={styles.sectionHeader}>
+    <h2 className={`${styles.sectionTitle} gradientTitle`}>
+      <Icon className={styles.sectionIcon} /> {title}
+    </h2>
+    <div className={styles.sectionTitleUnderline}></div>
+  </div>
+);
 
 const PublicUserProfile = () => {
   const { userId } = useParams();
@@ -40,8 +55,16 @@ const PublicUserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
   const [mounted, setMounted] = useState(false);
+  const [activeImpactSection, setActiveImpactSection] = useState(0);
+  const [showAllFollowedCharities, setShowAllFollowedCharities] = useState(false);
+
+  const impactSections = [
+    { title: 'Impact Journey', component: 'ImpactVisualization' },
+    { title: 'Impact Score Breakdown', component: 'ImpactScoreExplain' },
+    { title: 'Tier Progress', component: 'TierProgress' },
+    { title: 'Your Badges', component: 'BadgesDisplay' },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -60,17 +83,6 @@ const PublicUserProfile = () => {
       console.log('Fetching profile for userId:', userId);
       const data = await profileService.getUserPublicProfile(userId);
       console.log('Profile data received:', data);
-      console.log('Profile data details:', {
-        hasData: !!data,
-        hasUser: !!data?.user,
-        userDisplayName: data?.user?.displayName,
-        userTier: data?.user?.tier,
-        hasStats: !!data?.stats,
-        hasRecentActivity: !!data?.recentActivity,
-        recentActivityLength: data?.recentActivity?.length,
-        hasCharityPortfolio: !!data?.charityPortfolio,
-        charityPortfolioLength: data?.charityPortfolio?.length
-      });
       setProfile(data);
     } catch (err) {
       console.error('Profile fetch error in component:', err);
@@ -107,7 +119,7 @@ const PublicUserProfile = () => {
   
   if (error) {
     return (
-      <div className={styles.errorContainer}>
+      <div className={publicStyles.errorContainer}>
         <h2>Profile Not Found</h2>
         <p>{error}</p>
         <button onClick={() => navigate('/')}>Return Home</button>
@@ -117,7 +129,7 @@ const PublicUserProfile = () => {
 
   if (!profile || !profile.user) {
     return (
-      <div className={styles.errorContainer}>
+      <div className={publicStyles.errorContainer}>
         <h2>Profile Not Found</h2>
         <p>The profile you're looking for doesn't exist or is private.</p>
         <button onClick={() => navigate('/')}>Return Home</button>
@@ -149,38 +161,16 @@ const PublicUserProfile = () => {
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
 
-  // Tier configurations - aligned with dashboard tiers
-  const tierConfig = {
-    Giver: { color: '#E74C3C', icon: '❤️' },
-    Altruist: { color: '#2ECC71', icon: '🏆' },
-    Philanthropist: { color: '#CD7F32', icon: '🏅' },
-    Champion: { color: '#C0C0C0', icon: '🥈' },
-    Visionary: { color: '#FFD700', icon: '👑' }
+  // Calculate score change (for public profile we don't have last year's score)
+  const scoreChange = 0;
+  const arrow = '';
+  const pointsToNextTier = 1000; // Default value for public profile
+
+  const getDisplayedFollowedCharities = () => {
+    return showAllFollowedCharities ? charityPortfolio : (charityPortfolio || []).slice(0, 3);
   };
 
-  // Badge icons mapping - aligned with ScrollableImpactSection
-  const badgeIcons = {
-    'Healthcare Hero': { icon: FaHeartbeat, color: '#FF6B6B' },
-    'Education Champion': { icon: FaGraduationCap, color: '#4ECDC4' },
-    'Environmental Guardian': { icon: FaTree, color: '#45B649' },
-    'Humanitarian Helper': { icon: FaHandHoldingHeart, color: '#FF8C00' },
-    'Global Impact': { icon: FaGlobeAmericas, color: '#3498DB' },
-    'Clean Water Advocate': { icon: FaWater, color: '#00CED1' },
-    'Literacy Promoter': { icon: FaBook, color: '#9B59B6' },
-    'Animal Welfare Champion': { icon: FaPaw, color: '#E67E22' },
-    'Sustainability Steward': { icon: FaLeaf, color: '#27AE60' },
-    'Medical Research Supporter': { icon: FaBriefcaseMedical, color: '#E74C3C' },
-    'Hunger Fighter': { icon: FaUtensils, color: '#F39C12' },
-    'Housing Hero': { icon: FaHome, color: '#8E44AD' },
-    'Community Grower': { icon: FaSeedling, color: '#2ECC71' },
-    'Disaster Relief Ally': { icon: FaHandHoldingHeart, color: '#D35400' },
-    'Child Welfare Protector': { icon: FaHeartbeat, color: '#C0392B' },
-    'Arts and Culture Patron': { icon: FaBook, color: '#1ABC9C' },
-    'Climate Action Advocate': { icon: FaGlobeAmericas, color: '#16A085' },
-    'STEM Education Booster': { icon: FaBook, color: '#2980B9' },
-    'Elder Care Supporter': { icon: FaHandHoldingHeart, color: '#7F8C8D' },
-    'Conservation Champion': { icon: FaLeaf, color: '#27AE60' }
-  };
+  const toggleFollowedCharities = () => setShowAllFollowedCharities(!showAllFollowedCharities);
 
   return (
     <>
@@ -206,213 +196,127 @@ const PublicUserProfile = () => {
         </Helmet>
       )}
 
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.userInfo}>
-              <div className={styles.avatar}>
+      <div className={styles.profileBackground}>
+        <div className={styles.profileContainer}>
+          {/* Public Profile Header */}
+          <div className={publicStyles.publicHeader}>
+            <div className={publicStyles.userInfo}>
+              <div className={publicStyles.avatar}>
                 {safeUser.avatar ? (
                   <img src={safeUser.avatar} alt={safeUser.displayName} />
                 ) : (
-                  <div className={styles.avatarPlaceholder}>
+                  <div className={publicStyles.avatarPlaceholder}>
                     {safeUser.displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
-              <div className={styles.userDetails}>
+              <div className={publicStyles.userDetails}>
                 <h1>{safeUser.displayName}</h1>
-                <p className={styles.tierBadge}>{safeUser.tier} Tier</p>
-                <div className={styles.joinDate}>
+                <div className={publicStyles.joinDate}>
                   <FaCalendar />
                   Member since {format(new Date(safeUser.joinDate), 'MMMM yyyy')}
                 </div>
               </div>
             </div>
 
-            <div className={styles.shareButtons}>
-              <button onClick={() => handleShare('twitter')} className={styles.shareBtn}>
+            <div className={publicStyles.shareButtons}>
+              <button onClick={() => handleShare('twitter')} className={publicStyles.shareBtn}>
                 <FaTwitter />
               </button>
-              <button onClick={() => handleShare('facebook')} className={styles.shareBtn}>
+              <button onClick={() => handleShare('facebook')} className={publicStyles.shareBtn}>
                 <FaFacebook />
               </button>
-              <button onClick={() => handleShare('linkedin')} className={styles.shareBtn}>
+              <button onClick={() => handleShare('linkedin')} className={publicStyles.shareBtn}>
                 <FaLinkedin />
               </button>
-              <button onClick={() => handleShare('copy')} className={styles.shareBtn}>
+              <button onClick={() => handleShare('copy')} className={publicStyles.shareBtn}>
                 <FaLink />
-                {copied && <span className={styles.copied}>Copied!</span>}
+                {copied && <span className={publicStyles.copied}>Copied!</span>}
               </button>
             </div>
           </div>
 
-          <div className={styles.tierBadge} style={{ backgroundColor: tierConfig[safeUser.tier]?.color || '#CD7F32' }}>
-            <span className={styles.tierIcon}>{tierConfig[safeUser.tier]?.icon || '🥉'}</span>
-            <span className={styles.tierName}>{safeUser.tier} Tier</span>
+          {/* Impact Score Section */}
+          <div className={styles.impactScoreWrapper}>
+            <PersonalImpactScore
+              impactScore={safeUser.publicScore !== 'Private' ? safeUser.publicScore : 0}
+              scoreChange={scoreChange}
+              tier={safeUser.tier}
+              pointsToNextTier={pointsToNextTier}
+            />
           </div>
-        </div>
+          
+          {/* Scrollable Impact Section */}
+          <ScrollableImpactSection 
+            impactScore={safeUser.publicScore !== 'Private' ? safeUser.publicScore : 0}
+            scoreDetails={null}
+            tier={safeUser.tier}
+            pointsToNextTier={pointsToNextTier}
+            activeSection={activeImpactSection}
+            setActiveSection={setActiveImpactSection}
+            totalSections={impactSections.length}
+            sectionTitles={impactSections.map(section => section.title)}
+          />
 
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <FaTrophy className={styles.statIcon} />
-            <div className={styles.statValue}>
-              {safeUser.publicScore !== 'Private' ? (
-                <>{safeUser.publicScore.toLocaleString()} <span>points</span></>
-              ) : (
-                <FaLock className={styles.privateLock} />
-              )}
-            </div>
-            <div className={styles.statLabel}>Impact Score</div>
-          </div>
-
-
-          <div className={styles.statCard}>
-            <FaGlobeAfrica className={styles.statIcon} />
-            <div className={styles.statValue}>
-              {safeStats.charitiesSupported} <span>charities</span>
-            </div>
-            <div className={styles.statLabel}>Supported</div>
-          </div>
-
-          {safeStats.currentStreak > 0 && (
-            <div className={styles.statCard}>
-              <FaFire className={styles.statIcon} />
-              <div className={styles.statValue}>
-                {safeStats.currentStreak} <span>days</span>
+          {/* Impact Statement */}
+          {safeUser.impactStatement && (
+            <section className={styles.section}>
+              <div className={publicStyles.impactStatement}>
+                <h3>Impact Statement</h3>
+                <p>"{safeUser.impactStatement}"</p>
               </div>
-              <div className={styles.statLabel}>Current Streak</div>
-            </div>
+            </section>
           )}
-        </div>
+          
+          {/* Your Impact Section - Only showing Charities Following */}
+          <section className={`${styles.section} ${styles.impactSection}`}>
+            <SectionTitle icon={FaChartLine} title="Supporting" />
+            
+            <div className={styles.impactContent}>
+              <div className={publicStyles.charitiesGrid}>
+                <div className={`${styles.donationCard} card`}>
+                  <h3 className={`${styles.cardTitle} cardTitle`}>
+                    <FaRegHeart className={styles.icon} /> Charities Following
+                  </h3>
+                  <ul className={styles.list}>
+                    {getDisplayedFollowedCharities().map((charity, index) => (
+                      <li key={charity.ABN || `charity-${index}`} className={styles.listItem}>
+                        <span>{charity.name || 'Unknown Charity'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {charityPortfolio && charityPortfolio.length > 3 && (
+                    <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
+                      {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
 
-        {safeUser.impactStatement && (
-          <div className={styles.impactStatement}>
-            <h3>Impact Statement</h3>
-            <p>"{safeUser.impactStatement}"</p>
-          </div>
-        )}
+          {/* Activity Stats */}
+          <section className={styles.section}>
+            <div className={publicStyles.statsGrid}>
+              <div className={publicStyles.statCard}>
+                <FaGlobeAfrica className={publicStyles.statIcon} />
+                <div className={publicStyles.statValue}>
+                  {safeStats.charitiesSupported} <span>charities</span>
+                </div>
+                <div className={publicStyles.statLabel}>Supported</div>
+              </div>
 
-        <div className={styles.tabNavigation}>
-          <button 
-            className={activeTab === 'overview' ? styles.activeTab : ''}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button 
-            className={activeTab === 'charities' ? styles.activeTab : ''}
-            onClick={() => setActiveTab('charities')}
-          >
-            Charities Following ({charityPortfolio?.length || 0})
-          </button>
-          <button 
-            className={activeTab === 'badges' ? styles.activeTab : ''}
-            onClick={() => setActiveTab('badges')}
-          >
-            Badges ({safeUser.badges?.length || 0})
-          </button>
-          <button 
-            className={activeTab === 'activity' ? styles.activeTab : ''}
-            onClick={() => setActiveTab('activity')}
-          >
-            Activity
-          </button>
-        </div>
-
-        <div className={styles.tabContent}>
-          {activeTab === 'overview' && (
-            <div className={styles.overviewSection}>
-              <div className={styles.achievementsGrid}>
-                <div className={styles.achievement}>
-                  <FaMedal className={styles.achievementIcon} />
-                  <div>
-                    <h4>Top Supporter</h4>
-                    <p>Ranked in top 10% of donors</p>
+              {safeStats.currentStreak > 0 && (
+                <div className={publicStyles.statCard}>
+                  <FaFire className={publicStyles.statIcon} />
+                  <div className={publicStyles.statValue}>
+                    {safeStats.currentStreak} <span>days</span>
                   </div>
+                  <div className={publicStyles.statLabel}>Current Streak</div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'charities' && (
-            <div className={styles.charitiesSection}>
-              {charityPortfolio && charityPortfolio.length > 0 ? (
-                <div className={styles.charityGrid}>
-                  {charityPortfolio.map((charity) => (
-                    <div key={charity.id} className={styles.charityCard}>
-                      {charity.logo && (
-                        <img src={charity.logo} alt={charity.name} className={styles.charityLogo} />
-                      )}
-                      <h4>{charity.name}</h4>
-                      <p>{charity.category}</p>
-                      <button 
-                        onClick={() => navigate(`/charity/${charity.abn || charity.ABN}`)}
-                        className={styles.viewCharityBtn}
-                      >
-                        View Charity
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.emptyState}>No charities displayed publicly</p>
               )}
             </div>
-          )}
-
-          {activeTab === 'badges' && (
-            <div className={styles.badgesSection}>
-              {safeUser.badges && safeUser.badges.length > 0 ? (
-                <div className={styles.badgeGrid}>
-                  {safeUser.badges.map((badge) => {
-                    const badgeConfig = badgeIcons[badge.name] || badgeIcons[badge.title] || { icon: FaTrophy, color: '#FFD700' };
-                    const BadgeIcon = badgeConfig.icon;
-                    return (
-                      <div key={badge.id || badge.name} className={styles.badgeCard}>
-                        <div className={styles.badgeIcon}>
-                          <BadgeIcon size={30} color={badgeConfig.color} />
-                        </div>
-                        <h4>{badge.name || badge.title}</h4>
-                        <p>{badge.description}</p>
-                        <span className={styles.badgeDate}>
-                          Earned {badge.earnedDate ? format(new Date(badge.earnedDate), 'MMM d, yyyy') : 'recently'}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className={styles.emptyState}>No badges earned yet</p>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'activity' && (
-            <div className={styles.activitySection}>
-              {recentActivity && recentActivity.length > 0 ? (
-                <div className={styles.activityFeed}>
-                  {recentActivity
-                    .filter(item => item.type !== 'donation')
-                    .map((item, index) => (
-                    <div key={index} className={styles.activityItem}>
-                      <div className={styles.activityIcon}>
-                        {item.type === 'badge' && <FaMedal />}
-                        {item.type === 'milestone' && <FaTrophy />}
-                      </div>
-                      <div className={styles.activityContent}>
-                        <p>{item.description}</p>
-                        <span className={styles.activityDate}>
-                          {item.date ? format(new Date(item.date), 'MMM d, yyyy') : 'Unknown date'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.emptyState}>No public activity to display</p>
-              )}
-            </div>
-          )}
+          </section>
         </div>
       </div>
     </>

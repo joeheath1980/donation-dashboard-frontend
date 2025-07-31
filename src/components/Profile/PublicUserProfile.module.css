@@ -528,3 +528,41 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Additional styles for public profile layout */
+.publicHeader {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.impactStatement {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.impactStatement h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.impactStatement p {
+  font-style: italic;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.charitiesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
