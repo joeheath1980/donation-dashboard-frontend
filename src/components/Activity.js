@@ -251,39 +251,6 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     });
   }, [currentUserId]);
 
-  useEffect(() => {
-    clearOtherUsersData();
-    auditLocalStorage();
-  }, [clearOtherUsersData, auditLocalStorage]);
-
-  useEffect(() => {
-    checkGmailAuth();
-  }, [checkGmailAuth]);
-
-  const handleClearAll = useCallback(() => {
-    console.log('[Activity] Starting clear operation');
-    setIsClearing(true);
-    wasCleared.current = true;
-
-    console.log('[Activity] Removing data from localStorage');
-    clearState();
-
-    console.log('[Activity] Resetting all states');
-    setSearchHistory([]);
-    setDonationStatuses({});
-    setSelectedTypes({});
-    setSelectedCharityTypes({});
-
-    console.log('[Activity] Resetting refs');
-    lastSavedState.current = null;
-    hasSavedData.current = false;
-
-    clearingTimeout.current = setTimeout(() => {
-      console.log('[Activity] Finishing clear operation');
-      setIsClearing(false);
-    }, 300);
-  }, [clearState]);
-
   const logError = useCallback((message, error) => {
     console.error(message, error);
     setError(`${message}: ${error.message}`);
@@ -323,6 +290,39 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setCheckingAuth(false);
     }
   }, []);
+
+  useEffect(() => {
+    clearOtherUsersData();
+    auditLocalStorage();
+  }, [clearOtherUsersData, auditLocalStorage]);
+
+  useEffect(() => {
+    checkGmailAuth();
+  }, [checkGmailAuth]);
+
+  const handleClearAll = useCallback(() => {
+    console.log('[Activity] Starting clear operation');
+    setIsClearing(true);
+    wasCleared.current = true;
+
+    console.log('[Activity] Removing data from localStorage');
+    clearState();
+
+    console.log('[Activity] Resetting all states');
+    setSearchHistory([]);
+    setDonationStatuses({});
+    setSelectedTypes({});
+    setSelectedCharityTypes({});
+
+    console.log('[Activity] Resetting refs');
+    lastSavedState.current = null;
+    hasSavedData.current = false;
+
+    clearingTimeout.current = setTimeout(() => {
+      console.log('[Activity] Finishing clear operation');
+      setIsClearing(false);
+    }, 300);
+  }, [clearState]);
   
   const handleSearchEmails = useCallback(async () => {
     setLoading(true);
