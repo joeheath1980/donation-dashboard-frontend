@@ -25,7 +25,9 @@ import {
   FaMedal,
   FaTrophy,
   FaAward,
-  FaHeart
+  FaHeart,
+  FaTimes,
+  FaShare
 } from 'react-icons/fa';
 import styles from './ScrollableImpactSection.module.css';
 
@@ -76,48 +78,180 @@ const charityTypeToBadge = {
   'Rural Support': 'Community Grower'
 };
 
+// Badge Modal Component
+const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
+  if (!isOpen || !badge) return null;
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader} style={{ background: `linear-gradient(135deg, ${badge.color}dd, ${badge.color})` }}>
+          <div className={styles.modalBadge}>
+            <badge.icon size={48} color="white" />
+          </div>
+          <h3>{badge.title}</h3>
+          <button className={styles.modalClose} onClick={onClose}>
+            <FaTimes />
+          </button>
+        </div>
+        
+        <div className={styles.modalBody}>
+          {earnedDate ? (
+            <>
+              <div className={styles.earnedDate}>
+                <FaTrophy color={badge.color} />
+                <span>Earned on {earnedDate}</span>
+              </div>
+              
+              <div className={styles.badgeDetails}>
+                <h4>How you earned this badge:</h4>
+                <ul>
+                  {contributions.map((contrib, idx) => (
+                    <li key={idx}>{contrib}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className={styles.badgeImpact}>
+                <h4>Your Impact:</h4>
+                <p>{badge.description}</p>
+              </div>
+              
+              <div className={styles.modalActions}>
+                <button className={styles.shareButton} style={{ backgroundColor: badge.color }}>
+                  <FaShare /> Share Badge
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className={styles.lockedBadgeInfo}>
+              <h4>How to earn this badge:</h4>
+              <p>Make at least 3 contributions to {badge.title.replace(' Hero', '').replace(' Champion', '').replace(' Guardian', '')} causes</p>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ 
+                    width: `${(contributions.length / 3) * 100}%`,
+                    backgroundColor: badge.color 
+                  }}
+                />
+              </div>
+              <p className={styles.progressText}>{contributions.length} / 3 contributions</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BadgesDisplay = () => {
   const { donations, oneOffContributions } = useContext(ImpactContext);
+  const [selectedBadge, setSelectedBadge] = React.useState(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
 
-  const collectedBadges = React.useMemo(() => {
+  const { collectedBadges, badgeProgress } = React.useMemo(() => {
     const allContributions = [...donations, ...oneOffContributions];
     const charityTypeCounts = {};
+    const charityTypeContributions = {};
 
     // Count contributions by charity type
     allContributions.forEach(contribution => {
       const charityType = contribution.charityType;
       if (charityType) {
         charityTypeCounts[charityType] = (charityTypeCounts[charityType] || 0) + 1;
+        
+        if (!charityTypeContributions[charityType]) {
+          charityTypeContributions[charityType] = [];
+        }
+        charityTypeContributions[charityType].push({
+          amount: contribution.amount,
+          date: contribution.createdAt,
+          charityName: contribution.charityName
+        });
       }
     });
 
-    // Map charity types to badges using the mapping object
-    return Object.entries(charityTypeCounts).reduce((acc, [charityType, count]) => {
-      if (count >= 3) {
-        const badgeTitle = charityTypeToBadge[charityType];
-        if (badgeTitle) {
-          const badge = allBadges.find(b => b.title === badgeTitle);
-          if (badge && !acc.some(b => b.title === badge.title)) {
-            acc.push(badge);
+    // Map charity types to badges
+    const collected = [];
+    const progress = {};
+    
+    Object.entries(charityTypeCounts).forEach(([charityType, count]) => {
+      const badgeTitle = charityTypeToBadge[charityType];
+      if (badgeTitle) {
+        const badge = allBadges.find(b => b.title === badgeTitle);
+        if (badge) {
+          if (count >= 3 && !collected.some(b => b.title === badge.title)) {
+            collected.push({
+              ...badge,
+              earnedDate: new Date(charityTypeContributions[charityType][2].date).toLocaleDateString(),
+              contributions: charityTypeContributions[charityType].slice(0, 3).map(c => 
+                `Donated $${c.amount} to ${c.charityName}`
+              )
+            });
           }
+          progress[badge.title] = {
+            count,
+            contributions: charityTypeContributions[charityType]
+          };
         }
       }
-      return acc;
-    }, []);
+    });
+
+    return { collectedBadges: collected, badgeProgress: progress };
   }, [donations, oneOffContributions]);
 
+  const handleBadgeClick = (badge) => {
+    const collected = collectedBadges.find(b => b.title === badge.title);
+    const progress = badgeProgress[badge.title] || { count: 0, contributions: [] };
+    
+    setSelectedBadge({
+      ...badge,
+      earnedDate: collected?.earnedDate,
+      contributions: collected?.contributions || progress.contributions.map(c => 
+        `Donated $${c.amount} to ${c.charityName}`
+      )
+    });
+    setModalOpen(true);
+  };
+
   return (
-    <div className={styles.badgesGrid}>
-      {allBadges.map((badge, index) => (
-        <div
-          key={index}
-          className={`${styles.badgeItem} ${collectedBadges.some(b => b.title === badge.title) ? styles.collected : ''}`}
-        >
-          <badge.icon size={30} color={collectedBadges.some(b => b.title === badge.title) ? badge.color : '#ccc'} />
-          <div className={styles.badgeTitle}>{badge.title}</div>
-        </div>
-      ))}
-    </div>
+    <>
+      <div className={styles.badgesGrid}>
+        {allBadges.map((badge, index) => {
+          const isCollected = collectedBadges.some(b => b.title === badge.title);
+          const progress = badgeProgress[badge.title];
+          
+          return (
+            <div
+              key={index}
+              className={`${styles.badgeItem} ${isCollected ? styles.collected : styles.locked}`}
+              onClick={() => handleBadgeClick(badge)}
+              style={isCollected ? { '--badge-color': badge.color } : {}}
+            >
+              <div className={styles.badgeCircle}>
+                <badge.icon size={36} color={isCollected ? 'white' : '#999'} />
+                {isCollected && <div className={styles.badgeShine} />}
+              </div>
+              <div className={styles.badgeTitle}>{badge.title}</div>
+              {!isCollected && progress && (
+                <div className={styles.badgeProgress}>
+                  <span>{progress.count}/3</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      <BadgeModal
+        badge={selectedBadge}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        earnedDate={selectedBadge?.earnedDate}
+        contributions={selectedBadge?.contributions || []}
+      />
+    </>
   );
 };
 
