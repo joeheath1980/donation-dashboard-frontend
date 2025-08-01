@@ -155,7 +155,7 @@ const SignUp = () => {
       if (result) {
         setSuccess('Account created successfully! Redirecting to dashboard...');
         setTimeout(() => {
-          navigate('/');
+          navigate('/dashboard');
         }, 2000);
       }
     } catch (error) {
