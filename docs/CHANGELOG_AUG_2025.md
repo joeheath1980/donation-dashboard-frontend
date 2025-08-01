@@ -2,6 +2,24 @@
 
 ## August 1, 2025
 
+### Public Profile Improvements - Charities Following Section
+
+#### Changes:
+- Moved charities following from a separate section into the stats grid
+- Added a new stat card showing total number of charities being followed
+- Created a dedicated section for charity details with proper card layout
+- Improved charity name field handling to support multiple naming conventions
+- Fixed "unknown charity" display issue
+
+#### Technical Details:
+- Added charities following count to the statsGrid alongside other stats
+- Created separate charities detail section using charityCard layout
+- Enhanced field mapping to handle: Charity_Name, charityName, name, Name, charity_name
+- Added category/activity field mapping for better charity descriptions
+- Implemented "Show Less"/"View All X Charities" toggle for better UX
+
+## August 1, 2025
+
 ### URL Pattern Updates - Username-based Profile URLs
 
 #### Changes:
