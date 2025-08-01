@@ -76,9 +76,14 @@ class ProfileService {
   }
 
   // Search Methods
-  async searchProfiles(query, type = 'all') {
-    const response = await api.get('/api/public/search', {
-      params: { q: query, type }
+  async searchProfiles(params) {
+    // Support both old and new API signatures
+    if (typeof params === 'string') {
+      params = { q: params, type: arguments[1] || 'all' };
+    }
+    
+    const response = await api.get('/api/public/profiles/search', {
+      params
     });
     return response.data;
   }

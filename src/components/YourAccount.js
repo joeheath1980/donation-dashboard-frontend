@@ -19,7 +19,7 @@ const YourAccount = () => {
               <h2 className="cardTitle">Profile</h2>
             </div>
             <p className="cardText">Manage your personal information and preferences.</p>
-            <Link to="/dashboard" className="button">Edit Profile</Link>
+            <Link to="/profile/edit" className="button">Edit Profile</Link>
             <span className={`${styles.ctaTip} tip`}>Keep your profile updated for a better experience!</span>
           </div>
 

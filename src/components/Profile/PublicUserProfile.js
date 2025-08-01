@@ -10,8 +10,13 @@ import {
   FaFacebook,
   FaLinkedin,
   FaLink,
+  FaInstagram,
   FaFire,
   FaGlobeAfrica,
+  FaUser,
+  FaMapMarkerAlt,
+  FaBriefcase,
+  FaGlobe,
   FaHeartbeat, 
   FaGraduationCap, 
   FaTree, 
@@ -28,7 +33,8 @@ import {
   FaChartLine,
   FaRegHeart,
   FaTimes,
-  FaChevronRight
+  FaChevronRight,
+  FaHeart
 } from 'react-icons/fa';
 import { format } from 'date-fns';
 import styles from '../Profile.module.css';
@@ -337,6 +343,9 @@ const PublicUserProfile = () => {
               </div>
               <div className={publicStyles.userDetails}>
                 <h1>{safeUser.displayName}</h1>
+                {safeUser.username && (
+                  <p className={publicStyles.username}>@{safeUser.username}</p>
+                )}
                 <div className={publicStyles.joinDate}>
                   <FaCalendar />
                   Member since {format(new Date(safeUser.joinDate), 'MMMM yyyy')}
@@ -360,6 +369,74 @@ const PublicUserProfile = () => {
               </button>
             </div>
           </div>
+
+          {/* Profile Information Section */}
+          {(safeUser.bio || safeUser.professionalTitle || 
+            (safeUser.location && (safeUser.location.city || safeUser.location.state || safeUser.location.country)) ||
+            (safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks)) && (
+            <section className={publicStyles.profileInfoSection}>
+              {safeUser.bio && (
+                <div className={publicStyles.bio}>
+                  <p>{safeUser.bio}</p>
+                </div>
+              )}
+              
+              <div className={publicStyles.infoGrid}>
+                {safeUser.professionalTitle && (
+                  <div className={publicStyles.infoItem}>
+                    <FaBriefcase />
+                    <span>{safeUser.professionalTitle}</span>
+                  </div>
+                )}
+                
+                {safeUser.privacy?.showLocation !== false && safeUser.location && 
+                 (safeUser.location.city || safeUser.location.state || safeUser.location.country) && (
+                  <div className={publicStyles.infoItem}>
+                    <FaMapMarkerAlt />
+                    <span>
+                      {[safeUser.location.city, safeUser.location.state, safeUser.location.country]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </span>
+                  </div>
+                )}
+                
+                {safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks?.website && (
+                  <div className={publicStyles.infoItem}>
+                    <FaGlobe />
+                    <a href={safeUser.socialLinks.website} target="_blank" rel="noopener noreferrer">
+                      Website
+                    </a>
+                  </div>
+                )}
+              </div>
+              
+              {safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks && (
+                <div className={publicStyles.socialLinks}>
+                  {safeUser.socialLinks.twitter && (
+                    <a href={safeUser.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                      <FaTwitter />
+                    </a>
+                  )}
+                  {safeUser.socialLinks.linkedin && (
+                    <a href={safeUser.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                      <FaLinkedin />
+                    </a>
+                  )}
+                  {safeUser.socialLinks.facebook && (
+                    <a href={safeUser.socialLinks.facebook} target="_blank" rel="noopener noreferrer">
+                      <FaFacebook />
+                    </a>
+                  )}
+                  {safeUser.socialLinks.instagram && (
+                    <a href={safeUser.socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                      <FaInstagram />
+                    </a>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Impact Score Section */}
           <div className={styles.impactScoreWrapper}>
@@ -394,12 +471,34 @@ const PublicUserProfile = () => {
             sectionTitles={impactSections.map(section => section.title)}
           />
 
-          {/* Impact Statement */}
-          {safeUser.impactStatement && (
+          {/* Impact Statement & Giving Philosophy */}
+          {(safeUser.impactStatement || safeUser.givingPhilosophy) && (
             <section className={styles.section}>
-              <div className={publicStyles.impactStatement}>
-                <h3>Impact Statement</h3>
-                <p>"{safeUser.impactStatement}"</p>
+              {safeUser.impactStatement && (
+                <div className={publicStyles.impactStatement}>
+                  <h3>Impact Statement</h3>
+                  <p>"{safeUser.impactStatement}"</p>
+                </div>
+              )}
+              {safeUser.givingPhilosophy && (
+                <div className={publicStyles.givingPhilosophy}>
+                  <h3>Giving Philosophy</h3>
+                  <p>{safeUser.givingPhilosophy}</p>
+                </div>
+              )}
+            </section>
+          )}
+          
+          {/* Cause Areas */}
+          {safeUser.preferredCauses && safeUser.preferredCauses.length > 0 && (
+            <section className={styles.section}>
+              <SectionTitle icon={FaHeart} title="Cause Areas" />
+              <div className={publicStyles.causeAreas}>
+                {safeUser.preferredCauses.map((cause, index) => (
+                  <span key={index} className={publicStyles.causeTag}>
+                    {cause}
+                  </span>
+                ))}
               </div>
             </section>
           )}

@@ -20,7 +20,10 @@ const ProfileSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [username, setUsername] = useState(searchParams.get('username') || '');
+  const [location, setLocation] = useState(searchParams.get('location') || '');
   const [profileType, setProfileType] = useState(searchParams.get('type') || 'all');
+  const [showFilters, setShowFilters] = useState(false);
   const [results, setResults] = useState({
     users: [],
     businesses: [],
@@ -31,15 +34,21 @@ const ProfileSearch = () => {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (searchQuery, type) => {
-      if (!searchQuery || searchQuery.length < 2) {
+    debounce(async (searchQuery, usernameQuery, locationQuery, type) => {
+      if (!searchQuery && !usernameQuery && !locationQuery) {
         setResults({ users: [], businesses: [], charities: [] });
         return;
       }
 
       setLoading(true);
       try {
-        const data = await profileService.searchProfiles(searchQuery, type);
+        const searchParams = {
+          q: searchQuery,
+          username: usernameQuery,
+          location: locationQuery,
+          type
+        };
+        const data = await profileService.searchProfiles(searchParams);
         setResults(data);
         setHasSearched(true);
       } catch (error) {
@@ -52,18 +61,47 @@ const ProfileSearch = () => {
   );
 
   useEffect(() => {
-    debouncedSearch(query, profileType);
-  }, [query, profileType, debouncedSearch]);
+    debouncedSearch(query, username, location, profileType);
+  }, [query, username, location, profileType, debouncedSearch]);
 
   const handleQueryChange = (e) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-    setSearchParams({ q: newQuery, type: profileType });
+    updateSearchParams({ q: newQuery });
+  };
+
+  const handleUsernameChange = (e) => {
+    const newUsername = e.target.value.toLowerCase();
+    setUsername(newUsername);
+    updateSearchParams({ username: newUsername });
+  };
+
+  const handleLocationChange = (e) => {
+    const newLocation = e.target.value;
+    setLocation(newLocation);
+    updateSearchParams({ location: newLocation });
   };
 
   const handleTypeChange = (type) => {
     setProfileType(type);
-    setSearchParams({ q: query, type });
+    updateSearchParams({ type });
+  };
+
+  const updateSearchParams = (updates) => {
+    const newParams = {
+      q: query,
+      username,
+      location,
+      type: profileType,
+      ...updates
+    };
+    
+    // Remove empty parameters
+    Object.keys(newParams).forEach(key => {
+      if (!newParams[key]) delete newParams[key];
+    });
+    
+    setSearchParams(newParams);
   };
 
   const navigateToProfile = (type, identifier) => {
@@ -130,7 +168,44 @@ const ProfileSearch = () => {
               <span>{type.label}</span>
             </button>
           ))}
+          
+          <button
+            className={`${styles.filterToggle} ${showFilters ? styles.active : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FaFilter />
+            <span>Filters</span>
+          </button>
         </div>
+        
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div className={styles.filterSection}>
+            <div className={styles.filterGroup}>
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                placeholder="Search by exact username"
+                value={username}
+                onChange={handleUsernameChange}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label htmlFor="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                placeholder="City, state, or country"
+                value={location}
+                onChange={handleLocationChange}
+                className={styles.filterInput}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Results */}
@@ -168,7 +243,20 @@ const ProfileSearch = () => {
                         </div>
                         <div className={styles.userInfo}>
                           <h3>{user.displayName}</h3>
-                          <p className={styles.username}>{user.tier} Tier</p>
+                          {user.username && (
+                            <p className={styles.username}>@{user.username}</p>
+                          )}
+                          <p className={styles.tier}>{user.tier} Tier</p>
+                          {user.location && (user.location.city || user.location.state || user.location.country) && (
+                            <p className={styles.location}>
+                              <FaMapMarkerAlt />
+                              <span>
+                                {[user.location.city, user.location.state, user.location.country]
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </span>
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className={styles.userStats}>
