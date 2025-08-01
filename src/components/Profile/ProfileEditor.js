@@ -30,6 +30,7 @@ const ProfileEditor = () => {
     email: '',
     bio: '',
     professionalTitle: '',
+    profilePictureUrl: '',
     location: {
       city: '',
       state: '',
@@ -102,12 +103,21 @@ const ProfileEditor = () => {
       const userData = response.data.user || response.data;
       const completeness = response.data.profileCompleteness || userData.profileCompleteness || 0;
       
+      // Debug logging
+      console.log('Profile fetch response:', {
+        hasUser: !!response.data.user,
+        profilePictureUrl: userData.profilePictureUrl,
+        profilePicture: userData.profilePicture,
+        avatar: userData.avatar
+      });
+      
       setProfile({
         displayName: userData.displayName || '',
         username: userData.username || '',
         email: userData.email || '',
         bio: userData.bio || '',
         professionalTitle: userData.professionalTitle || '',
+        profilePictureUrl: userData.profilePictureUrl || userData.profilePicture || '',
         location: userData.location || { city: '', state: '', country: '' },
         preferredCauses: userData.preferredCauses || [],
         givingPhilosophy: userData.givingPhilosophy || '',
@@ -132,7 +142,8 @@ const ProfileEditor = () => {
         impactStatement: userData.impactStatement || ''
       });
       setProfileCompleteness(completeness);
-      setAvatarPreview(userData.avatar || null);
+      // Use profilePictureUrl if available, fall back to avatar or profilePicture
+      setAvatarPreview(userData.profilePictureUrl || userData.profilePicture || userData.avatar || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -264,6 +275,13 @@ const ProfileEditor = () => {
     try {
       setSaving(true);
       const headers = getAuthHeaders();
+      
+      // Log what we're sending to debug
+      console.log('Saving profile with data:', {
+        ...profile,
+        profilePictureUrl: profile.profilePictureUrl
+      });
+      
       const response = await axios.put(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
         profile,
@@ -297,8 +315,76 @@ const ProfileEditor = () => {
     };
     reader.readAsDataURL(file);
     
-    // TODO: Implement actual upload to server
-    // For now, just show preview
+    // Upload to S3
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      const headers = getAuthHeaders();
+      delete headers['Content-Type']; // Let browser set multipart boundary
+      
+      console.log('Uploading to:', `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`);
+      const uploadResponse = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`,
+        formData,
+        { headers }
+      );
+      
+      if (uploadResponse.data.success) {
+        console.log('Upload response:', uploadResponse.data);
+        
+        // Update profile with S3 URL
+        setProfile(prev => ({
+          ...prev,
+          profilePictureUrl: uploadResponse.data.profilePictureUrl
+        }));
+        setAvatarPreview(uploadResponse.data.profilePictureUrl);
+        
+        // Automatically save the profile with the new photo
+        try {
+          // Create a minimal update object with just the profilePictureUrl
+          const profileUpdate = {
+            profilePictureUrl: uploadResponse.data.profilePictureUrl
+          };
+          
+          console.log('Saving profile with update:', profileUpdate);
+          
+          const saveResponse = await axios.put(
+            `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
+            profileUpdate,
+            { headers: getAuthHeaders() }
+          );
+          
+          console.log('Profile save response:', saveResponse.data);
+          
+          if (saveResponse.data.user) {
+            setUser(saveResponse.data.user);
+            // Also update the local profile state with the full user data
+            const userData = saveResponse.data.user;
+            setProfile(prev => ({
+              ...prev,
+              profilePictureUrl: userData.profilePictureUrl || uploadResponse.data.profilePictureUrl
+            }));
+          }
+          
+          // Show success message
+          alert('Profile picture uploaded and saved successfully!');
+          console.log('Profile picture uploaded and saved:', uploadResponse.data.profilePictureUrl);
+        } catch (saveError) {
+          console.error('Error saving profile after upload:', saveError);
+          console.error('Save error details:', saveError.response?.data);
+          alert('Photo uploaded but failed to save. Please click "Save Profile" to persist changes.');
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      // Show error to user
+      alert('Failed to upload profile picture. Please try again.');
+      setErrors(prev => ({
+        ...prev,
+        avatar: 'Failed to upload profile picture. Please try again.'
+      }));
+    }
   };
 
   if (loading) {
@@ -368,6 +454,9 @@ const ProfileEditor = () => {
                     />
                   </label>
                 </div>
+                {errors.avatar && (
+                  <span className={styles.error}>{errors.avatar}</span>
+                )}
               </div>
 
               <div className={styles.formGroup}>
