@@ -57,7 +57,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 );
 
 const PublicUserProfile = () => {
-  const { userId } = useParams();
+  const { username } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { 
@@ -101,23 +101,23 @@ const PublicUserProfile = () => {
     if (mounted) {
       console.log('=== EFFECT TRIGGERED === v2');
       console.log('Mounted:', mounted);
-      console.log('UserId:', userId);
+      console.log('Username:', username);
       // Temporary alert to confirm new version
       console.warn('🚀 NEW VERSION DEPLOYED - PublicUserProfile v2');
       fetchProfile();
     }
-  }, [userId, mounted]);
+  }, [username, mounted]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
       console.log('=== PUBLIC PROFILE DEBUG === v2', new Date().toISOString());
-      console.log('1. Fetching profile for userId:', userId);
+      console.log('1. Fetching profile for username:', username);
       console.log('2. Current user from auth:', currentUser);
       console.log('3. Current user ID:', currentUser?._id);
       console.log('4. Type of userId param:', typeof userId);
       console.log('5. Type of currentUser._id:', typeof currentUser?._id);
-      console.log('6. Are they equal?', currentUser?._id === userId);
+      console.log('6. Are they equal?', currentUser?.username === username);
       console.log('7. Context values:', {
         contextImpactScore,
         contextTier,
@@ -125,7 +125,7 @@ const PublicUserProfile = () => {
         lastYearImpactScore
       });
       
-      const data = await profileService.getUserPublicProfile(userId);
+      const data = await profileService.getUserPublicProfile(username);
       console.log('8. Profile data received:', data);
       console.log('9. Full profile details:', {
         user: data?.user,
@@ -145,7 +145,7 @@ const PublicUserProfile = () => {
   };
 
   const handleShare = (platform) => {
-    const url = profileService.generateProfileUrl('user', userId);
+    const url = profileService.generateProfileUrl('user', username);
     const displayName = profile?.user?.displayName || 'this';
     const text = `Check out ${displayName}'s giving profile on Do-Nation!`;
 
@@ -213,16 +213,15 @@ const PublicUserProfile = () => {
   console.log('=== PROFILE COMPARISON DEBUG === v2', new Date().toISOString());
   console.log('currentUser:', currentUser);
   console.log('currentUser._id:', currentUser?._id);
-  console.log('userId from params:', userId);
+  console.log('username from params:', username);
   console.log('Type of currentUser._id:', typeof currentUser?._id);
-  console.log('Type of userId:', typeof userId);
+  console.log('Type of username:', typeof username);
   
   // Try multiple ways to check if it's own profile
   const isOwnProfile = currentUser && (
-    currentUser._id === userId || 
-    currentUser.id === userId ||
-    currentUser._id?.toString() === userId ||
-    currentUser.id?.toString() === userId
+    currentUser.username === username ||
+    currentUser._id === username || 
+    currentUser.id === username
   );
   
   console.log('isOwnProfile result:', isOwnProfile);

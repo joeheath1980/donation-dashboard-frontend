@@ -206,7 +206,7 @@ function App() {
                 <Route path="/microsoft-callback" element={<SuspenseWrapper><MicrosoftAuthCallback /></SuspenseWrapper>} />
                 
                 {/* Public profile routes (no auth required) */}
-                <Route path="/profile/:userId" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
+                <Route path="/profile/:username" element={<Layout><SuspenseWrapper><PublicUserProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/business/:slug" element={<Layout><SuspenseWrapper><PublicBusinessProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/charity/profile/:abn" element={<Layout><SuspenseWrapper><PublicCharityProfile /></SuspenseWrapper></Layout>} />
                 <Route path="/search" element={<Layout><SuspenseWrapper><ProfileSearch /></SuspenseWrapper></Layout>} />
