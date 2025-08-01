@@ -8,6 +8,7 @@ import { Icons } from './icons';
 const YourAccount = () => {
   const { user } = useAuth();
   
+  
   return (
     <div className={`${styles.accountPage} container`}>
       <main className={`${styles.main} mainContent`}>

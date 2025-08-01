@@ -49,14 +49,16 @@ const ProfileSearch = () => {
           type
         };
         const data = await profileService.searchProfiles(searchParams);
-        console.log('Search API Response:', data);
         
         // Handle different response formats
         let formattedResults = data;
         
+        // If the response has a results property, use that
+        if (data.results) {
+          formattedResults = data.results;
+        }
         // If the response is an array, categorize it
-        if (Array.isArray(data)) {
-          console.log('Response is an array, categorizing by type...');
+        else if (Array.isArray(data)) {
           formattedResults = {
             users: data.filter(item => !item.abn && !item.industry).map(user => ({
               ...user,
@@ -69,7 +71,16 @@ const ProfileSearch = () => {
           };
         }
         
-        console.log('Formatted results:', formattedResults);
+        // Ensure all user objects have required fields
+        if (formattedResults.users) {
+          formattedResults.users = formattedResults.users.map(user => ({
+            ...user,
+            displayName: user.displayName || user.name || 'Unknown',
+            publicScore: user.impactScore || user.publicScore || 0,
+            tier: user.tier || 'Bronze'
+          }));
+        }
+        
         setResults(formattedResults);
         setHasSearched(true);
       } catch (error) {
@@ -250,7 +261,7 @@ const ProfileSearch = () => {
                     <div 
                       key={user._id || user.id}
                       className={styles.userCard}
-                      onClick={() => navigateToProfile('user', user._id || user.id)}
+                      onClick={() => navigateToProfile('user', user.username || user._id || user.id)}
                     >
                       <div className={styles.userHeader}>
                         <div className={styles.avatar}>

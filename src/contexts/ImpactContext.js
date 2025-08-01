@@ -225,9 +225,6 @@ export const ImpactProvider = ({ children }) => {
     const headers = getAuthHeaders();
 
     try {
-      console.log('Fetching impact data...');
-      console.log('Using API URL:', process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002');
-      console.log('Headers:', headers);
       
       const [
         donationsRes,
@@ -241,12 +238,6 @@ export const ImpactProvider = ({ children }) => {
         axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`, { headers })
       ]);
 
-      console.log('API Responses:', {
-        donations: donationsRes.data,
-        oneOff: oneOffRes.data,
-        volunteer: volunteerRes.data,
-        fundraising: fundraisingRes.data
-      });
 
       // Ensure arrays even if API returns null/undefined
       setDonations(Array.isArray(donationsRes.data) ? donationsRes.data : []);
@@ -460,6 +451,7 @@ export const ImpactProvider = ({ children }) => {
       setFollowedCharities(JSON.parse(storedCharities));
     }
 
+    
     if (user) {
       setIsAuthenticated(!user.isBusiness);
     } else {
