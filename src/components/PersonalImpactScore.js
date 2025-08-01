@@ -15,6 +15,7 @@ const tierColors = {
 
 const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColor }) => {
   const [animateRings, setAnimateRings] = useState(false);
+  const [hoveredRing, setHoveredRing] = useState(null);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,31 +28,34 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
 
   const { donationScore = 0, volunteerScore = 0, fundraisingScore = 0 } = scoreDetails;
   
-  // Ring configuration
+  // Ring configuration with better spacing and colors
   const rings = [
     { 
       name: 'Donations',
       score: donationScore,
       maxScore: 40,
-      radius: 140,
-      strokeWidth: 25,
-      color: { start: '#5ecfb6', end: '#2d8f7b' }
+      radius: 120,
+      strokeWidth: 18,
+      color: { start: '#4DD0E1', end: '#00ACC1' }, // Cyan/Teal
+      bgColor: '#E0F7FA'
     },
     { 
       name: 'Volunteering',
       score: volunteerScore,
       maxScore: 30,
-      radius: 105,
-      strokeWidth: 25,
-      color: { start: '#4ebfa6', end: '#1d7f6b' }
+      radius: 90,
+      strokeWidth: 18,
+      color: { start: '#66BB6A', end: '#43A047' }, // Green
+      bgColor: '#E8F5E9'
     },
     { 
       name: 'Fundraising',
       score: fundraisingScore,
       maxScore: 20,
-      radius: 70,
-      strokeWidth: 25,
-      color: { start: '#3eaf96', end: '#0d6f5b' }
+      radius: 60,
+      strokeWidth: 18,
+      color: { start: '#AB47BC', end: '#8E24AA' }, // Purple
+      bgColor: '#F3E5F5'
     }
   ];
 
@@ -68,10 +72,20 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       >
         <defs>
           {rings.map((ring, index) => (
-            <linearGradient key={`gradient-${index}`} id={`ring-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={ring.color.start} />
-              <stop offset="100%" stopColor={ring.color.end} />
-            </linearGradient>
+            <React.Fragment key={`defs-${index}`}>
+              <linearGradient id={`ring-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={ring.color.start} />
+                <stop offset="100%" stopColor={ring.color.end} />
+              </linearGradient>
+              {/* Add glow filter for active portions */}
+              <filter id={`glow-${index}`}>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </React.Fragment>
           ))}
         </defs>
         
@@ -88,9 +102,10 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 cy={center}
                 r={ring.radius}
                 fill="none"
-                stroke="#f0f0f0"
+                stroke={ring.bgColor}
                 strokeWidth={ring.strokeWidth}
-                opacity="0.3"
+                opacity="0.5"
+                className={styles.bgRing}
               />
               {/* Progress ring */}
               <circle
@@ -99,17 +114,33 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 r={ring.radius}
                 fill="none"
                 stroke={`url(#ring-gradient-${index})`}
-                strokeWidth={ring.strokeWidth}
+                strokeWidth={hoveredRing === index ? ring.strokeWidth + 4 : ring.strokeWidth}
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={animateRings ? strokeDashoffset : circumference}
                 transform={`rotate(-90 ${center} ${center})`}
+                filter={hoveredRing === index ? `url(#glow-${index})` : 'none'}
                 className={styles.progressRing}
+                data-ring-index={index}
+                onMouseEnter={() => setHoveredRing(index)}
+                onMouseLeave={() => setHoveredRing(null)}
                 style={{
-                  transition: 'stroke-dashoffset 1.2s ease-out',
-                  transitionDelay: `${index * 0.2}s`
+                  transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transitionDelay: animateRings ? `${index * 0.15}s` : '0s'
                 }}
               />
+              {/* Percentage tooltip on hover */}
+              {hoveredRing === index && (
+                <text
+                  x={center}
+                  y={center + ring.radius + ring.strokeWidth + 25}
+                  textAnchor="middle"
+                  className={styles.percentageTooltip}
+                  fill={ring.color.end}
+                >
+                  {Math.round((ring.score / ring.maxScore) * 100)}%
+                </text>
+              )}
             </g>
           );
         })}
@@ -137,17 +168,25 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
         </g>
       </svg>
       
-      {/* Legend */}
+      {/* Legend positioned inside the circle */}
       <div className={styles.ringsLegend}>
         {rings.map((ring, index) => (
           <div key={index} className={styles.legendItem}>
-            <div 
-              className={styles.legendDot} 
-              style={{ background: `linear-gradient(135deg, ${ring.color.start}, ${ring.color.end})` }}
-            />
-            <span className={styles.legendText}>
-              {ring.name}: {ring.score}/{ring.maxScore}
-            </span>
+            <svg width="30" height="20" className={styles.legendArc}>
+              <path
+                d={`M 5 10 A 8 8 0 0 1 25 10`}
+                fill="none"
+                stroke={`url(#ring-gradient-${index})`}
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className={styles.legendTextWrapper}>
+              <span className={styles.legendLabel}>{ring.name}</span>
+              <span className={styles.legendScore}>
+                <strong>{ring.score}</strong>/{ring.maxScore}
+              </span>
+            </div>
           </div>
         ))}
       </div>
