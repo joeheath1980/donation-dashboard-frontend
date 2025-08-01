@@ -146,11 +146,11 @@ const ProfileSearch = () => {
         ) : (
           <>
             {/* User Results */}
-            {(profileType === 'all' || profileType === 'users') && results.users.length > 0 && (
+            {(profileType === 'all' || profileType === 'users') && results?.users?.length > 0 && (
               <div className={styles.resultSection}>
                 <h2>People</h2>
                 <div className={styles.userGrid}>
-                  {results.users.map((user) => (
+                  {results?.users?.map((user) => (
                     <div 
                       key={user._id || user.id}
                       className={styles.userCard}
@@ -193,11 +193,11 @@ const ProfileSearch = () => {
             )}
 
             {/* Business Results */}
-            {(profileType === 'all' || profileType === 'businesses') && results.businesses.length > 0 && (
+            {(profileType === 'all' || profileType === 'businesses') && results?.businesses?.length > 0 && (
               <div className={styles.resultSection}>
                 <h2>Businesses</h2>
                 <div className={styles.businessGrid}>
-                  {results.businesses.map((business) => (
+                  {results?.businesses?.map((business) => (
                     <div 
                       key={business.slug}
                       className={styles.businessCard}
@@ -233,11 +233,11 @@ const ProfileSearch = () => {
             )}
 
             {/* Charity Results */}
-            {(profileType === 'all' || profileType === 'charities') && results.charities.length > 0 && (
+            {(profileType === 'all' || profileType === 'charities') && results?.charities?.length > 0 && (
               <div className={styles.resultSection}>
                 <h2>Charities</h2>
                 <div className={styles.charityGrid}>
-                  {results.charities.map((charity) => (
+                  {results?.charities?.map((charity) => (
                     <div 
                       key={charity.abn}
                       className={styles.charityCard}
@@ -280,7 +280,7 @@ const ProfileSearch = () => {
             )}
 
             {/* No Results */}
-            {results.users.length === 0 && results.businesses.length === 0 && results.charities.length === 0 && (
+            {(!results?.users?.length && !results?.businesses?.length && !results?.charities?.length) && (
               <div className={styles.noResults}>
                 <h3>No results found</h3>
                 <p>Try adjusting your search terms or filters</p>
