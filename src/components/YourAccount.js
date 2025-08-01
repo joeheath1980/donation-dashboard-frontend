@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './YourAccount.module.css';
 import './SharedStyles.css';
 import { Icons } from './icons';
 
 const YourAccount = () => {
+  const { user } = useAuth();
+  
   return (
     <div className={`${styles.accountPage} container`}>
       <main className={`${styles.main} mainContent`}>
@@ -19,7 +22,12 @@ const YourAccount = () => {
               <h2 className="cardTitle">Profile</h2>
             </div>
             <p className="cardText">Manage your personal information and preferences.</p>
-            <Link to="/profile/edit" className="button">Edit Profile</Link>
+            <div className={styles.cardActions}>
+              <Link to="/profile/edit" className="button">Edit Profile</Link>
+              {user?.username && (
+                <Link to={`/profile/${user.username}`} className="button secondary">View Public Profile</Link>
+              )}
+            </div>
             <span className={`${styles.ctaTip} tip`}>Keep your profile updated for a better experience!</span>
           </div>
 
