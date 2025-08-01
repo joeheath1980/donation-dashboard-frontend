@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import ImpactVisualization from './ImpactVisualization';
-import ImpactScoreExplain from './ImpactScoreExplain';
 import TierProgressModal from './TierProgressModal';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { 
@@ -314,9 +313,6 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
       >
         <SwiperSlide>
           <ImpactVisualization hideTitle={true} />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ImpactScoreExplain hideTitle={true} />
         </SwiperSlide>
         <SwiperSlide>
           <TierProgressModal 

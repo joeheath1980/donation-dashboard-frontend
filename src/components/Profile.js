@@ -77,7 +77,6 @@ function Profile() {
 
   const impactSections = [
     { title: 'Impact Journey', component: 'ImpactVisualization' },
-    { title: 'Impact Score Breakdown', component: 'ImpactScoreExplain' },
     { title: 'Tier Progress', component: 'TierProgress' },
     { title: 'Your Badges', component: 'BadgesDisplay' },
   ];
