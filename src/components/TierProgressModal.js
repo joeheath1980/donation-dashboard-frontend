@@ -37,7 +37,6 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
           const Icon = tier.icon;
           const isAchieved = index >= currentTierIndex;
           const isNext = index === currentTierIndex - 1;
-          const isNearlyThere = isNext && pointsToNextTier <= 5; // Within 5 points
           
           // Calculate progress for the next tier
           let progressPercentage = 0;
@@ -66,6 +65,7 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
               {/* Center - Progress Bar */}
               <div className={styles.tierBarContainer}>
                 <div className={styles.tierBarBackground}>
+                  {/* Filled progress */}
                   <div
                     className={`${styles.tierBar} ${isAchieved ? styles.achieved : ''} ${isNext ? styles.inProgress : ''}`}
                     style={{ 
@@ -77,46 +77,47 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
                           'transparent'
                     }}
                   />
+                  {/* Remaining progress (washed out) */}
+                  {isNext && progressPercentage < 100 && (
+                    <div
+                      className={styles.tierBarRemaining}
+                      style={{ 
+                        left: `${progressPercentage}%`,
+                        width: `${100 - progressPercentage}%`,
+                        background: `linear-gradient(90deg, ${tier.color}33, ${tier.color}22)`
+                      }}
+                    />
+                  )}
+                  {/* Current score badge */}
                   {isNext && (
                     <div 
-                      className={styles.progressIndicator} 
+                      className={styles.currentScoreBadge} 
                       style={{ left: `${progressPercentage}%` }}
-                    />
+                    >
+                      <span>{impactScore}</span>
+                    </div>
                   )}
                 </div>
               </div>
               
-              {/* Right side - Score */}
+              {/* Right side - Tier threshold */}
               <div className={styles.tierRight}>
-                <span className={`${styles.tierScore} ${isAchieved ? styles.achieved : ''} ${isNearlyThere ? styles.nearlyThere : ''}`}>
-                  {isNearlyThere ? (
-                    <>
-                      <span className={styles.currentScoreHighlight}>{impactScore}</span>
-                      <span className={styles.scoreSeparator}>/</span>
-                      <span className={styles.targetScore}>{tier.minScore}</span>
-                    </>
-                  ) : (
-                    tier.minScore
-                  )}
+                <span className={`${styles.tierScore} ${isAchieved ? styles.achieved : ''}`}>
+                  {tier.minScore}
                 </span>
               </div>
             </div>
           );
         })}
       </div>
-      <div className={styles.summarySection}>
-        <div className={`${styles.currentScore} description`}>
-          <FaChartLine className={styles.scoreIcon} />
-          <span>Your Impact Score</span>
-          <span className={styles.scoreValue}>{impactScore}</span>
-        </div>
-        {nextTier && (
+      {nextTier && (
+        <div className={styles.summarySection}>
           <div className={`${styles.nextTier} highlight`}>
             <FaArrowUp className={styles.scoreIcon} />
             <span>{pointsToNextTier} points to {nextTier.name}</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
