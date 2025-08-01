@@ -193,6 +193,7 @@ const PublicUserProfile = () => {
   
   // Debug: Check all available score and tier fields
   console.log('=== API DATA STRUCTURE === v2', new Date().toISOString());
+  console.log('Charity Portfolio:', charityPortfolio);
   console.log('Profile object:', profile);
   console.log('User object:', user);
   console.log('Stats object:', stats);
@@ -502,32 +503,47 @@ const PublicUserProfile = () => {
             </section>
           )}
           
-          {/* Your Impact Section - Only showing Charities Following */}
-          <section className={`${styles.section} ${styles.impactSection}`}>
-            <SectionTitle icon={FaChartLine} title="Supporting" />
-            
-            <div className={styles.impactContent}>
-              <div className={publicStyles.charitiesGrid}>
-                <div className={`${styles.donationCard} card`}>
-                  <h3 className={`${styles.cardTitle} cardTitle`}>
-                    <FaRegHeart className={styles.icon} /> Charities Following
-                  </h3>
-                  <ul className={styles.list}>
-                    {getDisplayedFollowedCharities().map((charity, index) => (
-                      <li key={charity.ABN || `charity-${index}`} className={styles.listItem}>
-                        <span>{charity.name || 'Unknown Charity'}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {charityPortfolio && charityPortfolio.length > 3 && (
-                    <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
-                      {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-                    </button>
-                  )}
-                </div>
+          {/* Charities Following Details */}
+          {charityPortfolio && charityPortfolio.length > 0 && (
+            <section className={`${styles.section} ${styles.impactSection}`}>
+              <SectionTitle icon={FaRegHeart} title="Charities Following" />
+              
+              <div className={publicStyles.charityGrid}>
+                {getDisplayedFollowedCharities().map((charity, index) => {
+                  // Debug charity data structure
+                  console.log('Charity data:', charity);
+                  // Handle different field naming conventions
+                  const charityName = charity.Charity_Name || 
+                                     charity.charityName || 
+                                     charity.name || 
+                                     charity.Name ||
+                                     charity.charity_name ||
+                                     'Unknown Charity';
+                  const charityCategory = charity.Main_Activity || 
+                                         charity.mainActivity ||
+                                         charity.category || 
+                                         charity.Category ||
+                                         charity.main_activity ||
+                                         'Charitable Organization';
+                  
+                  return (
+                    <div key={charity.ABN || charity._id || `charity-${index}`} className={publicStyles.charityCard}>
+                      <h4>{charityName}</h4>
+                      <p>{charityCategory}</p>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          </section>
+              
+              {charityPortfolio.length > 3 && (
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                  <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
+                    {showAllFollowedCharities ? "Show Less" : `View All ${charityPortfolio.length} Charities`} <FaChevronRight className={styles.buttonIcon} />
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Activity Stats */}
           <section className={styles.section}>
@@ -547,6 +563,17 @@ const PublicUserProfile = () => {
                     {safeStats.currentStreak} <span>days</span>
                   </div>
                   <div className={publicStyles.statLabel}>Current Streak</div>
+                </div>
+              )}
+
+              {/* Charities Following */}
+              {charityPortfolio && charityPortfolio.length > 0 && (
+                <div className={publicStyles.statCard}>
+                  <FaRegHeart className={publicStyles.statIcon} />
+                  <div className={publicStyles.statValue}>
+                    {charityPortfolio.length} <span>charities</span>
+                  </div>
+                  <div className={publicStyles.statLabel}>Following</div>
                 </div>
               )}
             </div>
