@@ -82,7 +82,8 @@ class ProfileService {
       params = { q: params, type: arguments[1] || 'all' };
     }
     
-    const response = await api.get('/api/public/profiles/search', {
+    // Updated to use correct endpoint path
+    const response = await api.get('/api/public/search', {
       params
     });
     return response.data;
