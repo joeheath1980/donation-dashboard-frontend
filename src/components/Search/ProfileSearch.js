@@ -265,8 +265,8 @@ const ProfileSearch = () => {
                     >
                       <div className={styles.userHeader}>
                         <div className={styles.avatar}>
-                          {user.avatar ? (
-                            <img src={user.avatar} alt={user.displayName} />
+                          {(user.profilePictureUrl || user.profilePicture || user.avatar) ? (
+                            <img src={user.profilePictureUrl || user.profilePicture || user.avatar} alt={user.displayName} />
                           ) : (
                             <div className={styles.avatarPlaceholder}>
                               {user.displayName.charAt(0).toUpperCase()}

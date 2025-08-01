@@ -275,7 +275,7 @@ const PublicUserProfile = () => {
     displayName: user?.displayName || 'Anonymous User',
     tier: actualTier,
     joinDate: user?.joinDate || new Date().toISOString(),
-    avatar: user?.avatar,
+    avatar: user?.profilePictureUrl || user?.profilePicture || user?.avatar,
     publicScore: actualScore,
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
