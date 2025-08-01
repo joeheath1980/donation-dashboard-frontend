@@ -49,7 +49,28 @@ const ProfileSearch = () => {
           type
         };
         const data = await profileService.searchProfiles(searchParams);
-        setResults(data);
+        console.log('Search API Response:', data);
+        
+        // Handle different response formats
+        let formattedResults = data;
+        
+        // If the response is an array, categorize it
+        if (Array.isArray(data)) {
+          console.log('Response is an array, categorizing by type...');
+          formattedResults = {
+            users: data.filter(item => !item.abn && !item.industry).map(user => ({
+              ...user,
+              displayName: user.displayName || user.name || 'Unknown',
+              publicScore: user.impactScore || user.publicScore || 0,
+              tier: user.tier || 'Bronze'
+            })),
+            businesses: data.filter(item => item.industry),
+            charities: data.filter(item => item.abn)
+          };
+        }
+        
+        console.log('Formatted results:', formattedResults);
+        setResults(formattedResults);
         setHasSearched(true);
       } catch (error) {
         console.error('Search error:', error);
@@ -246,8 +267,14 @@ const ProfileSearch = () => {
                           {user.username && (
                             <p className={styles.username}>@{user.username}</p>
                           )}
-                          <p className={styles.tier}>{user.tier} Tier</p>
-                          {user.location && (user.location.city || user.location.state || user.location.country) && (
+                          {user.professionalTitle && (
+                            <p className={styles.title}>{user.professionalTitle}</p>
+                          )}
+                          {user.bio && (
+                            <p className={styles.bio}>{user.bio.substring(0, 100)}...</p>
+                          )}
+                          <p className={styles.tier}>{user.tier || 'Member'} Tier</p>
+                          {(user.location && (user.location.city || user.location.state || user.location.country)) ? (
                             <p className={styles.location}>
                               <FaMapMarkerAlt />
                               <span>
@@ -256,7 +283,12 @@ const ProfileSearch = () => {
                                   .join(', ')}
                               </span>
                             </p>
-                          )}
+                          ) : user.location && typeof user.location === 'string' ? (
+                            <p className={styles.location}>
+                              <FaMapMarkerAlt />
+                              <span>{user.location}</span>
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                       <div className={styles.userStats}>
