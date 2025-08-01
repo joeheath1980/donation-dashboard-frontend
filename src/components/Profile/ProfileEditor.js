@@ -97,24 +97,27 @@ const ProfileEditor = () => {
         { headers }
       );
       
-      const data = response.data;
+      // Handle both wrapped and unwrapped API responses
+      const userData = response.data.user || response.data;
+      const completeness = response.data.profileCompleteness || userData.profileCompleteness || 0;
+      
       setProfile({
-        displayName: data.displayName || '',
-        username: data.username || '',
-        email: data.email || '',
-        bio: data.bio || '',
-        professionalTitle: data.professionalTitle || '',
-        location: data.location || { city: '', state: '', country: '' },
-        preferredCauses: data.preferredCauses || [],
-        givingPhilosophy: data.givingPhilosophy || '',
-        socialLinks: data.socialLinks || {
+        displayName: userData.displayName || '',
+        username: userData.username || '',
+        email: userData.email || '',
+        bio: userData.bio || '',
+        professionalTitle: userData.professionalTitle || '',
+        location: userData.location || { city: '', state: '', country: '' },
+        preferredCauses: userData.preferredCauses || [],
+        givingPhilosophy: userData.givingPhilosophy || '',
+        socialLinks: userData.socialLinks || {
           website: '',
           twitter: '',
           linkedin: '',
           facebook: '',
           instagram: ''
         },
-        privacy: data.privacy || {
+        privacy: userData.privacy || {
           showRealName: true,
           showEmail: false,
           showDonationAmount: true,
@@ -125,10 +128,10 @@ const ProfileEditor = () => {
           showImpactScore: true,
           profileVisibility: 'public'
         },
-        impactStatement: data.impactStatement || ''
+        impactStatement: userData.impactStatement || ''
       });
-      setProfileCompleteness(data.profileCompleteness || 0);
-      setAvatarPreview(data.avatar || null);
+      setProfileCompleteness(completeness);
+      setAvatarPreview(userData.avatar || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -754,6 +757,16 @@ const ProfileEditor = () => {
             >
               Cancel
             </button>
+            {profile.username && (
+              <a 
+                href={`/profile/${profile.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.viewProfileButton}
+              >
+                View Public Profile
+              </a>
+            )}
             <button
               type="submit"
               className={styles.saveButton}

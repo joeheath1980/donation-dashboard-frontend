@@ -99,6 +99,13 @@
   text-align: left;
 }
 
+.cardActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .accountPage {
     padding: 1rem;
