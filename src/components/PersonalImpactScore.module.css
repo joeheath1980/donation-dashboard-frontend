@@ -534,19 +534,24 @@
 }
 
 .centerScore {
-  font-size: 3.5rem;
-  font-weight: 700;
-  opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1.6s;
-}
-
-.centerTier {
-  font-size: 1.25rem;
+  font-size: 2.25rem;
   font-weight: 600;
   opacity: 0;
   animation: fadeInLabel 0.6s ease-out forwards;
+  animation-delay: 1.6s;
+  color: #475569;
+  line-height: 1;
+}
+
+.centerTier {
+  font-size: 1.125rem;
+  font-weight: 500;
+  opacity: 0;
+  animation: fadeInLabel 0.6s ease-out forwards;
   animation-delay: 1.8s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
 }
 
 @keyframes fadeInLabel {
@@ -555,60 +560,76 @@
   }
 }
 
-/* Legend - Enhanced design */
-.ringsLegend {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  justify-content: center;
-  margin-top: -10px;
+/* Ring Tooltip */
+.ringTooltip {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--ring-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  pointer-events: none;
   opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1s;
+  animation: tooltipFadeIn 0.2s ease-out forwards;
+  min-width: 120px;
 }
 
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+.ringTooltip::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 6px 6px 0;
+  border-color: transparent var(--ring-color, #e0e0e0) transparent transparent;
 }
 
-.legendItem:hover {
-  background: rgba(0, 0, 0, 0.02);
-  transform: translateY(-2px);
+.ringTooltip::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 5px 5px 0;
+  border-color: transparent white transparent transparent;
 }
 
-.legendArc {
-  flex-shrink: 0;
+.tooltipHeader {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ring-color, #333);
+  margin-bottom: 4px;
 }
 
-.legendTextWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+.tooltipScore {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2px;
 }
 
-.legendLabel {
-  font-size: 0.75rem;
+.tooltipPercentage {
+  font-size: 0.875rem;
   color: #64748b;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.legendScore {
-  font-size: 0.875rem;
-  color: #1e293b;
-  font-weight: 400;
-}
-
-.legendScore strong {
-  font-weight: 700;
-  color: #0f172a;
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Ring hover effects */
@@ -693,11 +714,15 @@
   }
   
   .centerScore {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
   }
   
   .centerTier {
-    font-size: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .ringTooltip {
+    display: none;
   }
   
   .ringScore {
