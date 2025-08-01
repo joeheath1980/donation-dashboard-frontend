@@ -150,18 +150,18 @@ const SignUp = () => {
 
     setLoading(true);
     try {
-      const result = await userSignup(formData);
-      if (result.success) {
-        setSuccess('Account created successfully! Redirecting to login...');
+      const result = await userSignup(formData.name, formData.email, formData.password);
+      // userSignup returns the user object on success
+      if (result) {
+        setSuccess('Account created successfully! Redirecting to dashboard...');
         setTimeout(() => {
-          navigate('/login');
+          navigate('/');
         }, 2000);
-      } else {
-        setError(result.error || 'Failed to create account. Please try again.');
       }
     } catch (error) {
       console.error('Signup error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      // Use the error message from the catch block
+      setError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
