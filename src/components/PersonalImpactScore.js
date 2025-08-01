@@ -368,8 +368,8 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
           <Link to="/activity" className={styles.discoverButton}>
             Discover Your Contributions
           </Link>
-          {user && user._id && (
-            <Link to={`/profile/${user._id}`} className={styles.profileButton}>
+          {user && user.username && (
+            <Link to={`/profile/${user.username}`} className={styles.profileButton}>
               <FaUserCircle /> View Public Profile
             </Link>
           )}
