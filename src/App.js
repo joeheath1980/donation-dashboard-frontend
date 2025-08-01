@@ -70,6 +70,7 @@ const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
 const PublicUserProfile = lazy(() => import('./components/Profile/PublicUserProfile'));
 const PublicBusinessProfile = lazy(() => import('./components/Profile/PublicBusinessProfile'));
 const PublicCharityProfile = lazy(() => import('./components/Profile/PublicCharityProfile'));
+const ProfileEditor = lazy(() => import('./components/Profile/ProfileEditor'));
 const ProfileSearch = lazy(() => import('./components/Search/ProfileSearch'));
 const PrivacySettings = lazy(() => import('./components/Settings/PrivacySettings'));
 const PaymentMethods = lazy(() => import('./components/PaymentMethods/PaymentMethods'));
@@ -213,6 +214,7 @@ function App() {
                 {/* Protected routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Layout><SuspenseWrapper><Profile /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/profile/edit" element={<ProtectedRoute><Layout><SuspenseWrapper><ProfileEditor /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/YourAccount" element={<ProtectedRoute><Layout><SuspenseWrapper><YourAccount /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/about" element={<ProtectedRoute><Layout><SuspenseWrapper><About /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-perks" element={<ProtectedRoute><Layout><SuspenseWrapper><YourPerks /></SuspenseWrapper></Layout></ProtectedRoute>} />

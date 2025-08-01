@@ -566,3 +566,119 @@
   gap: 1.5rem;
   width: 100%;
 }
+/* Profile Information Section */
+.profileInfoSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.bio {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.infoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.infoItem svg {
+  color: #667eea;
+  font-size: 16px;
+}
+
+.infoItem a {
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.infoItem a:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.socialLinks a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.socialLinks a:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Username */
+.username {
+  font-size: 18px;
+  color: #667eea;
+  margin: 4px 0 8px;
+}
+
+/* Giving Philosophy */
+.givingPhilosophy {
+  margin-top: 24px;
+}
+
+.givingPhilosophy h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.givingPhilosophy p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+/* Cause Areas */
+.causeAreas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.causeTag {
+  display: inline-block;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+EOF < /dev/null
