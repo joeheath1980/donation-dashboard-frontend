@@ -66,10 +66,22 @@
   padding: 12px 0;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.4; /* Default: future tiers are faded */
 }
 
 .tierItem:hover {
   transform: translateX(4px);
+  opacity: 1 !important;
+}
+
+/* Achieved tiers are fully visible */
+.tierItem:has(.tierIcon.achieved) {
+  opacity: 1;
+}
+
+/* Current tier (next) is semi-visible */
+.tierItem:has(.tierIcon.next) {
+  opacity: 0.85;
 }
 
 /* Left side - Icon and Name */
@@ -217,25 +229,70 @@
   }
 }
 
-.progressIndicator {
+.tierBarRemaining {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 0 6px 6px 0;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.currentScoreBadge {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
   background: white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1);
+  padding: 4px 12px;
+  min-width: 36px;
+  text-align: center;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  border: 2px solid currentColor;
 }
 
-.progressIndicator::before {
+.currentScoreBadge::after {
   content: '';
   position: absolute;
-  inset: 4px;
-  background: currentColor;
-  border-radius: 50%;
-  opacity: 0.8;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 4px 0 4px;
+  border-color: white transparent transparent transparent;
+}
+
+.currentScoreBadge span {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+}
+
+.tierItem:hover .currentScoreBadge {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Pulse animation for the current score badge */
+@keyframes pulseBadge {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.currentScoreBadge {
+  animation: pulseBadge 3s ease-in-out infinite;
+}
+
+.tierItem:hover .currentScoreBadge {
+  animation: none;
 }
 
 /* Right side - Score */
@@ -264,41 +321,6 @@
   font-weight: 700;
 }
 
-.tierScore.nearlyThere {
-  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
-  color: #F57C00;
-  font-weight: 700;
-  animation: pulseScore 2s ease-in-out infinite;
-}
-
-@keyframes pulseScore {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(245, 124, 0, 0.3);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(245, 124, 0, 0.4);
-  }
-}
-
-.currentScoreHighlight {
-  color: #E65100;
-  font-weight: 800;
-  font-size: 20px;
-}
-
-.scoreSeparator {
-  margin: 0 4px;
-  color: #F57C00;
-  font-weight: 400;
-}
-
-.targetScore {
-  color: #F57C00;
-  font-weight: 600;
-  font-size: 16px;
-}
 
 /* Summary Section */
 .summarySection {
@@ -306,42 +328,29 @@
   padding-top: 24px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.currentScore, .nextTier {
-  font-size: 16px;
-  color: var(--text-primary);
-  line-height: 1.6;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.currentScore {
-  flex: 1;
-}
-
-.scoreValue {
-  margin-left: auto;
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--primary-color);
-  padding: 4px 12px;
-  background: linear-gradient(135deg, rgba(94, 207, 182, 0.1), rgba(45, 143, 123, 0.1));
-  border-radius: 16px;
 }
 
 .nextTier {
+  font-size: 16px;
   font-weight: 600;
   color: var(--primary-color);
-  background: linear-gradient(135deg, rgba(255, 243, 224, 0.8), rgba(255, 224, 178, 0.8));
-  padding: 8px 16px;
-  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 243, 224, 0.9), rgba(255, 224, 178, 0.9));
+  padding: 10px 20px;
+  border-radius: 24px;
   border: 1px solid rgba(245, 124, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(245, 124, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.nextTier:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.25);
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
 }
 
 /* Responsive adjustments */
