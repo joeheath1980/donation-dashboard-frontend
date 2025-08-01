@@ -92,6 +92,7 @@ const ProfileEditor = () => {
     try {
       setLoading(true);
       const headers = getAuthHeaders();
+      
       const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
         { headers }
