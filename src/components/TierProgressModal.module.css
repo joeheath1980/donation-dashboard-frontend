@@ -14,25 +14,25 @@
 
 .modalContent {
   background-color: white;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 30px;
+  border-radius: 16px;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: var(--transition-standard);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .modalContent:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .modalContent h2 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--primary-dark);
-  margin-bottom: 15px;
+  margin-bottom: 30px;
   line-height: 1.3;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@
 }
 
 .titleIcon {
-  font-size: 24px;
+  font-size: 26px;
   color: var(--primary-color);
 }
 
@@ -53,120 +53,295 @@
 .tierProgress {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-top: 20px;
   width: 100%;
 }
 
-.tierBarContainer {
-  background-color: var(--background-light);
-  border-radius: 8px;
-  height: 52px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-light);
-  transition: var(--transition-standard);
-  width: 100%;
-}
-
-.tierBarContainer:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.tierBar {
+/* New tier item layout */
+.tierItem {
   display: flex;
   align-items: center;
-  height: 100%;
-  transition: width 0.5s ease-in-out;
-  width: 100%;
+  gap: 20px;
+  padding: 12px 0;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tierItem:hover {
+  transform: translateX(4px);
+}
+
+/* Left side - Icon and Name */
+.tierLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 200px;
 }
 
 .tierIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-left: 8px;
-  font-size: 20px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: var(--transition-standard);
-  padding: 8px;
+  font-size: 22px;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  opacity: 0.4;
 }
 
-.tierBarContainer:hover .tierIcon {
+.tierIcon.achieved {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px currentColor, 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: scale(1.1);
 }
 
-.achieved .tierIcon {
-  background-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+.tierIcon.achieved::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.tierIcon.next {
+  opacity: 0.8;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.05;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 .tierName {
-  margin-left: 12px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   font-size: 16px;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+.tierName.achieved {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Center - Progress Bar Container */
+.tierBarContainer {
   flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0 8px;
+}
+
+.tierBarBackground {
+  width: 100%;
+  height: 12px;
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tierItem:hover .tierBarBackground {
+  height: 14px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tierBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 6px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tierBar.achieved {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.tierBar.inProgress {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tierBar.inProgress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressIndicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressIndicator::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+/* Right side - Score */
+.tierRight {
+  flex: 0 0 100px;
+  text-align: right;
 }
 
 .tierScore {
-  margin-right: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 14px;
+  font-size: 18px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  transition: all 0.3s ease;
+  min-width: 60px;
+  text-align: center;
 }
 
-.achieved {
+.tierScore.achieved {
   color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.3);
+  font-weight: 700;
 }
 
-.achieved .tierScore {
-  color: white;
-  background-color: rgba(255, 255, 255, 0.3);
+.tierScore.nearlyThere {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  color: #F57C00;
+  font-weight: 700;
+  animation: pulseScore 2s ease-in-out infinite;
+}
+
+@keyframes pulseScore {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(245, 124, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(245, 124, 0, 0.4);
+  }
+}
+
+.currentScoreHighlight {
+  color: #E65100;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.scoreSeparator {
+  margin: 0 4px;
+  color: #F57C00;
+  font-weight: 400;
+}
+
+.targetScore {
+  color: #F57C00;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Summary Section */
+.summarySection {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .currentScore, .nextTier {
-  margin-top: 20px;
   font-size: 16px;
   color: var(--text-primary);
   line-height: 1.6;
-  width: 100%;
-  text-align: left;
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.currentScore {
+  flex: 1;
+}
+
+.scoreValue {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--primary-color);
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(94, 207, 182, 0.1), rgba(45, 143, 123, 0.1));
+  border-radius: 16px;
 }
 
 .nextTier {
   font-weight: 600;
   color: var(--primary-color);
-}
-
-/* Tier-specific colors */
-.tierBar[data-tier="Visionary"] {
-  background: linear-gradient(45deg, #FFD700, #FFA500);
-}
-
-.tierBar[data-tier="Champion"] {
-  background: linear-gradient(45deg, #C0C0C0, #A9A9A9);
-}
-
-.tierBar[data-tier="Philanthropist"] {
-  background: linear-gradient(45deg, #CD7F32, #8B4513);
-}
-
-.tierBar[data-tier="Altruist"] {
-  background: linear-gradient(45deg, #2ECC71, #27AE60);
-}
-
-.tierBar[data-tier="Giver"] {
-  background: linear-gradient(45deg, #E74C3C, #C0392B);
+  background: linear-gradient(135deg, rgba(255, 243, 224, 0.8), rgba(255, 224, 178, 0.8));
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 124, 0, 0.2);
 }
 
 /* Responsive adjustments */
@@ -181,21 +356,17 @@
   }
 
   .titleIcon {
-    font-size: 20px;
+    font-size: 22px;
   }
 
-  .scoreIcon {
-    font-size: 16px;
-  }
-
-  .tierBarContainer {
-    height: 48px;
+  .tierLeft {
+    flex: 0 0 160px;
   }
 
   .tierIcon {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
 
   .tierName {
@@ -203,11 +374,44 @@
   }
 
   .tierScore {
-    font-size: 12px;
-    padding: 3px 10px;
+    font-size: 16px;
+    padding: 4px 12px;
   }
 
-  .currentScore, .nextTier {
+  .currentScoreHighlight {
+    font-size: 18px;
+  }
+
+  .targetScore {
     font-size: 14px;
+  }
+
+  .summarySection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .currentScore {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .tierItem {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .tierLeft {
+    flex: 0 0 100%;
+  }
+
+  .tierBarContainer {
+    flex: 1 0 calc(100% - 100px);
+    order: 3;
+  }
+
+  .tierRight {
+    order: 2;
   }
 }
