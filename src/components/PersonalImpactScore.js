@@ -104,8 +104,11 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 fill="none"
                 stroke={ring.bgColor}
                 strokeWidth={ring.strokeWidth}
-                opacity="0.5"
+                opacity={hoveredRing !== null && hoveredRing !== index ? "0.3" : "0.5"}
                 className={styles.bgRing}
+                style={{
+                  transition: 'opacity 0.3s ease'
+                }}
               />
               {/* Progress ring */}
               <circle
@@ -114,7 +117,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 r={ring.radius}
                 fill="none"
                 stroke={`url(#ring-gradient-${index})`}
-                strokeWidth={hoveredRing === index ? ring.strokeWidth + 4 : ring.strokeWidth}
+                strokeWidth={hoveredRing === index ? ring.strokeWidth + 2 : ring.strokeWidth}
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={animateRings ? strokeDashoffset : circumference}
@@ -125,22 +128,12 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 onMouseEnter={() => setHoveredRing(index)}
                 onMouseLeave={() => setHoveredRing(null)}
                 style={{
-                  transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transitionDelay: animateRings ? `${index * 0.15}s` : '0s'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transitionDelay: animateRings ? `${index * 0.15}s` : '0s',
+                  opacity: hoveredRing !== null && hoveredRing !== index ? 0.7 : 1,
+                  filter: hoveredRing === index ? 'brightness(1.1)' : 'none'
                 }}
               />
-              {/* Percentage tooltip on hover */}
-              {hoveredRing === index && (
-                <text
-                  x={center}
-                  y={center + ring.radius + ring.strokeWidth + 25}
-                  textAnchor="middle"
-                  className={styles.percentageTooltip}
-                  fill={ring.color.end}
-                >
-                  {Math.round((ring.score / ring.maxScore) * 100)}%
-                </text>
-              )}
             </g>
           );
         })}
@@ -149,16 +142,25 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
         <g>
           <text
             x={center}
-            y={center - 10}
+            y={center - 8}
             textAnchor="middle"
             className={styles.centerScore}
-            fill="#2d3748"
+            fill="#475569"
           >
             {totalScore}
           </text>
+          <line
+            x1={center - 25}
+            x2={center + 25}
+            y1={center + 4}
+            y2={center + 4}
+            stroke="#e2e8f0"
+            strokeWidth="1"
+            opacity="0.6"
+          />
           <text
             x={center}
-            y={center + 15}
+            y={center + 22}
             textAnchor="middle"
             className={styles.centerTier}
             fill={tierColor.end}
@@ -168,28 +170,25 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
         </g>
       </svg>
       
-      {/* Legend positioned inside the circle */}
-      <div className={styles.ringsLegend}>
-        {rings.map((ring, index) => (
-          <div key={index} className={styles.legendItem}>
-            <svg width="30" height="20" className={styles.legendArc}>
-              <path
-                d={`M 5 10 A 8 8 0 0 1 25 10`}
-                fill="none"
-                stroke={`url(#ring-gradient-${index})`}
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className={styles.legendTextWrapper}>
-              <span className={styles.legendLabel}>{ring.name}</span>
-              <span className={styles.legendScore}>
-                <strong>{ring.score}</strong>/{ring.maxScore}
-              </span>
-            </div>
+      {/* Hover tooltip */}
+      {hoveredRing !== null && (
+        <div 
+          className={styles.ringTooltip}
+          style={{
+            '--ring-color': rings[hoveredRing].color.end,
+            left: `${center + rings[hoveredRing].radius + 40}px`,
+            top: `${center - 20}px`
+          }}
+        >
+          <div className={styles.tooltipHeader}>{rings[hoveredRing].name}</div>
+          <div className={styles.tooltipScore}>
+            {rings[hoveredRing].score}/{rings[hoveredRing].maxScore}
           </div>
-        ))}
-      </div>
+          <div className={styles.tooltipPercentage}>
+            {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}%
+          </div>
+        </div>
+      )}
     </div>
   );
 };
