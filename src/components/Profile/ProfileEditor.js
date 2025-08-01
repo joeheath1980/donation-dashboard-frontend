@@ -19,7 +19,7 @@ import LoadingSpinner from '../Common/LoadingSpinner';
 import { debounce } from 'lodash';
 
 const ProfileEditor = () => {
-  const { user, getAuthHeaders, updateUser } = useAuth();
+  const { user, getAuthHeaders, setUser } = useAuth();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
@@ -271,8 +271,10 @@ const ProfileEditor = () => {
       );
       
       // Update auth context with new user data
-      updateUser(response.data.user);
-      setProfileCompleteness(response.data.profileCompleteness);
+      if (response.data.user) {
+        setUser(response.data.user);
+      }
+      setProfileCompleteness(response.data.profileCompleteness || 0);
       
       // Show success message
       alert('Profile updated successfully!');
