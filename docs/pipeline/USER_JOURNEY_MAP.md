@@ -24,10 +24,12 @@ The donor journey on Do-Nation begins with discovering their lifetime giving sco
 1. Sign up with email/social login
 2. Connect email for receipt scanning
 3. **AI scans lifetime of donation receipts**
-4. Watch score calculate in real-time
+4. Watch score calculate in real-time with modern animations
 5. **Reveal: "You've donated $3,847 to 12 charities!"**
-6. Receive tier status and badges
-7. **Create public profile** (optional)
+6. Receive tier status with floating progress indicators
+7. **Unlock 3D achievement badges** with progress tracking
+8. **Toggle between total score and interactive breakdown**
+9. **Create public profile** (optional)
 
 **Public Profile Setup:**
 - Choose privacy level (full public/friends/private)
@@ -79,31 +81,40 @@ The donor journey on Do-Nation begins with discovering their lifetime giving sco
 
 ### 3. **Comprehensive Impact Tracking**
 
+#### **Enhanced Visualizations**
+- **Impact Journey**: Interactive Chart.js timeline with gradient backgrounds
+- **Score Breakdown**: Concentric rings showing donation/volunteer/fundraising split
+- **Tier Progress**: Visual hierarchy with floating score badges
+- **Badge Collection**: 3D circular badges with shine effects and progress tracking
+
 #### **Donation Tracking** (Automatic)
 - Forward ANY donation receipt
 - Email scraping finds new receipts
 - Both micro and direct donations tracked
-- Score updates in real-time
+- Score updates in real-time with animations
+- View impact through toggle between total and breakdown
 
 #### **Volunteering Tracking** (Verified)
 - Forward volunteer confirmation emails
 - Manual upload with evidence (photos, certificates)
 - Admin verification required
 - Hours convert to score points
-- Special volunteer badges earned
+- Special volunteer badges earned with 3D design
+- Progress tracking shows "2/3 contributions" to next badge
 
 #### **Fundraising Tracking** (Verified)
 - Track money raised for charities
 - Submit campaign evidence (fundraising pages, receipts)
 - Admin reviews and approves
 - Multiplier effect on score
-- Fundraiser badges and recognition
+- Fundraiser badges with detailed achievement modals
 
 **Unified Impact Score:**
 - Donations + Volunteering + Fundraising
+- Interactive concentric rings visualization
 - Complete philanthropic identity
-- Tier progression accelerated
-- Unlock exclusive perks
+- Tier progression with visual indicators
+- Unlock exclusive perks and badges
 
 ---
 
@@ -180,11 +191,27 @@ The donor journey on Do-Nation begins with discovering their lifetime giving sco
 
 ---
 
-### 5. **Public Impact & Social Proof**
+### 5. **Enhanced User Experience**
+
+**Visual Improvements:**
+- **Modern Design Language**: Gradient backgrounds, subtle shadows, smooth animations
+- **Interactive Elements**: Hover states reveal detailed information
+- **Responsive Tooltips**: Always visible within viewport boundaries
+- **3D Effects**: Badges float and shine, creating depth
+- **Streamlined Navigation**: Removed duplicate information, clearer user flow
+
+**Engagement Features:**
+- **Toggle Views**: Switch between total score and detailed breakdown
+- **Progress Indicators**: See exactly where you stand in tier progression
+- **Achievement Modals**: Click badges to see earning history and requirements
+- **Visual Feedback**: Animations confirm actions and celebrate milestones
+
+### 6. **Public Impact & Social Proof**
 
 **Public Profile Features:**
-- **Impact Score Display**: Total giving across all activities
-- **Tier Badge**: Bronze/Silver/Gold/Platinum status
+- **Impact Score Display**: Total giving with toggle to breakdown view
+- **Tier Badge**: Visual hierarchy showing current status
+- **3D Badge Collection**: Showcase earned achievements
 - **Activity Feed**: Recent donations (anonymized amounts)
 - **Favorite Causes**: Charities you champion
 - **Giving Streak**: Current consecutive weeks
