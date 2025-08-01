@@ -2,6 +2,26 @@
 
 ## August 1, 2025
 
+### URL Pattern Updates - Username-based Profile URLs
+
+#### Changes:
+- Updated all user profile URLs to use usernames instead of database IDs
+- Route pattern changed from `/profile/:userId` to `/profile/:username`
+- All navigation links updated to use `user.username` instead of `user._id`
+- Profile comparison logic updated to check username match
+
+#### Benefits:
+- Human-readable URLs (e.g., `/profile/joeheath1980`)
+- Better SEO with meaningful URLs
+- Easier sharing on social media
+- Consistent with industry standards (GitHub, LinkedIn, Twitter)
+
+#### Technical Details:
+- Updated `App.js` route from `:userId` to `:username`
+- Updated `PublicUserProfile.js` to use username from params
+- Updated profile ownership check to compare usernames
+- Backend already supports both username and ID lookups
+
 ### Profile System & Search Fixes
 
 #### Issues Fixed:
