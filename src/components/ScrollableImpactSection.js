@@ -227,13 +227,23 @@ const BadgesDisplay = () => {
               key={index}
               className={`${styles.badgeItem} ${isCollected ? styles.collected : styles.locked}`}
               onClick={() => handleBadgeClick(badge)}
-              style={isCollected ? { '--badge-color': badge.color } : {}}
             >
-              <div className={styles.badgeCircle}>
+              <div 
+                className={styles.badgeCircle}
+                style={isCollected ? { 
+                  background: `linear-gradient(135deg, ${badge.color}, ${badge.color}dd)`,
+                  borderColor: 'rgba(255, 255, 255, 0.3)'
+                } : {}}
+              >
                 <badge.icon size={36} color={isCollected ? 'white' : '#999'} />
                 {isCollected && <div className={styles.badgeShine} />}
               </div>
-              <div className={styles.badgeTitle}>{badge.title}</div>
+              <div 
+                className={styles.badgeTitle}
+                style={isCollected ? { color: badge.color } : {}}
+              >
+                {badge.title}
+              </div>
               {!isCollected && progress && (
                 <div className={styles.badgeProgress}>
                   <span>{progress.count}/3</span>

@@ -97,7 +97,6 @@
 
 /* Collected badge styles with 3D effect */
 .badgeItem.collected .badgeCircle {
-  background: linear-gradient(135deg, var(--badge-color), var(--badge-color)dd);
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.2),
     0 8px 16px rgba(0, 0, 0, 0.1),
@@ -162,7 +161,6 @@
 }
 
 .badgeItem.collected .badgeTitle {
-  color: var(--badge-color);
   font-weight: 700;
 }
 
