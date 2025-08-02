@@ -221,9 +221,14 @@ function Profile() {
   const handleContributionTypeSelect = (type) => {
     switch (type) {
       case 'donation':
-        if (oneOffContributionsRef.current) {
-          oneOffContributionsRef.current.openModal();
-        }
+        // First expand the one-off contributions section
+        setShowOneOffContributions(true);
+        // Then open the modal after a short delay to ensure component is mounted
+        setTimeout(() => {
+          if (oneOffContributionsRef.current) {
+            oneOffContributionsRef.current.openModal();
+          }
+        }, 100);
         break;
       case 'volunteer':
         if (volunteerActivitiesRef.current) {
