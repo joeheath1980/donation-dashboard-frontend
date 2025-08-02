@@ -61,7 +61,6 @@ const DemoBanner = () => {
                 <li><strong>Individual Users:</strong> Test accounts for each tier (Bronze, Silver, Gold, Platinum)</li>
                 <li><strong>Businesses:</strong> Small, Medium, and Enterprise business accounts</li>
                 <li><strong>Charities:</strong> Various charity organizations</li>
-                <li><strong>Admin:</strong> Full administrative access</li>
               </ul>
             </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaBriefcase, FaHeart, FaUserShield } from 'react-icons/fa';
+import { FaUser, FaBriefcase, FaHeart } from 'react-icons/fa';
 import styles from './DemoQuickLogin.module.css';
 
 const DemoQuickLogin = ({ onCredentialsFill }) => {
@@ -62,8 +62,7 @@ const DemoQuickLogin = ({ onCredentialsFill }) => {
   const categories = [
     { id: 'users', label: 'Individual Users', icon: FaUser },
     { id: 'businesses', label: 'Businesses', icon: FaBriefcase },
-    { id: 'charities', label: 'Charities', icon: FaHeart },
-    { id: 'admin', label: 'Admin', icon: FaUserShield }
+    { id: 'charities', label: 'Charities', icon: FaHeart }
   ];
 
   return (
@@ -141,24 +140,6 @@ const DemoQuickLogin = ({ onCredentialsFill }) => {
           </button>
         ))}
 
-        {selectedCategory === 'admin' && (
-          <button
-            onClick={() => quickLogin('admin', 'admin')}
-            className={`${styles.accountCard} ${styles.adminCard}`}
-          >
-            <div className={styles.adminBadge}>Administrator</div>
-            <div className={styles.accountInfo}>
-              <h4>Platform Admin</h4>
-              <p className={styles.accountDescription}>
-                Full administrative access to manage users, businesses, charities, and platform settings
-              </p>
-              <div className={styles.accountDetails}>
-                <span>Access Level: Full</span>
-                <span>Permissions: All</span>
-              </div>
-            </div>
-          </button>
-        )}
       </div>
 
       <div className={styles.disclaimer}>
