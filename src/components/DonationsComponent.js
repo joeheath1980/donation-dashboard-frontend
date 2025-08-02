@@ -478,8 +478,6 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
       {createPortal(modalContent, document.body)}
     </div>
   );
-}
-
 });
 
 export default DonationsComponent;
