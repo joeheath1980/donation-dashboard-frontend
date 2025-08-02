@@ -38,7 +38,12 @@ const PublicBusinessProfile = () => {
     try {
       setLoading(true);
       const data = await profileService.getBusinessPublicProfile(slug);
-      setProfile(data);
+      // Handle the API response structure
+      if (data && data.profile) {
+        setProfile(data.profile);
+      } else {
+        setProfile(data);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -48,7 +53,8 @@ const PublicBusinessProfile = () => {
 
   const handleShare = (platform) => {
     const url = profileService.generateProfileUrl('business', slug);
-    const text = `Check out ${profile.business.name}'s impact on Do-Nation!`;
+    const businessName = profile?.business?.name || 'this business';
+    const text = `Check out ${businessName}'s impact on Do-Nation!`;
 
     switch (platform) {
       case 'twitter':
@@ -79,7 +85,19 @@ const PublicBusinessProfile = () => {
     );
   }
 
-  const { business, stats, campaigns, charities } = profile;
+  const { business, stats, campaigns, charities } = profile || {};
+  
+  // Ensure business data exists
+  if (!business) {
+    return (
+      <div className={styles.errorContainer}>
+        <h2>Business Profile Not Available</h2>
+        <p>Unable to load business information. Please try again later.</p>
+        <button onClick={() => navigate('/businesses')}>Browse Businesses</button>
+      </div>
+    );
+  }
+  
   const metaTags = profileService.generateMetaTags(business, 'business');
   const structuredData = profileService.generateStructuredData(business, 'business');
 
@@ -108,8 +126,8 @@ const PublicBusinessProfile = () => {
           <div className={styles.headerContent}>
             <div className={styles.businessInfo}>
               <div className={styles.logo}>
-                {business.logo ? (
-                  <img src={business.logo} alt={business.name} />
+                {business?.logo ? (
+                  <img src={business.logo} alt={business?.name || 'Business'} />
                 ) : (
                   <div className={styles.logoPlaceholder}>
                     <FaBuilding />
@@ -117,11 +135,11 @@ const PublicBusinessProfile = () => {
                 )}
               </div>
               <div className={styles.businessDetails}>
-                <h1>{business.name}</h1>
-                <p className={styles.industry}>{business.industry}</p>
+                <h1>{business?.name || 'Business Name'}</h1>
+                <p className={styles.industry}>{business?.industry || 'Industry'}</p>
                 <div className={styles.joinDate}>
                   <FaCalendar />
-                  Partner since {format(new Date(business.joinDate), 'MMMM yyyy')}
+                  Partner since {business?.joinDate ? format(new Date(business.joinDate), 'MMMM yyyy') : 'N/A'}
                 </div>
               </div>
             </div>
@@ -143,7 +161,7 @@ const PublicBusinessProfile = () => {
             </div>
           </div>
 
-          {business.description && (
+          {business?.description && (
             <div className={styles.description}>
               <p>{business.description}</p>
             </div>
@@ -154,7 +172,7 @@ const PublicBusinessProfile = () => {
           <div className={styles.statCard}>
             <FaDollarSign className={styles.statIcon} />
             <div className={styles.statValue}>
-              ${stats.totalMatched?.toLocaleString() || 0}
+              ${stats?.totalMatched?.toLocaleString() || 0}
             </div>
             <div className={styles.statLabel}>Total Matched</div>
           </div>
@@ -162,7 +180,7 @@ const PublicBusinessProfile = () => {
           <div className={styles.statCard}>
             <FaHandHoldingHeart className={styles.statIcon} />
             <div className={styles.statValue}>
-              {stats.matchesGiven?.toLocaleString() || 0}
+              {stats?.matchesGiven?.toLocaleString() || 0}
             </div>
             <div className={styles.statLabel}>Donations Matched</div>
           </div>
@@ -170,7 +188,7 @@ const PublicBusinessProfile = () => {
           <div className={styles.statCard}>
             <FaGlobeAfrica className={styles.statIcon} />
             <div className={styles.statValue}>
-              {stats.charitiesSupported || 0}
+              {stats?.charitiesSupported || 0}
             </div>
             <div className={styles.statLabel}>Charities Supported</div>
           </div>
@@ -178,13 +196,13 @@ const PublicBusinessProfile = () => {
           <div className={styles.statCard}>
             <FaUsers className={styles.statIcon} />
             <div className={styles.statValue}>
-              {stats.uniqueDonors || 0}
+              {stats?.uniqueDonors || 0}
             </div>
             <div className={styles.statLabel}>Unique Donors</div>
           </div>
         </div>
 
-        {business.impactStatement && (
+        {business?.impactStatement && (
           <div className={styles.impactStatement}>
             <h3>Our Impact Commitment</h3>
             <p>"{business.impactStatement}"</p>
@@ -229,7 +247,7 @@ const PublicBusinessProfile = () => {
                     <p>Ranked in top 20% of business partners</p>
                   </div>
                 </div>
-                {stats.averageMatchRate && (
+                {stats?.averageMatchRate && (
                   <div className={styles.highlight}>
                     <FaChartLine className={styles.highlightIcon} />
                     <div>
@@ -240,7 +258,7 @@ const PublicBusinessProfile = () => {
                 )}
               </div>
 
-              {business.csrInfo && (
+              {business?.csrInfo && (
                 <div className={styles.csrSection}>
                   <h3>Corporate Social Responsibility</h3>
                   <p>{business.csrInfo}</p>
@@ -333,7 +351,7 @@ const PublicBusinessProfile = () => {
                 <div className={styles.impactCard}>
                   <h4>Category Breakdown</h4>
                   <div className={styles.categoryList}>
-                    {stats.categoryBreakdown?.map((category, index) => (
+                    {stats?.categoryBreakdown?.map((category, index) => (
                       <div key={index} className={styles.categoryItem}>
                         <span>{category.name}</span>
                         <div className={styles.categoryBar}>
@@ -349,11 +367,11 @@ const PublicBusinessProfile = () => {
                 </div>
               </div>
 
-              {business.sustainabilityReport && (
+              {business?.sustainabilityReport && (
                 <div className={styles.sustainabilitySection}>
                   <h4>Sustainability & Impact Report</h4>
                   <p>{business.sustainabilityReport}</p>
-                  {business.reportUrl && (
+                  {business?.reportUrl && (
                     <a 
                       href={business.reportUrl} 
                       target="_blank" 
