@@ -13,9 +13,40 @@ import {
   FaTrophy,
   FaArrowUp,
   FaArrowDown,
-  FaClock
+  FaClock,
+  FaReceipt,
+  FaExchangeAlt
 } from 'react-icons/fa';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import styles from './AdminSharedStyles.module.css';
+import analyticsStyles from './AdminAnalyticsReporting.module.css';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const AdminAnalyticsReporting = () => {
   const { getAuthHeaders } = useAuth();
@@ -24,6 +55,8 @@ const AdminAnalyticsReporting = () => {
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState('month');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [receiptStats, setReceiptStats] = useState(null);
+  const [matchingStats, setMatchingStats] = useState(null);
 
   useEffect(() => {
     fetchAnalytics();
@@ -32,14 +65,27 @@ const AdminAnalyticsReporting = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/analytics`,
-        { 
-          headers: getAuthHeaders(),
-          params: { dateRange }
-        }
-      );
-      setAnalytics(response.data);
+      const [analyticsRes, receiptRes, matchingRes] = await Promise.all([
+        axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/analytics`,
+          { 
+            headers: getAuthHeaders(),
+            params: { dateRange }
+          }
+        ),
+        axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/receipt-approval/stats`,
+          { headers: getAuthHeaders() }
+        ),
+        axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/matching/stats`,
+          { headers: getAuthHeaders() }
+        )
+      ]);
+      
+      setAnalytics(analyticsRes.data);
+      setReceiptStats(receiptRes.data);
+      setMatchingStats(matchingRes.data);
     } catch (err) {
       console.error('Error fetching analytics:', err);
       setError('Failed to fetch analytics data');
@@ -194,6 +240,24 @@ const AdminAnalyticsReporting = () => {
               <p>{analytics.businessPartners || 0}</p>
               {analytics.previousPeriod && getChangeIndicator(analytics.businessPartners, analytics.previousPeriod.businessPartners)}
             </div>
+            {receiptStats && (
+              <>
+                <div className={styles.statCard}>
+                  <h3><FaReceipt /> Pending Receipts</h3>
+                  <p>{receiptStats.pending || 0}</p>
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    Approval Rate: {receiptStats.approvalRate?.toFixed(1) || 0}%
+                  </span>
+                </div>
+                <div className={styles.statCard}>
+                  <h3><FaExchangeAlt /> Active Matches</h3>
+                  <p>{matchingStats?.activeMatches || 0}</p>
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    Total: {formatCurrency(matchingStats?.totalMatched || 0)}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
           <div className={styles.grid}>
@@ -259,18 +323,162 @@ const AdminAnalyticsReporting = () => {
             </div>
           </div>
 
-          <div className={styles.card}>
-            <h2 style={{ marginBottom: '20px' }}>Donation Trends</h2>
-            <div style={{ 
-              background: '#f8f9fa', 
-              padding: '40px', 
-              borderRadius: '8px',
-              textAlign: 'center',
-              color: '#6c757d'
-            }}>
-              <FaChartLine size={48} style={{ marginBottom: '10px' }} />
-              <p>Chart visualization would go here</p>
-              <p style={{ fontSize: '14px' }}>Integrate with Chart.js or Recharts for data visualization</p>
+          <div className={analyticsStyles.chartsContainer}>
+            <div className={styles.card}>
+              <h2 style={{ marginBottom: '20px' }}>Donation Trends</h2>
+              <div className={analyticsStyles.chartWrapper}>
+                <Line
+                  data={{
+                    labels: analytics.donationTrends?.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [
+                      {
+                        label: 'Total Donations',
+                        data: analytics.donationTrends?.data || [0, 0, 0, 0],
+                        borderColor: '#2d8f7b',
+                        backgroundColor: 'rgba(45, 143, 123, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                      },
+                      {
+                        label: 'Micro-Matched',
+                        data: analytics.microMatchTrends?.data || [0, 0, 0, 0],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                      }
+                    ]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                      },
+                      title: {
+                        display: false
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          callback: function(value) {
+                            return '$' + value.toLocaleString();
+                          }
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <h2 style={{ marginBottom: '20px' }}>Donation Distribution</h2>
+              <div className={analyticsStyles.chartWrapper}>
+                <Doughnut
+                  data={{
+                    labels: ['Direct Donations', 'Micro-Matched', 'Campaign', 'Other'],
+                    datasets: [{
+                      data: analytics.donationDistribution || [40, 35, 20, 5],
+                      backgroundColor: [
+                        '#2d8f7b',
+                        '#f59e0b',
+                        '#3b82f6',
+                        '#e5e7eb'
+                      ],
+                      borderWidth: 0
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <h2 style={{ marginBottom: '20px' }}>User Growth</h2>
+              <div className={analyticsStyles.chartWrapper}>
+                <Bar
+                  data={{
+                    labels: analytics.userGrowth?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                      label: 'New Users',
+                      data: analytics.userGrowth?.data || [0, 0, 0, 0, 0, 0],
+                      backgroundColor: '#2d8f7b',
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <h2 style={{ marginBottom: '20px' }}>Receipt Processing Analytics</h2>
+              <div className={analyticsStyles.chartWrapper}>
+                <Bar
+                  data={{
+                    labels: ['Approved', 'Rejected', 'Pending', 'Processing'],
+                    datasets: [{
+                      label: 'Receipt Status',
+                      data: [
+                        receiptStats?.completed || 0,
+                        receiptStats?.failed || 0,
+                        receiptStats?.pending || 0,
+                        receiptStats?.processing || 0
+                      ],
+                      backgroundColor: [
+                        '#10b981',
+                        '#ef4444',
+                        '#f59e0b',
+                        '#3b82f6'
+                      ]
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </>
