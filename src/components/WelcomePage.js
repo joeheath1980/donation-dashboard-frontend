@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import styles from './WelcomePage.module.css';
 import './SharedStyles.css';
 import logoSvg from '../assets/logo.png';
@@ -27,6 +28,7 @@ import {
 const WelcomePage = () => {
   const [scrolled, setScrolled] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [platformStats, setPlatformStats] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,11 +46,39 @@ const WelcomePage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const stats = [
-    { value: '$12M+', label: 'Donations Tracked', animate: statsVisible },
-    { value: '$3.2M', label: 'Matching Unlocked', animate: statsVisible },
-    { value: '15,000+', label: 'Active Donors', animate: statsVisible },
-    { value: '98%', label: 'Satisfaction Rate', animate: statsVisible }
+  // Fetch platform stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/platform-stats`
+        );
+        setPlatformStats(response.data);
+      } catch (error) {
+        console.error('Error fetching platform stats:', error);
+        // Use demo data as fallback
+        setPlatformStats({
+          totalDonations: { formatted: '$282' },
+          matchingUnlocked: { formatted: '$0' },
+          activeDonors: { formatted: '5' },
+          supportedCharities: { formatted: '5' }
+        });
+      }
+    };
+    
+    fetchStats();
+  }, []);
+
+  const stats = platformStats ? [
+    { value: platformStats.totalDonations.formatted, label: 'Donations Tracked', animate: statsVisible },
+    { value: platformStats.matchingUnlocked.formatted, label: 'Matching Unlocked', animate: statsVisible },
+    { value: platformStats.activeDonors.formatted, label: 'Active Donors', animate: statsVisible },
+    { value: platformStats.supportedCharities.formatted, label: 'Charities Supported', animate: statsVisible }
+  ] : [
+    { value: '...', label: 'Donations Tracked', animate: false },
+    { value: '...', label: 'Matching Unlocked', animate: false },
+    { value: '...', label: 'Active Donors', animate: false },
+    { value: '...', label: 'Charities Supported', animate: false }
   ];
 
   return (

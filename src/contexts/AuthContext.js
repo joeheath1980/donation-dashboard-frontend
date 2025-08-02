@@ -185,10 +185,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Business user login
-  const businessLogin = async (contactEmail, password) => {
+  const businessLogin = async (emailOrContactEmail, password) => {
     try {
+      // Support both email and contactEmail fields for compatibility
       const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_LOGIN), {
-        contactEmail,
+        email: emailOrContactEmail,
+        contactEmail: emailOrContactEmail,
         password,
       });
       const { token, businessId } = response.data;
