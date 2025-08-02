@@ -89,7 +89,7 @@ const DemoQuickLogin = ({ onCredentialsFill }) => {
         {selectedCategory === 'users' && credentials.users?.map(user => (
           <button
             key={user.type}
-            onClick={() => quickLogin(user.type, null)}
+            onClick={() => quickLogin(user.type, 'user')}
             className={`${styles.accountCard} ${styles[user.tier?.toLowerCase()]}`}
           >
             <div className={styles.tierBadge}>{user.tierName}</div>
