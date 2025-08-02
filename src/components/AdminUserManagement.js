@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSearch, FaUser, FaEnvelope, FaShieldAlt, FaCheckCircle, FaTimesCircle, FaSpinner } from 'react-icons/fa';
+import { FaSearch, FaUser, FaEnvelope, FaShieldAlt, FaCheckCircle, FaTimesCircle, FaSpinner, FaStar, FaTrophy, FaEdit } from 'react-icons/fa';
+import { API_ENDPOINTS, getApiUrl } from '../config/api.config';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './AdminSharedStyles.module.css';
+import userStyles from './AdminUserManagement.module.css';
 
 const AdminUserManagement = () => {
+  const { getAuthHeaders } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [scoreAdjustment, setScoreAdjustment] = useState({
+    donations: 0,
+    volunteerHours: 0,
+    fundraisingAmount: 0
+  });
+  const [tierOverride, setTierOverride] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/api/admin/users');
+        const response = await axios.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS), {
+          headers: getAuthHeaders()
+        });
         setUsers(response.data);
         setLoading(false);
       } catch (err) {
@@ -24,11 +38,13 @@ const AdminUserManagement = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [getAuthHeaders]);
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await axios.put(`/api/admin/users/${userId}/role`, { role: newRole });
+      await axios.put(`${getApiUrl('/api/admin/users')}/${userId}/role`, { role: newRole }, {
+        headers: getAuthHeaders()
+      });
       setUsers(users.map(user => 
         user._id === userId ? { ...user, role: newRole } : user
       ));
@@ -39,13 +55,75 @@ const AdminUserManagement = () => {
 
   const handleStatusChange = async (userId, newStatus) => {
     try {
-      await axios.put(`/api/admin/users/${userId}/status`, { status: newStatus });
+      await axios.put(`${getApiUrl('/api/admin/users')}/${userId}/status`, { status: newStatus }, {
+        headers: getAuthHeaders()
+      });
       setUsers(users.map(user => 
         user._id === userId ? { ...user, status: newStatus } : user
       ));
     } catch (err) {
       setError('Failed to update user status');
     }
+  };
+
+  const handleScoreAdjustment = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      await axios.put(`${getApiUrl('/api/admin/users')}/${selectedUser._id}/impact-score`, {
+        adjustments: scoreAdjustment,
+        tierOverride: tierOverride || null
+      }, {
+        headers: getAuthHeaders()
+      });
+      
+      // Refresh user data
+      const response = await axios.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS), {
+        headers: getAuthHeaders()
+      });
+      setUsers(response.data);
+      
+      setMessage({ type: 'success', text: 'Impact score updated successfully' });
+      setShowScoreModal(false);
+      resetScoreModal();
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Failed to update impact score' });
+    }
+  };
+
+  const resetScoreModal = () => {
+    setSelectedUser(null);
+    setScoreAdjustment({
+      donations: 0,
+      volunteerHours: 0,
+      fundraisingAmount: 0
+    });
+    setTierOverride('');
+  };
+
+  const openScoreModal = (user) => {
+    setSelectedUser(user);
+    setShowScoreModal(true);
+  };
+
+  const getTierIcon = (tier) => {
+    const icons = {
+      bronze: '🥉',
+      silver: '🥈',
+      gold: '🥇',
+      platinum: '💎'
+    };
+    return icons[tier] || '⭐';
+  };
+
+  const getTierColor = (tier) => {
+    const colors = {
+      bronze: '#CD7F32',
+      silver: '#C0C0C0',
+      gold: '#FFD700',
+      platinum: '#E5E4E2'
+    };
+    return colors[tier] || '#666';
   };
 
   const filteredUsers = users.filter(user => {
@@ -144,6 +222,8 @@ const AdminUserManagement = () => {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Impact Score</th>
+                    <th>Tier</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -178,6 +258,23 @@ const AdminUserManagement = () => {
                         </span>
                       </td>
                       <td>
+                        <div className={userStyles.scoreCell}>
+                          <FaStar style={{ color: '#FFD700' }} />
+                          <span className={userStyles.scoreValue}>{user.impactScore || 0}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={userStyles.tierCell}>
+                          <span className={userStyles.tierIcon}>{getTierIcon(user.tier)}</span>
+                          <span 
+                            className={userStyles.tierBadge}
+                            style={{ backgroundColor: getTierColor(user.tier) }}
+                          >
+                            {user.tier ? user.tier.charAt(0).toUpperCase() + user.tier.slice(1) : 'None'}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
                         <select 
                           value={user.status} 
                           onChange={(e) => handleStatusChange(user._id, e.target.value)}
@@ -192,9 +289,18 @@ const AdminUserManagement = () => {
                         </span>
                       </td>
                       <td>
-                        <button className={`${styles.button} ${styles.primaryButton}`} style={{ fontSize: '12px', padding: '5px 15px' }}>
-                          View Details
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <button 
+                            onClick={() => openScoreModal(user)}
+                            className={`${styles.button} ${styles.primaryButton}`} 
+                            style={{ fontSize: '12px', padding: '5px 15px' }}
+                          >
+                            <FaEdit /> Edit Score
+                          </button>
+                          <button className={`${styles.button} ${styles.primaryButton}`} style={{ fontSize: '12px', padding: '5px 15px' }}>
+                            View Details
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -211,6 +317,119 @@ const AdminUserManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Impact Score Edit Modal */}
+      {showScoreModal && selectedUser && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h3>Edit Impact Score for {selectedUser.name}</h3>
+            
+            <div className={userStyles.currentScoreInfo}>
+              <div className={userStyles.scoreInfoItem}>
+                <label>Current Score:</label>
+                <span className={userStyles.currentScore}>{selectedUser.impactScore || 0}</span>
+              </div>
+              <div className={userStyles.scoreInfoItem}>
+                <label>Current Tier:</label>
+                <span>{getTierIcon(selectedUser.tier)} {selectedUser.tier || 'None'}</span>
+              </div>
+            </div>
+
+            <div className={userStyles.scoreBreakdown}>
+              <h4>Score Components</h4>
+              <div className={userStyles.componentGrid}>
+                <div className={userStyles.componentItem}>
+                  <span>Donations:</span>
+                  <span>${selectedUser.totalDonations || 0}</span>
+                </div>
+                <div className={userStyles.componentItem}>
+                  <span>Volunteer Hours:</span>
+                  <span>{selectedUser.volunteerHours || 0} hrs</span>
+                </div>
+                <div className={userStyles.componentItem}>
+                  <span>Fundraising:</span>
+                  <span>${selectedUser.fundraisingAmount || 0}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Score Adjustments</label>
+              <div className={userStyles.adjustmentGrid}>
+                <div>
+                  <label>Add Donations ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={scoreAdjustment.donations}
+                    onChange={(e) => setScoreAdjustment({
+                      ...scoreAdjustment,
+                      donations: parseFloat(e.target.value) || 0
+                    })}
+                    className={styles.input}
+                  />
+                </div>
+                <div>
+                  <label>Add Volunteer Hours</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={scoreAdjustment.volunteerHours}
+                    onChange={(e) => setScoreAdjustment({
+                      ...scoreAdjustment,
+                      volunteerHours: parseFloat(e.target.value) || 0
+                    })}
+                    className={styles.input}
+                  />
+                </div>
+                <div>
+                  <label>Add Fundraising ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={scoreAdjustment.fundraisingAmount}
+                    onChange={(e) => setScoreAdjustment({
+                      ...scoreAdjustment,
+                      fundraisingAmount: parseFloat(e.target.value) || 0
+                    })}
+                    className={styles.input}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Tier Override (Optional)</label>
+              <select
+                value={tierOverride}
+                onChange={(e) => setTierOverride(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Use calculated tier</option>
+                <option value="bronze">Bronze</option>
+                <option value="silver">Silver</option>
+                <option value="gold">Gold</option>
+                <option value="platinum">Platinum</option>
+              </select>
+            </div>
+
+            <div className={styles.modalButtons}>
+              <button 
+                onClick={() => { setShowScoreModal(false); resetScoreModal(); }} 
+                className={styles.cancelButton}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleScoreAdjustment} 
+                className={styles.saveButton}
+              >
+                Update Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

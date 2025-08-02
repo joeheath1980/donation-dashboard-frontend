@@ -1,0 +1,136 @@
+.scoreCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scoreValue {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.tierCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tierIcon {
+  font-size: 20px;
+}
+
+.tierBadge {
+  padding: 4px 12px;
+  border-radius: 15px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.currentScoreInfo {
+  display: flex;
+  justify-content: space-around;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.scoreInfoItem {
+  text-align: center;
+}
+
+.scoreInfoItem label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.currentScore {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2d8f7b;
+}
+
+.scoreBreakdown {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.scoreBreakdown h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 16px;
+}
+
+.componentGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.componentItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.componentItem span:first-child {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.componentItem span:last-child {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d8f7b;
+}
+
+.adjustmentGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.adjustmentGrid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.adjustmentGrid label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tierCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .componentGrid,
+  .adjustmentGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .currentScoreInfo {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

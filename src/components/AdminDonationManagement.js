@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSearch, FaDollarSign, FaCalendarAlt, FaHeart, FaCheckCircle, FaTimesCircle, FaClock, FaSpinner, FaChartLine } from 'react-icons/fa';
+import { FaSearch, FaDollarSign, FaCalendarAlt, FaHeart, FaCheckCircle, FaTimesCircle, FaClock, FaSpinner, FaChartLine, FaExchangeAlt, FaGift } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
+import donationStyles from './AdminDonationManagement.module.css';
 
 const AdminDonationManagement = () => {
   const [donations, setDonations] = useState([]);
@@ -14,8 +15,13 @@ const AdminDonationManagement = () => {
     total: 0,
     pending: 0,
     completed: 0,
-    failed: 0
+    failed: 0,
+    directDonations: 0,
+    microMatched: 0,
+    totalDirectAmount: 0,
+    totalMatchedAmount: 0
   });
+  const [donationType, setDonationType] = useState('all');
 
   useEffect(() => {
     const fetchDonations = async () => {
@@ -34,11 +40,18 @@ const AdminDonationManagement = () => {
 
   useEffect(() => {
     if (donations.length > 0) {
+      const directDonations = donations.filter(d => !d.isMatched);
+      const matchedDonations = donations.filter(d => d.isMatched);
+      
       const newStats = {
         total: donations.reduce((sum, d) => sum + d.amount, 0),
         pending: donations.filter(d => d.status === 'pending').length,
         completed: donations.filter(d => d.status === 'completed').length,
-        failed: donations.filter(d => d.status === 'failed').length
+        failed: donations.filter(d => d.status === 'failed').length,
+        directDonations: directDonations.length,
+        microMatched: matchedDonations.length,
+        totalDirectAmount: directDonations.reduce((sum, d) => sum + d.amount, 0),
+        totalMatchedAmount: matchedDonations.reduce((sum, d) => sum + d.amount, 0)
       };
       setStats(newStats);
     }
@@ -61,7 +74,10 @@ const AdminDonationManagement = () => {
                          donation.charity?.name?.toLowerCase().includes(searchLower) ||
                          donation.amount?.toString().includes(searchTerm);
     const matchesFilter = filter === 'all' || donation.status === filter;
-    return matchesSearch && matchesFilter;
+    const matchesType = donationType === 'all' || 
+                       (donationType === 'direct' && !donation.isMatched) ||
+                       (donationType === 'matched' && donation.isMatched);
+    return matchesSearch && matchesFilter && matchesType;
   });
 
   const getStatusBadge = (status) => {
@@ -104,6 +120,16 @@ const AdminDonationManagement = () => {
           <h3><FaTimesCircle /> Failed</h3>
           <p>{stats.failed}</p>
         </div>
+        <div className={styles.statCard}>
+          <h3><FaGift /> Direct Donations</h3>
+          <p>{stats.directDonations}</p>
+          <span style={{ fontSize: '12px', color: '#666' }}>${stats.totalDirectAmount.toFixed(2)}</span>
+        </div>
+        <div className={styles.statCard}>
+          <h3><FaExchangeAlt /> Micro-Matched</h3>
+          <p>{stats.microMatched}</p>
+          <span style={{ fontSize: '12px', color: '#666' }}>${stats.totalMatchedAmount.toFixed(2)}</span>
+        </div>
       </div>
 
       <div className={styles.card}>
@@ -124,7 +150,7 @@ const AdminDonationManagement = () => {
               onClick={() => setFilter('all')}
               className={`${styles.filterButton} ${filter === 'all' ? styles.active : ''}`}
             >
-              All Donations
+              All Status
             </button>
             <button
               onClick={() => setFilter('pending')}
@@ -147,6 +173,28 @@ const AdminDonationManagement = () => {
           </div>
         </div>
 
+        <div className={donationStyles.typeFilters}>
+          <span className={donationStyles.filterLabel}>Donation Type:</span>
+          <button
+            onClick={() => setDonationType('all')}
+            className={`${styles.filterButton} ${donationType === 'all' ? styles.active : ''}`}
+          >
+            All Types
+          </button>
+          <button
+            onClick={() => setDonationType('direct')}
+            className={`${styles.filterButton} ${donationType === 'direct' ? styles.active : ''}`}
+          >
+            <FaGift /> Direct Only
+          </button>
+          <button
+            onClick={() => setDonationType('matched')}
+            className={`${styles.filterButton} ${donationType === 'matched' ? styles.active : ''}`}
+          >
+            <FaExchangeAlt /> Micro-Matched Only
+          </button>
+        </div>
+
         {loading ? (
           <div className={styles.loading}>
             <FaSpinner className={styles.spinner} />
@@ -165,6 +213,7 @@ const AdminDonationManagement = () => {
                   <tr>
                     <th>Donor</th>
                     <th>Amount</th>
+                    <th>Type</th>
                     <th>Charity</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -186,6 +235,26 @@ const AdminDonationManagement = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <FaDollarSign style={{ color: '#10b981' }} />
                             <strong>${donation.amount?.toFixed(2) || '0.00'}</strong>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={donationStyles.typeIndicator}>
+                            {donation.isMatched ? (
+                              <>
+                                <FaExchangeAlt style={{ color: '#f59e0b' }} />
+                                <span className={donationStyles.matchedBadge}>Micro-Matched</span>
+                                {donation.matchDetails && (
+                                  <span className={donationStyles.matchInfo}>
+                                    {donation.matchDetails.businessName} ({donation.matchDetails.ratio}x)
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <FaGift style={{ color: '#2d8f7b' }} />
+                                <span className={donationStyles.directBadge}>Direct</span>
+                              </>
+                            )}
                           </div>
                         </td>
                         <td>{donation.charity?.name || 'Unknown Charity'}</td>

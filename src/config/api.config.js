@@ -63,6 +63,36 @@ export const API_ENDPOINTS = {
   // Admin endpoints
   ADMIN_USERS: '/api/admin/users',
   ADMIN_CHARITY_REQUESTS: '/api/charity/admin/link-requests',
+  ADMIN_DONATIONS: '/api/admin/donations',
+  ADMIN_CAMPAIGNS: '/api/admin/campaigns',
+  ADMIN_BUSINESS_PARTNERS: '/api/admin/business-partners',
+  ADMIN_CHARITIES: '/api/admin/charities',
+  ADMIN_ANALYTICS: '/api/admin/analytics',
+  ADMIN_CONTENT: '/api/admin/content',
+  
+  // Admin Receipt Approval
+  ADMIN_RECEIPT_PENDING: '/api/admin/receipt-approval/pending',
+  ADMIN_RECEIPT_DETAILS: '/api/admin/receipt-approval/pending',
+  ADMIN_RECEIPT_APPROVE: '/api/admin/receipt-approval/approve',
+  ADMIN_RECEIPT_REJECT: '/api/admin/receipt-approval/reject',
+  ADMIN_RECEIPT_STATS: '/api/admin/receipt-approval/stats',
+  
+  // Admin Matching Engine
+  ADMIN_MATCHING_RULES: '/api/admin/matching/rules',
+  ADMIN_MATCHING_STATS: '/api/admin/matching/stats',
+  ADMIN_MATCHING_ACTIVE: '/api/admin/matching/active',
+  ADMIN_MATCHING_MULTIPLIERS: '/api/admin/matching/multipliers',
+  
+  // Admin System Health
+  ADMIN_HEALTH_DATABASE: '/api/health/database',
+  ADMIN_HEALTH_EMAIL: '/api/health/email',
+  ADMIN_HEALTH_PAYMENT: '/api/health/payment',
+  ADMIN_HEALTH_WEBSOCKET: '/api/health/websocket',
+  ADMIN_HEALTH_REDIS: '/api/health/redis',
+  ADMIN_HEALTH_OPENAI: '/api/health/openai',
+  ADMIN_EMAIL_STATS: '/api/admin/integrations/email-stats',
+  ADMIN_WEBSOCKET_STATS: '/api/admin/integrations/websocket-stats',
+  ADMIN_API_KEYS: '/api/admin/integrations/api-keys',
   
   // Other endpoints
   MATCHING_OPPORTUNITIES: '/api/matchingOpportunities',
