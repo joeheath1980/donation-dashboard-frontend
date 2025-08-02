@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaPlus, 
@@ -21,7 +21,7 @@ import { createLogger } from '../utils/logger';
 
 const logger = createLogger('DonationsComponent');
 
-function DonationsComponent({ displayAll }) {
+const DonationsComponent = forwardRef(({ displayAll }, ref) => {
   const { user } = useAuth();
   const [donations, setDonations] = useState([]);
   const [localDonations, setLocalDonations] = useState([]);
@@ -43,6 +43,14 @@ function DonationsComponent({ displayAll }) {
   });
   
   const donationListRef = useRef(null);
+  
+  // Expose openModal method to parent component
+  useImperativeHandle(ref, () => ({
+    openModal: () => {
+      setCurrentDonation(null);
+      setShowModal(true);
+    }
+  }));
 
   const fetchDonations = useCallback(async () => {
     try {
@@ -471,5 +479,7 @@ function DonationsComponent({ displayAll }) {
     </div>
   );
 }
+
+});
 
 export default DonationsComponent;

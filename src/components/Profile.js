@@ -79,6 +79,7 @@ function Profile() {
   const [showContributionModal, setShowContributionModal] = useState(false);
   
   // Refs for child components
+  const regularDonationsRef = useRef();
   const oneOffContributionsRef = useRef();
   const volunteerActivitiesRef = useRef();
   const fundraisingCampaignsRef = useRef();
@@ -220,13 +221,23 @@ function Profile() {
 
   const handleContributionTypeSelect = (type) => {
     switch (type) {
-      case 'donation':
+      case 'oneoff':
         // First expand the one-off contributions section
         setShowOneOffContributions(true);
         // Then open the modal after a short delay to ensure component is mounted
         setTimeout(() => {
           if (oneOffContributionsRef.current) {
             oneOffContributionsRef.current.openModal();
+          }
+        }, 100);
+        break;
+      case 'regular':
+        // First expand the regular donations section
+        setShowRegularContributions(true);
+        // Then open the modal after a short delay to ensure component is mounted
+        setTimeout(() => {
+          if (regularDonationsRef.current) {
+            regularDonationsRef.current.openModal();
           }
         }, 100);
         break;
@@ -398,7 +409,7 @@ function Profile() {
                 </button>
                 {showRegularContributions && (
                   <div className={styles.expandedContent}>
-                    <DonationsComponent displayAll={true} />
+                    <DonationsComponent displayAll={true} ref={regularDonationsRef} />
                   </div>
                 )}
               </div>

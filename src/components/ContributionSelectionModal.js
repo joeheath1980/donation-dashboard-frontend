@@ -8,11 +8,18 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
 
   const contributionTypes = [
     {
-      id: 'donation',
-      title: 'Add Donation',
+      id: 'oneoff',
+      title: 'Add One-off Donation',
       icon: FaDonate,
       description: 'Record a one-time donation to a charity',
       color: '#4CAF50'
+    },
+    {
+      id: 'regular',
+      title: 'Add Regular Donation',
+      icon: FaDonate,
+      description: 'Set up a recurring donation',
+      color: '#2E7D32'
     },
     {
       id: 'volunteer',
