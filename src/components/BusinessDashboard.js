@@ -64,21 +64,47 @@ function BusinessDashboard() {
       if (!businessData.onboardingCompleted) return;
 
       try {
-        const [campaignsRes, matchesRes, statsRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/campaigns`, 
-            { headers: getAuthHeaders() }
-          ),
-          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/matches/recent`, 
-            { headers: getAuthHeaders() }
-          ),
-          axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/stats`, 
-            { headers: getAuthHeaders() }
-          )
-        ]);
+        // Get campaigns from the correct endpoint
+        const campaignsRes = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/campaigns`, 
+          { headers: getAuthHeaders() }
+        );
+        
+        // Get dashboard overview which includes recent matches and stats
+        const overviewRes = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/dashboard/overview`, 
+          { headers: getAuthHeaders() }
+        );
 
-        setCampaigns(campaignsRes.data.campaigns || []);
-        setRecentMatches(matchesRes.data.matches || []);
-        setCategoryBreakdown(statsRes.data.categoryBreakdown || []);
+        setCampaigns(campaignsRes.data.campaigns || campaignsRes.data || []);
+        
+        if (overviewRes.data) {
+          // Transform recent activity to match frontend format
+          const transformedMatches = (overviewRes.data.recentActivity || []).map(activity => ({
+            _id: activity.id || activity._id,
+            userName: activity.userName || 'Anonymous',
+            userAvatar: (activity.userName || 'A').substring(0, 2).toUpperCase(),
+            amount: activity.originalAmount || activity.amount,
+            matchAmount: activity.amount,
+            multiplier: activity.multiplier || 1,
+            charityName: activity.charityName,
+            timestamp: new Date(activity.date)
+          }));
+          setRecentMatches(transformedMatches);
+          
+          // Extract category breakdown from overview
+          if (overviewRes.data.donations && overviewRes.data.donations.categoryBreakdown) {
+            setCategoryBreakdown(overviewRes.data.donations.categoryBreakdown);
+          } else {
+            // Use default categories if none provided
+            setCategoryBreakdown([
+              { category: 'Education', percentage: 35, color: '#4CAF50' },
+              { category: 'Health', percentage: 30, color: '#2196F3' },
+              { category: 'Environment', percentage: 20, color: '#FF9800' },
+              { category: 'Community', percentage: 15, color: '#9C27B0' }
+            ]);
+          }
+        }
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
         // Use dummy data for now
