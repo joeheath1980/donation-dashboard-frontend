@@ -12,6 +12,39 @@
   overflow: visible;
 }
 
+.profileButtonWrapper {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  z-index: 10;
+}
+
+.viewProfileButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.viewProfileButton:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.viewProfileButton svg {
+  font-size: 1.1rem;
+}
+
 .impactScoreWrapper {
   background-color: transparent;
   margin: 0 0 3rem 0;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './SharedStyles.css';
 import oneOffStyles from './OneOffContributions.module.css';
@@ -27,7 +27,7 @@ function formatDate(dateString) {
   return format(date, 'dd/MM/yyyy');
 }
 
-function OneOffContributionsComponent({ displayAll }) {
+const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
   const { user, getAuthHeaders } = useAuth();
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [localContributions, setLocalContributions] = useState([]);
@@ -36,6 +36,14 @@ function OneOffContributionsComponent({ displayAll }) {
   const [error, setError] = useState('');
   const contributionListRef = useRef(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  
+  // Expose openModal method to parent component
+  useImperativeHandle(ref, () => ({
+    openModal: () => {
+      setEditingContribution(null);
+      setShowModal(true);
+    }
+  }));
 
   const fetchContributions = useCallback(async () => {
     try {
@@ -306,6 +314,6 @@ function OneOffContributionsComponent({ displayAll }) {
       {createPortal(modalContent, document.body)}
     </div>
   );
-}
+});
 
 export default OneOffContributionsComponent;
