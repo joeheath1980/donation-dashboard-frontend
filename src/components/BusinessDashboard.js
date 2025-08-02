@@ -447,6 +447,13 @@ function BusinessDashboard() {
               <div className={styles.actionIcon}>⚙️</div>
               <span>Settings</span>
             </Link>
+            
+            {businessData.slug && (
+              <Link to={`/business/${businessData.slug}`} className={styles.actionButton}>
+                <div className={styles.actionIcon}>👤</div>
+                <span>View Public Profile</span>
+              </Link>
+            )}
           </div>
 
           <div className={styles.quickStats}>

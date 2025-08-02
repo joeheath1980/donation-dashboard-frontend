@@ -400,6 +400,14 @@ function CharityDashboard() {
           >
             Donor Management
           </button>
+          {charityData.linkedABN && (
+            <button 
+              onClick={() => navigate(`/charity/profile/${charityData.linkedABN}`)}
+              className={styles.button}
+            >
+              View Public Profile
+            </button>
+          )}
         </div>
       </div>
 

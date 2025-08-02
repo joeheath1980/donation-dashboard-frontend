@@ -106,7 +106,7 @@ class ProfileService {
       case 'business':
         return `${baseUrl}/business/${identifier}`;
       case 'charity':
-        return `${baseUrl}/charity/${identifier}`;
+        return `${baseUrl}/charity/profile/${identifier}`;
       default:
         throw new Error('Invalid profile type');
     }
