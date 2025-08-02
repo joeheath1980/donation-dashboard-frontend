@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
@@ -9,7 +9,7 @@ import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign, FaBullhorn } from 'react-icons/fa';
 
-function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
+const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }, ref) => {
   const {
     fundraisingCampaigns,
     fetchImpactData,
@@ -35,6 +35,13 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [updatingCampaign, setUpdatingCampaign] = useState(null);
   const [tempRaisedAmounts, setTempRaisedAmounts] = useState({});
+  
+  // Expose openModal method to parent component
+  useImperativeHandle(ref, () => ({
+    openModal: () => {
+      setIsCreateModalOpen(true);
+    }
+  }));
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -562,6 +569,6 @@ function FundraisingCampaignsComponent({ userId, onCompleteCampaign }) {
       {createPortal(modalContent, document.body)}
     </>
   );
-}
+});
 
 export default FundraisingCampaignsComponent;

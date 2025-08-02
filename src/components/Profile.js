@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import styles from './Profile.module.css';
 import './SharedStyles.css';
@@ -15,6 +15,7 @@ import GlobalGivingProjects from './GlobalGivingProjects';
 import MatchOpportunityFeed from './matching/MatchOpportunityFeed';
 import MatchSuccessModal from './matching/MatchSuccessModal';
 import MatchingDetailModal from './matching/MatchingDetailModal';
+import ContributionSelectionModal from './ContributionSelectionModal';
 import { 
   FaRegHandshake, 
   FaRegCalendarAlt, 
@@ -25,7 +26,8 @@ import {
   FaHandshake,
   FaProjectDiagram,
   FaChartLine,
-  FaBolt
+  FaBolt,
+  FaUserCircle
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -55,7 +57,7 @@ function Profile() {
     scoreDetails,
   } = useContext(ImpactContext);
 
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, user } = useAuth();
   const navigate = useNavigate();
 
   const [localDonations, setLocalDonations] = useState(contextDonations || []);
@@ -74,6 +76,12 @@ function Profile() {
   const [matchSuccessData, setMatchSuccessData] = useState(null);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showMatchingDetail, setShowMatchingDetail] = useState(false);
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  
+  // Refs for child components
+  const oneOffContributionsRef = useRef();
+  const volunteerActivitiesRef = useRef();
+  const fundraisingCampaignsRef = useRef();
 
   const impactSections = [
     { title: 'Impact Journey', component: 'ImpactVisualization' },
@@ -206,6 +214,33 @@ function Profile() {
     setShowMatchingFeed(true);
   };
 
+  const handleAddContributions = () => {
+    setShowContributionModal(true);
+  };
+
+  const handleContributionTypeSelect = (type) => {
+    switch (type) {
+      case 'donation':
+        if (oneOffContributionsRef.current) {
+          oneOffContributionsRef.current.openModal();
+        }
+        break;
+      case 'volunteer':
+        if (volunteerActivitiesRef.current) {
+          volunteerActivitiesRef.current.openModal();
+        }
+        break;
+      case 'fundraising':
+        if (fundraisingCampaignsRef.current) {
+          fundraisingCampaignsRef.current.openModal();
+        }
+        break;
+      default:
+        break;
+    }
+    setShowContributionModal(false);
+  };
+
   if (isLoading) return <div className="textCenter">Loading your impact data...</div>;
   if (impactError) return <div className="textCenter">{impactError}</div>;
   if (!isAuthenticated) return <div className="textCenter">Please log in to view your profile and impact data.</div>;
@@ -213,6 +248,15 @@ function Profile() {
   return (
     <div className={styles.profileBackground}>
       <div className={styles.profileContainer}>
+        {/* View Public Profile Button */}
+        {user && user.username && (
+          <div className={styles.profileButtonWrapper}>
+            <Link to={`/profile/${user.username}`} className={styles.viewProfileButton}>
+              <FaUserCircle /> View Public Profile
+            </Link>
+          </div>
+        )}
+        
         <div className={styles.impactScoreWrapper}>
           <PersonalImpactScore
             impactScore={impactScore}
@@ -220,6 +264,7 @@ function Profile() {
             arrow={arrow}
             tier={tier}
             pointsToNextTier={pointsToNextTier}
+            onAddContributions={handleAddContributions}
           />
         </div>
         
@@ -367,7 +412,7 @@ function Profile() {
                 </button>
                 {showOneOffContributions && (
                   <div className={styles.expandedContent}>
-                    <OneOffContributionsComponent displayAll={true} />
+                    <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
                   </div>
                 )}
               </div>
@@ -403,10 +448,10 @@ function Profile() {
 
             <div className={styles.activitiesGrid}>
               <div className={`${styles.activityCard} card`}>
-                <VolunteerActivitiesComponent />
+                <VolunteerActivitiesComponent ref={volunteerActivitiesRef} />
               </div>
               <div className={`${styles.activityCard} card`}>
-                <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} />
+                <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} ref={fundraisingCampaignsRef} />
               </div>
             </div>
           </div>
@@ -441,6 +486,13 @@ function Profile() {
           }}
         />
       )}
+      
+      {/* Contribution Selection Modal */}
+      <ContributionSelectionModal
+        isOpen={showContributionModal}
+        onClose={() => setShowContributionModal(false)}
+        onSelectType={handleContributionTypeSelect}
+      />
     </div>
   );
 }

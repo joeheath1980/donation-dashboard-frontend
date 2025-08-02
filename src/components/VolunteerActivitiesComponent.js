@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
@@ -8,7 +8,7 @@ import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile, FaHandsHelping } from 'react-icons/fa';
 
-function VolunteerActivitiesComponent({ userId }) {
+const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   const [activities, setActivities] = useState([]);
   const [newActivity, setNewActivity] = useState({
     organization: '',
@@ -23,6 +23,13 @@ function VolunteerActivitiesComponent({ userId }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [isAddActivityModalOpen, setIsAddActivityModalOpen] = useState(false);
+  
+  // Expose openModal method to parent component
+  useImperativeHandle(ref, () => ({
+    openModal: () => {
+      setIsAddActivityModalOpen(true);
+    }
+  }));
 
   useEffect(() => {
     fetchActivities();
@@ -348,6 +355,6 @@ function VolunteerActivitiesComponent({ userId }) {
       {createPortal(modalContent, document.body)}
     </>
   );
-}
+});
 
 export default VolunteerActivitiesComponent;
