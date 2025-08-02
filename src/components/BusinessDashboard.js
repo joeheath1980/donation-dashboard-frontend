@@ -41,7 +41,10 @@ function BusinessDashboard() {
           verificationStatus: response.data.csrProfile?.verificationStatus
         });
         
-        setBusinessData(response.data);
+        setBusinessData({
+          ...response.data,
+          annualGivingBudget: response.data.csrProfile?.annualGivingBudget || response.data.annualGivingBudget || 0
+        });
         
         // Check if business has completed onboarding
         if (!response.data.onboardingCompleted) {
@@ -76,7 +79,36 @@ function BusinessDashboard() {
           { headers: getAuthHeaders() }
         );
 
-        setCampaigns(campaignsRes.data.campaigns || campaignsRes.data || []);
+        console.log('Campaigns response:', campaignsRes.data);
+        // Handle both array and object response formats
+        const rawCampaigns = Array.isArray(campaignsRes.data) 
+          ? campaignsRes.data 
+          : (campaignsRes.data.campaigns || []);
+        
+        // Transform campaign data to match frontend expectations
+        const campaignsData = rawCampaigns.map(campaign => ({
+          _id: campaign.id || campaign._id,
+          name: campaign.name,
+          status: campaign.status,
+          currentAmount: campaign.budget?.spent || campaign.currentAmount || 0,
+          goal: campaign.budget?.total || campaign.goal || 0,
+          budgetLeft: campaign.budget?.remaining || campaign.budgetLeft || 0,
+          activeUsers: campaign.metrics?.uniqueUsers || campaign.activeUsers || 0,
+          startDate: campaign.startDate,
+          endDate: campaign.endDate
+        }));
+        
+        setCampaigns(campaignsData);
+        
+        // Calculate budget utilized from campaigns
+        const totalBudgetUtilized = campaignsData.reduce((sum, campaign) => 
+          sum + (campaign.currentAmount || 0), 0
+        );
+        
+        setBusinessData(prev => ({
+          ...prev,
+          budgetUtilized: totalBudgetUtilized
+        }));
         
         if (overviewRes.data) {
           // Transform recent activity to match frontend format
@@ -322,13 +354,13 @@ function BusinessDashboard() {
                   
                   <div className={styles.campaignProgress}>
                     <div className={styles.progressInfo}>
-                      <span>${campaign.currentAmount.toLocaleString()}</span>
-                      <span>${campaign.goal.toLocaleString()}</span>
+                      <span>${(campaign.currentAmount || 0).toLocaleString()}</span>
+                      <span>${(campaign.goal || 0).toLocaleString()}</span>
                     </div>
                     <div className={styles.progressBarContainer}>
                       <div 
                         className={styles.progressBarFill}
-                        style={{ width: `${(campaign.currentAmount / campaign.goal) * 100}%` }}
+                        style={{ width: `${((campaign.currentAmount || 0) / (campaign.goal || 1)) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -343,7 +375,7 @@ function BusinessDashboard() {
                       <span className={styles.statLabel}>Active Users</span>
                     </div>
                     <div className={styles.stat}>
-                      <span className={styles.statNumber}>${campaign.budgetLeft.toLocaleString()}</span>
+                      <span className={styles.statNumber}>${(campaign.budgetLeft || 0).toLocaleString()}</span>
                       <span className={styles.statLabel}>Budget Left</span>
                     </div>
                   </div>
@@ -421,7 +453,7 @@ function BusinessDashboard() {
             <div className={styles.quickStat}>
               <h3>This Month</h3>
               <div className={styles.quickStatValue}>
-                ${(businessData.budgetUtilized * 0.08).toLocaleString()}
+                ${((businessData.budgetUtilized || 0) * 0.08).toLocaleString()}
               </div>
               <div className={styles.quickStatChange}>
                 <span className={styles.positive}>+12%</span> vs last month
