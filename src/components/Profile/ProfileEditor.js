@@ -305,27 +305,46 @@ const ProfileEditor = () => {
   };
 
   const handleAvatarUpload = async (e) => {
+    console.log('=== AVATAR UPLOAD START ===');
+    console.log('Event:', e);
+    console.log('Files:', e.target.files);
+    
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+    
+    console.log('File selected:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
     
     // Preview
     const reader = new FileReader();
     reader.onloadend = () => {
+      console.log('Preview loaded');
       setAvatarPreview(reader.result);
     };
     reader.readAsDataURL(file);
     
     // Upload to S3
     try {
+      console.log('Starting S3 upload...');
       const formData = new FormData();
       formData.append('profilePicture', file);
       
       const headers = getAuthHeaders();
+      console.log('Auth headers:', headers);
       delete headers['Content-Type']; // Let browser set multipart boundary
       
-      console.log('Uploading to:', `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`);
+      const uploadUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`;
+      console.log('Upload URL:', uploadUrl);
+      console.log('Making upload request...');
+      
       const uploadResponse = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`,
+        uploadUrl,
         formData,
         { headers }
       );
@@ -375,16 +394,26 @@ const ProfileEditor = () => {
           console.error('Save error details:', saveError.response?.data);
           alert('Photo uploaded but failed to save. Please click "Save Profile" to persist changes.');
         }
+      } else {
+        console.error('Upload failed - no success flag in response:', uploadResponse.data);
+        alert('Upload failed. Please try again.');
       }
     } catch (error) {
+      console.error('=== UPLOAD ERROR ===');
       console.error('Error uploading profile picture:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Full error object:', error);
+      
       // Show error to user
-      alert('Failed to upload profile picture. Please try again.');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to upload profile picture. Please try again.';
+      alert(`Upload error: ${errorMessage}`);
       setErrors(prev => ({
         ...prev,
-        avatar: 'Failed to upload profile picture. Please try again.'
+        avatar: errorMessage
       }));
     }
+    console.log('=== AVATAR UPLOAD END ===');
   };
 
   if (loading) {
@@ -444,13 +473,20 @@ const ProfileEditor = () => {
                       <FaUser />
                     </div>
                   )}
-                  <label className={styles.avatarUpload}>
+                  <label 
+                    className={styles.avatarUpload}
+                    onClick={() => console.log('Avatar upload label clicked')}
+                  >
                     <FaCamera />
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarUpload}
-                      hidden
+                      onClick={(e) => {
+                        console.log('File input clicked');
+                        e.stopPropagation();
+                      }}
+                      style={{ display: 'none' }}
                     />
                   </label>
                 </div>
