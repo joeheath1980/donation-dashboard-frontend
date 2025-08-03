@@ -26,40 +26,64 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
 
   if (!scoreDetails) return null;
 
-  const { donationScore = 0, volunteerScore = 0, fundraisingScore = 0 } = scoreDetails;
+  const { 
+    donationScore = 0, 
+    volunteerScore = 0, 
+    fundraisingScore = 0,
+    consistencyScore = 0,
+    engagementScore = 0
+  } = scoreDetails;
   
-  // Ring configuration with better spacing and colors
+  // Ring configuration with 5 categories
   const rings = [
     { 
       name: 'Donations',
       score: donationScore,
-      maxScore: 40,
-      radius: 120,
-      strokeWidth: 18,
+      maxScore: Math.max(100, donationScore),
+      radius: 140,
+      strokeWidth: 16,
       color: { start: '#4DD0E1', end: '#00ACC1' }, // Cyan/Teal
       bgColor: '#E0F7FA'
     },
     { 
       name: 'Volunteering',
       score: volunteerScore,
-      maxScore: 30,
-      radius: 90,
-      strokeWidth: 18,
+      maxScore: Math.max(80, volunteerScore),
+      radius: 115,
+      strokeWidth: 16,
       color: { start: '#66BB6A', end: '#43A047' }, // Green
       bgColor: '#E8F5E9'
     },
     { 
       name: 'Fundraising',
       score: fundraisingScore,
-      maxScore: 20,
-      radius: 60,
-      strokeWidth: 18,
+      maxScore: Math.max(60, fundraisingScore),
+      radius: 90,
+      strokeWidth: 16,
       color: { start: '#AB47BC', end: '#8E24AA' }, // Purple
       bgColor: '#F3E5F5'
+    },
+    { 
+      name: 'Consistency',
+      score: consistencyScore,
+      maxScore: Math.max(50, consistencyScore),
+      radius: 65,
+      strokeWidth: 16,
+      color: { start: '#FF7043', end: '#F4511E' }, // Orange
+      bgColor: '#FBE9E7'
+    },
+    { 
+      name: 'Engagement',
+      score: engagementScore,
+      maxScore: Math.max(40, engagementScore),
+      radius: 40,
+      strokeWidth: 16,
+      color: { start: '#FFD54F', end: '#FFB300' }, // Amber
+      bgColor: '#FFF8E1'
     }
   ];
 
-  const svgSize = 300;
+  const svgSize = 320;
   const center = svgSize / 2;
 
   return (
