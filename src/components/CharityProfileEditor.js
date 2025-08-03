@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -20,6 +20,7 @@ import styles from './CharityProfileEditor.module.css';
 
 const CharityProfileEditor = () => {
   const navigate = useNavigate();
+  const { charityId } = useParams();
   const { getAuthHeaders } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -83,14 +84,16 @@ const CharityProfileEditor = () => {
         { headers: getAuthHeaders() }
       );
       
-      setProfile({
-        ...profile,
-        ...response.data
-      });
-      setLoading(false);
+      if (response.data) {
+        setProfile({
+          ...profile,
+          ...response.data
+        });
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       setMessage({ type: 'error', text: 'Failed to load profile' });
+    } finally {
       setLoading(false);
     }
   };
@@ -576,11 +579,15 @@ const CharityProfileEditor = () => {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}></div>
+      <div className={styles?.loading || 'loading'}>
+        <div className={styles?.spinner || 'spinner'}></div>
         <p>Loading profile...</p>
       </div>
     );
+  }
+
+  if (!styles) {
+    return <div>Error: Styles not loaded</div>;
   }
 
   return (
