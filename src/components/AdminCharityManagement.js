@@ -15,7 +15,9 @@ import {
   FaSpinner,
   FaCreditCard,
   FaChartLine,
-  FaUsers
+  FaUsers,
+  FaLink,
+  FaHome
 } from 'react-icons/fa';
 import styles from './AdminCharityManagement.module.css';
 import sharedStyles from './AdminSharedStyles.module.css';
@@ -32,6 +34,7 @@ const AdminCharityManagement = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     fetchCharities();
@@ -50,26 +53,22 @@ const AdminCharityManagement = () => {
       setCharities(response.data);
     } catch (error) {
       console.error('Error fetching charities:', error);
-      setMessage({ type: 'error', text: 'Failed to load charities' });
+      setMessage({ type: 'error', text: 'Failed to fetch charities' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async (charityId) => {
-    if (!window.confirm('Are you sure you want to approve this charity?')) return;
-    
-    setActionLoading(true);
+  const approveCharity = async (charityId) => {
     try {
+      setActionLoading(true);
       await axios.post(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/approve`,
         {},
         { headers: getAuthHeaders() }
       );
-      
       setMessage({ type: 'success', text: 'Charity approved successfully!' });
       fetchCharities();
-      setSelectedCharity(null);
       setShowDetails(false);
     } catch (error) {
       console.error('Error approving charity:', error);
@@ -79,22 +78,23 @@ const AdminCharityManagement = () => {
     }
   };
 
-  const handleReject = async (charityId) => {
-    const rejectionReason = prompt('Please provide a reason for rejection:');
-    if (!rejectionReason) return;
-    
-    setActionLoading(true);
+  const rejectCharity = async (charityId) => {
+    if (!rejectReason.trim()) {
+      setMessage({ type: 'error', text: 'Please provide a rejection reason' });
+      return;
+    }
+
     try {
+      setActionLoading(true);
       await axios.post(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/reject`,
-        { reason: rejectionReason },
+        { reason: rejectReason },
         { headers: getAuthHeaders() }
       );
-      
       setMessage({ type: 'success', text: 'Charity rejected' });
       fetchCharities();
-      setSelectedCharity(null);
       setShowDetails(false);
+      setRejectReason('');
     } catch (error) {
       console.error('Error rejecting charity:', error);
       setMessage({ type: 'error', text: 'Failed to reject charity' });
@@ -103,301 +103,405 @@ const AdminCharityManagement = () => {
     }
   };
 
-  const handleSendEmail = async (charityId, type) => {
-    setActionLoading(true);
-    try {
-      await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/send-email`,
-        { emailType: type },
-        { headers: getAuthHeaders() }
-      );
-      
-      setMessage({ type: 'success', text: 'Email sent successfully!' });
-    } catch (error) {
-      console.error('Error sending email:', error);
-      setMessage({ type: 'error', text: 'Failed to send email' });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { icon: FaClock, className: sharedStyles.badgeWarning, text: 'Pending Review' },
-      approved: { icon: FaCheckCircle, className: sharedStyles.badgeSuccess, text: 'Approved' },
-      rejected: { icon: FaTimesCircle, className: sharedStyles.badgeDanger, text: 'Rejected' },
-      active: { icon: FaCheckCircle, className: sharedStyles.badgeSuccess, text: 'Active' },
-      suspended: { icon: FaExclamationCircle, className: sharedStyles.badgeDanger, text: 'Suspended' }
+      none: { class: styles.badgeDefault, text: 'Not Linked', icon: <FaExclamationCircle /> },
+      pending: { class: styles.badgeWarning, text: 'Pending Review', icon: <FaClock /> },
+      approved: { class: styles.badgeSuccess, text: 'Approved', icon: <FaCheckCircle /> },
+      rejected: { class: styles.badgeDanger, text: 'Rejected', icon: <FaTimesCircle /> }
     };
-    
-    const badge = badges[status] || badges.pending;
-    const Icon = badge.icon;
-    
+    const badge = badges[status] || badges.none;
     return (
-      <span className={`${sharedStyles.badge} ${badge.className}`}>
-        <Icon /> {badge.text}
+      <span className={`${styles.statusBadge} ${badge.class}`}>
+        {badge.icon} {badge.text}
       </span>
     );
   };
 
-  const filteredCharities = charities.filter(charity =>
-    charity.charityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    charity.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (charity.linkedABN && charity.linkedABN.includes(searchTerm))
-  );
+  const getCharityTypeInfo = (charity) => {
+    if (charity.linkedABN) {
+      return {
+        type: 'ACNC Linked',
+        icon: <FaCheckCircle />,
+        class: styles.typeAcncLinked,
+        description: 'Verified ACNC charity'
+      };
+    } else if (charity.ABN || charity.pendingABN) {
+      return {
+        type: 'Has ABN',
+        icon: <FaLink />,
+        class: styles.typeHasAbn,
+        description: 'Has ABN but not linked'
+      };
+    } else {
+      return {
+        type: 'Platform Only',
+        icon: <FaHome />,
+        class: styles.typePlatform,
+        description: 'Registered on platform only'
+      };
+    }
+  };
 
-  const renderCharityDetails = () => {
-    if (!selectedCharity) return null;
+  const filteredCharities = charities.filter(charity => {
+    const matchesSearch = charity.charityName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         charity.contactEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         charity.ABN?.includes(searchTerm) ||
+                         charity.linkedABN?.includes(searchTerm);
+    return matchesSearch;
+  });
 
-    return (
-      <div className={styles.detailsModal}>
-        <div className={styles.modalContent}>
-          <button
-            onClick={() => {
-              setShowDetails(false);
-              setSelectedCharity(null);
-            }}
-            className={styles.closeButton}
+  const pendingCount = charities.filter(c => c.linkingStatus === 'pending').length;
+
+  return (
+    <div className={sharedStyles.adminSection}>
+      <div className={sharedStyles.sectionHeader}>
+        <h2>Charity Management</h2>
+        <div className={styles.headerActions}>
+          <div className={styles.searchBar}>
+            <FaSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search charities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+        </div>
+      </div>
+
+      {message.text && (
+        <div className={`${sharedStyles.alert} ${sharedStyles[`alert${message.type.charAt(0).toUpperCase() + message.type.slice(1)}`]}`}>
+          {message.text}
+          <button 
+            onClick={() => setMessage({ type: '', text: '' })}
+            className={sharedStyles.alertClose}
           >
             ×
           </button>
-          
-          <h2>Charity Details</h2>
-          
-          <div className={styles.detailsGrid}>
-            <div className={styles.detailSection}>
-              <h3>Basic Information</h3>
-              <p><strong>Name:</strong> {selectedCharity.charityName}</p>
-              <p><strong>Email:</strong> {selectedCharity.contactEmail}</p>
-              <p><strong>Category:</strong> {selectedCharity.category}</p>
-              <p><strong>Status:</strong> {getStatusBadge(selectedCharity.linkingStatus || 'pending')}</p>
-              <p><strong>Registration Date:</strong> {new Date(selectedCharity.createdAt).toLocaleDateString()}</p>
-            </div>
-            
-            <div className={styles.detailSection}>
-              <h3>Verification</h3>
-              {selectedCharity.linkedABN ? (
-                <>
-                  <p><strong>ABN:</strong> {selectedCharity.linkedABN}</p>
-                  <p><strong>Linking Status:</strong> {selectedCharity.linkingStatus}</p>
-                  {selectedCharity.linkingEvidence && (
-                    <button
-                      onClick={() => window.open(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${selectedCharity.linkingEvidence}`, '_blank')}
-                      className={styles.iconButton}
-                    >
-                      <FaDownload /> View Evidence
-                    </button>
-                  )}
-                </>
-              ) : (
-                <p>No ABN linked yet</p>
-              )}
-            </div>
-            
-            <div className={styles.detailSection}>
-              <h3>Payment Setup</h3>
-              {selectedCharity.stripeAccountId ? (
-                <>
-                  <p><strong>Stripe Account:</strong> Connected</p>
-                  <p><strong>Charges Enabled:</strong> {selectedCharity.stripeChargesEnabled ? 'Yes' : 'No'}</p>
-                  <p><strong>Payouts Enabled:</strong> {selectedCharity.stripePayoutsEnabled ? 'Yes' : 'No'}</p>
-                </>
-              ) : (
-                <p>Stripe not connected</p>
-              )}
-            </div>
-            
-            <div className={styles.detailSection}>
-              <h3>Impact & Activity</h3>
-              <p><strong>Total Donations:</strong> ${selectedCharity.totalDonations || 0}</p>
-              <p><strong>Donor Count:</strong> {selectedCharity.donorCount || 0}</p>
-              <p><strong>Last Activity:</strong> {selectedCharity.lastActivity ? new Date(selectedCharity.lastActivity).toLocaleDateString() : 'Never'}</p>
-            </div>
-            
-            <div className={styles.detailSection}>
-              <h3>Description</h3>
-              <p>{selectedCharity.description || 'No description provided'}</p>
-              
-              <h3>Mission Statement</h3>
-              <p>{selectedCharity.missionStatement || 'No mission statement provided'}</p>
-            </div>
-          </div>
-          
-          <div className={styles.actionButtons}>
-            {selectedCharity.linkingStatus === 'pending' && (
-              <>
-                <button
-                  onClick={() => handleApprove(selectedCharity._id)}
-                  className={`${styles.button} ${styles.approveButton}`}
-                  disabled={actionLoading}
-                >
-                  {actionLoading ? <FaSpinner className={styles.spinner} /> : <FaCheckCircle />}
-                  Approve Charity
-                </button>
-                <button
-                  onClick={() => handleReject(selectedCharity._id)}
-                  className={`${styles.button} ${styles.rejectButton}`}
-                  disabled={actionLoading}
-                >
-                  {actionLoading ? <FaSpinner className={styles.spinner} /> : <FaTimesCircle />}
-                  Reject Application
-                </button>
-              </>
-            )}
-            
-            <button
-              onClick={() => handleSendEmail(selectedCharity._id, 'status-update')}
-              className={`${styles.button} ${styles.emailButton}`}
-              disabled={actionLoading}
-            >
-              {actionLoading ? <FaSpinner className={styles.spinner} /> : <FaEnvelope />}
-              Send Status Email
-            </button>
-            
-            <button
-              onClick={() => navigate(`/admin/charity/${selectedCharity._id}/edit`)}
-              className={`${styles.button} ${styles.editButton}`}
-            >
-              Edit Details
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className={sharedStyles.adminContainer}>
-      <div className={sharedStyles.pageHeader}>
-        <h1 className={sharedStyles.pageTitle}>Charity Management</h1>
-        <button
-          onClick={() => navigate('/admin-dashboard')}
-          className={`${sharedStyles.button} ${sharedStyles.secondaryButton}`}
-        >
-          Back to Admin Dashboard
-        </button>
-      </div>
-      
-      {message.text && (
-        <div className={`${sharedStyles.message} ${message.type === 'error' ? sharedStyles.messageError : sharedStyles.messageSuccess}`}>
-          {message.text}
         </div>
       )}
-      
-      <div className={sharedStyles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <div className={sharedStyles.searchBar}>
-            <input
-              type="text"
-              placeholder="Search by name, email, or ABN..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={sharedStyles.searchInput}
-            />
-            <FaSearch className={sharedStyles.searchIcon} />
-          </div>
-          
-          <div className={sharedStyles.filters}>
-            <button
-              onClick={() => setFilter('all')}
-              className={`${sharedStyles.filterButton} ${filter === 'all' ? sharedStyles.active : ''}`}
-            >
-              All Charities
-            </button>
-            <button
-              onClick={() => setFilter('pending')}
-              className={`${sharedStyles.filterButton} ${filter === 'pending' ? sharedStyles.active : ''}`}
-            >
-              <FaClock /> Pending Review
-            </button>
-            <button
-              onClick={() => setFilter('approved')}
-              className={`${sharedStyles.filterButton} ${filter === 'approved' ? sharedStyles.active : ''}`}
-            >
-              <FaCheckCircle /> Approved
-            </button>
-            <button
-              onClick={() => setFilter('rejected')}
-              className={`${sharedStyles.filterButton} ${filter === 'rejected' ? sharedStyles.active : ''}`}
-            >
-              <FaTimesCircle /> Rejected
-            </button>
-          </div>
-        </div>
-      
-      <div className={sharedStyles.statsGrid}>
-        <div className={sharedStyles.statCard}>
-          <h3><FaUsers /> Total Charities</h3>
-          <p>{charities.length}</p>
-        </div>
-        <div className={sharedStyles.statCard}>
-          <h3><FaClock /> Pending Review</h3>
-          <p>{charities.filter(c => c.linkingStatus === 'pending').length}</p>
-        </div>
-        <div className={sharedStyles.statCard}>
-          <h3><FaCheckCircle /> Approved</h3>
-          <p>{charities.filter(c => c.linkingStatus === 'approved').length}</p>
-        </div>
-        <div className={sharedStyles.statCard}>
-          <h3><FaCreditCard /> Active with Stripe</h3>
-          <p>{charities.filter(c => c.stripeChargesEnabled).length}</p>
-        </div>
-      </div>
-      
-        {loading ? (
-          <div className={sharedStyles.loading}>
-            <FaSpinner className={sharedStyles.spinner} />
-            <p>Loading charities...</p>
-          </div>
-        ) : (
-        <div className={styles.charityList}>
-          {filteredCharities.map(charity => (
-            <div key={charity._id} className={styles.charityCard}>
-              <div className={styles.charityInfo}>
-                <h3>{charity.charityName}</h3>
-                <p>{charity.contactEmail}</p>
-                <div className={styles.charityMeta}>
-                  {getStatusBadge(charity.linkingStatus || 'pending')}
-                  {charity.linkedABN && (
-                    <span className={styles.abnBadge}>ABN: {charity.linkedABN}</span>
-                  )}
-                  {charity.stripeAccountId && (
-                    <span className={styles.stripeBadge}>
-                      <FaCreditCard /> Stripe Connected
-                    </span>
-                  )}
-                </div>
-                <div className={styles.charityStats}>
-                  <span><FaChartLine /> ${charity.totalDonations || 0} raised</span>
-                  <span><FaUsers /> {charity.donorCount || 0} donors</span>
-                </div>
-              </div>
-              
-              <div className={styles.charityActions}>
-                <button
-                  onClick={() => {
-                    setSelectedCharity(charity);
-                    setShowDetails(true);
-                  }}
-                  className={styles.viewButton}
-                >
-                  <FaEye /> View Details
-                </button>
-              </div>
-            </div>
-          ))}
-          
-          {filteredCharities.length === 0 && (
-            <div className={sharedStyles.emptyState}>
-              <h3>No charities found</h3>
-              <p>Try adjusting your search or filter criteria</p>
-            </div>
+
+      <div className={styles.filterTabs}>
+        <button 
+          className={`${styles.filterTab} ${filter === 'all' ? styles.active : ''}`}
+          onClick={() => setFilter('all')}
+        >
+          All Charities
+        </button>
+        <button 
+          className={`${styles.filterTab} ${filter === 'pending' ? styles.active : ''}`}
+          onClick={() => setFilter('pending')}
+        >
+          Pending Approval
+          {pendingCount > 0 && (
+            <span className={styles.countBadge}>{pendingCount}</span>
           )}
-        </div>
-        )}
+        </button>
+        <button 
+          className={`${styles.filterTab} ${filter === 'approved' ? styles.active : ''}`}
+          onClick={() => setFilter('approved')}
+        >
+          Approved
+        </button>
+        <button 
+          className={`${styles.filterTab} ${filter === 'rejected' ? styles.active : ''}`}
+          onClick={() => setFilter('rejected')}
+        >
+          Rejected
+        </button>
       </div>
-      
-      {showDetails && renderCharityDetails()}
+
+      <div className={styles.charityLegend}>
+        <h3>Charity Types:</h3>
+        <div className={styles.legendItems}>
+          <div className={styles.legendItem}>
+            <span className={`${styles.typeIcon} ${styles.typeAcncLinked}`}>
+              <FaCheckCircle />
+            </span>
+            <span>ACNC Linked - Verified Australian charity linked to ACNC database</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.typeIcon} ${styles.typeHasAbn}`}>
+              <FaLink />
+            </span>
+            <span>Has ABN - Has Australian Business Number but not yet linked to ACNC</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.typeIcon} ${styles.typePlatform}`}>
+              <FaHome />
+            </span>
+            <span>Platform Only - Registered on Do-Nation platform without ABN</span>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className={sharedStyles.loadingContainer}>
+          <FaSpinner className={sharedStyles.spinner} />
+          <p>Loading charities...</p>
+        </div>
+      ) : (
+        <div className={styles.tableContainer}>
+          <table className={sharedStyles.dataTable}>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Charity Name</th>
+                <th>Contact Email</th>
+                <th>ABN/Tax ID</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Registration Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCharities.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className={styles.emptyState}>
+                    No charities found
+                  </td>
+                </tr>
+              ) : (
+                filteredCharities.map((charity) => {
+                  const typeInfo = getCharityTypeInfo(charity);
+                  return (
+                    <tr key={charity._id} className={styles.charityRow}>
+                      <td>
+                        <div className={`${styles.typeIndicator} ${typeInfo.class}`} title={typeInfo.description}>
+                          <span className={styles.typeIcon}>{typeInfo.icon}</span>
+                          <span className={styles.typeLabel}>{typeInfo.type}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.charityName}>
+                          <strong>{charity.charityName}</strong>
+                          {charity.verified && (
+                            <FaCheckCircle className={styles.verifiedBadge} title="Verified" />
+                          )}
+                        </div>
+                      </td>
+                      <td>{charity.contactEmail}</td>
+                      <td>
+                        <div className={styles.abnInfo}>
+                          {charity.linkedABN && (
+                            <div>
+                              <span className={styles.label}>Linked:</span> {charity.linkedABN}
+                            </div>
+                          )}
+                          {charity.pendingABN && charity.linkingStatus === 'pending' && (
+                            <div>
+                              <span className={styles.label}>Pending:</span> {charity.pendingABN}
+                            </div>
+                          )}
+                          {charity.taxId && (
+                            <div>
+                              <span className={styles.label}>Tax ID:</span> {charity.taxId}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td>{charity.category}</td>
+                      <td>{getStatusBadge(charity.linkingStatus)}</td>
+                      <td>{new Date(charity.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <div className={styles.actionButtons}>
+                          <button 
+                            className={`${sharedStyles.btnSmall} ${sharedStyles.btnSecondary}`}
+                            onClick={() => {
+                              setSelectedCharity(charity);
+                              setShowDetails(true);
+                            }}
+                          >
+                            <FaEye /> View
+                          </button>
+                          {charity.linkingStatus === 'pending' && (
+                            <>
+                              <button 
+                                className={`${sharedStyles.btnSmall} ${sharedStyles.btnSuccess}`}
+                                onClick={() => approveCharity(charity._id)}
+                              >
+                                <FaCheckCircle /> Approve
+                              </button>
+                              <button 
+                                className={`${sharedStyles.btnSmall} ${sharedStyles.btnDanger}`}
+                                onClick={() => {
+                                  setSelectedCharity(charity);
+                                  setShowDetails(true);
+                                }}
+                              >
+                                <FaTimesCircle /> Reject
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showDetails && selectedCharity && (
+        <div className={sharedStyles.modal} onClick={() => setShowDetails(false)}>
+          <div className={sharedStyles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={sharedStyles.modalHeader}>
+              <h3>Charity Details</h3>
+              <button 
+                className={sharedStyles.modalClose}
+                onClick={() => setShowDetails(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={sharedStyles.modalBody}>
+              <div className={styles.detailGrid}>
+                <div className={styles.detailSection}>
+                  <h4>Basic Information</h4>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Name:</span>
+                    <span className={styles.detailValue}>{selectedCharity.charityName}</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Email:</span>
+                    <span className={styles.detailValue}>{selectedCharity.contactEmail}</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Category:</span>
+                    <span className={styles.detailValue}>{selectedCharity.category}</span>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Tax ID:</span>
+                    <span className={styles.detailValue}>{selectedCharity.taxId || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className={styles.detailSection}>
+                  <h4>ACNC Linking</h4>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Status:</span>
+                    {getStatusBadge(selectedCharity.linkingStatus)}
+                  </div>
+                  {selectedCharity.pendingABN && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Requested ABN:</span>
+                      <span className={styles.detailValue}>{selectedCharity.pendingABN}</span>
+                    </div>
+                  )}
+                  {selectedCharity.linkedABN && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Linked ABN:</span>
+                      <span className={styles.detailValue}>{selectedCharity.linkedABN}</span>
+                    </div>
+                  )}
+                  {selectedCharity.evidenceFile && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Evidence:</span>
+                      <a 
+                        href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/uploads/${selectedCharity.evidenceFile}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={styles.evidenceLink}
+                      >
+                        View Evidence File
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <div className={`${styles.detailSection} ${styles.fullWidth}`}>
+                  <h4>Mission Statement</h4>
+                  <p className={styles.missionText}>
+                    {selectedCharity.missionStatement || 'No mission statement provided'}
+                  </p>
+                </div>
+
+                <div className={`${styles.detailSection} ${styles.fullWidth}`}>
+                  <h4>Description</h4>
+                  <p className={styles.descriptionText}>
+                    {selectedCharity.description || 'No description provided'}
+                  </p>
+                </div>
+
+                <div className={styles.statsGrid}>
+                  <div className={styles.statCard}>
+                    <FaUsers className={styles.statIcon} />
+                    <div>
+                      <div className={styles.statValue}>{selectedCharity.donorCount || 0}</div>
+                      <div className={styles.statLabel}>Donors</div>
+                    </div>
+                  </div>
+                  <div className={styles.statCard}>
+                    <FaCreditCard className={styles.statIcon} />
+                    <div>
+                      <div className={styles.statValue}>
+                        ${(selectedCharity.totalDonations || 0).toLocaleString()}
+                      </div>
+                      <div className={styles.statLabel}>Total Donations</div>
+                    </div>
+                  </div>
+                  <div className={styles.statCard}>
+                    <FaChartLine className={styles.statIcon} />
+                    <div>
+                      <div className={styles.statValue}>
+                        ${(selectedCharity.averageDonation || 0).toFixed(2)}
+                      </div>
+                      <div className={styles.statLabel}>Average Donation</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {selectedCharity.linkingStatus === 'pending' && (
+                <div className={styles.approvalSection}>
+                  <h4>Take Action</h4>
+                  <div className={styles.approvalActions}>
+                    <button 
+                      className={`${sharedStyles.btnLarge} ${sharedStyles.btnSuccess}`}
+                      onClick={() => approveCharity(selectedCharity._id)}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? <FaSpinner className={sharedStyles.spinner} /> : <FaCheckCircle />}
+                      Approve ACNC Linking
+                    </button>
+                    <div className={styles.rejectSection}>
+                      <textarea
+                        placeholder="Enter rejection reason..."
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        rows="3"
+                        className={styles.rejectTextarea}
+                      />
+                      <button 
+                        className={`${sharedStyles.btnLarge} ${sharedStyles.btnDanger}`}
+                        onClick={() => rejectCharity(selectedCharity._id)}
+                        disabled={actionLoading || !rejectReason.trim()}
+                      >
+                        {actionLoading ? <FaSpinner className={sharedStyles.spinner} /> : <FaTimesCircle />}
+                        Reject with Reason
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedCharity.linkingStatus === 'rejected' && selectedCharity.rejectionReason && (
+                <div className={styles.rejectionInfo}>
+                  <h4>Rejection Information</h4>
+                  <p><strong>Reason:</strong> {selectedCharity.rejectionReason}</p>
+                  <p><strong>Rejected on:</strong> {new Date(selectedCharity.rejectedAt).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
