@@ -493,6 +493,84 @@
   color: #3b82f6;
 }
 
+/* Custom Amount Styles */
+.customAmountWrapper {
+  margin-top: 1rem;
+}
+
+.customAmountButton {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  color: #6366f1;
+  border: 2px dashed #6366f1;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.customAmountButton:hover {
+  background: #f9fafb;
+  border-color: #4f46e5;
+}
+
+.customAmountInput {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.customInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.customInput:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.customAmountConfirm {
+  padding: 0.75rem 1.5rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.customAmountConfirm:hover {
+  background: #4f46e5;
+}
+
+/* Multiplier Highlight */
+.multiplierHighlight {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  background: #10b981;
+  color: white;
+  border-radius: 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.matchText {
+  display: flex;
+  align-items: center;
+  font-size: 0.9375rem;
+  color: #6b7280;
+}
+
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .cardStack {
