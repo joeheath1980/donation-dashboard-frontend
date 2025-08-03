@@ -130,90 +130,56 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     return [];
   }
 
-  // Split one-off contributions into regular and completed campaigns
-  const completedCampaignsFromOneOffs = oneOffContributions.filter(contribution => 
-    contribution.subject?.startsWith('Completed fundraising campaign:')
-  );
-  
-  const regularOneOffs = oneOffContributions.filter(contribution => 
-    !contribution.subject?.startsWith('Completed fundraising campaign:')
-  );
+  // Get the current total score using the new scoring system
+  const totalScore = calculateComplexImpactScore({
+    regularDonations: donations,
+    oneOffDonations: oneOffContributions,
+    volunteeringActivities: volunteerActivities,
+    fundraisingCampaigns: fundraisingCampaigns
+  }).totalScore;
 
-  // Get archived campaigns from fundraisingCampaigns
-  const archivedCampaigns = (fundraisingCampaigns || [])
-    .filter(campaign => campaign.status === 'archived')
-    .map(campaign => ({
-      type: 'fundraisingCampaign',
-      date: new Date(campaign.completedDate || campaign.endDate),
-      amount: Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
-      charity: campaign.title,
-      subject: `Completed fundraising campaign: ${campaign.description}`
-    }));
-
-  // Calculate volunteer long-term bonus
-  let volunteerLongTermBonus = 0;
-  if (volunteerActivities && volunteerActivities.length > 0) {
-    let earliestStartDate = new Date();
-    let latestEndDate = new Date(0);
-
-    volunteerActivities.forEach(activity => {
-      const startDate = new Date(activity.startDate);
-      const endDate = activity.endDate ? new Date(activity.endDate) : new Date();
-      if (startDate < earliestStartDate) earliestStartDate = startDate;
-      if (endDate > latestEndDate) latestEndDate = endDate;
-    });
-
-    const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + 
-                           (latestEndDate.getMonth() - earliestStartDate.getMonth());
-
-    if (durationInMonths >= 12) {
-      volunteerLongTermBonus = 3;
-    } else if (durationInMonths >= 6) {
-      volunteerLongTermBonus = 1.5;
-    }
-  }
-
-  // Combine all activities into a single array
+  // Combine all activities into a single array with dates
   const allActivities = [
     ...donations.map(d => ({
       ...d,
       type: 'donation',
       date: new Date(d.date),
       amount: Number(d.amount) || 0,
+      displayAmount: `$${Number(d.amount) || 0}`,
       frequency: d.frequency
     })),
-    ...regularOneOffs.map(d => ({
+    ...oneOffContributions.map(d => ({
       ...d,
       type: 'oneOff',
       date: new Date(d.date),
-      amount: Number(d.amount) || 0
-    })),
-    ...completedCampaignsFromOneOffs.map(d => ({
-      ...d,
-      type: 'fundraisingCampaign',
-      date: new Date(d.date),
       amount: Number(d.amount) || 0,
-      charity: d.charity || d.subject.replace('Completed fundraising campaign: ', '')
+      displayAmount: `$${Number(d.amount) || 0}`
     })),
-    ...archivedCampaigns,
     ...(volunteerActivities || []).map(v => ({
       ...v,
       type: 'volunteer',
-      date: new Date(v.date),
+      date: new Date(v.date || v.startDate),
       hours: Number(v.hours) || 0,
-      startDate: v.startDate,
-      endDate: v.endDate
-    }))
+      displayAmount: `${Number(v.hours) || 0} hours`
+    })),
+    ...(fundraisingCampaigns || [])
+      .filter(campaign => campaign.status === 'archived')
+      .map(campaign => ({
+        ...campaign,
+        type: 'fundraisingCampaign',
+        date: new Date(campaign.completedDate || campaign.endDate || campaign.createdAt),
+        amount: Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
+        displayAmount: `$${Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0} raised`,
+        charity: campaign.title
+      }))
   ].filter(activity => activity.date && !isNaN(activity.date.getTime()));
 
   // Sort activities by date
   allActivities.sort((a, b) => a.date - b.date);
 
-  // Initialize cumulative totals
-  let cumulativeDonationAmount = 0;
-  let cumulativeVolunteerHours = 0;
-  let cumulativeFundsRaised = 0;
-  let cumulativeScore = 0;
+  if (allActivities.length === 0) {
+    return [];
+  }
 
   // Group activities by date
   const groupedActivities = allActivities.reduce((acc, activity) => {
@@ -226,101 +192,50 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   }, {});
 
   const processedData = [];
-
-  Object.entries(groupedActivities).forEach(([date, activities]) => {
-    const currentDate = new Date(date);
-    const activitiesWithPoints = activities.map(activity => {
-      let pointsEarned = 0;
-
-      switch (activity.type) {
-        case 'donation':
-          pointsEarned = calculateDonationPointsIncremental(
-            activity.amount,
-            cumulativeDonationAmount,
-            activity.frequency
-          );
-          cumulativeDonationAmount += activity.amount;
-          break;
-
-        case 'oneOff':
-          pointsEarned = calculateDonationPointsIncremental(
-            activity.amount,
-            cumulativeDonationAmount,
-            null
-          );
-          cumulativeDonationAmount += activity.amount;
-          break;
-
-        case 'volunteer':
-          pointsEarned = calculateVolunteerPointsIncremental(
-            activity.hours,
-            cumulativeVolunteerHours
-          );
-          cumulativeVolunteerHours += activity.hours;
-          break;
-
-        case 'fundraisingCampaign':
-          pointsEarned = calculateFundraisingPointsIncremental(
-            activity.amount,
-            cumulativeFundsRaised
-          );
-          cumulativeFundsRaised += activity.amount;
-          break;
-
-        default:
-          console.warn(`Unknown activity type: ${activity.type}`);
-          pointsEarned = 0;
-          break;
-      }
-
-      return {
-        type: activity.type,
-        details: activity.type === 'volunteer' ? `${activity.hours} hours` : 
-                `$${activity.amount}`,
-        recipient: activity.organization || activity.charity,
-        pointsEarned
-      };
-    });
-
-    const totalPointsEarned = activitiesWithPoints.reduce((sum, activity) => sum + activity.pointsEarned, 0);
-    cumulativeScore += totalPointsEarned;
-
+  const sortedDates = Object.keys(groupedActivities).sort();
+  
+  // For each date, calculate the score up to that point
+  sortedDates.forEach((dateKey, index) => {
+    const currentDate = new Date(dateKey);
+    const activities = groupedActivities[dateKey];
+    
+    // Get all activities up to and including this date
+    const activitiesUpToDate = allActivities.filter(a => a.date <= currentDate);
+    
+    // Group them by type for the new scoring system
+    const donationsUpToDate = activitiesUpToDate.filter(a => a.type === 'donation');
+    const oneOffsUpToDate = activitiesUpToDate.filter(a => a.type === 'oneOff');
+    const volunteeringUpToDate = activitiesUpToDate.filter(a => a.type === 'volunteer');
+    const fundraisingUpToDate = activitiesUpToDate.filter(a => a.type === 'fundraisingCampaign');
+    
+    // Calculate score up to this point using the new scoring system
+    const scoreUpToDate = calculateComplexImpactScore({
+      regularDonations: donationsUpToDate,
+      oneOffDonations: oneOffsUpToDate,
+      volunteeringActivities: volunteeringUpToDate,
+      fundraisingCampaigns: fundraisingUpToDate
+    }).totalScore;
+    
+    // Format activities for display
+    const activitiesWithDetails = activities.map(activity => ({
+      type: activity.type,
+      details: activity.displayAmount,
+      recipient: activity.organization || activity.charity || activity.charityName || 'Unknown',
+      pointsEarned: 0 // We don't calculate individual points in the new system
+    }));
+    
     processedData.push({
       x: currentDate,
-      y: cumulativeScore,
-      activities: activitiesWithPoints,
-      pointsEarned: totalPointsEarned,
+      y: scoreUpToDate,
+      activities: activitiesWithDetails,
+      pointsEarned: index > 0 ? scoreUpToDate - processedData[index - 1].y : scoreUpToDate,
       isDense: activities.length > 1
     });
   });
 
-  // Add volunteer long-term bonus to the final cumulative score
-  cumulativeScore += volunteerLongTermBonus;
-  
-  // Add fundraising event and campaign bonuses
-  if (fundraisingCampaigns) {
-    const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
-    const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
-    cumulativeScore += totalEventsOrganized * 1.5;
-    cumulativeScore += totalOnlineCampaignsInitiated * 0.75;
-  }
-  
-  // Round the cumulative score to match ImpactContext behavior
-  cumulativeScore = Math.round(cumulativeScore);
-  
-  // No longer applying the 90 point cap - new scoring system has no cap
-
-  // Instead of using the old cumulative score, use the actual impact score from the new system
-  const actualImpactScore = calculateComplexImpactScore({
-    regularDonations: donations,
-    oneOffDonations: oneOffContributions,
-    volunteeringActivities: volunteerActivities,
-    fundraisingCampaigns: fundraisingCampaigns
-  }).totalScore;
-
-  // Update the last data point with the actual score if there are any data points
-  if (processedData.length > 0) {
-    processedData[processedData.length - 1].y = actualImpactScore;
+  // Ensure the last point matches the current total score
+  if (processedData.length > 0 && processedData[processedData.length - 1].y !== totalScore) {
+    processedData[processedData.length - 1].y = totalScore;
   }
 
   // Verify total score matches
@@ -404,7 +319,10 @@ function ImpactVisualization({ hideTitle = false }) {
       fundraisingCampaigns,
       impactScore
     });
-    return processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns);
+    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns);
+    console.log('Processed data points:', points);
+    console.log('Chart Y values:', points.map(p => p.y));
+    return points;
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
 
   // Set up intersection observer to detect visibility
@@ -505,17 +423,30 @@ function ImpactVisualization({ hideTitle = false }) {
     const maxScore = Math.max(impactScore, ...dataPoints.map(point => point.y));
     let yAxisMax, stepSize;
 
-    if (maxScore <= 25) {
-      yAxisMax = 25;
-      stepSize = 5;
-    } else if (maxScore <= 50) {
+    // Updated scaling for new scoring system
+    if (maxScore <= 50) {
       yAxisMax = 50;
       stepSize = 10;
-    } else if (maxScore <= 75) {
-      yAxisMax = 75;
-      stepSize = 15;
+    } else if (maxScore <= 100) {
+      yAxisMax = 100;
+      stepSize = 20;
+    } else if (maxScore <= 300) {
+      yAxisMax = 300;
+      stepSize = 50;
+    } else if (maxScore <= 500) {
+      yAxisMax = 500;
+      stepSize = 100;
+    } else if (maxScore <= 1000) {
+      yAxisMax = 1000;
+      stepSize = 200;
+    } else if (maxScore <= 2500) {
+      yAxisMax = 2500;
+      stepSize = 500;
+    } else if (maxScore <= 5000) {
+      yAxisMax = 5000;
+      stepSize = 1000;
     } else {
-      yAxisMax = Math.ceil(maxScore / 25) * 25;
+      yAxisMax = Math.ceil(maxScore / 1000) * 1000;
       stepSize = yAxisMax / 5;
     }
 
