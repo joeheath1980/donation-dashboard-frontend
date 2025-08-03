@@ -33,97 +33,7 @@ const COLORS = {
   DENSE_SIMPLE: '#ff7f50'
 };
 
-function calculateDonationPointsIncremental(amount, cumulativeTotalBefore, frequency) {
-  let points = 0;
-  let remainingAmount = amount;
-  let totalSoFar = cumulativeTotalBefore;
-
-  // Tier limits and rates
-  const tiers = [
-    { limit: 1000, rate: 1 / 100 },    // Up to $1,000
-    { limit: 5000, rate: 1 / 200 },    // Up to $5,000
-    { limit: Infinity, rate: 1 / 500 }  // Above $5,000
-  ];
-
-  for (const tier of tiers) {
-    if (totalSoFar >= tier.limit) continue;
-
-    const tierAvailable = tier.limit - totalSoFar;
-    const amountInTier = Math.min(remainingAmount, tierAvailable);
-    points += amountInTier * tier.rate;
-
-    remainingAmount -= amountInTier;
-    totalSoFar += amountInTier;
-
-    if (remainingAmount <= 0) break;
-  }
-
-  // Regular Giving Multiplier
-  let regularGivingMultiplier = 1;
-  if (frequency === 'weekly') {
-    regularGivingMultiplier = 1.2;
-  } else if (frequency === 'monthly') {
-    regularGivingMultiplier = 1.1;
-  }
-
-  points *= regularGivingMultiplier;
-
-  return points;
-}
-
-function calculateVolunteerPointsIncremental(hours, cumulativeHoursBefore) {
-  let points = 0;
-  let remainingHours = hours;
-  let totalHoursSoFar = cumulativeHoursBefore;
-
-  const tiers = [
-    { limit: 40, rate: 0.5 },      // Up to 40 hours
-    { limit: 120, rate: 0.3 },     // Up to 120 hours (40 + 80)
-    { limit: Infinity, rate: 0.1 }  // Above 120 hours
-  ];
-
-  for (const tier of tiers) {
-    if (totalHoursSoFar >= tier.limit) continue;
-
-    const tierAvailable = tier.limit - totalHoursSoFar;
-    const hoursInTier = Math.min(remainingHours, tierAvailable);
-    points += hoursInTier * tier.rate;
-
-    remainingHours -= hoursInTier;
-    totalHoursSoFar += hoursInTier;
-
-    if (remainingHours <= 0) break;
-  }
-
-  return points;
-}
-
-function calculateFundraisingPointsIncremental(amount, cumulativeTotalBefore) {
-  let points = 0;
-  let remainingAmount = amount;
-  let totalSoFar = cumulativeTotalBefore;
-
-  const tiers = [
-    { limit: 2000, rate: 1 / 100 },    // Up to $2,000
-    { limit: 8000, rate: 1 / 300 },   // Up to $8,000 (2000 + 6000)
-    { limit: Infinity, rate: 1 / 600 }  // Above $8,000
-  ];
-
-  for (const tier of tiers) {
-    if (totalSoFar >= tier.limit) continue;
-
-    const tierAvailable = tier.limit - totalSoFar;
-    const amountInTier = Math.min(remainingAmount, tierAvailable);
-    points += amountInTier * tier.rate;
-
-    remainingAmount -= amountInTier;
-    totalSoFar += amountInTier;
-
-    if (remainingAmount <= 0) break;
-  }
-
-  return points;
-}
+// Old incremental calculation functions removed - now using calculateComplexImpactScore
 
 function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns) {
   if (!donations || !oneOffContributions) {
@@ -216,13 +126,44 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       fundraisingCampaigns: fundraisingUpToDate
     }).totalScore;
     
-    // Format activities for display
-    const activitiesWithDetails = activities.map(activity => ({
-      type: activity.type,
-      details: activity.displayAmount,
-      recipient: activity.organization || activity.charity || activity.charityName || 'Unknown',
-      pointsEarned: 0 // We don't calculate individual points in the new system
-    }));
+    // Calculate points for each individual activity
+    const activitiesWithDetails = activities.map(activity => {
+      // Calculate score with just this single activity
+      let singleActivityScore = 0;
+      
+      if (activity.type === 'donation' || activity.type === 'oneOff') {
+        const tempScore = calculateComplexImpactScore({
+          regularDonations: activity.type === 'donation' ? [activity] : [],
+          oneOffDonations: activity.type === 'oneOff' ? [activity] : [],
+          volunteeringActivities: [],
+          fundraisingCampaigns: []
+        });
+        singleActivityScore = tempScore.donationScore;
+      } else if (activity.type === 'volunteer') {
+        const tempScore = calculateComplexImpactScore({
+          regularDonations: [],
+          oneOffDonations: [],
+          volunteeringActivities: [activity],
+          fundraisingCampaigns: []
+        });
+        singleActivityScore = tempScore.volunteerScore;
+      } else if (activity.type === 'fundraisingCampaign') {
+        const tempScore = calculateComplexImpactScore({
+          regularDonations: [],
+          oneOffDonations: [],
+          volunteeringActivities: [],
+          fundraisingCampaigns: [activity]
+        });
+        singleActivityScore = tempScore.fundraisingScore;
+      }
+      
+      return {
+        type: activity.type,
+        details: activity.displayAmount,
+        recipient: activity.organization || activity.charity || activity.charityName || 'Unknown',
+        pointsEarned: singleActivityScore
+      };
+    });
     
     processedData.push({
       x: currentDate,
@@ -238,36 +179,6 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     processedData[processedData.length - 1].y = totalScore;
   }
 
-  // Verify total score matches
-  const totalImpactScore = calculateComplexImpactScore({
-    regularDonations: donations,
-    oneOffDonations: oneOffContributions,
-    volunteeringActivities: volunteerActivities,
-    fundraisingCampaigns: fundraisingCampaigns
-  }).totalScore;
-
-  // Calculate detailed scores for debugging
-  const scoreBreakdown = calculateComplexImpactScore({
-    regularDonations: donations,
-    oneOffDonations: oneOffContributions,
-    volunteeringActivities: volunteerActivities,
-    fundraisingCampaigns: fundraisingCampaigns
-  });
-
-  if (Math.abs(cumulativeScore - totalImpactScore) > 0.01) {
-    console.warn('Cumulative score does not match total impact score', {
-      cumulativeScore,
-      totalImpactScore,
-      difference: Math.abs(cumulativeScore - totalImpactScore),
-      volunteerLongTermBonus,
-      fundraisingEvents: fundraisingCampaigns?.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0) || 0,
-      onlineCampaigns: fundraisingCampaigns?.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0) || 0,
-      scoreBreakdown,
-      cumulativeDonationAmount,
-      cumulativeVolunteerHours,
-      cumulativeFundsRaised
-    });
-  }
 
   return processedData;
 }
