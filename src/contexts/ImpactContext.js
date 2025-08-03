@@ -313,6 +313,30 @@ export const calculateComplexImpactScore = (userData) => {
       breakdown: {}
     };
   }
+  
+  // Helper function to get tier info
+  const getTierInfo = (score) => {
+    if (score >= 5000) return { 
+      name: 'Visionary',
+      multiplier: 1.5
+    };
+    if (score >= 2500) return { 
+      name: 'Champion',
+      multiplier: 1.3
+    };
+    if (score >= 1000) return { 
+      name: 'Philanthropist',
+      multiplier: 1.2
+    };
+    if (score >= 300) return { 
+      name: 'Altruist',
+      multiplier: 1.1
+    };
+    return { 
+      name: 'Giver',
+      multiplier: 1.0
+    };
+  };
 
   const {
     regularDonations = [],
@@ -489,30 +513,6 @@ export const ImpactProvider = ({ children }) => {
       setPointsToNextTier(300);
     }
   }, [getAuthHeaders]);
-
-  // Helper function to get tier info
-  const getTierInfo = (score) => {
-    if (score >= 5000) return { 
-      name: 'Visionary',
-      multiplier: 1.5
-    };
-    if (score >= 2500) return { 
-      name: 'Champion',
-      multiplier: 1.3
-    };
-    if (score >= 1000) return { 
-      name: 'Philanthropist',
-      multiplier: 1.2
-    };
-    if (score >= 300) return { 
-      name: 'Altruist',
-      multiplier: 1.1
-    };
-    return { 
-      name: 'Giver',
-      multiplier: 1.0
-    };
-  };
 
   const getTier = (score) => {
     if (score >= 5000) return { 
