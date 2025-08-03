@@ -130,6 +130,8 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     const activitiesWithDetails = activities.map(activity => {
       // Calculate score with just this single activity
       let singleActivityScore = 0;
+      let rawScore = 0;
+      let decayFactor = 1;
       
       if (activity.type === 'donation' || activity.type === 'oneOff') {
         const tempScore = calculateComplexImpactScore({
@@ -139,6 +141,27 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: []
         });
         singleActivityScore = tempScore.donationScore;
+        
+        // Calculate raw score without decay for display
+        const amount = activity.amount || 0;
+        if (amount < 15) {
+          rawScore = 8; // Micro donation base
+        } else {
+          // Traditional donation brackets
+          let remaining = amount;
+          if (remaining > 0) rawScore += Math.min(remaining, 25) * 1.0;
+          remaining -= 25;
+          if (remaining > 0) rawScore += Math.min(remaining, 25) * 0.8;
+          remaining -= 25;
+          if (remaining > 0) rawScore += Math.min(remaining, 50) * 0.6;
+          remaining -= 50;
+          if (remaining > 0) rawScore += Math.min(remaining, 150) * 0.4;
+          remaining -= 150;
+          if (remaining > 0) rawScore += Math.min(remaining, 250) * 0.2;
+          remaining -= 250;
+          if (remaining > 0) rawScore += remaining * 0.1;
+        }
+        decayFactor = singleActivityScore / rawScore;
       } else if (activity.type === 'volunteer') {
         const tempScore = calculateComplexImpactScore({
           regularDonations: [],
@@ -147,6 +170,14 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: []
         });
         singleActivityScore = tempScore.volunteerScore;
+        
+        // Calculate raw score
+        const hours = activity.hours || 0;
+        rawScore = hours * 2; // 2 points per hour
+        if (hours >= 8) rawScore += 8;
+        else if (hours >= 4) rawScore += 4;
+        else if (hours >= 2) rawScore += 2;
+        decayFactor = singleActivityScore / rawScore;
       } else if (activity.type === 'fundraisingCampaign') {
         const tempScore = calculateComplexImpactScore({
           regularDonations: [],
@@ -157,11 +188,26 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         singleActivityScore = tempScore.fundraisingScore;
       }
       
+      // Debug log
+      if (activity.amount >= 100 || activity.hours >= 10) {
+        console.log('Activity scoring:', {
+          type: activity.type,
+          amount: activity.amount,
+          hours: activity.hours,
+          date: activity.date,
+          rawScore: Math.round(rawScore),
+          decayFactor: decayFactor.toFixed(2),
+          finalScore: singleActivityScore
+        });
+      }
+      
       return {
         type: activity.type,
         details: activity.displayAmount,
         recipient: activity.organization || activity.charity || activity.charityName || 'Unknown',
-        pointsEarned: singleActivityScore
+        pointsEarned: singleActivityScore,
+        rawPoints: Math.round(rawScore),
+        isDecayed: decayFactor < 0.95
       };
     });
     
@@ -562,7 +608,10 @@ function ImpactVisualization({ hideTitle = false }) {
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Points Earned:</span>
-                    <span class="${styles.tooltipValue}">+${activity.pointsEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span class="${styles.tooltipValue}">
+                      +${activity.pointsEarned.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      ${activity.isDecayed ? `<span style="font-size: 0.85em; opacity: 0.7">(was ${activity.rawPoints})</span>` : ''}
+                    </span>
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
 
