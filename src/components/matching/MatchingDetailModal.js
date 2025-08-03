@@ -131,7 +131,10 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 </div>
                 <div className={styles.sectionContent}>
                   <h3>{opportunity.businessName}</h3>
-                  <p>Will match your donation at <strong className={styles.multiplier}>{opportunity.multiplier || 2}x</strong></p>
+                  <p className={styles.multiplierText}>
+                    Will match your donation at 
+                    <strong className={styles.multiplierBig}>{opportunity.multiplier || 2}x</strong>
+                  </p>
                 </div>
               </div>
 
@@ -251,13 +254,13 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                   <div className={styles.impactRow}>
                     <span>{opportunity.businessName} matches:</span>
                     <strong className={styles.matchAmount}>
-                      ${opportunity.suggestedAmount * (opportunity.multiplier || 2)}
+                      ${opportunity.suggestedAmount * ((opportunity.multiplier || 2) - 1)}
                     </strong>
                   </div>
                   <div className={styles.impactRow + ' ' + styles.totalRow}>
                     <span>Total impact:</span>
                     <strong className={styles.totalAmount}>
-                      ${opportunity.suggestedAmount + (opportunity.suggestedAmount * (opportunity.multiplier || 2))}
+                      ${opportunity.suggestedAmount * (opportunity.multiplier || 2)}
                     </strong>
                   </div>
                 </div>

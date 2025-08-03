@@ -104,6 +104,37 @@
   font-size: 1.25rem;
 }
 
+.multiplierText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0.5rem 0;
+}
+
+.multiplierBig {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: #10b981;
+  color: white;
+  border-radius: 2rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 .charityDescription {
   margin-bottom: 1rem;
 }

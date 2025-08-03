@@ -18,6 +18,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
   const [charityOptions, setCharityOptions] = useState({});
   const [showCharitySearch, setShowCharitySearch] = useState(false);
   const [loadingCharities, setLoadingCharities] = useState(false);
+  const [showCustomAmount, setShowCustomAmount] = useState(false);
+  const [customAmount, setCustomAmount] = useState('');
   const websocket = useWebSocket();
 
   useEffect(() => {
@@ -243,6 +245,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
     setSelectedAmount(null);
     setSelectedCharityId(null);
     setShowCharitySearch(false);
+    setShowCustomAmount(false);
+    setCustomAmount('');
     
     if (currentIndex < opportunities.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -364,7 +368,12 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 )}
                 <div className={styles.businessDetails}>
                   <h3>{currentOpp.businessName}</h3>
-                  <p>will match your donation {currentOpp.multiplierText || '2x'}</p>
+                  <p className={styles.matchText}>
+                    will match your donation 
+                    <span className={styles.multiplierHighlight}>
+                      {currentOpp.multiplier || 2}x
+                    </span>
+                  </p>
                 </div>
               </div>
 
@@ -437,8 +446,10 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 )}
 
                 <div className={styles.detailRow}>
-                  <span>Match Amount:</span>
-                  <strong className={styles.contribution}>${currentOpp.contribution}</strong>
+                  <span>Match Range:</span>
+                  <strong className={styles.contribution}>
+                    ${currentOpp.minAmount || 5} - ${currentOpp.maxAmount || 15}
+                  </strong>
                 </div>
               </div>
 
@@ -449,21 +460,76 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
               <div className={styles.quickAmounts}>
                 <p className={styles.quickAmountsLabel}>Select amount to donate:</p>
                 <div className={styles.amountButtons}>
-                  {[10, 25, 50, 100].map(amount => {
-                    const matchAmount = amount * (currentOpp.multiplier || 2);
-                    return (
+                  {(() => {
+                    // Calculate 4 evenly distributed amounts within the range
+                    const min = currentOpp.minAmount || 5;
+                    const max = currentOpp.maxAmount || 15;
+                    const step = (max - min) / 3;
+                    const amounts = [
+                      Math.round(min),
+                      Math.round(min + step),
+                      Math.round(min + step * 2),
+                      Math.round(max)
+                    ];
+                    
+                    return amounts.map(amount => {
+                      // Fix: 2x means business matches your amount 1:1
+                      const businessMatch = amount * (currentOpp.multiplier - 1 || 1);
+                      const totalImpact = amount + businessMatch;
+                      return (
+                        <button
+                          key={amount}
+                          className={`${styles.amountButton} ${selectedAmount === amount ? styles.selected : ''}`}
+                          onClick={() => handleQuickDonation(amount)}
+                        >
+                          <span className={styles.donationAmount}>${amount}</span>
+                          <span className={styles.matchAmount}>
+                            = ${totalImpact}
+                          </span>
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+                
+                {/* Custom Amount Option */}
+                <div className={styles.customAmountWrapper}>
+                  {!showCustomAmount ? (
+                    <button 
+                      className={styles.customAmountButton}
+                      onClick={() => setShowCustomAmount(true)}
+                    >
+                      Custom Amount
+                    </button>
+                  ) : (
+                    <div className={styles.customAmountInput}>
+                      <input
+                        type="number"
+                        min={currentOpp.minAmount || 5}
+                        max={currentOpp.maxAmount || 15}
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(e.target.value)}
+                        placeholder={`$${currentOpp.minAmount || 5} - $${currentOpp.maxAmount || 15}`}
+                        className={styles.customInput}
+                      />
                       <button
-                        key={amount}
-                        className={`${styles.amountButton} ${selectedAmount === amount ? styles.selected : ''}`}
-                        onClick={() => handleQuickDonation(amount)}
+                        className={styles.customAmountConfirm}
+                        onClick={() => {
+                          const amount = parseFloat(customAmount);
+                          const min = currentOpp.minAmount || 5;
+                          const max = currentOpp.maxAmount || 15;
+                          if (amount >= min && amount <= max) {
+                            handleQuickDonation(amount);
+                            setShowCustomAmount(false);
+                          } else {
+                            alert(`Please enter an amount between $${min} and $${max}`);
+                          }
+                        }}
                       >
-                        <span className={styles.donationAmount}>${amount}</span>
-                        <span className={styles.matchAmount}>
-                          → ${matchAmount}
-                        </span>
+                        Select
                       </button>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
               </div>
 
