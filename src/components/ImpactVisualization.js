@@ -737,6 +737,10 @@ function ImpactVisualization({ hideTitle = false }) {
               const position = context.chart.canvas.getBoundingClientRect();
               const chartContainer = chartRef.current.parentElement.getBoundingClientRect();
               
+              // Get activities from the data point
+              const dataPoint = tooltipModel.dataPoints ? dataPoints[tooltipModel.dataPoints[0].dataIndex] : null;
+              const activities = dataPoint ? dataPoint.activities : [];
+              
               // Calculate tooltip dimensions (estimate based on content)
               const tooltipWidth = 320; // max-width from CSS
               const tooltipHeight = Math.min(400, 100 + (activities.length * 80)); // dynamic height based on content
