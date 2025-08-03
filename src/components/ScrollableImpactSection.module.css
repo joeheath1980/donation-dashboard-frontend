@@ -8,7 +8,8 @@
 /* Swiper styles */
 :global(.swiper-container) {
   width: 100%;
-  height: 400px; /* Set a fixed height to match ImpactVisualization */
+  min-height: 400px; /* Changed to min-height to allow badges to expand */
+  height: auto;
 }
 
 :global(.swiper-slide) {
@@ -26,12 +27,19 @@
   display: none; /* Hide the default pagination */
 }
 
-/* Ensure content inside slides is visible */
+/* Ensure content inside slides is visible and clickable */
 :global(.swiper-slide > div) {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
   padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Only apply overflow to specific components that need it */
+:global(.swiper-slide) .impactVisualization,
+:global(.swiper-slide) .tierProgressModal {
+  overflow-y: auto;
 }
 
 /* Common styles for all components */
@@ -55,12 +63,21 @@
   display: none;
 }
 
+/* Badges container */
+.badgesContainer {
+  width: 100%;
+  min-height: 400px;
+  position: relative;
+}
+
 /* Badges Display Styles */
 .badgesGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
   padding: 20px;
+  position: relative;
+  z-index: 10;
 }
 
 .badgeItem {
@@ -73,6 +90,8 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Circular badge design */
