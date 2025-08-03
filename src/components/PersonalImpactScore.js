@@ -327,13 +327,13 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
           stroke={`url(#${gradientId})`}
           fill="transparent"
           strokeWidth={strokeWidth}
-          strokeDasharray={`${(progress / 100) * circumference} ${circumference}`}
+          strokeDasharray={`${(percentage / 100) * circumference} ${circumference}`}
           strokeDashoffset="0"
           style={{
             transform: 'rotate(-90deg)',
             transformOrigin: '50% 50%',
             transition: 'stroke-dasharray 1.2s ease-out',
-            strokeDasharray: animateCircle ? `${(progress / 100) * circumference} ${circumference}` : `0 ${circumference}`,
+            strokeDasharray: animateCircle ? `${(percentage / 100) * circumference} ${circumference}` : `0 ${circumference}`,
           }}
           r={normalizedRadius}
           cx={radius}
