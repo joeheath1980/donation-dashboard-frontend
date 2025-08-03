@@ -24,8 +24,18 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     return () => clearTimeout(timer);
   }, []);
 
-  if (!scoreDetails) return null;
+  if (!scoreDetails || !scoreDetails.breakdown) return null;
 
+  // Use weighted scores from breakdown for proper visualization
+  const { 
+    donations: weightedDonationScore = 0,
+    volunteering: weightedVolunteerScore = 0,
+    fundraising: weightedFundraisingScore = 0,
+    consistency: weightedConsistencyScore = 0,
+    engagement: weightedEngagementScore = 0
+  } = scoreDetails.breakdown;
+
+  // Also get raw scores for tooltip display
   const { 
     donationScore = 0, 
     volunteerScore = 0, 
@@ -34,52 +44,63 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     engagementScore = 0
   } = scoreDetails;
   
-  // Ring configuration with 5 categories
+  // Ring configuration with 5 categories using weighted scores
+  // Max scores are based on expected ranges for weighted contributions
   const rings = [
     { 
       name: 'Donations',
-      score: donationScore,
-      maxScore: Math.max(100, donationScore),
+      score: Math.round(weightedDonationScore),
+      rawScore: donationScore,
+      maxScore: 150, // 30% weight, so max ~150 for very high donations
       radius: 140,
       strokeWidth: 16,
       color: { start: '#4DD0E1', end: '#00ACC1' }, // Cyan/Teal
-      bgColor: '#E0F7FA'
+      bgColor: '#E0F7FA',
+      weight: '30%'
     },
     { 
       name: 'Volunteering',
-      score: volunteerScore,
-      maxScore: Math.max(80, volunteerScore),
+      score: Math.round(weightedVolunteerScore),
+      rawScore: volunteerScore,
+      maxScore: 125, // 25% weight, so max ~125 for very high volunteering
       radius: 115,
       strokeWidth: 16,
       color: { start: '#66BB6A', end: '#43A047' }, // Green
-      bgColor: '#E8F5E9'
+      bgColor: '#E8F5E9',
+      weight: '25%'
     },
     { 
       name: 'Fundraising',
-      score: fundraisingScore,
-      maxScore: Math.max(60, fundraisingScore),
+      score: Math.round(weightedFundraisingScore),
+      rawScore: fundraisingScore,
+      maxScore: 100, // 20% weight, so max ~100 for very high fundraising
       radius: 90,
       strokeWidth: 16,
       color: { start: '#AB47BC', end: '#8E24AA' }, // Purple
-      bgColor: '#F3E5F5'
+      bgColor: '#F3E5F5',
+      weight: '20%'
     },
     { 
       name: 'Consistency',
-      score: consistencyScore,
-      maxScore: Math.max(50, consistencyScore),
+      score: Math.round(weightedConsistencyScore),
+      rawScore: consistencyScore,
+      maxScore: 75, // 15% weight, so max ~75 for perfect consistency
       radius: 65,
       strokeWidth: 16,
       color: { start: '#FF7043', end: '#F4511E' }, // Orange
-      bgColor: '#FBE9E7'
+      bgColor: '#FBE9E7',
+      weight: '15%'
     },
     { 
       name: 'Engagement',
-      score: engagementScore,
-      maxScore: Math.max(40, engagementScore),
+      score: Math.round(weightedEngagementScore),
+      rawScore: engagementScore,
+      maxScore: 50, // 10% weight, so max ~50 for full engagement
       radius: 40,
       strokeWidth: 16,
       color: { start: '#FFD54F', end: '#FFB300' }, // Amber
-      bgColor: '#FFF8E1'
+      bgColor: '#FFF8E1',
+      weight: '10%'
     }
   ];
 
@@ -207,10 +228,13 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
         >
           <div className={styles.tooltipHeader}>{rings[hoveredRing].name}</div>
           <div className={styles.tooltipScore}>
-            {rings[hoveredRing].score}/{rings[hoveredRing].maxScore}
+            Weighted: {rings[hoveredRing].score} points
+          </div>
+          <div className={styles.tooltipScore} style={{fontSize: '0.9em', opacity: 0.8}}>
+            Raw: {rings[hoveredRing].rawScore} × {rings[hoveredRing].weight}
           </div>
           <div className={styles.tooltipPercentage}>
-            {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}%
+            {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% of max
           </div>
         </div>
       )}
