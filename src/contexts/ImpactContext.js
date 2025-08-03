@@ -43,11 +43,11 @@ const TRADITIONAL_BRACKETS = [
 
 // Volunteering scoring configuration
 const VOLUNTEERING_CONFIG = {
-  hourlyRate: 5,                     // Base points per hour (reduced from 12)
+  hourlyRate: 2,                     // Base points per hour (reduced from 5)
   sessionBonuses: {
-    2: 5,     // 2+ hour session: +5 points (reduced from 10)
-    4: 10,    // Half day: +10 points (reduced from 25)
-    8: 20     // Full day: +20 points (reduced from 60)
+    2: 2,     // 2+ hour session: +2 points (reduced from 5)
+    4: 4,     // Half day: +4 points (reduced from 10)
+    8: 8      // Full day: +8 points (reduced from 20)
   },
   skillMultipliers: {
     general: 1.0,      // General volunteering
