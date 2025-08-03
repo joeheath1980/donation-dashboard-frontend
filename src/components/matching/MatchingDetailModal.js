@@ -249,21 +249,26 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 <div className={styles.impactDetails}>
                   <div className={styles.impactRow}>
                     <span>Your donation:</span>
-                    <strong>${opportunity.suggestedAmount}</strong>
+                    <strong>${opportunity.suggestedAmount || 50}</strong>
                   </div>
                   <div className={styles.impactRow}>
                     <span>{opportunity.businessName} matches:</span>
                     <strong className={styles.matchAmount}>
-                      ${opportunity.suggestedAmount * ((opportunity.multiplier || 2) - 1)}
+                      ${(opportunity.suggestedAmount || 50) * ((opportunity.multiplier || 2) - 1)}
                     </strong>
                   </div>
                   <div className={styles.impactRow + ' ' + styles.totalRow}>
                     <span>Total impact:</span>
                     <strong className={styles.totalAmount}>
-                      ${opportunity.suggestedAmount * (opportunity.multiplier || 2)}
+                      ${(opportunity.suggestedAmount || 50) * (opportunity.multiplier || 2)}
                     </strong>
                   </div>
                 </div>
+                {!opportunity.suggestedAmount && (
+                  <p className={styles.impactNote}>
+                    * Example shown with $50 donation. Choose your amount on the next screen.
+                  </p>
+                )}
               </div>
 
               {/* Campaign Message */}

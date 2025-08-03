@@ -222,6 +222,14 @@
   color: #3b82f6;
 }
 
+.impactNote {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+}
+
 .campaignMessage {
   padding: 1.5rem 2rem;
   background: #f9fafb;

@@ -316,14 +316,9 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
     const total = filteredContributions.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
     const matched = filteredContributions.filter(c => c.matches && c.matches.length > 0).length;
     const unmatched = filteredContributions.length - matched;
-    const totalImpact = filteredContributions.reduce((sum, c) => {
-      const matchAmount = c.matches ? c.matches.reduce((m, match) => m + match.matchAmount, 0) : 0;
-      return sum + c.amount + matchAmount;
-    }, 0);
     
     return {
       total: total.toFixed(2),
-      totalImpact: totalImpact.toFixed(2),
       count: filteredContributions.length,
       matched,
       unmatched
@@ -376,10 +371,6 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
             <div className={oneOffStyles.statItem}>
               <span className={oneOffStyles.statLabel}>Total:</span>
               <span className={oneOffStyles.statValue}>${summaryStats.total}</span>
-            </div>
-            <div className={oneOffStyles.statItem}>
-              <span className={oneOffStyles.statLabel}>Impact:</span>
-              <span className={oneOffStyles.statValue}>${summaryStats.totalImpact}</span>
             </div>
             <div className={oneOffStyles.statItem}>
               <span className={oneOffStyles.statLabel}>Contributions:</span>
