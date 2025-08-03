@@ -144,10 +144,23 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
   );
 };
 
-const BadgesDisplay = () => {
+const BadgesDisplay = ({ isActive }) => {
   const { donations, oneOffContributions } = useContext(ImpactContext);
   const [selectedBadge, setSelectedBadge] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    // Force re-render when component becomes active
+    if (isActive) {
+      setMounted(true);
+      // Force a small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        setMounted(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive]);
 
   const { collectedBadges, badgeProgress } = React.useMemo(() => {
     const allContributions = [...donations, ...oneOffContributions];
@@ -316,6 +329,10 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
         slidesPerView={1}
         onSlideChange={handleSlideChange}
         allowTouchMove={false}
+        observer={true}
+        observeParents={true}
+        updateOnWindowResize={true}
+        watchSlidesProgress={true}
       >
         <SwiperSlide>
           <ImpactVisualization hideTitle={true} />
@@ -330,7 +347,7 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
         </SwiperSlide>
         <SwiperSlide>
           <div className={styles.badgesContainer}>
-            <BadgesDisplay />
+            <BadgesDisplay isActive={activeSection === 2} />
           </div>
         </SwiperSlide>
       </Swiper>
