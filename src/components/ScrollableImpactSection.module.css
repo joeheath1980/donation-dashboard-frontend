@@ -138,6 +138,11 @@
   transform: translateY(-8px);
 }
 
+/* Add visual feedback for clickable badges */
+.badgeItem:active {
+  transform: translateY(-4px) scale(0.98);
+}
+
 .badgeItem.collected:hover .badgeCircle {
   transform: scale(1.1) rotateZ(5deg);
   box-shadow: 
