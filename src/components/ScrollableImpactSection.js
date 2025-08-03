@@ -54,10 +54,10 @@ const allBadges = [
 ];
 
 const tiers = [
-  { name: 'Visionary', minScore: 90, icon: FaCrown, color: '#FFD700' },
-  { name: 'Champion', minScore: 70, icon: FaMedal, color: '#C0C0C0' },
-  { name: 'Philanthropist', minScore: 50, icon: FaTrophy, color: '#CD7F32' },
-  { name: 'Altruist', minScore: 30, icon: FaAward, color: '#2ECC71' },
+  { name: 'Visionary', minScore: 5000, icon: FaCrown, color: '#FFD700' },
+  { name: 'Champion', minScore: 2500, icon: FaMedal, color: '#C0C0C0' },
+  { name: 'Philanthropist', minScore: 1000, icon: FaTrophy, color: '#CD7F32' },
+  { name: 'Altruist', minScore: 300, icon: FaAward, color: '#2ECC71' },
   { name: 'Giver', minScore: 0, icon: FaHeart, color: '#E74C3C' }
 ];
 
