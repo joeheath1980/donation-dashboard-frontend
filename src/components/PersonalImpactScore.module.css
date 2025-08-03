@@ -567,12 +567,14 @@
   border: 1px solid var(--ring-color, #e0e0e0);
   border-radius: 8px;
   padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08);
   z-index: 1000;
   pointer-events: none;
   opacity: 0;
   animation: tooltipFadeIn 0.2s ease-out forwards;
   min-width: 120px;
+  transform: translateY(-50%); /* Center vertically */
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .ringTooltip::before {
@@ -722,7 +724,32 @@
   }
   
   .ringTooltip {
-    display: none;
+    /* On mobile, position tooltip above the rings instead of to the side */
+    left: 50% !important;
+    top: -60px !important;
+    transform: translateX(-50%);
+    white-space: normal;
+    min-width: 150px;
+    max-width: 200px;
+  }
+  
+  .ringTooltip::before {
+    /* Arrow pointing down */
+    left: 50%;
+    top: auto;
+    bottom: -6px;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0 6px;
+    border-color: var(--ring-color, #e0e0e0) transparent transparent transparent;
+  }
+  
+  .ringTooltip::after {
+    left: 50%;
+    top: auto;
+    bottom: -5px;
+    transform: translateX(-50%);
+    border-width: 5px 5px 0 5px;
+    border-color: white transparent transparent transparent;
   }
   
   .ringScore {
