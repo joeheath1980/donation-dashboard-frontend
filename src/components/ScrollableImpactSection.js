@@ -80,6 +80,8 @@ const charityTypeToBadge = {
 // Badge Modal Component
 const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
   if (!isOpen || !badge) return null;
+  
+  console.log('BadgeModal rendering:', { badge: badge?.title, isOpen, earnedDate });
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -201,6 +203,7 @@ const BadgesDisplay = () => {
   }, [donations, oneOffContributions]);
 
   const handleBadgeClick = (badge) => {
+    console.log('Badge clicked:', badge.title);
     const collected = collectedBadges.find(b => b.title === badge.title);
     const progress = badgeProgress[badge.title] || { count: 0, contributions: [] };
     
