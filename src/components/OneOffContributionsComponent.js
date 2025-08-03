@@ -1,10 +1,23 @@
-import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './SharedStyles.css';
 import oneOffStyles from './OneOffContributions.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationModal from './DonationModal';
-import { FaEdit, FaTrash, FaCheckCircle, FaPlus } from 'react-icons/fa';
+import { 
+  FaEdit, 
+  FaTrash, 
+  FaCheckCircle, 
+  FaPlus,
+  FaDownload,
+  FaFileDownload,
+  FaFilter,
+  FaCalendarAlt,
+  FaBuilding,
+  FaDollarSign,
+  FaTimes,
+  FaReceipt
+} from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
@@ -36,6 +49,18 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
   const [error, setError] = useState('');
   const contributionListRef = useRef(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [downloadingReceipts, setDownloadingReceipts] = useState(false);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    charity: '',
+    dateFrom: '',
+    dateTo: '',
+    amountMin: '',
+    amountMax: '',
+    status: 'all' // all, matched, unmatched
+  });
   
   // Expose openModal method to parent component
   useImperativeHandle(ref, () => ({
@@ -165,7 +190,147 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
     setShowModal(true);
   };
 
-  const displayedContributions = displayAll ? localContributions : localContributions.slice(0, 5);
+  // Filter contributions based on criteria
+  const filteredContributions = useMemo(() => {
+    return localContributions.filter(contribution => {
+      // Charity filter
+      if (filters.charity && !contribution.charity?.toLowerCase().includes(filters.charity.toLowerCase())) {
+        return false;
+      }
+      
+      // Date range filter
+      const contributionDate = new Date(contribution.date);
+      if (filters.dateFrom && contributionDate < new Date(filters.dateFrom)) {
+        return false;
+      }
+      if (filters.dateTo && contributionDate > new Date(filters.dateTo)) {
+        return false;
+      }
+      
+      // Amount range filter
+      const amount = parseFloat(contribution.amount);
+      if (filters.amountMin && amount < parseFloat(filters.amountMin)) {
+        return false;
+      }
+      if (filters.amountMax && amount > parseFloat(filters.amountMax)) {
+        return false;
+      }
+      
+      // Match status filter
+      const hasMatches = contribution.matches && contribution.matches.length > 0;
+      if (filters.status === 'matched' && !hasMatches) {
+        return false;
+      }
+      if (filters.status === 'unmatched' && hasMatches) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [localContributions, filters]);
+
+  // Get unique charity names for filter dropdown
+  const charityNames = useMemo(() => {
+    const names = [...new Set(oneOffContributions.map(c => c.charity).filter(Boolean))];
+    return names.sort();
+  }, [oneOffContributions]);
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      charity: '',
+      dateFrom: '',
+      dateTo: '',
+      amountMin: '',
+      amountMax: '',
+      status: 'all'
+    });
+  };
+
+  const hasActiveFilters = Object.values(filters).some(value => value && value !== 'all');
+
+  // Download single receipt
+  const handleReceiptDownload = async (contribution) => {
+    try {
+      if (!contribution.receiptUrl) {
+        setError('No receipt available for this contribution.');
+        return;
+      }
+      
+      // For now, just open the receipt in a new tab
+      // In the future, this could be enhanced to download as PDF
+      const receiptUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`;
+      window.open(receiptUrl, '_blank');
+    } catch (error) {
+      console.error('Error downloading receipt:', error);
+      setError('Failed to download receipt. Please try again.');
+    }
+  };
+
+  // Bulk download receipts
+  const handleBulkDownload = async () => {
+    setDownloadingReceipts(true);
+    try {
+      // Get filtered contributions that have receipts
+      const contributionsWithReceipts = filteredContributions.filter(c => c.receiptUrl);
+      
+      if (contributionsWithReceipts.length === 0) {
+        setError('No receipts available to download.');
+        setDownloadingReceipts(false);
+        return;
+      }
+      
+      // For now, open all receipts in new tabs (with a limit to prevent browser blocking)
+      // In the future, this should be enhanced to create a zip file on the backend
+      const maxToOpen = 5;
+      if (contributionsWithReceipts.length > maxToOpen) {
+        if (!window.confirm(`This will open ${maxToOpen} receipts in new tabs. Continue?`)) {
+          setDownloadingReceipts(false);
+          return;
+        }
+      }
+      
+      contributionsWithReceipts.slice(0, maxToOpen).forEach((contribution, index) => {
+        setTimeout(() => {
+          const receiptUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`;
+          window.open(receiptUrl, '_blank');
+        }, index * 500); // Delay to prevent popup blocking
+      });
+      
+      if (contributionsWithReceipts.length > maxToOpen) {
+        setError(`Opened first ${maxToOpen} receipts. Please use individual download buttons for remaining receipts.`);
+      }
+    } catch (error) {
+      console.error('Error downloading bulk receipts:', error);
+      setError('Failed to download receipts. Please try again.');
+    } finally {
+      setTimeout(() => setDownloadingReceipts(false), 2000);
+    }
+  };
+
+  // Calculate summary statistics
+  const summaryStats = useMemo(() => {
+    const total = filteredContributions.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
+    const matched = filteredContributions.filter(c => c.matches && c.matches.length > 0).length;
+    const unmatched = filteredContributions.length - matched;
+    const totalImpact = filteredContributions.reduce((sum, c) => {
+      const matchAmount = c.matches ? c.matches.reduce((m, match) => m + match.matchAmount, 0) : 0;
+      return sum + c.amount + matchAmount;
+    }, 0);
+    
+    return {
+      total: total.toFixed(2),
+      totalImpact: totalImpact.toFixed(2),
+      count: filteredContributions.length,
+      matched,
+      unmatched
+    };
+  }, [filteredContributions]);
+
+  const displayedContributions = displayAll ? filteredContributions : filteredContributions.slice(0, 5);
 
   if (!user) {
     return <div className="card">Please log in to view your one-off contributions.</div>;
@@ -186,11 +351,142 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
   return (
     <div className={`container ${oneOffStyles.oneOffComponentContainer}`}>
       <div className={oneOffStyles.oneOffSection}>
-        <div className="flexBetween">
-          <button onClick={handleAddNew} className={oneOffStyles.addNewContributionButton}>
-            <FaPlus /> Add New One-Off Contribution
-          </button>
+        <div className={oneOffStyles.headerSection}>
+          <div className={oneOffStyles.headerActions}>
+            <button onClick={handleAddNew} className={oneOffStyles.addNewContributionButton}>
+              <FaPlus /> Add New One-Off Contribution
+            </button>
+            <button 
+              onClick={() => setShowFilters(!showFilters)} 
+              className={`${oneOffStyles.filterButton} ${hasActiveFilters ? oneOffStyles.active : ''}`}
+            >
+              <FaFilter /> Filter {hasActiveFilters && `(${Object.values(filters).filter(v => v && v !== 'all').length})`}
+            </button>
+            <button 
+              onClick={handleBulkDownload} 
+              className={oneOffStyles.downloadButton}
+              disabled={downloadingReceipts || filteredContributions.filter(c => c.receiptUrl).length === 0}
+            >
+              <FaFileDownload /> {downloadingReceipts ? 'Downloading...' : 'Download Receipts'}
+            </button>
+          </div>
+
+          {/* Summary Statistics */}
+          <div className={oneOffStyles.summaryStats}>
+            <div className={oneOffStyles.statItem}>
+              <span className={oneOffStyles.statLabel}>Total:</span>
+              <span className={oneOffStyles.statValue}>${summaryStats.total}</span>
+            </div>
+            <div className={oneOffStyles.statItem}>
+              <span className={oneOffStyles.statLabel}>Impact:</span>
+              <span className={oneOffStyles.statValue}>${summaryStats.totalImpact}</span>
+            </div>
+            <div className={oneOffStyles.statItem}>
+              <span className={oneOffStyles.statLabel}>Contributions:</span>
+              <span className={oneOffStyles.statValue}>{summaryStats.count}</span>
+            </div>
+            <div className={oneOffStyles.statItem}>
+              <span className={oneOffStyles.statLabel}>Matched:</span>
+              <span className={oneOffStyles.statValue}>{summaryStats.matched}</span>
+            </div>
+          </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className={oneOffStyles.filterPanel}>
+            <div className={oneOffStyles.filterGrid}>
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaBuilding /> Charity
+                </label>
+                <select 
+                  value={filters.charity} 
+                  onChange={(e) => handleFilterChange('charity', e.target.value)}
+                  className={oneOffStyles.filterSelect}
+                >
+                  <option value="">All Charities</option>
+                  {charityNames.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaCalendarAlt /> Date From
+                </label>
+                <input 
+                  type="date" 
+                  value={filters.dateFrom}
+                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                  className={oneOffStyles.filterInput}
+                />
+              </div>
+
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaCalendarAlt /> Date To
+                </label>
+                <input 
+                  type="date" 
+                  value={filters.dateTo}
+                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                  className={oneOffStyles.filterInput}
+                />
+              </div>
+
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaDollarSign /> Min Amount
+                </label>
+                <input 
+                  type="number" 
+                  value={filters.amountMin}
+                  onChange={(e) => handleFilterChange('amountMin', e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  className={oneOffStyles.filterInput}
+                />
+              </div>
+
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaDollarSign /> Max Amount
+                </label>
+                <input 
+                  type="number" 
+                  value={filters.amountMax}
+                  onChange={(e) => handleFilterChange('amountMax', e.target.value)}
+                  placeholder="999999"
+                  min="0"
+                  className={oneOffStyles.filterInput}
+                />
+              </div>
+
+              <div className={oneOffStyles.filterGroup}>
+                <label>
+                  <FaReceipt /> Status
+                </label>
+                <select 
+                  value={filters.status} 
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className={oneOffStyles.filterSelect}
+                >
+                  <option value="all">All</option>
+                  <option value="matched">Matched Only</option>
+                  <option value="unmatched">Unmatched Only</option>
+                </select>
+              </div>
+            </div>
+
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className={oneOffStyles.clearFiltersButton}>
+                <FaTimes /> Clear Filters
+              </button>
+            )}
+          </div>
+        )}
         {error && (
           <div className="alert error">
             {error}
@@ -275,6 +571,16 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                           >
                             View Receipt
                           </a>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleReceiptDownload(contribution);
+                            }}
+                            className={oneOffStyles.receiptDownloadButton}
+                            style={{ marginLeft: '10px', padding: '2px 8px', fontSize: '12px' }}
+                          >
+                            <FaDownload /> Download
+                          </button>
                         </p>
                       )}
                     </div>
@@ -299,14 +605,16 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
               })}
             </>
           ) : (
-            <p className="textCenter">No one-off contributions found.</p>
+            <p className="textCenter">
+              {hasActiveFilters ? 'No contributions match your filters.' : 'No one-off contributions found.'}
+            </p>
           )}
           {showScrollIndicator && <div className="scrollIndicator" />}
         </div>
         <div className="flexBetween">
-          {!displayAll && localContributions.length > 5 && (
+          {!displayAll && filteredContributions.length > 5 && (
             <button onClick={() => {}} className="button secondary">
-              See All
+              See All ({filteredContributions.length})
             </button>
           )}
         </div>
