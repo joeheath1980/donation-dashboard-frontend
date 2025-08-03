@@ -164,8 +164,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 stroke={`url(#ring-gradient-${index})`}
                 strokeWidth={hoveredRing === index ? ring.strokeWidth + 2 : ring.strokeWidth}
                 strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={animateRings ? strokeDashoffset : circumference}
+                strokeDasharray={`${(percentage / 100) * circumference} ${circumference}`}
+                strokeDashoffset="0"
                 transform={`rotate(-90 ${center} ${center})`}
                 filter={hoveredRing === index ? `url(#glow-${index})` : 'none'}
                 className={styles.progressRing}
@@ -176,8 +176,21 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   transitionDelay: animateRings ? `${index * 0.15}s` : '0s',
                   opacity: hoveredRing !== null && hoveredRing !== index ? 0.7 : 1,
-                  filter: hoveredRing === index ? 'brightness(1.1)' : 'none'
+                  filter: hoveredRing === index ? 'brightness(1.1)' : 'none',
+                  strokeDasharray: animateRings ? `${(percentage / 100) * circumference} ${circumference}` : `0 ${circumference}`
                 }}
+              />
+              {/* Invisible hover area for empty rings */}
+              <circle
+                cx={center}
+                cy={center}
+                r={ring.radius}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={ring.strokeWidth + 10}
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={() => setHoveredRing(index)}
+                onMouseLeave={() => setHoveredRing(null)}
               />
             </g>
           );
@@ -227,15 +240,31 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
           }}
         >
           <div className={styles.tooltipHeader}>{rings[hoveredRing].name}</div>
-          <div className={styles.tooltipScore}>
-            Weighted: {rings[hoveredRing].score} points
-          </div>
-          <div className={styles.tooltipScore} style={{fontSize: '0.9em', opacity: 0.8}}>
-            Raw: {rings[hoveredRing].rawScore} × {rings[hoveredRing].weight}
-          </div>
-          <div className={styles.tooltipPercentage}>
-            {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% of max
-          </div>
+          {rings[hoveredRing].score > 0 ? (
+            <>
+              <div className={styles.tooltipScore}>
+                Weighted: {rings[hoveredRing].score} points
+              </div>
+              <div className={styles.tooltipScore} style={{fontSize: '0.9em', opacity: 0.8}}>
+                Raw: {rings[hoveredRing].rawScore} × {rings[hoveredRing].weight}
+              </div>
+              <div className={styles.tooltipPercentage}>
+                {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% of max
+              </div>
+            </>
+          ) : (
+            <div className={styles.tooltipEmpty}>
+              <div className={styles.tooltipScore}>No activity yet</div>
+              <div className={styles.tooltipHint}>
+                {rings[hoveredRing].name === 'Donations' && 'Start with a micro-donation of any amount!'}
+                {rings[hoveredRing].name === 'Volunteering' && 'Log your volunteer hours to earn points'}
+                {rings[hoveredRing].name === 'Fundraising' && 'Create a campaign or organize an event'}
+                {rings[hoveredRing].name === 'Consistency' && 'Build daily giving habits to earn streaks'}
+                {rings[hoveredRing].name === 'Engagement' && 'Complete your profile and follow charities'}
+              </div>
+              <div className={styles.tooltipWeight}>Worth {rings[hoveredRing].weight} of total score</div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -298,12 +327,13 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
           stroke={`url(#${gradientId})`}
           fill="transparent"
           strokeWidth={strokeWidth}
-          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDasharray={`${(progress / 100) * circumference} ${circumference}`}
+          strokeDashoffset="0"
           style={{
-            strokeDashoffset: animateCircle ? strokeDashoffset : circumference,
             transform: 'rotate(-90deg)',
             transformOrigin: '50% 50%',
-            transition: 'stroke-dashoffset 1.2s ease-out',
+            transition: 'stroke-dasharray 1.2s ease-out',
+            strokeDasharray: animateCircle ? `${(progress / 100) * circumference} ${circumference}` : `0 ${circumference}`,
           }}
           r={normalizedRadius}
           cx={radius}
