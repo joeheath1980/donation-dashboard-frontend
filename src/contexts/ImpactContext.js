@@ -447,17 +447,34 @@ export const ImpactProvider = ({ children }) => {
       regularDonations: donations,
       oneOffDonations: oneOffContributions,
       volunteeringActivities: volunteerActivities,
-      fundraisingCampaigns: fundraisingCampaigns
+      fundraisingCampaigns: fundraisingCampaigns,
+      // Add user data for engagement score calculation
+      profileComplete: user?.profileComplete,
+      bio: user?.bio,
+      profilePictureUrl: user?.profilePictureUrl,
+      impactStatement: user?.impactStatement,
+      followedCharities: followedCharities,
+      dailyActionsCount: user?.dailyActionsCount || 0
     };
 
     const scoreResult = calculateComplexImpactScore(userData);
+    console.log('ImpactContext score calculation:', {
+      totalScore: scoreResult.totalScore,
+      breakdown: scoreResult,
+      userData
+    });
     setImpactScore(scoreResult.totalScore);
     setScoreDetails(scoreResult);
 
     const currentTier = getTier(scoreResult.totalScore);
+    console.log('Tier calculation:', {
+      score: scoreResult.totalScore,
+      tier: currentTier.name,
+      pointsToNextTier: currentTier.pointsToNextTier
+    });
     setTier(currentTier.name);
     setPointsToNextTier(currentTier.pointsToNextTier);
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, user, followedCharities]);
 
   const fetchImpactData = useCallback(async () => {
     setError(null);

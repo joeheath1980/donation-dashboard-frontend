@@ -308,12 +308,19 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   // Round the cumulative score to match ImpactContext behavior
   cumulativeScore = Math.round(cumulativeScore);
   
-  // Apply the 90 point cap to match ImpactContext behavior
-  cumulativeScore = Math.min(cumulativeScore, 90);
+  // No longer applying the 90 point cap - new scoring system has no cap
 
-  // Update the last data point with the bonus if there are any data points
+  // Instead of using the old cumulative score, use the actual impact score from the new system
+  const actualImpactScore = calculateComplexImpactScore({
+    regularDonations: donations,
+    oneOffDonations: oneOffContributions,
+    volunteeringActivities: volunteerActivities,
+    fundraisingCampaigns: fundraisingCampaigns
+  }).totalScore;
+
+  // Update the last data point with the actual score if there are any data points
   if (processedData.length > 0) {
-    processedData[processedData.length - 1].y = cumulativeScore;
+    processedData[processedData.length - 1].y = actualImpactScore;
   }
 
   // Verify total score matches
@@ -727,7 +734,7 @@ function ImpactVisualization({ hideTitle = false }) {
                       ${activitiesHtml}
                       <div class="${styles.tooltipRow} ${styles.totalScore}">
                         <span class="${styles.tooltipLabel}">Total Impact Score:</span>
-                        <span class="${styles.tooltipValue}">${dataPoint.y.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
+                        <span class="${styles.tooltipValue}">${dataPoint.y.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
                   </div>
@@ -1015,8 +1022,8 @@ function ImpactVisualization({ hideTitle = false }) {
               <div 
                 className={styles.progressFill} 
                 style={{ 
-                  width: `${Math.min((impactScore / 90) * 100, 100)}%`,
-                  background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min((impactScore / 90) * 100, 100)}%)`
+                  width: `${Math.min((impactScore / 500) * 100, 100)}%`,
+                  background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min((impactScore / 500) * 100, 100)}%)`
                 }}
               />
             </div>
@@ -1024,7 +1031,11 @@ function ImpactVisualization({ hideTitle = false }) {
               {impactScore < 25 ? 'Keep going! You\'re making an impact' :
                impactScore < 50 ? 'Great progress! Your impact is growing' :
                impactScore < 75 ? 'Amazing! You\'re making a significant difference' :
-               'Incredible! You\'re a champion for change'}
+               impactScore < 300 ? 'Incredible! You\'re building great momentum' :
+               impactScore < 1000 ? 'Outstanding! You\'re an Altruist making waves' :
+               impactScore < 2500 ? 'Exceptional! You\'re a true Philanthropist' :
+               impactScore < 5000 ? 'Legendary! You\'re a Champion for change' :
+               'Visionary! You\'re transforming the world'}
             </div>
           </div>
         )}

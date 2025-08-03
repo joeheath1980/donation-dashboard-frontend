@@ -1,6 +1,12 @@
 # Charity Features Tracker - Do-Nation Platform
 
-## Recent Updates (July 25, 2025)
+## Recent Updates (August 3, 2025)
+- ✅ **Profile Editor Route**: Added /charity/:charityId/edit route for editing public profiles
+- ✅ **Public Profile Links**: Working links to charity public profiles from dashboards
+- ✅ **Admin Charity Management**: Enhanced UI for charity verification and management
+- ✅ **Demo Charity Support**: Fixed demo charity handling in profile systems
+
+## Previous Updates (July 25, 2025)
 - ✅ **Match Notifications**: Charities receive email when donations are matched
 - ✅ **Business Partnership Display**: Shows business partners in opportunities
 - ✅ **Match Tracking**: Complete visibility of matched vs direct donations
@@ -35,7 +41,7 @@
 | ACNC linking process | ✅ Fully Built | Search and link workflow | - |
 | Evidence submission | ✅ Fully Built | Multiple file types supported | - |
 | Approval status tracking | ✅ Fully Built | Pending/Approved states | - |
-| Admin review workflow | 🟨 Partially Built | Status exists, admin panel unclear | HIGH |
+| Admin review workflow | ✅ Fully Built | Complete admin panel with bulk actions | - |
 | Automated verification | ❌ Not Built | Manual process only | MEDIUM |
 | Rejection handling | ❌ Not Built | No rejection flow | MEDIUM |
 | Re-submission process | ❌ Not Built | Can't resubmit evidence | MEDIUM |
@@ -68,7 +74,8 @@
 | Quick actions panel | ✅ Fully Built | Common tasks accessible | - |
 | Donation statistics | 🟨 Partially Built | Basic numbers only | HIGH |
 | Recent activity feed | 🟨 Partially Built | Limited data shown | MEDIUM |
-| Profile management | 🟨 Partially Built | Can't edit all fields | HIGH |
+| Profile management | ✅ Fully Built | Edit public page link working | - |
+| Profile editor | ✅ Fully Built | CharityProfileEditor component with route | - |
 | Mission editing | 🟨 Partially Built | Frontend only | HIGH |
 | Analytics dashboard | ❌ Not Built | Button exists, no page | HIGH |
 | Donor management | ❌ Not Built | Button exists, no page | HIGH |
