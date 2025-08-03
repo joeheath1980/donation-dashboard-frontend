@@ -50,6 +50,7 @@ const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'))
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
 const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor'));
+const CharityProfileEditorSimple = lazy(() => import('./components/CharityProfileEditorSimple'));
 const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));
 const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCampaign'));
 const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
@@ -238,6 +239,7 @@ function App() {
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-onboarding" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityOnboarding /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity/:charityId/edit" element={<div>Test Edit Page</div>} />
 
                 {/* Donation routes */}
                 <Route path="/donate/:charityId" element={<ProtectedRoute><Layout><SuspenseWrapper><DonationForm /></SuspenseWrapper></Layout></ProtectedRoute>} />
