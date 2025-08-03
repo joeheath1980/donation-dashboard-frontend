@@ -739,34 +739,51 @@ function ImpactVisualization({ hideTitle = false }) {
               
               // Calculate tooltip dimensions (estimate based on content)
               const tooltipWidth = 320; // max-width from CSS
-              const tooltipHeight = 200; // estimated height
+              const tooltipHeight = Math.min(400, 100 + (activities.length * 80)); // dynamic height based on content
               
               // Calculate initial position
               let left = position.left + window.pageXOffset + tooltipModel.caretX;
               let top = position.top + window.pageYOffset + tooltipModel.caretY;
               
-              // Adjust horizontal position to keep tooltip within chart bounds
-              const rightEdge = left + tooltipWidth;
-              const chartRightEdge = chartContainer.left + window.pageXOffset + chartContainer.width;
+              // Add offset to prevent overlapping with cursor/point
+              const cursorOffset = 15;
               
-              if (rightEdge > chartRightEdge) {
-                // Position tooltip to the left of the cursor
-                left = left - tooltipWidth - 20;
+              // Check if we have enough space below the cursor
+              const viewportHeight = window.innerHeight;
+              const scrollTop = window.pageYOffset;
+              const tooltipBottom = top + tooltipHeight + cursorOffset;
+              const viewportBottom = scrollTop + viewportHeight;
+              
+              // Position tooltip above or below based on available space
+              if (tooltipBottom > viewportBottom - 20) {
+                // Not enough space below, position above
+                top = top - tooltipHeight - cursorOffset;
+              } else {
+                // Enough space below, add offset
+                top = top + cursorOffset;
               }
               
-              // Ensure tooltip doesn't go off the left edge
+              // Adjust horizontal position to keep tooltip within viewport
+              const viewportWidth = window.innerWidth;
+              const rightEdge = left + tooltipWidth;
+              
+              if (rightEdge > viewportWidth - 20) {
+                // Position tooltip to the left of the cursor
+                left = left - tooltipWidth - cursorOffset;
+              } else if (left < 20) {
+                // Too close to left edge
+                left = 20;
+              }
+              
+              // Final bounds check to ensure tooltip stays within chart container
+              const chartRightEdge = chartContainer.left + window.pageXOffset + chartContainer.width;
               const chartLeftEdge = chartContainer.left + window.pageXOffset;
+              
+              if (left + tooltipWidth > chartRightEdge) {
+                left = chartRightEdge - tooltipWidth - 10;
+              }
               if (left < chartLeftEdge) {
                 left = chartLeftEdge + 10;
-              }
-              
-              // Adjust vertical position if needed
-              const bottomEdge = top + tooltipHeight;
-              const chartBottomEdge = chartContainer.top + window.pageYOffset + chartContainer.height;
-              
-              if (bottomEdge > chartBottomEdge) {
-                // Position tooltip above the cursor
-                top = top - tooltipHeight - 20;
               }
               
               tooltipEl.style.opacity = 1;

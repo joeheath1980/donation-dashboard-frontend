@@ -176,8 +176,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
           className={styles.ringTooltip}
           style={{
             '--ring-color': rings[hoveredRing].color.end,
-            left: `${center + rings[hoveredRing].radius + 40}px`,
-            top: `${center - 20}px`
+            left: `${svgSize + 20}px`, // Position to the right of the entire SVG
+            top: `50%` // Center vertically using CSS transform
           }}
         >
           <div className={styles.tooltipHeader}>{rings[hoveredRing].name}</div>
