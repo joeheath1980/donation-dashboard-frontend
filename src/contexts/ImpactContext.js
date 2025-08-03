@@ -4,129 +4,314 @@ import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Max points for each component
-const MAX_DONATION_SCORE = 40;
-const MAX_VOLUNTEER_SCORE = 25;
-const MAX_FUNDRAISING_SCORE = 25;
+// Category weights for the new system
+const CATEGORY_WEIGHTS = {
+  donations: 0.30,         // 30% - All monetary contributions
+  volunteering: 0.25,      // 25% - Time contributions
+  fundraising: 0.20,       // 20% - Network effects
+  consistency: 0.15,       // 15% - Regular engagement (any pattern)
+  engagement: 0.10         // 10% - Platform participation
+};
 
-// Score calculation functions remain unchanged
+// Temporal decay factors
+const TIME_DECAY_FACTORS = {
+  fresh: 1.0,         // Last 30 days: 100% value
+  recent: 0.85,       // 1-3 months: 85% value
+  quarter: 0.65,      // 3-6 months: 65% value
+  halfYear: 0.45,     // 6-12 months: 45% value
+  annual: 0.25,       // 1-2 years: 25% value
+  legacy: 0.10        // 2+ years: 10% value
+};
+
+// Micro donation configuration
+const MICRO_DONATION_CONFIG = {
+  threshold: 15,              // Donations under $15 are "micro"
+  basePoints: 8,              // Base for any micro donation
+  frequencyBonus: 5,          // Bonus for each micro donation in a day
+  maxDailyBonus: 20          // Cap at 4 micro donations/day
+};
+
+// Traditional donation brackets
+const TRADITIONAL_BRACKETS = [
+  { max: 25, rate: 1.0 },      // $1-25: 1 point per dollar
+  { max: 50, rate: 0.8 },      // $25-50: 0.8 points per dollar  
+  { max: 100, rate: 0.6 },     // $50-100: 0.6 points per dollar
+  { max: 250, rate: 0.4 },     // $100-250: 0.4 points per dollar
+  { max: 500, rate: 0.2 },     // $250-500: 0.2 points per dollar
+  { max: Infinity, rate: 0.1 } // $500+: 0.1 points per dollar
+];
+
+// Volunteering scoring configuration
+const VOLUNTEERING_CONFIG = {
+  hourlyRate: 12,                    // Base points per hour
+  sessionBonuses: {
+    2: 10,    // 2+ hour session: +10 points
+    4: 25,    // Half day: +25 points  
+    8: 60     // Full day: +60 points
+  },
+  skillMultipliers: {
+    general: 1.0,      // General volunteering
+    skilled: 1.3,      // Professional skills
+    leadership: 1.5,   // Leading/organizing
+    emergency: 2.0     // Crisis response
+  }
+};
+
+// Helper function to calculate temporal decay
+const getTemporalDecayFactor = (date) => {
+  const now = new Date();
+  const activityDate = new Date(date);
+  const monthsAgo = (now - activityDate) / (1000 * 60 * 60 * 24 * 30);
+  
+  if (monthsAgo <= 1) return TIME_DECAY_FACTORS.fresh;
+  if (monthsAgo <= 3) return TIME_DECAY_FACTORS.recent;
+  if (monthsAgo <= 6) return TIME_DECAY_FACTORS.quarter;
+  if (monthsAgo <= 12) return TIME_DECAY_FACTORS.halfYear;
+  if (monthsAgo <= 24) return TIME_DECAY_FACTORS.annual;
+  return TIME_DECAY_FACTORS.legacy;
+};
+
+// Group donations by day for micro-donation frequency bonuses
+const groupDonationsByDay = (donations) => {
+  const grouped = {};
+  donations.forEach(donation => {
+    const dateKey = new Date(donation.date).toDateString();
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(donation);
+  });
+  return grouped;
+};
+
+// New donation scoring with micro and traditional paths
 const calculateDonationScore = (regularDonations, oneOffDonations, archivedCampaigns = []) => {
   const archivedDonations = archivedCampaigns.map(campaign => ({
     amount: campaign.raisedAmount || campaign.goalAmount,
     date: campaign.completedDate
   }));
 
-  const totalDonations = [...regularDonations, ...oneOffDonations, ...archivedDonations];
-  const totalDonationAmount = totalDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
+  const allDonations = [...regularDonations, ...oneOffDonations, ...archivedDonations];
+  const donationsByDay = groupDonationsByDay(allDonations);
+  
+  let totalScore = 0;
+  let monthlyBonusApplied = false;
 
-  let donationScore = 0;
-  let remainingAmount = totalDonationAmount;
+  // Process donations by day
+  Object.entries(donationsByDay).forEach(([dateKey, dayDonations]) => {
+    let dayScore = 0;
+    let microDonationCount = 0;
+    
+    dayDonations.forEach(donation => {
+      const amount = donation.amount || 0;
+      const decayFactor = getTemporalDecayFactor(donation.date);
+      
+      if (amount < MICRO_DONATION_CONFIG.threshold) {
+        // Micro donation path
+        let score = MICRO_DONATION_CONFIG.basePoints;
+        if (microDonationCount < 4) { // Max 4 frequency bonuses per day
+          score += MICRO_DONATION_CONFIG.frequencyBonus;
+        }
+        dayScore += score * decayFactor;
+        microDonationCount++;
+      } else {
+        // Traditional donation path
+        let score = 0;
+        let remainingAmount = amount;
+        
+        for (const bracket of TRADITIONAL_BRACKETS) {
+          if (remainingAmount <= 0) break;
+          const bracketAmount = Math.min(remainingAmount, bracket.max - (score > 0 ? TRADITIONAL_BRACKETS[TRADITIONAL_BRACKETS.indexOf(bracket) - 1].max : 0));
+          score += bracketAmount * bracket.rate;
+          remainingAmount -= bracketAmount;
+        }
+        
+        dayScore += score * decayFactor;
+      }
+    });
+    
+    totalScore += dayScore;
+  });
 
-  const firstTierAmount = Math.min(remainingAmount, 1000);
-  donationScore += firstTierAmount / 100;
-  remainingAmount -= firstTierAmount;
-
-  if (remainingAmount > 0) {
-    const secondTierAmount = Math.min(remainingAmount, 4000);
-    donationScore += secondTierAmount / 200;
-    remainingAmount -= secondTierAmount;
+  // Monthly consistency bonus for regular donors
+  const hasMonthlyDonations = regularDonations.some(d => d.frequency === 'monthly');
+  const recentMonthlyDonations = regularDonations.filter(d => {
+    const decayFactor = getTemporalDecayFactor(d.date);
+    return d.frequency === 'monthly' && decayFactor >= TIME_DECAY_FACTORS.quarter;
+  });
+  
+  if (hasMonthlyDonations && recentMonthlyDonations.length >= 3) {
+    totalScore += 20; // Monthly consistency bonus
   }
 
-  if (remainingAmount > 0) {
-    donationScore += remainingAmount / 500;
-  }
-
-  let regularGivingMultiplier = 1;
-  if (regularDonations && regularDonations.length > 0) {
-    const frequencies = regularDonations.map(d => d.frequency);
-    if (frequencies.includes('weekly')) {
-      regularGivingMultiplier = 1.2;
-    } else if (frequencies.includes('monthly')) {
-      regularGivingMultiplier = 1.1;
-    }
-  }
-  donationScore *= regularGivingMultiplier;
-
-  return Math.min(Math.round(donationScore), MAX_DONATION_SCORE);
+  return Math.round(totalScore);
 };
 
 const calculateVolunteerScore = (volunteeringActivities) => {
-  const totalVolunteerHours = volunteeringActivities.reduce((sum, v) => sum + (v.hours || 0), 0);
-
-  let volunteerScore = 0;
-  let remainingHours = totalVolunteerHours;
-
-  const firstTierHours = Math.min(remainingHours, 40);
-  volunteerScore += firstTierHours * 0.5;
-  remainingHours -= firstTierHours;
-
-  if (remainingHours > 0) {
-    const secondTierHours = Math.min(remainingHours, 80);
-    volunteerScore += secondTierHours * 0.3;
-    remainingHours -= secondTierHours;
-  }
-
-  if (remainingHours > 0) {
-    volunteerScore += remainingHours * 0.1;
-  }
-
-  let longTermBonus = 0;
-  let earliestStartDate = new Date();
-  let latestEndDate = new Date(0);
+  let totalScore = 0;
 
   volunteeringActivities.forEach(activity => {
-    const startDate = new Date(activity.startDate);
-    const endDate = activity.endDate ? new Date(activity.endDate) : new Date();
-    if (startDate < earliestStartDate) earliestStartDate = startDate;
-    if (endDate > latestEndDate) latestEndDate = endDate;
+    const hours = activity.hours || 0;
+    const decayFactor = getTemporalDecayFactor(activity.date || activity.startDate);
+    const skillType = activity.skillType || 'general';
+    const skillMultiplier = VOLUNTEERING_CONFIG.skillMultipliers[skillType] || 1.0;
+    
+    // Base score
+    let activityScore = hours * VOLUNTEERING_CONFIG.hourlyRate * skillMultiplier;
+    
+    // Session bonuses for longer commitments
+    if (hours >= 8) {
+      activityScore += VOLUNTEERING_CONFIG.sessionBonuses[8];
+    } else if (hours >= 4) {
+      activityScore += VOLUNTEERING_CONFIG.sessionBonuses[4];
+    } else if (hours >= 2) {
+      activityScore += VOLUNTEERING_CONFIG.sessionBonuses[2];
+    }
+    
+    // Apply temporal decay
+    totalScore += activityScore * decayFactor;
   });
 
-  const durationInMonths = (latestEndDate.getFullYear() - earliestStartDate.getFullYear()) * 12 + (latestEndDate.getMonth() - earliestStartDate.getMonth());
-
-  if (durationInMonths >= 12) {
-    longTermBonus = 3;
-  } else if (durationInMonths >= 6) {
-    longTermBonus = 1.5;
-  }
-
-  volunteerScore += longTermBonus;
-
-  return Math.min(Math.round(volunteerScore), MAX_VOLUNTEER_SCORE);
+  return Math.round(totalScore);
 };
 
 const calculateFundraisingScore = (fundraisingCampaigns) => {
-  const totalFundsRaised = fundraisingCampaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
+  let totalScore = 0;
 
-  let fundraisingScore = 0;
-  let remainingAmount = totalFundsRaised;
+  fundraisingCampaigns.forEach(campaign => {
+    const raisedAmount = campaign.raisedAmount || 0;
+    const decayFactor = getTemporalDecayFactor(campaign.startDate || campaign.createdAt);
+    
+    // Progressive scoring based on amount raised
+    let score = 0;
+    let remainingAmount = raisedAmount;
+    
+    const brackets = [
+      { max: 100, rate: 0.5 },      // First $100: 0.5 points per dollar
+      { max: 500, rate: 0.3 },      // $100-500: 0.3 points per dollar
+      { max: 2000, rate: 0.2 },     // $500-2000: 0.2 points per dollar
+      { max: 5000, rate: 0.1 },     // $2000-5000: 0.1 points per dollar
+      { max: Infinity, rate: 0.05 } // $5000+: 0.05 points per dollar
+    ];
+    
+    let previousMax = 0;
+    for (const bracket of brackets) {
+      if (remainingAmount <= 0) break;
+      const bracketAmount = Math.min(remainingAmount, bracket.max - previousMax);
+      score += bracketAmount * bracket.rate;
+      remainingAmount -= bracketAmount;
+      previousMax = bracket.max;
+    }
+    
+    // Bonus for campaign creation and management
+    if (campaign.eventsOrganized) {
+      score += campaign.eventsOrganized * 20;
+    }
+    if (campaign.onlineCampaignsInitiated) {
+      score += campaign.onlineCampaignsInitiated * 15;
+    }
+    
+    totalScore += score * decayFactor;
+  });
 
-  const firstTierAmount = Math.min(remainingAmount, 2000);
-  fundraisingScore += firstTierAmount / 100;
-  remainingAmount -= firstTierAmount;
+  return Math.round(totalScore);
+};
 
-  if (remainingAmount > 0) {
-    const secondTierAmount = Math.min(remainingAmount, 6000);
-    fundraisingScore += secondTierAmount / 300;
-    remainingAmount -= secondTierAmount;
+// Calculate consistency score based on activity patterns
+const calculateConsistencyScore = (userData) => {
+  const { regularDonations = [], oneOffDonations = [], volunteeringActivities = [] } = userData;
+  let score = 0;
+  
+  // Check for daily micro-donation streaks
+  const allDonations = [...regularDonations, ...oneOffDonations];
+  const donationDates = allDonations.map(d => new Date(d.date).toDateString());
+  const uniqueDonationDays = new Set(donationDates).size;
+  
+  // Calculate current streak
+  const sortedDates = [...new Set(donationDates)].sort((a, b) => new Date(b) - new Date(a));
+  let currentStreak = 0;
+  const today = new Date();
+  let checkDate = new Date(today);
+  
+  for (let i = 0; i < sortedDates.length && i < 365; i++) {
+    const dateStr = checkDate.toDateString();
+    if (sortedDates.includes(dateStr)) {
+      currentStreak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      // Allow 1 skip day per week
+      const skipDays = Math.floor(currentStreak / 7);
+      if (skipDays > 0) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        i--; // Don't count this as an iteration
+      } else {
+        break;
+      }
+    }
   }
+  
+  // Streak bonuses
+  if (currentStreak >= 365) score += 200;  // Year streak
+  else if (currentStreak >= 180) score += 100;  // 6 month streak
+  else if (currentStreak >= 90) score += 50;   // Quarter streak
+  else if (currentStreak >= 30) score += 25;   // Month streak
+  else if (currentStreak >= 7) score += 10;    // Week streak
+  
+  // Monthly consistency bonus for traditional givers
+  const monthlyDonors = regularDonations.filter(d => d.frequency === 'monthly');
+  const monthsActive = new Set(monthlyDonors.map(d => {
+    const date = new Date(d.date);
+    return `${date.getFullYear()}-${date.getMonth()}`;
+  })).size;
+  
+  if (monthsActive >= 12) score += 100;
+  else if (monthsActive >= 6) score += 50;
+  else if (monthsActive >= 3) score += 25;
+  
+  // Volunteer consistency
+  const volunteerMonths = new Set(volunteeringActivities.map(v => {
+    const date = new Date(v.date || v.startDate);
+    return `${date.getFullYear()}-${date.getMonth()}`;
+  })).size;
+  
+  if (volunteerMonths >= 6) score += 30;
+  else if (volunteerMonths >= 3) score += 15;
+  
+  return score;
+};
 
-  if (remainingAmount > 0) {
-    fundraisingScore += remainingAmount / 600;
-  }
-
-  const totalEventsOrganized = fundraisingCampaigns.reduce((sum, c) => sum + (c.eventsOrganized || 0), 0);
-  const totalOnlineCampaignsInitiated = fundraisingCampaigns.reduce((sum, c) => sum + (c.onlineCampaignsInitiated || 0), 0);
-
-  fundraisingScore += totalEventsOrganized * 1.5;
-  fundraisingScore += totalOnlineCampaignsInitiated * 0.75;
-
-  return Math.min(Math.round(fundraisingScore), MAX_FUNDRAISING_SCORE);
+// Calculate engagement score (platform participation)
+const calculateEngagementScore = (userData) => {
+  let score = 0;
+  
+  // Profile completeness (worth up to 50 points)
+  if (userData.profileComplete) score += 20;
+  if (userData.bio && userData.bio.length > 50) score += 10;
+  if (userData.profilePictureUrl) score += 10;
+  if (userData.impactStatement) score += 10;
+  
+  // Followed charities (worth up to 30 points)
+  const followedCount = userData.followedCharities?.length || 0;
+  score += Math.min(30, followedCount * 5);
+  
+  // Daily actions (would need to be tracked - placeholder)
+  // This would include: morning check-ins, voting, sharing, etc.
+  const dailyActionsScore = userData.dailyActionsCount || 0;
+  score += Math.min(50, dailyActionsScore);
+  
+  return score;
 };
 
 export const calculateComplexImpactScore = (userData) => {
   if (!userData) {
     console.error('Invalid input for calculateComplexImpactScore');
-    return { totalScore: 0, donationScore: 0, volunteerScore: 0, fundraisingScore: 0 };
+    return { 
+      totalScore: 0, 
+      donationScore: 0, 
+      volunteerScore: 0, 
+      fundraisingScore: 0,
+      consistencyScore: 0,
+      engagementScore: 0,
+      breakdown: {}
+    };
   }
 
   const {
@@ -138,18 +323,44 @@ export const calculateComplexImpactScore = (userData) => {
 
   const archivedCampaigns = fundraisingCampaigns.filter(campaign => campaign.status === 'archived');
 
+  // Calculate raw scores for each category
   const donationScore = calculateDonationScore(regularDonations, oneOffDonations, archivedCampaigns);
   const volunteerScore = calculateVolunteerScore(volunteeringActivities);
   const fundraisingScore = calculateFundraisingScore(fundraisingCampaigns);
+  const consistencyScore = calculateConsistencyScore(userData);
+  const engagementScore = calculateEngagementScore(userData);
 
-  const totalScore = donationScore + volunteerScore + fundraisingScore;
-  const finalTotalScore = Math.min(Math.round(totalScore), 90);
+  // Apply category weights
+  const weightedScores = {
+    donations: donationScore * CATEGORY_WEIGHTS.donations,
+    volunteering: volunteerScore * CATEGORY_WEIGHTS.volunteering,
+    fundraising: fundraisingScore * CATEGORY_WEIGHTS.fundraising,
+    consistency: consistencyScore * CATEGORY_WEIGHTS.consistency,
+    engagement: engagementScore * CATEGORY_WEIGHTS.engagement
+  };
+
+  // Calculate total score
+  const totalScore = Object.values(weightedScores).reduce((sum, score) => sum + score, 0);
+
+  // Apply tier multipliers if user has achieved certain milestones
+  const tier = getTier(totalScore);
+  let multiplier = 1.0;
+  if (tier.name === 'Visionary') multiplier = 1.5;
+  else if (tier.name === 'Champion') multiplier = 1.3;
+  else if (tier.name === 'Philanthropist') multiplier = 1.2;
+  else if (tier.name === 'Altruist') multiplier = 1.1;
+
+  const finalScore = Math.round(totalScore * multiplier);
 
   return {
-    totalScore: finalTotalScore,
-    donationScore,
-    volunteerScore,
-    fundraisingScore
+    totalScore: finalScore,
+    donationScore: Math.round(donationScore),
+    volunteerScore: Math.round(volunteerScore),
+    fundraisingScore: Math.round(fundraisingScore),
+    consistencyScore: Math.round(consistencyScore),
+    engagementScore: Math.round(engagementScore),
+    breakdown: weightedScores,
+    multiplier
   };
 };
 
@@ -157,7 +368,11 @@ const defaultScoreDetails = {
   totalScore: 0,
   donationScore: 0,
   volunteerScore: 0,
-  fundraisingScore: 0
+  fundraisingScore: 0,
+  consistencyScore: 0,
+  engagementScore: 0,
+  breakdown: {},
+  multiplier: 1.0
 };
 
 const extractKeywords = (text) => {
@@ -216,7 +431,7 @@ export const ImpactProvider = ({ children }) => {
     setScoreDetails(scoreResult);
 
     const currentTier = getTier(scoreResult.totalScore);
-    setTier(currentTier.tier);
+    setTier(currentTier.name);
     setPointsToNextTier(currentTier.pointsToNextTier);
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
 
@@ -269,15 +484,62 @@ export const ImpactProvider = ({ children }) => {
       setOneOffContributions([]);
       setVolunteerActivities([]);
       setFundraisingCampaigns([]);
+      setImpactScore(0);
+      setTier('Giver');
+      setPointsToNextTier(300);
     }
   }, [getAuthHeaders]);
 
   const getTier = (score) => {
-    if (score >= 90) return { tier: "Visionary", nextTier: null, pointsToNextTier: 0 };
-    if (score >= 70) return { tier: "Champion", nextTier: "Visionary", pointsToNextTier: 90 - score };
-    if (score >= 50) return { tier: "Philanthropist", nextTier: "Champion", pointsToNextTier: 70 - score };
-    if (score >= 30) return { tier: "Altruist", nextTier: "Philanthropist", pointsToNextTier: 50 - score };
-    return { tier: "Giver", nextTier: "Altruist", pointsToNextTier: 30 - score };
+    if (score >= 5000) return { 
+      tier: "Visionary", 
+      name: "Visionary",
+      nextTier: null, 
+      pointsToNextTier: 0,
+      description: "Visionaries shape the future of giving",
+      minPoints: 5000,
+      maintenance: 150
+    };
+    if (score >= 2500) return { 
+      tier: "Champion", 
+      name: "Champion",
+      nextTier: "Visionary", 
+      pointsToNextTier: 5000 - score,
+      description: "Champions inspire others through their dedication",
+      minPoints: 2500,
+      maxPoints: 4999,
+      maintenance: 120
+    };
+    if (score >= 1000) return { 
+      tier: "Philanthropist", 
+      name: "Philanthropist",
+      nextTier: "Champion", 
+      pointsToNextTier: 2500 - score,
+      description: "Strategic giving multiplies impact across communities",
+      minPoints: 1000,
+      maxPoints: 2499,
+      maintenance: 80
+    };
+    if (score >= 300) return { 
+      tier: "Altruist", 
+      name: "Altruist",
+      nextTier: "Philanthropist", 
+      pointsToNextTier: 1000 - score,
+      description: "Whether daily drops or monthly waves, your kindness creates ripples",
+      minPoints: 300,
+      maxPoints: 999,
+      maintenance: 40
+    };
+    return { 
+      tier: "Giver", 
+      name: "Giver",
+      nextTier: "Altruist", 
+      pointsToNextTier: 300 - score,
+      description: "Every journey begins with a single act of kindness",
+      minPoints: 0,
+      maxPoints: 299,
+      maintenance: 0
+    };
   };
 
   const addDonation = useCallback(async (donation, alreadySaved = false) => {
