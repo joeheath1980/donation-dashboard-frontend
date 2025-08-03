@@ -1,6 +1,14 @@
 # Business Features Tracker - Do-Nation Platform
 
-## Recent Updates (July 25, 2025)
+## Recent Updates (August 3, 2025)
+- ✅ **Demo Business Support**: Fixed BusinessDashboard crashes with demo data
+- ✅ **Public Profile Links**: Added working links to business public profiles
+- ✅ **Admin Business Management**: Enhanced UI for partner management
+- ✅ **Profile Error Handling**: Fixed PublicBusinessProfile null reference errors
+- ✅ **Match Range Display**: Updated matching UI to show ranges instead of fixed amounts
+- ✅ **Fixed 2x Matching Logic**: Corrected calculation (2x = 1:1 match)
+
+## Previous Updates (July 25, 2025)
 - ✅ **Matching Engine**: Complete backend implementation with priority scoring
 - ✅ **Campaign Performance**: Full analytics for match tracking and budget usage
 - ✅ **WebSocket Notifications**: Real-time updates for business partners
@@ -203,16 +211,20 @@
 |---------|--------|-------|----------|
 | Receipt approval queue | ✅ Fully Built | Review low confidence receipts | - |
 | Approval statistics | ✅ Fully Built | Success rates and confidence metrics | - |
-| Charity verification | 🟨 Partially Built | Manual review process | HIGH |
-| User management | 🟨 Partially Built | Basic admin routes | MEDIUM |
+| Charity verification | ✅ Fully Built | Complete verification workflow with bulk actions | - |
+| Business partner management | ✅ Fully Built | Full CRUD operations for partners | - |
+| User management | ✅ Fully Built | Complete user management with filters | - |
 | System monitoring | ✅ Fully Built | Queue stats and job tracking | - |
 | Audit trail | ✅ Fully Built | All approvals/rejections logged | - |
+| Analytics reporting | ✅ Fully Built | Comprehensive analytics dashboard | - |
+| Campaign management | ✅ Fully Built | View and manage all campaigns | - |
+| Content management | ✅ Fully Built | CMS for platform content | - |
 
 ---
 
 ## Summary
 
-### Fully Built (Core Working): 60% (+10%)
+### Fully Built (Core Working): 65% (+5%)
 - Complete onboarding flow
 - Campaign creation wizard
 - Dashboard visualizations
@@ -221,23 +233,26 @@
 - Real-time matching engine with payment processing
 - Stripe Connect integration for fund transfers
 - Automated match reconciliation
-- Admin receipt approval system
+- Complete admin panel with all features
 - System monitoring and queue management
 - Complete audit trail
-- **NEW: Public business profiles with SEO**
-- **NEW: Impact metrics display**
-- **NEW: Dynamic slug generation**
-- **NEW: Complete matching engine implementation**
-- **NEW: WebSocket real-time notifications**
-- **NEW: Match analytics and tracking**
-- **NEW: Campaign budget management**
+- Public business profiles with SEO
+- Impact metrics display
+- Dynamic slug generation
+- Complete matching engine implementation
+- WebSocket real-time notifications
+- Match analytics and tracking
+- Campaign budget management
+- **NEW: Match range configuration**
+- **NEW: Fixed 2x matching calculations**
+- **NEW: Demo business support**
+- **NEW: Enhanced admin features**
 
-### Partially Built (Needs Backend): 15%
+### Partially Built (Needs Backend): 10% (-5%)
 - CSR AI analysis
 - Advanced analytics
 - Portfolio management
 - Campaign execution
-- Admin user management
 
 ### Not Built (Missing): 30% (-10%)
 - Advanced analytics/reporting

@@ -1,6 +1,18 @@
 # User (Donor) Features Tracker - Do-Nation Platform
 
-## Recent Updates (August 1, 2025)
+## Recent Updates (August 3, 2025)
+- ✅ **Impact Score Tooltip Fix**: Repositioned tooltip below rings to prevent overlap with score text
+- ✅ **Matching UI Improvements**: Changed "Match Amount" to "Match Range" with evenly distributed options
+- ✅ **Custom Donation Amount**: Added custom amount input with validation within range
+- ✅ **Fixed 2x Matching Logic**: Now correctly shows 2x = business matches 1:1 (not double)
+- ✅ **Prominent Multiplier Display**: Added animated highlighting for match multipliers
+- ✅ **Profile Picture Upload**: Fixed persistence and display using profilePictureUrl field
+- ✅ **Charity Profile Editor Route**: Added missing /charity/:charityId/edit route
+- ✅ **Public Profile Links**: Added working links for businesses and charities
+- ✅ **Username-based URLs**: Implemented /profile/:username routes
+- ✅ **Admin Dashboard Enhancements**: Comprehensive UI improvements for admin features
+
+## Previous Updates (August 1, 2025)
 - ✅ **Enhanced Impact Visualizations**: Modern gradient backgrounds, fixed tooltips, improved animations
 - ✅ **Concentric Rings Score Breakdown**: New interactive visualization showing donation/volunteer/fundraising breakdown
 - ✅ **Redesigned Tier Progress**: Floating score badges, washed-out progress indicators, visual hierarchy
@@ -89,7 +101,10 @@
 | Match opportunities carousel | ✅ Fully Built | Beautiful swiper implementation | - |
 | Business match visibility | ✅ Fully Built | Shows business partners | - |
 | Real-time match calculator | ✅ Fully Built | Shows in donation flow preview | - |
-| One-click micro donations | ✅ Fully Built | Preset amounts $5-$100 + custom | - |
+| One-click micro donations | ✅ Fully Built | Dynamic range with 4 options + custom | - |
+| Match range display | ✅ Fully Built | Shows min-max range instead of fixed amount | - |
+| Custom amount input | ✅ Fully Built | Within range validation | - |
+| Fixed 2x matching logic | ✅ Fully Built | 2x = 1:1 match (e.g. $10 + $10 = $20) | - |
 | Match notification system | ✅ Fully Built | Real-time WebSocket + email notifications | - |
 | Match success modal | ✅ Fully Built | Celebration UI with social sharing | - |
 | Match opportunity feed | ✅ Fully Built | Live feed component | - |
