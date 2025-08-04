@@ -123,7 +123,6 @@ function Profile() {
     try {
       const headers = getAuthHeaders();
       const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matching/opportunities`, { headers });
-      console.log('Raw API response for matching opportunities:', response.data);
       setMatchingOpportunities(response.data);
     } catch (err) {
       console.error('Error fetching matching opportunities:', err);
