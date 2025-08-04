@@ -145,7 +145,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
           cause: opp.cause || null,
           matchDetails: opp.matchDetails || {},
           // Determine if charity selection is needed
-          needsCharitySelection: matchType === 'category_choice' || matchType === 'open',
+          needsCharitySelection: matchType === 'category_auto' || matchType === 'category_choice' || matchType === 'open',
           charityOptions: opp.matchDetails?.charityOptions || []
         };
         
@@ -381,8 +381,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
 
               {/* Match Details */}
               <div className={styles.matchDetails}>
-                {/* P1/P2: Direct or Auto-selected charity */}
-                {(currentOpp.matchType === 'direct' || currentOpp.matchType === 'category_auto') && (
+                {/* P1: Direct match with pre-selected charity */}
+                {currentOpp.matchType === 'direct' && (
                   <>
                     <div className={styles.detailRow}>
                       <span>Charity:</span>
@@ -397,8 +397,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                   </>
                 )}
 
-                {/* P3: Category choice */}
-                {currentOpp.matchType === 'category_choice' && (
+                {/* P2 & P3: Category matches - need charity selection */}
+                {(currentOpp.matchType === 'category_auto' || currentOpp.matchType === 'category_choice') && (
                   <>
                     <div className={styles.detailRow}>
                       <span>Category:</span>
