@@ -14,7 +14,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAmount, setSelectedAmount] = useState(null);
-  const [selectedCharityId, setSelectedCharityId] = useState(null);
+  const [selectedCharityId, setSelectedCharityId] = useState({});
   const [charityOptions, setCharityOptions] = useState({});
   const [showCharitySearch, setShowCharitySearch] = useState(false);
   const [loadingCharities, setLoadingCharities] = useState(false);
@@ -230,7 +230,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       
       // Check if charity selection is required
       
-      if (currentOpp.needsCharitySelection && !selectedCharityId) {
+      if (currentOpp.needsCharitySelection && !selectedCharityId[currentOpp.id]) {
         alert('Please select a charity for this match');
         return;
       }
@@ -239,14 +239,13 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
         onSelectOpportunity({ 
           ...currentOpp, 
           suggestedAmount: selectedAmount,
-          selectedCharityId: selectedCharityId || currentOpp.charityId
+          selectedCharityId: selectedCharityId[currentOpp.id] || currentOpp.charityId
         });
       }
     }
     
-    // Reset selected amount and charity for next card
+    // Reset selected amount for next card
     setSelectedAmount(null);
-    setSelectedCharityId(null);
     setShowCharitySearch(false);
     setShowCustomAmount(false);
     setCustomAmount('');
@@ -408,8 +407,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                     <div className={styles.charitySelection}>
                       <p>Choose a charity from {currentOpp.businessName}'s approved list:</p>
                       <select 
-                        value={selectedCharityId || ''}
-                        onChange={(e) => setSelectedCharityId(e.target.value)}
+                        value={selectedCharityId[currentOpp.id] || ''}
+                        onChange={(e) => setSelectedCharityId(prev => ({...prev, [currentOpp.id]: e.target.value}))}
                         className={styles.charityDropdown}
                       >
                         <option value="">Select a charity...</option>
@@ -427,13 +426,13 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 {currentOpp.matchType === 'open' && (
                   <div className={styles.openMatchSection}>
                     <p>{currentOpp.businessName} will match ${currentOpp.contribution} to any registered charity</p>
-                    {selectedCharityId ? (
+                    {selectedCharityId[currentOpp.id] ? (
                       <div className={styles.selectedCharityNotice}>
                         <p style={{color: '#10b981', fontWeight: '600'}}>✓ Charity selected</p>
                         <button 
                           className={styles.selectCharityButton}
                           onClick={() => {
-                            setSelectedCharityId(null);
+                            setSelectedCharityId(prev => ({...prev, [currentOpp.id]: null}));
                             setShowCharitySearch(true);
                           }}
                         >
@@ -452,7 +451,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                         <CharitySearch 
                           onSelect={(charity) => {
                             const charityId = charity._id || charity.id || charity.ABN;
-                            setSelectedCharityId(charityId);
+                            setSelectedCharityId(prev => ({...prev, [currentOpp.id]: charityId}));
                             setShowCharitySearch(false);
                           }}
                           compact={true}
