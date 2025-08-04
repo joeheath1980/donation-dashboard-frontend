@@ -7,7 +7,7 @@ export const matchingAPI = {
   getActiveOpportunities: async (filters = {}) => {
     try {
       // Try the common endpoint path first
-      const response = await api.get('/api/matchingOpportunities', {
+      const response = await api.get('/api/matching/opportunities', {
         params: filters
       });
       return response.data;
@@ -132,7 +132,7 @@ export const matchingAPI = {
         body.selectedCharityId = selectedCharityId;
       }
       
-      const response = await api.post(`/api/matchingOpportunities/${opportunityId}/accept`, body);
+      const response = await api.post(`/api/matching/opportunities/${opportunityId}/accept`, body);
       return response.data;
     } catch (error) {
       console.error('Error accepting matching opportunity:', error);
