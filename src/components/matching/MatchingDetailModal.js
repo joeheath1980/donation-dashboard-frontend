@@ -153,7 +153,7 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 </div>
                 <div className={styles.sectionContent}>
                   {/* Show different content based on match type */}
-                  {(opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity ? (
+                  {opportunity.matchType === 'direct' && charity ? (
                     <>
                       <h3>{charity.name}</h3>
                       <p className={styles.charityDescription}>
@@ -175,7 +175,7 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                         </div>
                       )}
                     </>
-                  ) : opportunity.matchType === 'category_choice' ? (
+                  ) : (opportunity.matchType === 'category_choice' || opportunity.matchType === 'category_auto') ? (
                     <>
                       <h3>Choose Your Charity</h3>
                       <p className={styles.charityDescription}>
