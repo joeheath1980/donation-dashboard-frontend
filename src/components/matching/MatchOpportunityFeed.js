@@ -638,18 +638,20 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 <p className={styles.quickAmountsLabel}>Select amount to donate:</p>
                 <div className={styles.amountButtons}>
                   {(() => {
-                    // Calculate 3 evenly distributed amounts within the range
+                    // Calculate 3 smaller preset amounts
                     const min = currentOpp.minAmount || 5;
                     const max = currentOpp.maxAmount || 15;
-                    const step = (max - min) / 2;
+                    
+                    // Make amounts smaller - use lower portion of range
+                    const range = max - min;
                     const amounts = [
                       Math.round(min),
-                      Math.round(min + step),
-                      Math.round(max)
+                      Math.round(min + range * 0.3),
+                      Math.round(min + range * 0.6)
                     ];
                     
-                    return amounts.map(amount => {
-                      // Fix: 2x means business matches your amount 1:1
+                    // Add all buttons including custom in the same row
+                    return [...amounts.map(amount => {
                       const businessMatch = amount * (currentOpp.multiplier - 1 || 1);
                       const totalImpact = amount + businessMatch;
                       return (
@@ -664,49 +666,54 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                           </span>
                         </button>
                       );
-                    });
+                    }),
+                    // Custom amount button as 4th option
+                    <button
+                      key="custom"
+                      className={`${styles.amountButton} ${styles.customButton} ${showCustomAmount ? styles.selected : ''}`}
+                      onClick={() => setShowCustomAmount(!showCustomAmount)}
+                    >
+                      <span className={styles.donationAmount}>Other</span>
+                      <span className={styles.matchAmount}>
+                        $?
+                      </span>
+                    </button>
+                    ];
                   })()}
                 </div>
                 
-                {/* Custom Amount Option */}
-                <div className={styles.customAmountWrapper}>
-                  {!showCustomAmount ? (
-                    <button 
-                      className={styles.customAmountButton}
-                      onClick={() => setShowCustomAmount(true)}
+                {/* Custom Amount Input - Show below buttons when selected */}
+                {showCustomAmount && (
+                  <div className={styles.customAmountInput}>
+                    <input
+                      type="number"
+                      min={currentOpp.minAmount || 5}
+                      max={currentOpp.maxAmount || 15}
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      placeholder={`Enter $${currentOpp.minAmount || 5} - $${currentOpp.maxAmount || 15}`}
+                      className={styles.customInput}
+                      autoFocus
+                    />
+                    <button
+                      className={styles.customAmountConfirm}
+                      onClick={() => {
+                        const amount = parseFloat(customAmount);
+                        const min = currentOpp.minAmount || 5;
+                        const max = currentOpp.maxAmount || 15;
+                        if (amount >= min && amount <= max) {
+                          handleQuickDonation(amount);
+                          setShowCustomAmount(false);
+                          setCustomAmount('');
+                        } else {
+                          alert(`Please enter an amount between $${min} and $${max}`);
+                        }
+                      }}
                     >
-                      Custom Amount
+                      ✓
                     </button>
-                  ) : (
-                    <div className={styles.customAmountInput}>
-                      <input
-                        type="number"
-                        min={currentOpp.minAmount || 5}
-                        max={currentOpp.maxAmount || 15}
-                        value={customAmount}
-                        onChange={(e) => setCustomAmount(e.target.value)}
-                        placeholder={`$${currentOpp.minAmount || 5} - $${currentOpp.maxAmount || 15}`}
-                        className={styles.customInput}
-                      />
-                      <button
-                        className={styles.customAmountConfirm}
-                        onClick={() => {
-                          const amount = parseFloat(customAmount);
-                          const min = currentOpp.minAmount || 5;
-                          const max = currentOpp.maxAmount || 15;
-                          if (amount >= min && amount <= max) {
-                            handleQuickDonation(amount);
-                            setShowCustomAmount(false);
-                          } else {
-                            alert(`Please enter an amount between $${min} and $${max}`);
-                          }
-                        }}
-                      >
-                        Select
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Campaign Message */}
