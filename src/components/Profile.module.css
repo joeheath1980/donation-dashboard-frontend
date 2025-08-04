@@ -407,6 +407,7 @@
 .matchingFeedContainer {
   position: relative;
   margin-top: 1rem;
+  min-height: 500px;
 }
 
 .closeMatchingButton {

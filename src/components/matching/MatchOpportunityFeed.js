@@ -229,6 +229,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       }
       
       // Check if charity selection is required
+      
       if (currentOpp.needsCharitySelection && !selectedCharityId) {
         alert('Please select a charity for this match');
         return;
@@ -426,7 +427,20 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 {currentOpp.matchType === 'open' && (
                   <div className={styles.openMatchSection}>
                     <p>{currentOpp.businessName} will match ${currentOpp.contribution} to any registered charity</p>
-                    {!showCharitySearch ? (
+                    {selectedCharityId ? (
+                      <div className={styles.selectedCharityNotice}>
+                        <p style={{color: '#10b981', fontWeight: '600'}}>✓ Charity selected</p>
+                        <button 
+                          className={styles.selectCharityButton}
+                          onClick={() => {
+                            setSelectedCharityId(null);
+                            setShowCharitySearch(true);
+                          }}
+                        >
+                          Change charity
+                        </button>
+                      </div>
+                    ) : !showCharitySearch ? (
                       <button 
                         className={styles.selectCharityButton}
                         onClick={() => setShowCharitySearch(true)}
@@ -437,7 +451,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                       <div className={styles.charitySearchWrapper}>
                         <CharitySearch 
                           onSelect={(charity) => {
-                            setSelectedCharityId(charity._id || charity.ABN);
+                            const charityId = charity._id || charity.id || charity.ABN;
+                            setSelectedCharityId(charityId);
                             setShowCharitySearch(false);
                           }}
                           compact={true}
