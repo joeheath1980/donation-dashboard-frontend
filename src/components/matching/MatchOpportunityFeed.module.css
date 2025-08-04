@@ -14,7 +14,8 @@
 
 .cardStack {
   position: relative;
-  height: 480px;
+  min-height: 420px;
+  max-height: 520px;
   margin-bottom: 2rem;
 }
 
@@ -34,7 +35,7 @@
 }
 
 .cardContent {
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.5rem;
   position: relative;
 }
 
@@ -77,8 +78,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -276,31 +277,33 @@
 }
 
 .quickAmounts {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .quickAmountsLabel {
   font-size: 0.875rem;
   color: #6b7280;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .amountButtons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
 }
 
 .amountButton {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: #f3f4f6;
   border: 2px solid transparent;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: 60px;
+  justify-content: center;
 }
 
 .amountButton:hover {
@@ -308,16 +311,34 @@
   border-color: #3b82f6;
 }
 
+.amountButton.selected {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.amountButton.customButton {
+  background: #fef3c7;
+}
+
+.amountButton.customButton:hover {
+  background: #fde68a;
+}
+
+.amountButton.customButton.selected {
+  background: #fbbf24;
+  border-color: #f59e0b;
+}
+
 .donationAmount {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
 }
 
 .matchAmount {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #10b981;
-  margin-top: 0.25rem;
+  margin-top: 0.125rem;
 }
 
 .campaignMessage {
@@ -334,7 +355,7 @@
 .actionButtons {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 .skipButton,
@@ -518,36 +539,38 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  margin-top: 0.5rem;
 }
 
 .customInput {
   flex: 1;
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #f59e0b;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   transition: border-color 0.2s;
 }
 
 .customInput:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: #d97706;
 }
 
 .customAmountConfirm {
-  padding: 0.75rem 1.5rem;
-  background: #6366f1;
+  padding: 0.5rem 1rem;
+  background: #10b981;
   color: white;
   border: none;
   border-radius: 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .customAmountConfirm:hover {
-  background: #4f46e5;
+  background: #059669;
 }
 
 /* Multiplier Highlight */
