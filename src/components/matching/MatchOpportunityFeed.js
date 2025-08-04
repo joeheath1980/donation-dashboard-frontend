@@ -8,6 +8,80 @@ import LoadingSpinner from '../LoadingSpinner';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import styles from './MatchOpportunityFeed.module.css';
 
+// Persistence layer for charity selections
+const persistSelection = (oppId, charityId) => {
+  try {
+    sessionStorage.setItem(`match_${oppId}`, JSON.stringify({
+      charityId,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.error('Failed to persist charity selection:', error);
+  }
+};
+
+const recoverSelection = (oppId) => {
+  try {
+    const stored = sessionStorage.getItem(`match_${oppId}`);
+    if (stored) {
+      const { charityId, timestamp } = JSON.parse(stored);
+      // Check if selection is still valid (< 30 min old)
+      if (Date.now() - timestamp < 1800000) {
+        return charityId;
+      }
+      // Clean up expired selection
+      sessionStorage.removeItem(`match_${oppId}`);
+    }
+  } catch (error) {
+    console.error('Failed to recover charity selection:', error);
+  }
+  return null;
+};
+
+const clearExpiredSelections = () => {
+  try {
+    const keys = Object.keys(sessionStorage);
+    keys.forEach(key => {
+      if (key.startsWith('match_')) {
+        const stored = sessionStorage.getItem(key);
+        if (stored) {
+          const { timestamp } = JSON.parse(stored);
+          if (Date.now() - timestamp > 1800000) {
+            sessionStorage.removeItem(key);
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Failed to clear expired selections:', error);
+  }
+};
+
+// Analytics tracking for debugging charity selection issues
+const trackCharitySelection = (eventType, data) => {
+  try {
+    // Log to console for debugging
+    console.log('Charity Selection Event:', eventType, data);
+    
+    // If analytics is available, track the event
+    if (window.analytics && window.analytics.track) {
+      window.analytics.track('matching_charity_selection', {
+        event: eventType,
+        opportunityId: data.opportunityId,
+        matchType: data.matchType,
+        hasSelection: !!data.charityId,
+        charityId: data.charityId,
+        timestamp: Date.now(),
+        sessionId: sessionStorage.getItem('session_id') || 'no-session',
+        cardIndex: data.cardIndex,
+        userAgent: navigator.userAgent
+      });
+    }
+  } catch (error) {
+    console.error('Failed to track charity selection:', error);
+  }
+};
+
 const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
   const [opportunities, setOpportunities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,6 +97,9 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
   const websocket = useWebSocket();
 
   useEffect(() => {
+    // Clear expired selections on mount
+    clearExpiredSelections();
+    
     fetchOpportunities();
 
     // Listen for real-time updates
@@ -152,7 +229,18 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
         return mappedOpp;
       });
       
+      // Recover any persisted charity selections
+      const recoveredSelections = {};
+      mappedOpportunities.forEach(opp => {
+        const recoveredId = recoverSelection(opp.id);
+        if (recoveredId) {
+          recoveredSelections[opp.id] = recoveredId;
+          console.log(`Recovered charity selection for opportunity ${opp.id}:`, recoveredId);
+        }
+      });
+      
       setOpportunities(mappedOpportunities);
+      setSelectedCharityId(prev => ({ ...prev, ...recoveredSelections }));
       setError(null);
       
       // Fetch charity names for all opportunities with charity IDs
@@ -228,18 +316,43 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
         return;
       }
       
-      // Check if charity selection is required
-      
-      if (currentOpp.needsCharitySelection && !selectedCharityId[currentOpp.id]) {
-        alert('Please select a charity for this match');
-        return;
+      // Check if charity selection is required with recovery
+      if (currentOpp.needsCharitySelection) {
+        const selectedId = selectedCharityId[currentOpp.id] || recoverSelection(currentOpp.id);
+        
+        if (!selectedId) {
+          trackCharitySelection('selection_missing', {
+            opportunityId: currentOpp.id,
+            matchType: currentOpp.matchType,
+            cardIndex: currentIndex
+          });
+          
+          alert('Please select a charity for this match');
+          return;
+        }
+        
+        // If we recovered a selection, update state
+        if (!selectedCharityId[currentOpp.id] && selectedId) {
+          setSelectedCharityId(prev => ({...prev, [currentOpp.id]: selectedId}));
+        }
       }
       
+      const finalCharityId = currentOpp.needsCharitySelection 
+        ? (selectedCharityId[currentOpp.id] || recoverSelection(currentOpp.id))
+        : currentOpp.charityId;
+      
       if (onSelectOpportunity) {
+        trackCharitySelection('match_initiated', {
+          opportunityId: currentOpp.id,
+          matchType: currentOpp.matchType,
+          charityId: finalCharityId,
+          cardIndex: currentIndex
+        });
+        
         onSelectOpportunity({ 
           ...currentOpp, 
           suggestedAmount: selectedAmount,
-          selectedCharityId: selectedCharityId[currentOpp.id] || currentOpp.charityId
+          selectedCharityId: finalCharityId
         });
       }
     }
@@ -408,7 +521,26 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                       <p>Choose a charity from {currentOpp.businessName}'s approved list:</p>
                       <select 
                         value={selectedCharityId[currentOpp.id] || ''}
-                        onChange={(e) => setSelectedCharityId(prev => ({...prev, [currentOpp.id]: e.target.value}))}
+                        onChange={(e) => {
+                          const charityId = e.target.value;
+                          
+                          // Update state
+                          setSelectedCharityId(prev => ({...prev, [currentOpp.id]: charityId}));
+                          
+                          // Persist selection if not empty
+                          if (charityId) {
+                            persistSelection(currentOpp.id, charityId);
+                            
+                            trackCharitySelection('charity_selected_dropdown', {
+                              opportunityId: currentOpp.id,
+                              matchType: currentOpp.matchType,
+                              charityId,
+                              cardIndex: currentIndex
+                            });
+                          } else {
+                            sessionStorage.removeItem(`match_${currentOpp.id}`);
+                          }
+                        }}
                         className={styles.charityDropdown}
                       >
                         <option value="">Select a charity...</option>
@@ -428,11 +560,26 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                     <p>{currentOpp.businessName} will match ${currentOpp.contribution} to any registered charity</p>
                     {selectedCharityId[currentOpp.id] ? (
                       <div className={styles.selectedCharityNotice}>
-                        <p style={{color: '#10b981', fontWeight: '600'}}>✓ Charity selected</p>
+                        <p style={{color: '#10b981', fontWeight: '600'}}>
+                          ✓ Charity selected
+                          {recoverSelection(currentOpp.id) && !opportunities[currentIndex]?.hasShownRecovery && (
+                            <span style={{fontSize: '0.875rem', marginLeft: '8px', opacity: 0.8}}>
+                              (recovered)
+                            </span>
+                          )}
+                        </p>
                         <button 
                           className={styles.selectCharityButton}
                           onClick={() => {
                             setSelectedCharityId(prev => ({...prev, [currentOpp.id]: null}));
+                            sessionStorage.removeItem(`match_${currentOpp.id}`);
+                            
+                            trackCharitySelection('charity_deselected', {
+                              opportunityId: currentOpp.id,
+                              matchType: currentOpp.matchType,
+                              cardIndex: currentIndex
+                            });
+                            
                             setShowCharitySearch(true);
                           }}
                         >
@@ -451,7 +598,21 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                         <CharitySearch 
                           onSelect={(charity) => {
                             const charityId = charity._id || charity.id || charity.ABN;
+                            
+                            // Update state
                             setSelectedCharityId(prev => ({...prev, [currentOpp.id]: charityId}));
+                            
+                            // Persist to sessionStorage
+                            persistSelection(currentOpp.id, charityId);
+                            
+                            // Track selection
+                            trackCharitySelection('charity_selected', {
+                              opportunityId: currentOpp.id,
+                              matchType: currentOpp.matchType,
+                              charityId,
+                              cardIndex: currentIndex
+                            });
+                            
                             setShowCharitySearch(false);
                           }}
                           compact={true}
