@@ -88,9 +88,7 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
       const rawOpportunities = Array.isArray(data) ? data : (data.opportunities || []);
       
       // Map the API response to the expected format
-      console.log('Raw opportunities from API:', rawOpportunities);
       const mappedOpportunities = rawOpportunities.map(opp => {
-        console.log('Mapping opportunity - original data:', opp);
         // Map based on the new priority system
         let matchType = opp.matchType || 'open';
         
@@ -130,8 +128,8 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
           // Handle various formats for charity name
           charityName: opp.charityName || opp.charity || opp.matchDetails?.matchedCharityName || null,
           charityId: opp.charityId || opp.matchDetails?.matchedCharity || null,
-          multiplier: opp.multiplier || 2,
-          multiplierText: opp.multiplierText || '2x',
+          multiplier: Math.max(opp.multiplier || 2, 2), // Ensure minimum 2x
+          multiplierText: opp.multiplier > 1 ? `${opp.multiplier}x` : '2x',
           contribution: opp.contribution || 50,
           endDate: opp.validUntil || opp.endDate || opp.campaignEndDate,
           remainingBudget: opp.remainingBudget || opp.budget?.remaining || opp.budget || 0,
@@ -150,13 +148,6 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
           needsCharitySelection: matchType === 'category_choice' || matchType === 'open',
           charityOptions: opp.matchDetails?.charityOptions || []
         };
-        
-        console.log('Mapped opportunity:', {
-          id: mappedOpp.id,
-          multiplier: mappedOpp.multiplier,
-          multiplierText: mappedOpp.multiplierText,
-          originalMultiplier: opp.multiplier
-        });
         
         return mappedOpp;
       });

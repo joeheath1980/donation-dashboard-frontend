@@ -14,10 +14,6 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('MatchingDetailModal - Full opportunity object:', opportunity);
-    console.log('Multiplier field:', opportunity?.multiplier);
-    console.log('MultiplierText field:', opportunity?.multiplierText);
-    console.log('All opportunity fields:', Object.keys(opportunity || {}));
     
     // For P1/P2 matches with a charity assigned
     if (opportunity?.charityId && (opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto')) {
