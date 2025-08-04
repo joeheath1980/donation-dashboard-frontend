@@ -230,6 +230,12 @@
   text-align: center;
 }
 
+.noMatchNote {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
 .campaignMessage {
   padding: 1.5rem 2rem;
   background: #f9fafb;

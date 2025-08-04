@@ -15,6 +15,7 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
 
   useEffect(() => {
     console.log('MatchingDetailModal - opportunity:', opportunity);
+    console.log('Multiplier:', opportunity?.multiplier, 'SuggestedAmount:', opportunity?.suggestedAmount);
     
     // For P1/P2 matches with a charity assigned
     if (opportunity?.charityId && (opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto')) {
@@ -132,8 +133,17 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 <div className={styles.sectionContent}>
                   <h3>{opportunity.businessName}</h3>
                   <p className={styles.multiplierText}>
-                    Will match your donation at 
-                    <strong className={styles.multiplierBig}>{opportunity.multiplier || 2}x</strong>
+                    {(opportunity.multiplier || 2) > 1 ? (
+                      <>
+                        Will match your donation at 
+                        <strong className={styles.multiplierBig}>{opportunity.multiplier || 2}x</strong>
+                      </>
+                    ) : (
+                      <>
+                        Is facilitating donations to this charity
+                        <span className={styles.noMatchNote}> (no matching)</span>
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -247,22 +257,38 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                   <h3>Your Impact</h3>
                 </div>
                 <div className={styles.impactDetails}>
-                  <div className={styles.impactRow}>
-                    <span>Your donation:</span>
-                    <strong>${opportunity.suggestedAmount || 50}</strong>
-                  </div>
-                  <div className={styles.impactRow}>
-                    <span>{opportunity.businessName} matches:</span>
-                    <strong className={styles.matchAmount}>
-                      ${(opportunity.suggestedAmount || 50) * ((opportunity.multiplier || 2) - 1)}
-                    </strong>
-                  </div>
-                  <div className={styles.impactRow + ' ' + styles.totalRow}>
-                    <span>Total impact:</span>
-                    <strong className={styles.totalAmount}>
-                      ${(opportunity.suggestedAmount || 50) * (opportunity.multiplier || 2)}
-                    </strong>
-                  </div>
+                  {(opportunity.multiplier || 2) > 1 ? (
+                    <>
+                      <div className={styles.impactRow}>
+                        <span>Your donation:</span>
+                        <strong>${opportunity.suggestedAmount || 50}</strong>
+                      </div>
+                      <div className={styles.impactRow}>
+                        <span>{opportunity.businessName} matches:</span>
+                        <strong className={styles.matchAmount}>
+                          ${(opportunity.suggestedAmount || 50) * ((opportunity.multiplier || 2) - 1)}
+                        </strong>
+                      </div>
+                      <div className={styles.impactRow + ' ' + styles.totalRow}>
+                        <span>Total impact:</span>
+                        <strong className={styles.totalAmount}>
+                          ${(opportunity.suggestedAmount || 50) * (opportunity.multiplier || 2)}
+                        </strong>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.impactRow}>
+                        <span>Your donation:</span>
+                        <strong className={styles.totalAmount}>${opportunity.suggestedAmount || 50}</strong>
+                      </div>
+                      <div className={styles.impactRow}>
+                        <span className={styles.noMatchNote}>
+                          {opportunity.businessName} is facilitating this donation but not providing matching funds
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {!opportunity.suggestedAmount && (
                   <p className={styles.impactNote}>
