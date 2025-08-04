@@ -463,14 +463,13 @@ const MatchOpportunityFeed = ({ onSelectOpportunity }) => {
                 <p className={styles.quickAmountsLabel}>Select amount to donate:</p>
                 <div className={styles.amountButtons}>
                   {(() => {
-                    // Calculate 4 evenly distributed amounts within the range
+                    // Calculate 3 evenly distributed amounts within the range
                     const min = currentOpp.minAmount || 5;
                     const max = currentOpp.maxAmount || 15;
-                    const step = (max - min) / 3;
+                    const step = (max - min) / 2;
                     const amounts = [
                       Math.round(min),
                       Math.round(min + step),
-                      Math.round(min + step * 2),
                       Math.round(max)
                     ];
                     
