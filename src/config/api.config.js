@@ -95,7 +95,7 @@ export const API_ENDPOINTS = {
   ADMIN_API_KEYS: '/api/admin/integrations/api-keys',
   
   // Other endpoints
-  MATCHING_OPPORTUNITIES: '/api/matchingOpportunities',
+  MATCHING_OPPORTUNITIES: '/api/matching/opportunities',
   GLOBALGIVING_PROJECTS: '/api/globalgiving/projects/recommended',
   
   // Email forwarding endpoints
