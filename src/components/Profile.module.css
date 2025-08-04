@@ -404,6 +404,11 @@
   font-size: 0.875rem;
 }
 
+.matchingSection {
+  overflow: visible;
+  min-height: 600px;
+}
+
 .matchingFeedContainer {
   position: relative;
   margin-top: 1rem;

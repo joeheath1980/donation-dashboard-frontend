@@ -14,7 +14,7 @@
 
 .cardStack {
   position: relative;
-  height: 420px;
+  height: 480px;
   margin-bottom: 2rem;
 }
 
@@ -572,7 +572,7 @@
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .cardStack {
-    height: 450px;
+    height: 460px;
   }
   
   .amountButtons {

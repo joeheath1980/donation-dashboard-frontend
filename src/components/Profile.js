@@ -295,7 +295,7 @@ function Profile() {
           sectionTitles={impactSections.map(section => section.title)}
         />
         
-        <section className={styles.section}>
+        <section className={`${styles.section} ${showMatchingFeed ? styles.matchingSection : ''}`}>
           <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           
