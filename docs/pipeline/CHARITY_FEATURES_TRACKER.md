@@ -1,6 +1,13 @@
 # Charity Features Tracker - Do-Nation Platform
 
-## Recent Updates (August 3, 2025)
+## Recent Updates (August 6, 2025)
+- ✅ **Matching Opportunity Integration**: Charities can be matched through 4 different matching types
+- ✅ **Category-based Matching**: Improved category matching with normalized cause areas
+- ✅ **Test Charity Generation**: Added test data generation for charities with proper categories
+- ✅ **Charity Selection Validation**: Backend validates charity selection based on matching type
+- ✅ **Production Deployment**: All charity features deployed to production
+
+## Previous Updates (August 3, 2025)
 - ✅ **Profile Editor Route**: Added /charity/:charityId/edit route for editing public profiles
 - ✅ **Public Profile Links**: Working links to charity public profiles from dashboards
 - ✅ **Admin Charity Management**: Enhanced UI for charity verification and management

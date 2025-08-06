@@ -54,7 +54,19 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
   };
 
   const handleConfirm = () => {
-    const charityIdToUse = opportunity.charityId || selectedCharity?._id || selectedCharity?.id;
+    // Check if Stripe is configured
+    if (!process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY) {
+      alert('Payment processing is not configured yet. This feature will be available soon!');
+      return;
+    }
+    
+    // Use the charity already selected in the first modal (selectedCharityId)
+    // or the pre-selected charity for P1/P2 matches
+    const charityIdToUse = opportunity.selectedCharityId || 
+                          opportunity.charityId || 
+                          opportunity.charity ||
+                          selectedCharity?._id || 
+                          selectedCharity?.id;
     
     if (!charityIdToUse) {
       alert('Please select a charity to continue');
@@ -65,9 +77,10 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
     navigate(`/donate/${charityIdToUse}`, {
       state: {
         matchingOpportunity: opportunity,
-        campaignId: opportunity.campaignId,
-        suggestedAmount: opportunity.suggestedAmount,
-        charityData: selectedCharity // Pass the full charity data
+        campaignId: opportunity.campaignId || opportunity.campaign,
+        suggestedAmount: opportunity.suggestedAmount || opportunity.donationAmount,
+        selectedCharityId: charityIdToUse,
+        charityData: selectedCharity || { id: charityIdToUse } // Pass the full charity data if available
       }
     });
     
@@ -152,8 +165,18 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                   <FaHandHoldingHeart />
                 </div>
                 <div className={styles.sectionContent}>
-                  {/* Show different content based on match type */}
-                  {opportunity.matchType === 'direct' && charity ? (
+                  {/* Check if charity was already selected in the first modal */}
+                  {opportunity.selectedCharityId ? (
+                    <>
+                      <h3>Selected Charity</h3>
+                      <p className={styles.charityDescription}>
+                        You've selected: <strong>{opportunity.selectedCharityName || `Charity ID: ${opportunity.selectedCharityId}`}</strong> for this match.
+                      </p>
+                      <p className={styles.charityNote}>
+                        Click "Donate Now" below to proceed with your donation.
+                      </p>
+                    </>
+                  ) : opportunity.matchType === 'direct' && charity ? (
                     <>
                       <h3>{charity.name}</h3>
                       <p className={styles.charityDescription}>
@@ -309,11 +332,11 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
                 </button>
                 <button className={styles.confirmButton} onClick={handleConfirm}>
                   <FaHeart />
-                  {(opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity 
+                  {opportunity.selectedCharityId || 
+                   ((opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity) || 
+                   selectedCharity 
                     ? 'Continue to Donation' 
-                    : selectedCharity 
-                      ? 'Continue with Selected Charity'
-                      : 'Select Charity to Continue'}
+                    : 'Select Charity to Continue'}
                 </button>
               </div>
             </>

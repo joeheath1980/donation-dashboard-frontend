@@ -10,12 +10,22 @@ function MatchingPage() {
   const [matchSuccessData, setMatchSuccessData] = useState(null);
 
   const handleSelectOpportunity = (opportunity) => {
+    // Use selectedCharityId if available (P3/P4), otherwise use charityId (P1/P2)
+    const charityId = opportunity.selectedCharityId || opportunity.charityId || opportunity.charity;
+    
+    if (!charityId) {
+      console.error('No charity ID available for navigation', opportunity);
+      alert('Please select a charity before proceeding');
+      return;
+    }
+    
     // Navigate to donation form with the opportunity data
-    navigate(`/donate/${opportunity.charityId}`, {
+    navigate(`/donate/${charityId}`, {
       state: {
         matchingOpportunity: opportunity,
-        campaignId: opportunity.campaignId,
-        suggestedAmount: opportunity.suggestedAmount
+        campaignId: opportunity.campaignId || opportunity.campaign,
+        suggestedAmount: opportunity.suggestedAmount || opportunity.donationAmount,
+        selectedCharityId: charityId // Explicitly pass the selected charity
       }
     });
   };
