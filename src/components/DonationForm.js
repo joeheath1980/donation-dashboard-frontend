@@ -123,7 +123,9 @@ function DonationFormContent({ charity, onSuccess, matchingOpportunity }) {
   const stripe = useStripe();
   const elements = useElements();
   
-  const [amount, setAmount] = useState(matchingOpportunity?.suggestedAmount?.toString() || '');
+  const [amount, setAmount] = useState(
+    matchingOpportunity?.suggestedAmount ? matchingOpportunity.suggestedAmount.toString() : ''
+  );
   const [isMonthly, setIsMonthly] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -267,8 +269,7 @@ function DonationFormContent({ charity, onSuccess, matchingOpportunity }) {
               <span className="match-business">{matchingOpportunity.businessName}</span>
             </div>
             <p className="match-info-text">
-              {matchingOpportunity.businessName} will match your donation {matchingOpportunity.multiplier}x 
-              as part of their {matchingOpportunity.campaignName}!
+              {matchingOpportunity.businessName} will match your donation {matchingOpportunity.multiplier || 2}x!
             </p>
           </div>
         )}

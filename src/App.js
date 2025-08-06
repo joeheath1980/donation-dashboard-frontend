@@ -6,6 +6,7 @@ import { ImpactProvider } from './contexts/ImpactContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
+import { MatchSelectionProvider } from './contexts/MatchSelectionContext';
 import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
 import { ToastContainer } from 'react-toastify';
@@ -20,6 +21,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ChunkErrorBoundary from './components/ChunkErrorBoundary';
 import DemoBanner from './components/DemoBanner';
 import DemoBadge from './components/DemoBadge';
+
+// Components that use Chart.js or Swiper - loaded eagerly to avoid chunk loading issues
+import BusinessCampaignAnalytics from './components/BusinessCampaignAnalytics';
+import AdminDashboard from './components/AdminDashboard';
+import YourImpact from './components/YourImpact';
+import Profile from './components/Profile';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './components/SharedStyles.css';
@@ -37,7 +45,7 @@ try {
 }
 
 // Lazy loaded components for code splitting
-const Profile = lazy(() => import('./components/Profile'));
+// Profile is loaded eagerly above due to Swiper usage
 const SignUp = lazy(() => import('./components/SignUp'));
 const YourAccount = lazy(() => import('./components/YourAccount'));
 const About = lazy(() => import('./components/About'));
@@ -54,14 +62,11 @@ const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));
 const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCampaign'));
 const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
 const BusinessCampaignList = lazy(() => import('./components/BusinessCampaignList'));
-const BusinessCampaignAnalytics = lazy(() => import('./components/BusinessCampaignAnalytics'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const GoogleAuthCallback = lazy(() => import('./components/GoogleAuthCallback'));
 const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallback'));
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsComponent'));
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
-const YourImpact = lazy(() => import('./components/YourImpact'));
 const DonationForm = lazy(() => import('./components/DonationForm'));
 const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
 const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
@@ -185,13 +190,14 @@ function App() {
         <UserProvider>
           <WebSocketProvider>
             <ImpactProvider>
-              <Router>
-                <RouteChangeHandler />
-                <ErrorBoundary name="Router">
-                  <DemoBanner />
-                  <DemoBadge />
-                  <div className={styles.app}>
-                    <Routes>
+              <MatchSelectionProvider>
+                <Router>
+                  <RouteChangeHandler />
+                  <ErrorBoundary name="Router">
+                    <DemoBanner />
+                    <DemoBadge />
+                    <div className={styles.app}>
+                      <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/login" element={<Login />} />
@@ -261,9 +267,10 @@ function App() {
             pauseOnHover
           />
         </Router>
-      </ImpactProvider>
-    </WebSocketProvider>
-  </UserProvider>
+      </MatchSelectionProvider>
+    </ImpactProvider>
+  </WebSocketProvider>
+</UserProvider>
 </AuthProvider>
 </ErrorBoundary>
 );

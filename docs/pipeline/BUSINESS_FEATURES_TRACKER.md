@@ -1,6 +1,13 @@
 # Business Features Tracker - Do-Nation Platform
 
-## Recent Updates (August 3, 2025)
+## Recent Updates (August 6, 2025)
+- ✅ **Matching Opportunity Types**: Implemented proper 4-tier matching system (P1: Direct, P2: Category Auto, P3: Category Choice, P4: Open)
+- ✅ **Match Type Validation**: Backend now validates and sanitizes all matchType values
+- ✅ **Campaign Matching Engine**: Updated to properly generate opportunities based on campaign settings
+- ✅ **Test Data Generation**: Added business test data generation with proper matching configurations
+- ✅ **Production Deployment**: Successfully deployed all business features to production
+
+## Previous Updates (August 3, 2025)
 - ✅ **Demo Business Support**: Fixed BusinessDashboard crashes with demo data
 - ✅ **Public Profile Links**: Added working links to business public profiles
 - ✅ **Admin Business Management**: Enhanced UI for partner management

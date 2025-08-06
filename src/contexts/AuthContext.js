@@ -231,7 +231,8 @@ export const AuthProvider = ({ children }) => {
   const charityLogin = async (contactEmail, password) => {
     try {
       const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_LOGIN), {
-        contactEmail,
+        email: contactEmail,  // Backend expects 'email' field
+        contactEmail,  // Also send contactEmail for compatibility
         password,
       });
       const { token, charity } = response.data;

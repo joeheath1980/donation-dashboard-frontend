@@ -1,6 +1,13 @@
 # User (Donor) Features Tracker - Do-Nation Platform
 
-## Recent Updates (August 3, 2025)
+## Recent Updates (August 6, 2025)
+- ✅ **Matching Opportunity matchType Validation**: Fixed backend to validate and convert invalid 'random' matchType to valid types (direct, category, open)
+- ✅ **Matching Opportunity Generator Updates**: Set MIN_OPPORTUNITIES to 0 to prevent demo data generation when no real matches exist
+- ✅ **Backend API Validation**: Added comprehensive matchType validation in /api/matching/opportunities endpoint
+- ✅ **Test Data Generation Scripts**: Added scripts to generate proper test matching opportunities with all 4 types (P1-P4)
+- ✅ **Production Deployment**: Successfully deployed backend and frontend to https://do-nation.space
+
+## Previous Updates (August 3, 2025)
 - ✅ **Impact Score Tooltip Fix**: Repositioned tooltip below rings to prevent overlap with score text
 - ✅ **Matching UI Improvements**: Changed "Match Amount" to "Match Range" with evenly distributed options
 - ✅ **Custom Donation Amount**: Added custom amount input with validation within range

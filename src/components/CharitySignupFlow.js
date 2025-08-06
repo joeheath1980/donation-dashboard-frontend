@@ -357,12 +357,18 @@ const CharitySignupFlow = () => {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userType', 'charity');
+        localStorage.setItem('charityId', response.data.charityId);
+        
+        // Redirect to charity dashboard after 2 seconds
+        setTimeout(() => {
+          navigate('/charity-dashboard');
+        }, 2000);
+      } else {
+        // If no token, redirect to login
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
-      
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
     } catch (err) {
       console.error('Signup error:', err);
       
@@ -841,7 +847,7 @@ const CharitySignupFlow = () => {
           <h1>Registration Successful!</h1>
           <p>Your charity account has been created successfully.</p>
           <p>A verification email has been sent to {formData.contactEmail}</p>
-          <p>Redirecting to login page...</p>
+          <p>Redirecting to your dashboard...</p>
         </div>
       </div>
     );
