@@ -148,6 +148,7 @@ const CharitySignupFlow = () => {
           
           // Determine category using the ACNC data
           charityData.category = determineCategory(record);
+          console.log('ACNC Charity processed:', charityData.name, 'Category:', charityData.category);
           
           return charityData;
         });
@@ -371,6 +372,7 @@ const CharitySignupFlow = () => {
     
     // Set flag if category was determined from ACNC
     if (charity.category) {
+      console.log('Setting categoryAutoSelected to true, category:', charity.category);
       setCategoryAutoSelected(true);
     }
     
@@ -663,7 +665,7 @@ const CharitySignupFlow = () => {
               >
                 <div className={styles.charityName}>{charity.name}</div>
                 <div className={styles.charityDetails}>
-                  ABN: {charity.ABN} | {charity.state} | {charity.category}
+                  ABN: {charity.ABN} | {charity.state} | {charity.category || 'No category'}
                 </div>
               </div>
             ))}
@@ -768,6 +770,9 @@ const CharitySignupFlow = () => {
   );
   
   const renderStep2 = () => {
+    console.log('renderStep2 - categoryAutoSelected:', categoryAutoSelected);
+    console.log('renderStep2 - formData.category:', formData.category);
+    
     return (
     <div className={styles.stepContent}>
       <h2>Tell us about your organization</h2>
@@ -776,8 +781,21 @@ const CharitySignupFlow = () => {
       </p>
       
       {categoryAutoSelected && formData.category && (
-        <div className={styles.infoMessage} style={{marginBottom: '20px', padding: '10px', backgroundColor: '#e8f4fd', borderRadius: '4px'}}>
-          Category auto-selected from ACNC: <strong>{formData.category}</strong>
+        <div style={{
+          marginBottom: '20px', 
+          padding: '12px 16px', 
+          backgroundColor: '#e3f2fd', 
+          border: '1px solid #90caf9',
+          borderRadius: '8px',
+          color: '#1565c0',
+          fontSize: '14px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span>ℹ️</span>
+          <span>Category auto-selected from ACNC: <strong style={{color: '#0d47a1'}}>{formData.category}</strong></span>
         </div>
       )}
       
