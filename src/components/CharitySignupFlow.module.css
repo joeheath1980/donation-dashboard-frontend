@@ -1,3 +1,8 @@
+/* Global box-sizing */
+* {
+  box-sizing: border-box;
+}
+
 /* Do-Nation design system variables */
 :root {
   --primary-color: #2d8f7b;
@@ -219,6 +224,8 @@
 
 .stepContent {
   animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 20px;
+  min-height: 400px;
 }
 
 @keyframes slideIn {
@@ -249,7 +256,12 @@
 
 /* Form Groups */
 .formGroup {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0; /* Critical: prevents grid item overflow */
 }
 
 .formGroup label {
@@ -272,6 +284,7 @@
 .formGroup select,
 .formGroup textarea {
   width: 100%;
+  box-sizing: border-box; /* Ensure padding is included in width */
   padding: 14px 18px;
   border: 2px solid var(--border-light);
   border-radius: 12px;
@@ -310,8 +323,34 @@
 
 .formRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem; /* 24px - consistent spacing */
+  margin-bottom: 28px;
+  width: 100%;
+}
+
+.formRow .formGroup {
+  margin-bottom: 0 !important;
+  min-width: 0; /* Prevent grid overflow */
+  flex: 1 1 0;
+}
+
+/* Three column variant for address fields */
+.formRow.threeColumns {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+  .formRow.threeColumns {
+    grid-template-columns: 1fr; /* Stack on tablets */
+  }
+}
+
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr; /* Stack vertically on mobile */
+    gap: 20px;
+  }
 }
 
 .charCount {
@@ -326,8 +365,10 @@
   color: #ef5350;
   font-size: 0.875rem;
   margin-top: 6px;
+  margin-bottom: 8px;
   display: block;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 /* Agreements */
@@ -589,7 +630,7 @@
 
 /* Search Functionality Styles */
 .searchSection {
-  margin-bottom: 30px;
+  margin-bottom: 35px;
   padding: 25px;
   background: var(--light-gray);
   border-radius: 12px;

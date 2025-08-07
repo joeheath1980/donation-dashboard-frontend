@@ -224,49 +224,78 @@ function CharityDashboard() {
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
-        <img src={logo} alt="Logo" className={styles.logo} />
-        <h1 className={styles.title}>Charity Dashboard</h1>
-        <button onClick={handleLogout} className={styles.button}>Log Out</button>
+        <div className={styles.headerContent}>
+          <img src={logo} alt="Logo" className={styles.logo} />
+          <h1 className={styles.title}>Charity Dashboard</h1>
+          <button onClick={handleLogout} className={styles.button}>Log Out</button>
+        </div>
       </header>
 
-      <div className={styles.card}>
+      <div className={styles.mainContent}>
+        <div className={styles.card}>
         <h2 className={styles.cardTitle}>Welcome, {charityData.charityName}</h2>
         <p className={styles.description}><strong>Email:</strong> {charityData.contactEmail}</p>
         <p className={styles.description}><strong>Category:</strong> {charityData.category}</p>
       </div>
 
-      <div className={styles.card}>
-        <h3 className={styles.cardTitle}>Link Your Charity</h3>
-        {linkingStatus === 'pending' && linkedCharity ? (
-          <div>
-            <p className={styles.description}>Your linking request is being reviewed</p>
-            {renderCharityCard(linkedCharity, true)}
-          </div>
-        ) : !charityData.linkedABN && (
-          <>
-            <p className={styles.description}>Search for your charity in the Australian Charities database to link it to your dashboard.</p>
-            <div className={styles.searchInputWrapper}>
-              <FaSearch className={styles.searchIcon} />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search for your charity..."
-                className={styles.searchInput}
-              />
+      {linkingStatus !== 'approved' && (
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Link Your Charity</h3>
+          {linkingStatus === 'pending' && linkedCharity ? (
+            <div>
+              <p className={styles.description}>Your linking request is being reviewed</p>
+              {renderCharityCard(linkedCharity, true)}
             </div>
-            {isSearching && (
-              <div className={styles.description}>Searching...</div>
-            )}
-
-            {searchResults.length > 0 && (
-              <div className={styles.grid}>
-                {searchResults.map(charity => renderCharityCard(charity))}
+          ) : linkingStatus === 'rejected' ? (
+            <>
+              <p className={styles.description}>Your previous linking request was not approved. Please try again with different documentation.</p>
+              <p className={styles.description}>Search for your charity in the Australian Charities database to link it to your dashboard.</p>
+              <div className={styles.searchInputWrapper}>
+                <FaSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search for your charity..."
+                  className={styles.searchInput}
+                />
               </div>
-            )}
-          </>
-        )}
-      </div>
+              {isSearching && (
+                <div className={styles.description}>Searching...</div>
+              )}
+
+              {searchResults.length > 0 && (
+                <div className={styles.grid}>
+                  {searchResults.map(charity => renderCharityCard(charity))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <p className={styles.description}>Search for your charity in the Australian Charities database to link it to your dashboard.</p>
+              <div className={styles.searchInputWrapper}>
+                <FaSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search for your charity..."
+                  className={styles.searchInput}
+                />
+              </div>
+              {isSearching && (
+                <div className={styles.description}>Searching...</div>
+              )}
+
+              {searchResults.length > 0 && (
+                <div className={styles.grid}>
+                  {searchResults.map(charity => renderCharityCard(charity))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {linkingStatus === 'approved' && (
         <>
@@ -411,14 +440,16 @@ function CharityDashboard() {
         </div>
       </div>
 
+      </div> {/* End of mainContent */}
+
       {showLinkModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <button onClick={() => setShowLinkModal(false)} className={styles.iconButton}>
+            <button onClick={() => setShowLinkModal(false)} className={styles.closeButton}>
               <FaTimes />
             </button>
-            <h2 className={styles.cardTitle}>Link Your Charity</h2>
-            <p className={styles.description}>Please provide evidence that you represent {selectedCharity?.Charity_Legal_Name}</p>
+            <h2>Link Your Charity</h2>
+            <p>Please provide evidence that you represent {selectedCharity?.Charity_Legal_Name}</p>
             <div>
               <input
                 type="file"
