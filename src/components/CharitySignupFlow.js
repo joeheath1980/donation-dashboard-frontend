@@ -122,27 +122,34 @@ const CharitySignupFlow = () => {
       );
       
       if (response.data?.result?.records) {
-        const charities = response.data.result.records.map(record => ({
-          ABN: record.ABN,
-          name: record.Charity_Legal_Name,
-          tradingName: record.Other_Organisation_Names,
-          category: record.Main_Activity || determineCategory(record),
-          state: record.State,
-          postcode: record.Postcode,
-          website: record.Charity_Website,
-          address: {
-            street: record.Address_Line_1,
-            city: record.Town_City,
+        const charities = response.data.result.records.map(record => {
+          // Create the charity object with all fields first
+          const charityData = {
+            ABN: record.ABN,
+            name: record.Charity_Legal_Name,
+            tradingName: record.Other_Organisation_Names,
             state: record.State,
-            postalCode: record.Postcode
-          },
-          // Store additional fields for category determination
-          charity_type: record.Charity_Type,
-          main_activity: record.Main_Activity,
-          advancing_category: record.Advancing_Category,
-          purpose: record.Purpose,
-          beneficiaries: record.Beneficiaries
-        }));
+            postcode: record.Postcode,
+            website: record.Charity_Website,
+            address: {
+              street: record.Address_Line_1,
+              city: record.Town_City,
+              state: record.State,
+              postalCode: record.Postcode
+            },
+            // Store additional fields for category determination
+            charity_type: record.Charity_Type,
+            main_activity: record.Main_Activity,
+            advancing_category: record.Advancing_Category,
+            purpose: record.Purpose,
+            beneficiaries: record.Beneficiaries
+          };
+          
+          // Determine category using the ACNC data
+          charityData.category = determineCategory(record);
+          
+          return charityData;
+        });
         setCharitySearchResults(charities);
       } else {
         setCharitySearchResults([]);
@@ -214,64 +221,145 @@ const CharitySignupFlow = () => {
   }, [addressSearchTerm, searchAddresses]);
   
   // Function to determine category from ACNC charity type
-  const determineCategory = (charity) => {
-    // Check various fields that might contain category information
+  const determineCategory = (record) => {
+    // Check various fields that might contain category information from ACNC
     const charityInfo = [
-      charity.charity_type,
-      charity.main_activity,
-      charity.advancing_category,
-      charity.purpose,
-      charity.beneficiaries
+      record.Charity_Type,
+      record.Main_Activity,
+      record.Advancing_Category,
+      record.Purpose,
+      record.Beneficiaries,
+      record.Charity_Subtype,
+      record.Activities,
+      record.Operating_Countries
     ].filter(Boolean).join(' ').toLowerCase();
     
-    if (charityInfo.includes('education') || charityInfo.includes('school') || charityInfo.includes('research')) {
+    // Check for education and research
+    if (charityInfo.includes('education') || charityInfo.includes('school') || 
+        charityInfo.includes('research') || charityInfo.includes('university') ||
+        charityInfo.includes('college') || charityInfo.includes('training') ||
+        charityInfo.includes('scholarship') || charityInfo.includes('literacy')) {
       return 'Education & Research';
-    } else if (charityInfo.includes('health') || charityInfo.includes('medical') || charityInfo.includes('hospital')) {
+    } 
+    // Check for health and medical
+    else if (charityInfo.includes('health') || charityInfo.includes('medical') || 
+             charityInfo.includes('hospital') || charityInfo.includes('clinic') ||
+             charityInfo.includes('disease') || charityInfo.includes('cancer') ||
+             charityInfo.includes('treatment') || charityInfo.includes('therapy')) {
       return 'Health & Medical Services';
-    } else if (charityInfo.includes('social') || charityInfo.includes('welfare') || charityInfo.includes('community')) {
+    } 
+    // Check for social and community welfare
+    else if (charityInfo.includes('social') || charityInfo.includes('welfare') || 
+             charityInfo.includes('community') || charityInfo.includes('support') ||
+             charityInfo.includes('assistance') || charityInfo.includes('service')) {
       return 'Social & Community Welfare';
-    } else if (charityInfo.includes('environment') || charityInfo.includes('conservation')) {
+    } 
+    // Check for environment
+    else if (charityInfo.includes('environment') || charityInfo.includes('conservation') ||
+             charityInfo.includes('climate') || charityInfo.includes('sustainability') ||
+             charityInfo.includes('wildlife') || charityInfo.includes('marine')) {
       return 'Environment & Conservation';
-    } else if (charityInfo.includes('animal')) {
+    } 
+    // Check for animal welfare
+    else if (charityInfo.includes('animal') || charityInfo.includes('pet') ||
+             charityInfo.includes('rspca') || charityInfo.includes('shelter')) {
       return 'Animal Welfare';
-    } else if (charityInfo.includes('art') || charityInfo.includes('culture') || charityInfo.includes('heritage')) {
+    } 
+    // Check for arts and culture
+    else if (charityInfo.includes('art') || charityInfo.includes('culture') || 
+             charityInfo.includes('heritage') || charityInfo.includes('museum') ||
+             charityInfo.includes('gallery') || charityInfo.includes('music') ||
+             charityInfo.includes('theatre') || charityInfo.includes('performing')) {
       return 'Arts, Culture & Heritage';
-    } else if (charityInfo.includes('sport') || charityInfo.includes('recreation')) {
+    } 
+    // Check for sports and recreation
+    else if (charityInfo.includes('sport') || charityInfo.includes('recreation') ||
+             charityInfo.includes('fitness') || charityInfo.includes('club') ||
+             charityInfo.includes('athletic') || charityInfo.includes('physical')) {
       return 'Sports & Recreation';
-    } else if (charityInfo.includes('religious') || charityInfo.includes('church')) {
+    } 
+    // Check for religious activities
+    else if (charityInfo.includes('religious') || charityInfo.includes('church') ||
+             charityInfo.includes('faith') || charityInfo.includes('christian') ||
+             charityInfo.includes('islamic') || charityInfo.includes('jewish') ||
+             charityInfo.includes('buddhist') || charityInfo.includes('hindu')) {
       return 'Religious Activities';
-    } else if (charityInfo.includes('international') || charityInfo.includes('overseas')) {
+    } 
+    // Check for international aid
+    else if (charityInfo.includes('international') || charityInfo.includes('overseas') ||
+             charityInfo.includes('foreign') || charityInfo.includes('global') ||
+             charityInfo.includes('developing')) {
       return 'International Aid & Development';
-    } else if (charityInfo.includes('emergency') || charityInfo.includes('relief')) {
+    } 
+    // Check for emergency relief
+    else if (charityInfo.includes('emergency') || charityInfo.includes('relief') ||
+             charityInfo.includes('disaster') || charityInfo.includes('crisis') ||
+             charityInfo.includes('flood') || charityInfo.includes('fire')) {
       return 'Emergency Relief';
-    } else if (charityInfo.includes('youth') || charityInfo.includes('young')) {
+    } 
+    // Check for youth services
+    else if (charityInfo.includes('youth') || charityInfo.includes('young') ||
+             charityInfo.includes('child') || charityInfo.includes('kids') ||
+             charityInfo.includes('adolescent') || charityInfo.includes('teenager')) {
       return 'Youth Services';
-    } else if (charityInfo.includes('aged') || charityInfo.includes('elderly')) {
+    } 
+    // Check for aged care
+    else if (charityInfo.includes('aged') || charityInfo.includes('elderly') ||
+             charityInfo.includes('senior') || charityInfo.includes('retirement') ||
+             charityInfo.includes('geriatric')) {
       return 'Aged Care';
-    } else if (charityInfo.includes('disability')) {
+    } 
+    // Check for disability services
+    else if (charityInfo.includes('disability') || charityInfo.includes('disabled') ||
+             charityInfo.includes('handicap') || charityInfo.includes('impair') ||
+             charityInfo.includes('special needs') || charityInfo.includes('accessibility')) {
       return 'Disability Services';
-    } else if (charityInfo.includes('indigenous') || charityInfo.includes('aboriginal')) {
+    } 
+    // Check for indigenous programs
+    else if (charityInfo.includes('indigenous') || charityInfo.includes('aboriginal') ||
+             charityInfo.includes('torres strait') || charityInfo.includes('first nations')) {
       return 'Indigenous Programs';
-    } else if (charityInfo.includes('housing') || charityInfo.includes('homeless')) {
+    } 
+    // Check for housing and homelessness
+    else if (charityInfo.includes('housing') || charityInfo.includes('homeless') ||
+             charityInfo.includes('shelter') || charityInfo.includes('accommodation') ||
+             charityInfo.includes('refuge')) {
       return 'Housing & Homelessness';
-    } else if (charityInfo.includes('mental')) {
+    } 
+    // Check for mental health
+    else if (charityInfo.includes('mental') || charityInfo.includes('psychological') ||
+             charityInfo.includes('counselling') || charityInfo.includes('depression') ||
+             charityInfo.includes('anxiety') || charityInfo.includes('wellbeing')) {
       return 'Mental Health';
-    } else if (charityInfo.includes('family') || charityInfo.includes('children')) {
+    } 
+    // Check for family and children services
+    else if (charityInfo.includes('family') || charityInfo.includes('children') ||
+             charityInfo.includes('parent') || charityInfo.includes('maternal')) {
       return 'Family & Children Services';
     }
-    return charity.category || ''; // Fallback to existing category if available
+    
+    // If no specific category matches, try to use Main_Activity if it matches our categories
+    if (record.Main_Activity) {
+      const mainActivity = record.Main_Activity;
+      // Check if Main_Activity matches any of our predefined categories
+      if (categories.includes(mainActivity)) {
+        return mainActivity;
+      }
+    }
+    
+    // Default fallback
+    return '';
   };
 
   // Handle charity selection from ACNC search
   const handleCharitySelect = (charity) => {
     setSelectedCharity(charity);
-    const autoCategory = determineCategory(charity);
     
     setFormData(prev => ({
       ...prev,
       charityName: charity.name,
       abn: charity.ABN,
-      category: autoCategory, // Auto-populate category
+      category: charity.category || '', // Use the category already determined during search
       website: charity.website || '',
       address: {
         ...prev.address,
