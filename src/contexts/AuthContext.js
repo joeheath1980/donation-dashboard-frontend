@@ -228,17 +228,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Charity user login
-  const charityLogin = async (contactEmail, password) => {
+  const charityLogin = async (emailOrContactEmail, password) => {
     try {
       const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_LOGIN), {
-        email: contactEmail,  // Backend expects 'email' field
-        contactEmail,  // Also send contactEmail for compatibility
+        email: emailOrContactEmail,  // Backend accepts 'email' field
+        contactEmail: emailOrContactEmail,  // Also send contactEmail for compatibility
         password,
       });
       const { token, charity } = response.data;
       localStorage.setItem(STORAGE_KEYS.TOKEN, token);
       localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.CHARITY);
-      localStorage.setItem(STORAGE_KEYS.CHARITY_ID, charity.id);
+      if (charity) {
+        localStorage.setItem(STORAGE_KEYS.CHARITY_ID, charity._id || charity.id || charity.charityId);
+      }
       setupAxiosDefaults(token);
       const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });

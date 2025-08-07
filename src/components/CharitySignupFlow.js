@@ -17,9 +17,11 @@ import {
 } from 'react-icons/fa';
 import styles from './CharitySignupFlow.module.css';
 import logo from '../assets/logo.png';
+import { useAuth } from '../contexts/AuthContext';
 
 const CharitySignupFlow = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -76,9 +78,26 @@ const CharitySignupFlow = () => {
   ];
   
   const categories = [
-    'Education', 'Health', 'Environment', 'Animals', 
-    'Social Services', 'Arts & Culture', 'International', 
-    'Religious', 'Community Development', 'Other'
+    'Education & Research',
+    'Health & Medical Services',
+    'Social & Community Welfare',
+    'Environment & Conservation', 
+    'Animal Welfare',
+    'Arts, Culture & Heritage',
+    'Sports & Recreation',
+    'Religious Activities',
+    'International Aid & Development',
+    'Emergency Relief',
+    'Youth Services',
+    'Aged Care',
+    'Disability Services',
+    'Indigenous Programs',
+    'Housing & Homelessness',
+    'Mental Health',
+    'Family & Children Services',
+    'Employment & Training',
+    'Law & Advocacy',
+    'Other Philanthropic'
   ];
   
   const australianStates = [
@@ -94,21 +113,20 @@ const CharitySignupFlow = () => {
     
     setSearchingCharity(true);
     try {
-      // Using the Australian charity database API
-      const response = await axios.get('https://data.gov.au/data/api/3/action/datastore_search', {
-        params: {
-          resource_id: 'eb1e6be4-5b13-4feb-b28e-388bf7c26f93',
-          q: searchTerm,
-          limit: 10
+      // Use the backend API which already works for charity search
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`,
+        {
+          params: { q: searchTerm }
         }
-      });
+      );
       
-      if (response.data.success && response.data.result) {
+      if (response.data?.result?.records) {
         const charities = response.data.result.records.map(record => ({
           ABN: record.ABN,
           name: record.Charity_Legal_Name,
           tradingName: record.Other_Organisation_Names,
-          category: record.Main_Activity || 'Other',
+          category: record.Main_Activity || determineCategory(record),
           state: record.State,
           postcode: record.Postcode,
           website: record.Charity_Website,
@@ -117,12 +135,21 @@ const CharitySignupFlow = () => {
             city: record.Town_City,
             state: record.State,
             postalCode: record.Postcode
-          }
+          },
+          // Store additional fields for category determination
+          charity_type: record.Charity_Type,
+          main_activity: record.Main_Activity,
+          advancing_category: record.Advancing_Category,
+          purpose: record.Purpose,
+          beneficiaries: record.Beneficiaries
         }));
         setCharitySearchResults(charities);
+      } else {
+        setCharitySearchResults([]);
       }
     } catch (error) {
       console.error('Error searching ACNC:', error);
+      setCharitySearchResults([]);
     } finally {
       setSearchingCharity(false);
     }
@@ -186,14 +213,65 @@ const CharitySignupFlow = () => {
     return () => clearTimeout(timer);
   }, [addressSearchTerm, searchAddresses]);
   
+  // Function to determine category from ACNC charity type
+  const determineCategory = (charity) => {
+    // Check various fields that might contain category information
+    const charityInfo = [
+      charity.charity_type,
+      charity.main_activity,
+      charity.advancing_category,
+      charity.purpose,
+      charity.beneficiaries
+    ].filter(Boolean).join(' ').toLowerCase();
+    
+    if (charityInfo.includes('education') || charityInfo.includes('school') || charityInfo.includes('research')) {
+      return 'Education & Research';
+    } else if (charityInfo.includes('health') || charityInfo.includes('medical') || charityInfo.includes('hospital')) {
+      return 'Health & Medical Services';
+    } else if (charityInfo.includes('social') || charityInfo.includes('welfare') || charityInfo.includes('community')) {
+      return 'Social & Community Welfare';
+    } else if (charityInfo.includes('environment') || charityInfo.includes('conservation')) {
+      return 'Environment & Conservation';
+    } else if (charityInfo.includes('animal')) {
+      return 'Animal Welfare';
+    } else if (charityInfo.includes('art') || charityInfo.includes('culture') || charityInfo.includes('heritage')) {
+      return 'Arts, Culture & Heritage';
+    } else if (charityInfo.includes('sport') || charityInfo.includes('recreation')) {
+      return 'Sports & Recreation';
+    } else if (charityInfo.includes('religious') || charityInfo.includes('church')) {
+      return 'Religious Activities';
+    } else if (charityInfo.includes('international') || charityInfo.includes('overseas')) {
+      return 'International Aid & Development';
+    } else if (charityInfo.includes('emergency') || charityInfo.includes('relief')) {
+      return 'Emergency Relief';
+    } else if (charityInfo.includes('youth') || charityInfo.includes('young')) {
+      return 'Youth Services';
+    } else if (charityInfo.includes('aged') || charityInfo.includes('elderly')) {
+      return 'Aged Care';
+    } else if (charityInfo.includes('disability')) {
+      return 'Disability Services';
+    } else if (charityInfo.includes('indigenous') || charityInfo.includes('aboriginal')) {
+      return 'Indigenous Programs';
+    } else if (charityInfo.includes('housing') || charityInfo.includes('homeless')) {
+      return 'Housing & Homelessness';
+    } else if (charityInfo.includes('mental')) {
+      return 'Mental Health';
+    } else if (charityInfo.includes('family') || charityInfo.includes('children')) {
+      return 'Family & Children Services';
+    }
+    return charity.category || ''; // Fallback to existing category if available
+  };
+
   // Handle charity selection from ACNC search
   const handleCharitySelect = (charity) => {
     setSelectedCharity(charity);
+    const autoCategory = determineCategory(charity);
+    
     setFormData(prev => ({
       ...prev,
       charityName: charity.name,
       abn: charity.ABN,
-      category: charity.category,
+      category: autoCategory, // Auto-populate category
       website: charity.website || '',
       address: {
         ...prev.address,
@@ -358,6 +436,29 @@ const CharitySignupFlow = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userType', 'charity');
         localStorage.setItem('charityId', response.data.charityId);
+        
+        // Setup axios defaults with token
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+        // Fetch the charity profile to set in auth context
+        try {
+          const profileResponse = await axios.get(
+            `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`
+          );
+          
+          // Set user in auth context with charity flag
+          setUser({ ...profileResponse.data, isBusiness: false, isCharity: true });
+        } catch (profileError) {
+          console.error('Error fetching charity profile:', profileError);
+          // Even if profile fetch fails, still set basic user info
+          setUser({ 
+            charityId: response.data.charityId,
+            charityName: formData.charityName,
+            contactEmail: formData.contactEmail,
+            isBusiness: false, 
+            isCharity: true 
+          });
+        }
         
         // Redirect to charity dashboard after 2 seconds
         setTimeout(() => {
