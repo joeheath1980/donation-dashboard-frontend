@@ -148,6 +148,10 @@ const CharitySignupFlow = () => {
           // Determine category using the ACNC data
           charityData.category = determineCategory(record);
           
+          // Debug logging
+          console.log('ACNC Record:', record);
+          console.log('Determined category:', charityData.category);
+          
           return charityData;
         });
         setCharitySearchResults(charities);
@@ -337,6 +341,18 @@ const CharitySignupFlow = () => {
              charityInfo.includes('parent') || charityInfo.includes('maternal')) {
       return 'Family & Children Services';
     }
+    // Check for employment and training
+    else if (charityInfo.includes('employment') || charityInfo.includes('training') ||
+             charityInfo.includes('vocational') || charityInfo.includes('job') ||
+             charityInfo.includes('career') || charityInfo.includes('workforce')) {
+      return 'Employment & Training';
+    }
+    // Check for law and advocacy
+    else if (charityInfo.includes('law') || charityInfo.includes('legal') ||
+             charityInfo.includes('advocacy') || charityInfo.includes('justice') ||
+             charityInfo.includes('rights') || charityInfo.includes('civil')) {
+      return 'Law & Advocacy';
+    }
     
     // If no specific category matches, try to use Main_Activity if it matches our categories
     if (record.Main_Activity) {
@@ -347,26 +363,35 @@ const CharitySignupFlow = () => {
       }
     }
     
-    // Default fallback
-    return '';
+    // Default fallback - return 'Other Philanthropic' if we can't determine a specific category
+    // This ensures the dropdown will show something selected
+    return charityInfo ? 'Other Philanthropic' : '';
   };
 
   // Handle charity selection from ACNC search
   const handleCharitySelect = (charity) => {
     setSelectedCharity(charity);
     
-    setFormData(prev => ({
-      ...prev,
-      charityName: charity.name,
-      abn: charity.ABN,
-      category: charity.category || '', // Use the category already determined during search
-      website: charity.website || '',
-      address: {
-        ...prev.address,
-        ...charity.address,
-        country: 'Australia'
-      }
-    }));
+    // Debug logging
+    console.log('Selected charity:', charity);
+    console.log('Charity category:', charity.category);
+    
+    setFormData(prev => {
+      const newFormData = {
+        ...prev,
+        charityName: charity.name,
+        abn: charity.ABN,
+        category: charity.category || '', // Use the category already determined during search
+        website: charity.website || '',
+        address: {
+          ...prev.address,
+          ...charity.address,
+          country: 'Australia'
+        }
+      };
+      console.log('Updated formData with category:', newFormData.category);
+      return newFormData;
+    });
     setCharitySearchTerm('');
     setCharitySearchResults([]);
   };
@@ -743,12 +768,23 @@ const CharitySignupFlow = () => {
     </div>
   );
   
-  const renderStep2 = () => (
+  const renderStep2 = () => {
+    console.log('Step 2 - Current formData.category:', formData.category);
+    console.log('Step 2 - Categories array:', categories);
+    console.log('Step 2 - Category in list?', categories.includes(formData.category));
+    
+    return (
     <div className={styles.stepContent}>
       <h2>Tell us about your organization</h2>
       <p className={styles.stepDescription}>
         This information helps donors understand your mission and impact.
       </p>
+      
+      {formData.category && (
+        <div className={styles.infoMessage} style={{marginBottom: '20px', padding: '10px', backgroundColor: '#e8f4fd', borderRadius: '4px'}}>
+          Category auto-selected from ACNC: <strong>{formData.category}</strong>
+        </div>
+      )}
       
       <div className={styles.formGroup}>
         <label htmlFor="category">
@@ -846,6 +882,7 @@ const CharitySignupFlow = () => {
       </div>
     </div>
   );
+  };
   
   const renderStep3 = () => (
     <div className={styles.stepContent}>
