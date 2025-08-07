@@ -124,6 +124,9 @@ const CharitySignupFlow = () => {
       
       if (response.data?.result?.records) {
         const charities = response.data.result.records.map(record => {
+          // Log the raw ACNC record to see what fields are available
+          console.log('Raw ACNC record:', record);
+          
           // Create the charity object with all fields first
           const charityData = {
             ABN: record.ABN,
@@ -145,6 +148,15 @@ const CharitySignupFlow = () => {
             purpose: record.Purpose,
             beneficiaries: record.Beneficiaries
           };
+          
+          // Log what fields we're using for category determination
+          console.log('Fields for category determination:', {
+            Charity_Type: record.Charity_Type,
+            Main_Activity: record.Main_Activity,
+            Advancing_Category: record.Advancing_Category,
+            Purpose: record.Purpose,
+            Beneficiaries: record.Beneficiaries
+          });
           
           // Determine category using the ACNC data
           charityData.category = determineCategory(record);
@@ -224,8 +236,11 @@ const CharitySignupFlow = () => {
   
   // Function to determine category from ACNC charity type
   const determineCategory = (record) => {
+    // Log the record to see what we're working with
+    console.log('determineCategory input record:', record);
+    
     // Check various fields that might contain category information from ACNC
-    const charityInfo = [
+    const fieldsToCheck = [
       record.Charity_Type,
       record.Main_Activity,
       record.Advancing_Category,
@@ -234,7 +249,12 @@ const CharitySignupFlow = () => {
       record.Charity_Subtype,
       record.Activities,
       record.Operating_Countries
-    ].filter(Boolean).join(' ').toLowerCase();
+    ];
+    
+    console.log('Fields being checked:', fieldsToCheck);
+    
+    const charityInfo = fieldsToCheck.filter(Boolean).join(' ').toLowerCase();
+    console.log('Combined charity info string:', charityInfo);
     
     // Check for education and research
     if (charityInfo.includes('education') || charityInfo.includes('school') || 
@@ -361,9 +381,10 @@ const CharitySignupFlow = () => {
       }
     }
     
-    // Default fallback - return 'Other Philanthropic' if we can't determine a specific category
+    // Default fallback - always return 'Other Philanthropic' if we can't determine a specific category
     // This ensures the dropdown will show something selected
-    return charityInfo ? 'Other Philanthropic' : '';
+    console.log('No specific category match found, returning Other Philanthropic');
+    return 'Other Philanthropic';
   };
 
   // Handle charity selection from ACNC search
