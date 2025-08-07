@@ -70,6 +70,7 @@ const CharitySignupFlow = () => {
   });
   
   const [validation, setValidation] = useState({});
+  const [categoryAutoSelected, setCategoryAutoSelected] = useState(false);
   
   const steps = [
     { number: 1, title: 'Basic Information', icon: FaUser },
@@ -147,10 +148,6 @@ const CharitySignupFlow = () => {
           
           // Determine category using the ACNC data
           charityData.category = determineCategory(record);
-          
-          // Debug logging
-          console.log('ACNC Record:', record);
-          console.log('Determined category:', charityData.category);
           
           return charityData;
         });
@@ -372,26 +369,23 @@ const CharitySignupFlow = () => {
   const handleCharitySelect = (charity) => {
     setSelectedCharity(charity);
     
-    // Debug logging
-    console.log('Selected charity:', charity);
-    console.log('Charity category:', charity.category);
+    // Set flag if category was determined from ACNC
+    if (charity.category) {
+      setCategoryAutoSelected(true);
+    }
     
-    setFormData(prev => {
-      const newFormData = {
-        ...prev,
-        charityName: charity.name,
-        abn: charity.ABN,
-        category: charity.category || '', // Use the category already determined during search
-        website: charity.website || '',
-        address: {
-          ...prev.address,
-          ...charity.address,
-          country: 'Australia'
-        }
-      };
-      console.log('Updated formData with category:', newFormData.category);
-      return newFormData;
-    });
+    setFormData(prev => ({
+      ...prev,
+      charityName: charity.name,
+      abn: charity.ABN,
+      category: charity.category || '', // Use the category already determined during search
+      website: charity.website || '',
+      address: {
+        ...prev.address,
+        ...charity.address,
+        country: 'Australia'
+      }
+    }));
     setCharitySearchTerm('');
     setCharitySearchResults([]);
   };
@@ -473,6 +467,11 @@ const CharitySignupFlow = () => {
   
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // If user manually changes category, clear the auto-selected flag
+    if (name === 'category') {
+      setCategoryAutoSelected(false);
+    }
     
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -769,10 +768,6 @@ const CharitySignupFlow = () => {
   );
   
   const renderStep2 = () => {
-    console.log('Step 2 - Current formData.category:', formData.category);
-    console.log('Step 2 - Categories array:', categories);
-    console.log('Step 2 - Category in list?', categories.includes(formData.category));
-    
     return (
     <div className={styles.stepContent}>
       <h2>Tell us about your organization</h2>
@@ -780,7 +775,7 @@ const CharitySignupFlow = () => {
         This information helps donors understand your mission and impact.
       </p>
       
-      {formData.category && (
+      {categoryAutoSelected && formData.category && (
         <div className={styles.infoMessage} style={{marginBottom: '20px', padding: '10px', backgroundColor: '#e8f4fd', borderRadius: '4px'}}>
           Category auto-selected from ACNC: <strong>{formData.category}</strong>
         </div>
