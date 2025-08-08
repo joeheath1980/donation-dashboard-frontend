@@ -443,9 +443,9 @@ function BusinessDashboard() {
               <span>Manage Portfolio</span>
             </Link>
             
-            <Link to="/business/settings" className={styles.actionButton}>
+            <Link to="/business-dashboard/account-settings" className={styles.actionButton}>
               <div className={styles.actionIcon}>⚙️</div>
-              <span>Settings</span>
+              <span>Account Settings</span>
             </Link>
             
             {businessData.slug && (
