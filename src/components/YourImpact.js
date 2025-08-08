@@ -75,7 +75,7 @@ const YourImpact = () => {
             <li>$500 - $2,000: 0.2 points per dollar</li>
             <li>$2,000 - $5,000: 0.1 points per dollar</li>
             <li>Above $5,000: 0.05 points per dollar</li>
-            <li>Event organizing bonus: +20 points per event</li>
+            <li>Event organising bonus: +20 points per event</li>
             <li>Online campaign bonus: +15 points per campaign</li>
           </ul>
         </div>

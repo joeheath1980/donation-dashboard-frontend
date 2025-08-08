@@ -289,7 +289,7 @@ function BusinessDashboard() {
                 {calculateBudgetPercentage()}%
               </text>
               <text x="100" y="115" textAnchor="middle" className={styles.progressLabel}>
-                Budget Utilized
+                Budget Utilised
               </text>
             </svg>
           </div>

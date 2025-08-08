@@ -280,7 +280,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
               <div className={styles.tooltipHint}>
                 {rings[hoveredRing].name === 'Donations' && 'Start with a micro-donation of any amount!'}
                 {rings[hoveredRing].name === 'Volunteering' && 'Log your volunteer hours to earn points'}
-                {rings[hoveredRing].name === 'Fundraising' && 'Create a campaign or organize an event'}
+                {rings[hoveredRing].name === 'Fundraising' && 'Create a campaign or organise an event'}
                 {rings[hoveredRing].name === 'Consistency' && 'Build daily giving habits to earn streaks'}
                 {rings[hoveredRing].name === 'Engagement' && 'Complete your profile and follow charities'}
               </div>

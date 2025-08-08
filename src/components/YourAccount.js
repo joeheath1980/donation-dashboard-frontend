@@ -75,9 +75,9 @@ const YourAccount = () => {
               </span>
               <h2 className="cardTitle">Discover Your Donations</h2>
             </div>
-            <p className="cardText">Find and categorize your past donations from email receipts.</p>
+            <p className="cardText">Find and categorise your past donations from email receipts.</p>
             <Link to="/activity" className="button">Discover</Link>
-            <span className={`${styles.ctaTip} tip`}>Uncover and organize your charitable contributions.</span>
+            <span className={`${styles.ctaTip} tip`}>Uncover and organise your charitable contributions.</span>
           </div>
 
           <div className={`${styles.card} card`}>

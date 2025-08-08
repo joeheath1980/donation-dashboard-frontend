@@ -52,7 +52,7 @@ const VOLUNTEERING_CONFIG = {
   skillMultipliers: {
     general: 1.0,      // General volunteering
     skilled: 1.3,      // Professional skills
-    leadership: 1.5,   // Leading/organizing
+    leadership: 1.5,   // Leading/organising
     emergency: 2.0     // Crisis response
   }
 };

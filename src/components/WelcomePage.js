@@ -155,7 +155,7 @@ const WelcomePage = () => {
       {/* Core Features Section */}
       <section id="features" className={styles.features}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Everything you need to maximize your impact</h2>
+          <h2 className={styles.sectionTitle}>Everything you need to maximise your impact</h2>
           <p className={styles.sectionSubtitle}>
             One platform. Complete visibility. Maximum impact.
           </p>
@@ -217,12 +217,12 @@ const WelcomePage = () => {
             <h3 className={styles.featureTitle}>Smart Giving Insights</h3>
             <p className={styles.featureDescription}>
               AI-powered recommendations help you discover high-impact charities 
-              and optimize your giving strategy.
+              and optimise your giving strategy.
             </p>
             <ul className={styles.featureList}>
               <li><RiCheckLine /> Charity recommendations</li>
-              <li><RiCheckLine /> Tax optimization tips</li>
-              <li><RiCheckLine /> Personalized insights</li>
+              <li><RiCheckLine /> Tax optimisation tips</li>
+              <li><RiCheckLine /> Personalised insights</li>
             </ul>
           </div>
         </div>
