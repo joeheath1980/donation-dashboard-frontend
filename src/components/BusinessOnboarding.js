@@ -55,34 +55,14 @@ const BusinessOnboarding = () => {
 
     // Step 4: Charity Portfolio
     charityPortfolio: [],
-    suggestedCharities: [],
-
-    // Step 5: Targeting Configuration
-    targetingConfig: {
-      customerTypes: {
-        highValue: false,
-        frequent: false,
-        new: false
-      },
-      geography: {
-        countries: [],
-        states: [],
-        cities: []
-      },
-      donationRanges: [
-        { min: 0, max: 50, multiplier: 3 },
-        { min: 50, max: 200, multiplier: 2 },
-        { min: 200, max: 1000, multiplier: 1.5 }
-      ]
-    }
+    suggestedCharities: []
   });
 
   const steps = [
     { id: 1, title: 'Business Profile', icon: <RiBuildingLine /> },
     { id: 2, title: 'CSR Report', icon: <RiBarChartLine /> },
     { id: 3, title: 'Primary Charities', icon: <RiHeartLine /> },
-    { id: 4, title: 'Charity Portfolio', icon: <RiFolderLine /> },
-    { id: 5, title: 'Targeting Config', icon: <RiFocusLine /> }
+    { id: 4, title: 'Charity Portfolio', icon: <RiFolderLine /> }
   ];
 
   const handleNext = async () => {
@@ -105,7 +85,7 @@ const BusinessOnboarding = () => {
       } finally {
         setLoading(false);
       }
-    } else if (currentStep < 5) {
+    } else if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
       await handleSubmit();
@@ -181,15 +161,8 @@ const BusinessOnboarding = () => {
 
     try {
       // Prepare the complete onboarding data - transform customerTypes to match backend schema
-      const onboardingData = {
-        customerTypes: {
-          highValue: { enabled: formData.targetingConfig.customerTypes.highValue },
-          frequency: { enabled: formData.targetingConfig.customerTypes.frequent },
-          newCustomers: { enabled: formData.targetingConfig.customerTypes.new }
-        },
-        geography: formData.targetingConfig.geography,
-        donationRanges: formData.targetingConfig.donationRanges
-      };
+      // Targeting config will be handled in campaign creation
+      const onboardingData = {};
       
       await businessAPI.onboarding.complete(onboardingData);
 
@@ -212,8 +185,6 @@ const BusinessOnboarding = () => {
         return <PrimaryCharitiesStep formData={formData} onChange={handleInputChange} />;
       case 4:
         return <CharityPortfolioStep formData={formData} onChange={handleInputChange} />;
-      case 5:
-        return <TargetingConfigStep formData={formData} onChange={handleInputChange} />;
       default:
         return null;
     }
@@ -250,7 +221,6 @@ const BusinessOnboarding = () => {
           {currentStep === 2 && 'Upload your CSR report to unlock AI-powered charity matching'}
           {currentStep === 3 && 'Select charities that align with your company values'}
           {currentStep === 4 && 'Build your personalized charity portfolio'}
-          {currentStep === 5 && 'Configure how you want to target your donation matching'}
         </p>
         
         {error && (
@@ -277,7 +247,7 @@ const BusinessOnboarding = () => {
             onClick={handleNext}
             disabled={loading}
           >
-            {loading ? 'Processing...' : currentStep === 5 ? 'Complete Setup' : 'Next →'}
+            {loading ? 'Processing...' : currentStep === 4 ? 'Complete Setup' : 'Next →'}
           </button>
         </div>
       </div>
@@ -877,8 +847,8 @@ const CharityPortfolioStep = ({ formData, onChange }) => {
   );
 };
 
-// Step 5: Targeting Configuration Component
-const TargetingConfigStep = ({ formData, onChange }) => {
+// Removed Step 5: Targeting Configuration - now handled in campaign creation
+/* const TargetingConfigStep = ({ formData, onChange }) => {
   const handleCustomerTypeChange = (type) => {
     onChange('targetingConfig', {
       ...formData.targetingConfig,
@@ -1106,6 +1076,6 @@ const TargetingConfigStep = ({ formData, onChange }) => {
       </div>
     </div>
   );
-};
+}; */
 
 export default BusinessOnboarding;
