@@ -448,6 +448,11 @@ function BusinessDashboard() {
               <span>Account Settings</span>
             </Link>
             
+            <Link to="/business/tax-center" className={styles.actionButton}>
+              <div className={styles.actionIcon}>📊</div>
+              <span>Tax Centre</span>
+            </Link>
+            
             {businessData.slug && (
               <Link to={`/business/${businessData.slug}`} className={styles.actionButton}>
                 <div className={styles.actionIcon}>👤</div>
