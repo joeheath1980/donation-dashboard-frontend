@@ -3,19 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CHARITY_CATEGORIES, formatABN } from '../constants/charityCategories';
 import { 
-  FaUser, 
-  FaBuilding, 
-  FaEnvelope, 
-  FaLock, 
-  FaPhone,
-  FaGlobe,
-  FaMapMarkerAlt,
-  FaCheckCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaSpinner,
-  FaSearch
-} from 'react-icons/fa';
+  RiUserLine, 
+  RiBuildingLine, 
+  RiMailLine, 
+  RiLockLine, 
+  RiPhoneLine,
+  RiGlobalLine,
+  RiMapPinLine,
+  RiCheckboxCircleLine,
+  RiArrowRightLine,
+  RiArrowLeftLine,
+  RiLoader4Line,
+  RiSearchLine
+} from 'react-icons/ri';
 import styles from './CharitySignupFlow.module.css';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
@@ -74,9 +74,9 @@ const CharitySignupFlow = () => {
   const [categoryAutoSelected, setCategoryAutoSelected] = useState(false);
   
   const steps = [
-    { number: 1, title: 'Basic Information', icon: FaUser },
-    { number: 2, title: 'Organization Details', icon: FaBuilding },
-    { number: 3, title: 'Address & Legal', icon: FaMapMarkerAlt }
+    { number: 1, title: 'Basic Information', icon: RiUserLine },
+    { number: 2, title: 'Organization Details', icon: RiBuildingLine },
+    { number: 3, title: 'Address & Legal', icon: RiMapPinLine }
   ];
   
   // Use the same categories as the donation modal for consistency
@@ -520,7 +520,7 @@ const CharitySignupFlow = () => {
               className={`${styles.step} ${isActive ? styles.active : ''} ${isCompleted ? styles.completed : ''}`}
             >
               <div className={styles.stepIcon}>
-                {isCompleted ? <FaCheckCircle /> : <Icon />}
+                {isCompleted ? <RiCheckboxCircleLine /> : <Icon />}
               </div>
               <span className={styles.stepTitle}>{step.title}</span>
             </div>
@@ -541,7 +541,7 @@ const CharitySignupFlow = () => {
       <div className={styles.searchSection}>
         <div className={styles.formGroup}>
           <label>
-            <FaSearch /> Search ACNC Charity Database
+            <RiSearchLine /> Search ACNC Charity Database
           </label>
           <input
             type="text"
@@ -552,7 +552,7 @@ const CharitySignupFlow = () => {
           />
           {searchingCharity && (
             <div className={styles.searchingIndicator}>
-              <FaSpinner className={styles.spinner} /> Searching...
+              <RiLoader4Line className={styles.spinner} /> Searching...
             </div>
           )}
         </div>
@@ -577,13 +577,13 @@ const CharitySignupFlow = () => {
       
       {selectedCharity && (
         <div className={styles.selectedCharity}>
-          <FaCheckCircle /> Selected: {selectedCharity.name}
+          <RiCheckboxCircleLine /> Selected: {selectedCharity.name}
         </div>
       )}
       
       <div className={styles.formGroup}>
         <label htmlFor="charityName">
-          <FaBuilding /> Charity Name *
+          <RiBuildingLine /> Charity Name *
         </label>
         <input
           type="text"
@@ -601,7 +601,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formGroup}>
         <label htmlFor="contactEmail">
-          <FaEnvelope /> Contact Email *
+          <RiMailLine /> Contact Email *
         </label>
         <input
           type="email"
@@ -619,7 +619,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formGroup}>
         <label htmlFor="contactPhone">
-          <FaPhone /> Contact Phone
+          <RiPhoneLine /> Contact Phone
         </label>
         <input
           type="tel"
@@ -634,7 +634,7 @@ const CharitySignupFlow = () => {
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
           <label htmlFor="password">
-            <FaLock /> Password *
+            <RiLockLine /> Password *
           </label>
           <input
             type="password"
@@ -652,7 +652,7 @@ const CharitySignupFlow = () => {
         
         <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">
-            <FaLock /> Confirm Password *
+            <RiLockLine /> Confirm Password *
           </label>
           <input
             type="password"
@@ -721,7 +721,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formGroup}>
         <label htmlFor="website">
-          <FaGlobe /> Website
+          <RiGlobalLine /> Website
         </label>
         <input
           type="url"
@@ -807,7 +807,7 @@ const CharitySignupFlow = () => {
       <div className={styles.searchSection}>
         <div className={styles.formGroup}>
           <label>
-            <FaSearch /> Search for Address
+            <RiSearchLine /> Search for Address
           </label>
           <input
             type="text"
@@ -818,7 +818,7 @@ const CharitySignupFlow = () => {
           />
           {searchingAddress && (
             <div className={styles.searchingIndicator}>
-              <FaSpinner className={styles.spinner} /> Searching...
+              <RiLoader4Line className={styles.spinner} /> Searching...
             </div>
           )}
         </div>
@@ -840,7 +840,7 @@ const CharitySignupFlow = () => {
       
       <div className={styles.formGroup}>
         <label htmlFor="street">
-          <FaMapMarkerAlt /> Street Address *
+          <RiMapPinLine /> Street Address *
         </label>
         <input
           type="text"
@@ -981,7 +981,7 @@ const CharitySignupFlow = () => {
     return (
       <div className={styles.pageContainer}>
         <div className={styles.successContainer}>
-          <FaCheckCircle className={styles.successIcon} />
+          <RiCheckboxCircleLine className={styles.successIcon} />
           <h1>Registration Successful!</h1>
           <p>Your charity account has been created successfully.</p>
           <p>A verification email has been sent to {formData.contactEmail}</p>
@@ -1019,7 +1019,7 @@ const CharitySignupFlow = () => {
                 onClick={handlePrevious}
                 className={styles.previousButton}
               >
-                <FaArrowLeft /> Previous
+                <RiArrowLeftLine /> Previous
               </button>
             )}
             
@@ -1029,7 +1029,7 @@ const CharitySignupFlow = () => {
                 onClick={handleNext}
                 className={styles.nextButton}
               >
-                Next <FaArrowRight />
+                Next <RiArrowRightLine />
               </button>
             ) : (
               <button
@@ -1040,7 +1040,7 @@ const CharitySignupFlow = () => {
               >
                 {loading ? (
                   <>
-                    <FaSpinner className={styles.spinner} />
+                    <RiLoader4Line className={styles.spinner} />
                     Creating Account...
                   </>
                 ) : (
