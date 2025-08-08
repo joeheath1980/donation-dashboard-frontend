@@ -82,6 +82,90 @@ const CharitySignupFlow = () => {
   // Use the same categories as the donation modal for consistency
   const categories = CHARITY_CATEGORIES;
   
+  // Function to determine category from ACNC data
+  const determineCategory = (record) => {
+    // Combine all relevant fields for category determination
+    const fields = [
+      record.Charity_Type,
+      record.Main_Activity,
+      record.Advancing_Health,
+      record.Advancing_Education,
+      record.Advancing_Culture,
+      record.Advancing_natual_environment,
+      record.Purposes_beneficial_to_ther_general_public_and_other_analogous,
+      record.Charity_Legal_Name
+    ].filter(Boolean).join(' ').toLowerCase();
+    
+    // Check for specific categories based on ACNC fields
+    if (fields.includes('health') || fields.includes('medical') || 
+        fields.includes('hospital') || fields.includes('red cross')) {
+      return 'Health Services';
+    }
+    if (fields.includes('mental health') || fields.includes('psychology') || 
+        fields.includes('counselling')) {
+      return 'Mental Health';
+    }
+    if (fields.includes('education') || fields.includes('school') || 
+        fields.includes('university') || fields.includes('training')) {
+      return 'Education';
+    }
+    if (fields.includes('environment') || fields.includes('conservation') || 
+        fields.includes('climate') || fields.includes('sustainability')) {
+      return 'Environmental Conservation';
+    }
+    if (fields.includes('social') || fields.includes('welfare') || 
+        fields.includes('community')) {
+      return 'Social Welfare';
+    }
+    if (fields.includes('emergency') || fields.includes('relief') || 
+        fields.includes('disaster')) {
+      return 'Emergency Relief';
+    }
+    if (fields.includes('food') || fields.includes('hunger') || 
+        fields.includes('nutrition')) {
+      return 'Food Security';
+    }
+    if (fields.includes('child') || fields.includes('youth') || 
+        fields.includes('kids')) {
+      return 'Child Welfare';
+    }
+    if (fields.includes('indigenous') || fields.includes('aboriginal') || 
+        fields.includes('first nations')) {
+      return 'Indigenous Support';
+    }
+    if (fields.includes('housing') || fields.includes('homeless') || 
+        fields.includes('shelter')) {
+      return 'Housing';
+    }
+    if (fields.includes('rural') || fields.includes('regional') || 
+        fields.includes('remote')) {
+      return 'Rural Support';
+    }
+    if (fields.includes('animal') || fields.includes('wildlife') || 
+        fields.includes('pet')) {
+      return 'Animal Welfare';
+    }
+    if (fields.includes('art') || fields.includes('culture') || 
+        fields.includes('museum') || fields.includes('heritage')) {
+      return 'Arts & Culture';
+    }
+    if (fields.includes('religious') || fields.includes('church') || 
+        fields.includes('faith')) {
+      return 'Religious';
+    }
+    if (fields.includes('disability') || fields.includes('disabled') || 
+        fields.includes('accessibility')) {
+      return 'Disability Support';
+    }
+    if (fields.includes('refugee') || fields.includes('asylum') || 
+        fields.includes('migrant')) {
+      return 'Refugee Support';
+    }
+    
+    // Default category if no match
+    return 'Community Building';
+  };
+  
   const australianStates = [
     'NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'
   ];
@@ -95,31 +179,28 @@ const CharitySignupFlow = () => {
     
     setSearchingCharity(true);
     try {
-      // Use the same API endpoint as the CharitySearch component
+      // Use the public search-charities endpoint that doesn't require authentication
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity-search/simple`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`,
         {
-          params: { q: searchTerm },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          params: { q: searchTerm }
         }
       );
       
-      if (response.data?.charities) {
-        // The API already returns charities with proper categories
-        const charities = response.data.charities.map(charity => ({
-          ABN: charity.ABN || charity.abn,
-          name: charity.name,
-          state: charity.state,
-          postcode: charity.postcode,
-          website: charity.website,
-          category: charity.category, // This comes pre-populated from the API
+      if (response.data?.result?.records) {
+        // Map ACNC records to our format
+        const charities = response.data.result.records.map(record => ({
+          ABN: record.ABN,
+          name: record.Charity_Legal_Name,
+          state: record.State,
+          postcode: record.Postcode,
+          website: record.Charity_Website,
+          category: determineCategory(record), // Determine category from ACNC data
           address: {
-            street: charity.address?.street || '',
-            city: charity.address?.city || charity.city || '',
-            state: charity.state || '',
-            postalCode: charity.postcode || ''
+            street: record.Address_Line_1 || '',
+            city: record.Town_City || '',
+            state: record.State || '',
+            postalCode: record.Postcode || ''
           }
         }));
         setCharitySearchResults(charities);

@@ -426,7 +426,7 @@ const ProfileEditor = () => {
     { id: 'professional', label: 'Professional', icon: FaBriefcase },
     { id: 'giving', label: 'Giving', icon: FaHeart },
     { id: 'social', label: 'Social Links', icon: FaLink },
-    { id: 'privacy', label: 'Privacy', icon: FaLock }
+    { id: 'privacy', label: 'Privacy', icon: FaLock } // Keep for UI consistency
   ];
 
   return (
@@ -783,7 +783,7 @@ const ProfileEditor = () => {
             </section>
           )}
 
-          {activeSection === 'privacy' && (
+          {/*activeSection === 'privacy' && (
             <section className={styles.section}>
               <h2>Privacy Settings</h2>
               
@@ -873,6 +873,27 @@ const ProfileEditor = () => {
                   />
                   <span>Show impact score</span>
                 </label>
+              </div>
+            </section>
+          )*/}
+
+          {/* Privacy settings moved to dedicated page */}
+          {activeSection === 'privacy' && (
+            <section className={styles.section}>
+              <h2>Privacy Settings</h2>
+              <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <FaLock style={{ fontSize: '3rem', color: '#666', marginBottom: '1rem' }} />
+                <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                  Privacy settings have been moved to a dedicated page for better organization and control.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/privacy-settings')}
+                  className={styles.saveButton}
+                  style={{ width: 'auto' }}
+                >
+                  Go to Privacy Settings
+                </button>
               </div>
             </section>
           )}
