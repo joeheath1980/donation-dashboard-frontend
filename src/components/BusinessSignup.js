@@ -68,14 +68,16 @@ function BusinessSignup() {
   return (
     <div className={`${styles.container} container`}>
       <div className={`${styles.card} card`}>
-        <h2 className={`${styles.title} gradientTitle`}>Business Signup</h2>
+        <h2 className={`${styles.title} gradientTitle`}>Start Your Business Impact Journey</h2>
+        <p className={styles.subtitle}>Join Do-Nation to amplify your company's charitable giving and engage your employees</p>
         {error && <div className={`${styles.error} error`}>{error}</div>}
         {successMessage && <div className={`${styles.success} success`}>{successMessage}</div>}
         
         <form onSubmit={handleSubmit} className={`${styles.form} flexColumn`}>
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="companyName">Company Name</label>
+            <label className={`${styles.label} description`} htmlFor="companyName">Company Name *</label>
             <input
+              placeholder="Enter your company name"
               type="text"
               id="companyName"
               name="companyName"
@@ -87,8 +89,9 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="contactEmail">Contact Email</label>
+            <label className={`${styles.label} description`} htmlFor="contactEmail">Business Email *</label>
             <input
+              placeholder="your.name@company.com"
               type="email"
               id="contactEmail"
               name="contactEmail"
@@ -100,8 +103,10 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="password">Password</label>
+            <label className={`${styles.label} description`} htmlFor="password">Password *</label>
+            <small className={styles.hint}>Minimum 6 characters</small>
             <input
+              placeholder="Create a secure password"
               type="password"
               id="password"
               name="password"
@@ -114,8 +119,10 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="description">Company Description</label>
+            <label className={`${styles.label} description`} htmlFor="description">Tell us about your company *</label>
+            <small className={styles.hint}>Brief description of your business and charitable goals</small>
             <textarea
+              placeholder="e.g., We're a tech company focused on sustainable solutions..."
               id="description"
               name="description"
               value={formData.description}
@@ -126,7 +133,8 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="preferredCauses">Preferred Causes (Hold Ctrl/Cmd to select multiple)</label>
+            <label className={`${styles.label} description`} htmlFor="preferredCauses">Preferred Charitable Causes *</label>
+            <small className={styles.hint}>Hold Ctrl/Cmd to select multiple causes</small>
             <select
               multiple
               id="preferredCauses"
