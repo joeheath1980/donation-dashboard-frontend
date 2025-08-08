@@ -22,6 +22,33 @@
   padding: 32px;
 }
 
+.breadcrumb {
+  margin-bottom: 24px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.backButton:hover {
+  background: var(--light-gray);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateX(-2px);
+}
+
 .header {
   background: var(--white);
   padding: 32px;

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './TaxPlanning.module.css';
 import {
   RiGiftLine,
   RiBriefcaseLine,
   RiCalendarLine,
-  RiLineChartLine
+  RiLineChartLine,
+  RiArrowLeftLine
 } from 'react-icons/ri';
 
 const TaxPlanning = () => {
+  const navigate = useNavigate();
   const [planningData, setPlanningData] = useState({
     targetAmount: 10000,
     taxRate: 40,
@@ -60,9 +63,9 @@ const TaxPlanning = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-AU', {
       style: 'currency',
-      currency: 'GBP',
+      currency: 'AUD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -104,6 +107,15 @@ const TaxPlanning = () => {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb}>
+        <button 
+          onClick={() => navigate('/business/tax-center')} 
+          className={styles.backButton}
+        >
+          <RiArrowLeftLine /> Back to Tax Centre
+        </button>
+      </nav>
+      
       <div className={styles.header}>
         <h1>Tax Planning Calculator</h1>
         <p className={styles.subtitle}>Optimise your charitable giving strategy for maximum tax efficiency</p>

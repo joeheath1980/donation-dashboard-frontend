@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
 import styles from './TaxSummary.module.css';
-import { RiLightbulbLine } from 'react-icons/ri';
+import { RiLightbulbLine, RiArrowLeftLine } from 'react-icons/ri';
 
 const TaxSummary = () => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [summaryData, setSummaryData] = useState(null);
@@ -38,9 +40,9 @@ const TaxSummary = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-AU', {
       style: 'currency',
-      currency: 'GBP',
+      currency: 'AUD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -87,6 +89,15 @@ const TaxSummary = () => {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb}>
+        <button 
+          onClick={() => navigate('/business/tax-center')} 
+          className={styles.backButton}
+        >
+          <RiArrowLeftLine /> Back to Tax Centre
+        </button>
+      </nav>
+      
       <div className={styles.header}>
         <h1>Tax Summary</h1>
         <select 

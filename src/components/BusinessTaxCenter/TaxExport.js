@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './TaxExport.module.css';
+import { RiArrowLeftLine } from 'react-icons/ri';
 
 const TaxExport = () => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const [exportConfig, setExportConfig] = useState({
     format: 'pdf',
@@ -74,6 +77,15 @@ const TaxExport = () => {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb}>
+        <button 
+          onClick={() => navigate('/business/tax-center')} 
+          className={styles.backButton}
+        >
+          <RiArrowLeftLine /> Back to Tax Centre
+        </button>
+      </nav>
+      
       <div className={styles.header}>
         <h1>Export Tax Documents</h1>
         <p className={styles.subtitle}>Generate comprehensive tax reports in your preferred format</p>

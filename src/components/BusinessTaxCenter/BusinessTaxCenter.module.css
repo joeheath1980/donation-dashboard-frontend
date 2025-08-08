@@ -22,6 +22,33 @@
   padding: 32px;
 }
 
+.breadcrumb {
+  margin-bottom: 24px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.backButton:hover {
+  background: var(--light-gray);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateX(-2px);
+}
+
 .header {
   background: var(--white);
   padding: 32px;
@@ -87,11 +114,12 @@
   font-size: 36px;
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, rgba(45, 143, 123, 0.1) 0%, rgba(94, 207, 182, 0.1) 100%);
+  background: rgba(45, 143, 123, 0.1);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--primary-color);
 }
 
 .statContent h3 {
@@ -106,10 +134,7 @@
 .statValue {
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
   line-height: 1;
 }
@@ -164,6 +189,7 @@
 .sectionIcon {
   font-size: 48px;
   margin-bottom: 16px;
+  color: var(--primary-color);
 }
 
 .sectionCard h2 {
@@ -214,6 +240,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(45, 143, 123, 0.2);
+  color: var(--primary-color);
 }
 
 .alertContent h3 {
