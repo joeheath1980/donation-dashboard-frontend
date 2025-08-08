@@ -6,7 +6,6 @@ import styles from './BusinessDashboard.module.css';
 import {
   RiAddLine,
   RiBarChartLine,
-  RiFolderLine,
   RiSettings4Line,
   RiUserLine,
   RiLightbulbLine,
@@ -441,16 +440,6 @@ function BusinessDashboard() {
             <Link to="/create-business-campaign" className={styles.actionButton}>
               <div className={styles.actionIcon}><RiAddLine /></div>
               <span>Create Campaign</span>
-            </Link>
-            
-            <Link to="/business/analytics" className={styles.actionButton}>
-              <div className={styles.actionIcon}><RiBarChartLine /></div>
-              <span>View Analytics</span>
-            </Link>
-            
-            <Link to="/business/portfolio" className={styles.actionButton}>
-              <div className={styles.actionIcon}><RiFolderLine /></div>
-              <span>Manage Portfolio</span>
             </Link>
             
             <Link to="/business-dashboard/account-settings" className={styles.actionButton}>
