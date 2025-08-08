@@ -89,7 +89,7 @@ const YourAccount = () => {
             </div>
             <p className="cardText">Manage email notifications, security settings, and account preferences.</p>
             <Link to="/account-settings" className="button">Manage Settings</Link>
-            <span className={`${styles.ctaTip} tip`}>Coming soon: Email preferences, password change, and more!</span>
+            <span className={`${styles.ctaTip} tip`}>Keep your account secure and preferences up to date.</span>
           </div>
         </div>
       </main>
