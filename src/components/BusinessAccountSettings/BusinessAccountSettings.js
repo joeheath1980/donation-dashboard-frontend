@@ -8,6 +8,13 @@ import Notifications from './tabs/Notifications';
 import BillingPayments from './tabs/BillingPayments';
 import styles from './BusinessAccountSettings.module.css';
 import { toast } from 'react-toastify';
+import {
+  RiBuildingLine,
+  RiGroupLine,
+  RiShieldCheckLine,
+  RiBellLine,
+  RiBankCardLine
+} from 'react-icons/ri';
 
 function BusinessAccountSettings() {
   const [activeTab, setActiveTab] = useState('company');
@@ -35,11 +42,11 @@ function BusinessAccountSettings() {
   };
 
   const tabs = [
-    { id: 'company', label: 'Company Profile', icon: '🏢' },
-    { id: 'team', label: 'Team Management', icon: '👥' },
-    { id: 'security', label: 'Security', icon: '🔐' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
-    { id: 'billing', label: 'Billing & Payments', icon: '💳' }
+    { id: 'company', label: 'Company Profile', icon: <RiBuildingLine /> },
+    { id: 'team', label: 'Team Management', icon: <RiGroupLine /> },
+    { id: 'security', label: 'Security', icon: <RiShieldCheckLine /> },
+    { id: 'notifications', label: 'Notifications', icon: <RiBellLine /> },
+    { id: 'billing', label: 'Billing & Payments', icon: <RiBankCardLine /> }
   ];
 
   const renderTabContent = () => {

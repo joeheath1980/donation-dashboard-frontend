@@ -4,6 +4,17 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import businessAPI from '../services/businessAPI';
 import styles from './BusinessOnboarding.module.css';
+import {
+  RiBuildingLine,
+  RiBarChartLine,
+  RiHeartLine,
+  RiFolderLine,
+  RiFocusLine,
+  RiCheckLine,
+  RiFileLine,
+  RiAlertLine,
+  RiArrowRightLine
+} from 'react-icons/ri';
 
 const BusinessOnboarding = () => {
   const navigate = useNavigate();
@@ -67,11 +78,11 @@ const BusinessOnboarding = () => {
   });
 
   const steps = [
-    { id: 1, title: 'Business Profile', icon: '🏢' },
-    { id: 2, title: 'CSR Report', icon: '📊' },
-    { id: 3, title: 'Primary Charities', icon: '❤️' },
-    { id: 4, title: 'Charity Portfolio', icon: '📁' },
-    { id: 5, title: 'Targeting Config', icon: '🎯' }
+    { id: 1, title: 'Business Profile', icon: <RiBuildingLine /> },
+    { id: 2, title: 'CSR Report', icon: <RiBarChartLine /> },
+    { id: 3, title: 'Primary Charities', icon: <RiHeartLine /> },
+    { id: 4, title: 'Charity Portfolio', icon: <RiFolderLine /> },
+    { id: 5, title: 'Targeting Config', icon: <RiFocusLine /> }
   ];
 
   const handleNext = async () => {
@@ -450,7 +461,7 @@ const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading }) => {
             className={styles.fileInput}
           />
           <label htmlFor="csr-upload" className={styles.uploadLabel}>
-            <div className={styles.uploadIcon}>📄</div>
+            <div className={styles.uploadIcon}><RiFileLine /></div>
             <h3>Upload CSR Report</h3>
             <p>Drag and drop your PDF here or click to browse</p>
             <p className={styles.uploadHint}>Accepted format: PDF (max 10MB)</p>
