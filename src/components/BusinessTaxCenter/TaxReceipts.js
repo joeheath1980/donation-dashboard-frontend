@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './TaxReceipts.module.css';
+import { RiDownloadLine } from 'react-icons/ri';
 
 const TaxReceipts = () => {
   const [receipts, setReceipts] = useState([]);
@@ -254,7 +255,7 @@ const TaxReceipts = () => {
                     onClick={() => downloadReceipt(receipt.id)}
                     title="Download Receipt"
                   >
-                    📥
+                    <RiDownloadLine />
                   </button>
                 </td>
               </tr>

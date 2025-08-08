@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styles from './TaxPlanning.module.css';
+import {
+  RiGiftLine,
+  RiBriefcaseLine,
+  RiCalendarLine,
+  RiLineChartLine
+} from 'react-icons/ri';
 
 const TaxPlanning = () => {
   const [planningData, setPlanningData] = useState({
@@ -74,25 +80,25 @@ const TaxPlanning = () => {
       title: 'Gift Aid Maximisation',
       description: 'Ensure all donations qualify for Gift Aid to increase your tax relief by 25%',
       savings: planningData.targetAmount * 0.25,
-      icon: '🎁'
+      icon: <RiGiftLine />
     },
     {
       title: 'Payroll Giving',
       description: 'Donate directly from your salary before tax for immediate tax relief',
       savings: planningData.targetAmount * planningData.taxRate / 100,
-      icon: '💼'
+      icon: <RiBriefcaseLine />
     },
     {
       title: 'Carry Back Relief',
       description: 'Carry back donations to previous tax year if more beneficial',
       savings: planningData.targetAmount * 0.05,
-      icon: '📅'
+      icon: <RiCalendarLine />
     },
     {
       title: 'Share Donations',
       description: 'Donate shares instead of cash to avoid capital gains tax',
       savings: planningData.targetAmount * 0.15,
-      icon: '📈'
+      icon: <RiLineChartLine />
     }
   ];
 

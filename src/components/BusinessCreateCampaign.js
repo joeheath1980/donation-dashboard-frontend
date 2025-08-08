@@ -11,7 +11,9 @@ import {
   RiFocusLine,
   RiRocketLine,
   RiCheckLine,
-  RiAddLine
+  RiAddLine,
+  RiArrowLeftLine,
+  RiArrowRightLine
 } from 'react-icons/ri';
 
 function BusinessCreateCampaign() {
@@ -311,7 +313,7 @@ function BusinessCreateCampaign() {
                 className={styles.previousButton}
                 onClick={handlePrevious}
               >
-                Previous
+                <RiArrowLeftLine /> Previous
               </button>
             )}
             
@@ -321,7 +323,7 @@ function BusinessCreateCampaign() {
                 className={styles.nextButton}
                 onClick={handleNext}
               >
-                Next
+                Next <RiArrowRightLine />
               </button>
             ) : (
               <button
@@ -329,7 +331,7 @@ function BusinessCreateCampaign() {
                 className={styles.submitButton}
                 disabled={loading}
               >
-                {loading ? 'Creating Campaign...' : 'Launch Campaign'}
+                {loading ? 'Creating Campaign...' : <><RiRocketLine /> Launch Campaign</>}
               </button>
             )}
           </div>
@@ -741,7 +743,7 @@ const TargetingRulesSection = ({ data, onChange, onNestedChange, onDonationRange
             className={styles.addRangeButton}
             onClick={onAddRange}
           >
-            Add Another Range
+            <RiAddLine /> Add Another Range
           </button>
         </div>
       </div>
