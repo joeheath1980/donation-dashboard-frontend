@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './TaxReceipts.module.css';
-import { RiDownloadLine } from 'react-icons/ri';
+import { RiDownloadLine, RiArrowLeftLine } from 'react-icons/ri';
 
 const TaxReceipts = () => {
+  const navigate = useNavigate();
   const [receipts, setReceipts] = useState([]);
   const [filteredReceipts, setFilteredReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -142,9 +144,9 @@ const TaxReceipts = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-AU', {
       style: 'currency',
-      currency: 'GBP',
+      currency: 'AUD',
       minimumFractionDigits: 2
     }).format(amount);
   };
@@ -163,6 +165,15 @@ const TaxReceipts = () => {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb}>
+        <button 
+          onClick={() => navigate('/business/tax-center')} 
+          className={styles.backButton}
+        >
+          <RiArrowLeftLine /> Back to Tax Centre
+        </button>
+      </nav>
+      
       <div className={styles.header}>
         <h1>Tax Receipts</h1>
         <div className={styles.headerActions}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './BusinessTaxCenter.module.css';
 import {
   RiMoneyDollarCircleLine,
@@ -10,10 +10,13 @@ import {
   RiFilePaper2Line,
   RiDownloadLine,
   RiFocusLine,
-  RiInformationLine
+  RiInformationLine,
+  RiArrowLeftLine,
+  RiDashboardLine
 } from 'react-icons/ri';
 
 const BusinessTaxCenter = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     ytdDonations: 0,
     taxSavings: 0,
@@ -52,9 +55,9 @@ const BusinessTaxCenter = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-AU', {
       style: 'currency',
-      currency: 'GBP',
+      currency: 'AUD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -66,6 +69,15 @@ const BusinessTaxCenter = () => {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb}>
+        <button 
+          onClick={() => navigate('/business/dashboard')} 
+          className={styles.backButton}
+        >
+          <RiDashboardLine /> Back to Dashboard
+        </button>
+      </nav>
+      
       <div className={styles.header}>
         <h1>Tax Centre</h1>
         <p className={styles.subtitle}>Manage your charitable tax deductions and optimise your giving strategy</p>
