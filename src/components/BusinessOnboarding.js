@@ -465,7 +465,7 @@ const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading }) => {
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p>Uploading and analyzing report... {uploadProgress}%</p>
+            <p>Uploading and analysing report... {uploadProgress}%</p>
           </div>
         )}
 

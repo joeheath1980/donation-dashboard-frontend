@@ -159,7 +159,7 @@ function GlobalGivingProjects() {
   if (loading) {
     return (
       <div className={styles.loading}>
-        Loading {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} GlobalGiving projects...
+        Loading {user && formPersonalizedSearchQuery() ? 'personalised' : 'featured'} GlobalGiving projects...
       </div>
     );
   }
@@ -203,7 +203,7 @@ function GlobalGivingProjects() {
     <div className={styles.container}>
       {projects.length === 0 ? (
         <p className={styles.noProjects}>
-          No {user && formPersonalizedSearchQuery() ? 'personalized' : 'featured'} projects available at the moment.
+          No {user && formPersonalizedSearchQuery() ? 'personalised' : 'featured'} projects available at the moment.
           Please try again later.
         </p>
       ) : (

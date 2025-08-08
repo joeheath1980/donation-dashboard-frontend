@@ -32,7 +32,7 @@ const ImpactScoreExplain = ({ hideTitle = false }) => {
         title="Fundraising" 
         score={fundraisingScore} 
         maxScore={20} 
-        description="Points are awarded based on the amount you've raised, with additional bonuses for organizing events and online campaigns."
+        description="Points are awarded based on the amount you've raised, with additional bonuses for organising events and online campaigns."
       />
       
       <div className={styles.breakdownItem}>
