@@ -63,6 +63,11 @@ const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCam
 const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
 const BusinessCampaignList = lazy(() => import('./components/BusinessCampaignList'));
 const BusinessAccountSettings = lazy(() => import('./components/BusinessAccountSettings/BusinessAccountSettings'));
+const BusinessTaxCenter = lazy(() => import('./components/BusinessTaxCenter/BusinessTaxCenter'));
+const TaxSummary = lazy(() => import('./components/BusinessTaxCenter/TaxSummary'));
+const TaxReceipts = lazy(() => import('./components/BusinessTaxCenter/TaxReceipts'));
+const TaxExport = lazy(() => import('./components/BusinessTaxCenter/TaxExport'));
+const TaxPlanning = lazy(() => import('./components/BusinessTaxCenter/TaxPlanning'));
 const GoogleAuthCallback = lazy(() => import('./components/GoogleAuthCallback'));
 const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallback'));
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
@@ -243,6 +248,13 @@ function App() {
                 <Route path="/business/campaigns" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignList /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/business/campaigns/:campaignId/analytics" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignAnalytics /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/create-business-campaign" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCreateCampaign /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                
+                {/* Business Tax Center routes */}
+                <Route path="/business/tax-center" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessTaxCenter /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/tax-center/summary" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><TaxSummary /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/tax-center/receipts" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><TaxReceipts /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/tax-center/export" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><TaxExport /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business/tax-center/planning" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><TaxPlanning /></SuspenseWrapper></Layout></ProtectedRoute>} />
 
                 {/* Charity routes */}
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
