@@ -46,12 +46,22 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
   
   // Ring configuration with 5 categories using weighted scores
   // Max scores are based on expected ranges for weighted contributions
+  // Calculate dynamic max scores based on tier progression
+  // Higher tiers should have more runway for growth
+  const tierMultiplier = {
+    'Giver': 1.0,
+    'Altruist': 1.5,
+    'Philanthropist': 2.0,
+    'Champion': 3.0,
+    'Visionary': 4.0
+  }[tier] || 1.0;
+  
   const rings = [
     { 
       name: 'Donations',
       score: Math.round(weightedDonationScore),
       rawScore: donationScore,
-      maxScore: 150, // 30% weight, so max ~150 for very high donations
+      maxScore: 600 * tierMultiplier, // Much higher ceiling for donations as the primary activity
       radius: 140,
       strokeWidth: 16,
       color: { start: '#4DD0E1', end: '#00ACC1' }, // Cyan/Teal
@@ -62,7 +72,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Volunteering',
       score: Math.round(weightedVolunteerScore),
       rawScore: volunteerScore,
-      maxScore: 125, // 25% weight, so max ~125 for very high volunteering
+      maxScore: 400 * tierMultiplier, // Higher ceiling for volunteer activities
       radius: 115,
       strokeWidth: 16,
       color: { start: '#66BB6A', end: '#43A047' }, // Green
@@ -73,7 +83,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Fundraising',
       score: Math.round(weightedFundraisingScore),
       rawScore: fundraisingScore,
-      maxScore: 100, // 20% weight, so max ~100 for very high fundraising
+      maxScore: 300 * tierMultiplier, // Higher ceiling for fundraising
       radius: 90,
       strokeWidth: 16,
       color: { start: '#AB47BC', end: '#8E24AA' }, // Purple
@@ -84,7 +94,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Consistency',
       score: Math.round(weightedConsistencyScore),
       rawScore: consistencyScore,
-      maxScore: 75, // 15% weight, so max ~75 for perfect consistency
+      maxScore: 200 * tierMultiplier, // Higher ceiling for consistency
       radius: 65,
       strokeWidth: 16,
       color: { start: '#FF7043', end: '#F4511E' }, // Orange
@@ -95,7 +105,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Engagement',
       score: Math.round(weightedEngagementScore),
       rawScore: engagementScore,
-      maxScore: 50, // 10% weight, so max ~50 for full engagement
+      maxScore: 150 * tierMultiplier, // Higher ceiling for engagement
       radius: 40,
       strokeWidth: 16,
       color: { start: '#FFD54F', end: '#FFB300' }, // Amber
@@ -135,7 +145,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
         </defs>
         
         {rings.map((ring, index) => {
-          const percentage = (ring.score / ring.maxScore) * 100;
+          // Cap percentage at 100% to prevent overflow
+          const percentage = Math.min((ring.score / ring.maxScore) * 100, 100);
           const circumference = 2 * Math.PI * ring.radius;
           const strokeDashoffset = circumference - (percentage / 100) * circumference;
           
@@ -249,7 +260,18 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 Raw: {rings[hoveredRing].rawScore} × {rings[hoveredRing].weight}
               </div>
               <div className={styles.tooltipPercentage}>
-                {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% of max
+                {rings[hoveredRing].score >= rings[hoveredRing].maxScore ? (
+                  <span style={{color: '#4CAF50', fontWeight: 'bold'}}>
+                    Exceptional! ({Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}%)
+                  </span>
+                ) : (
+                  <>
+                    {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% progress
+                    <div style={{fontSize: '0.85em', opacity: 0.7, marginTop: '2px'}}>
+                      {Math.round(rings[hoveredRing].maxScore - rings[hoveredRing].score)} points to fill
+                    </div>
+                  </>
+                )}
               </div>
             </>
           ) : (

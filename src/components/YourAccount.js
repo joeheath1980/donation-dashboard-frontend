@@ -87,9 +87,9 @@ const YourAccount = () => {
               </span>
               <h2 className="cardTitle">Account Settings</h2>
             </div>
-            <p className="cardText">Adjust your account preferences and notification settings.</p>
-            <button className="button">Manage Settings</button>
-            <span className={`${styles.ctaTip} tip`}>Customize your account for the best experience.</span>
+            <p className="cardText">Manage email notifications, security settings, and account preferences.</p>
+            <Link to="/account-settings" className="button">Manage Settings</Link>
+            <span className={`${styles.ctaTip} tip`}>Coming soon: Email preferences, password change, and more!</span>
           </div>
         </div>
       </main>

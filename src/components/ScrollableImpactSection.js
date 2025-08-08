@@ -164,12 +164,22 @@ const BadgesDisplay = ({ isActive }) => {
 
   const { collectedBadges, badgeProgress } = React.useMemo(() => {
     const allContributions = [...donations, ...oneOffContributions];
+    
+    // Debug: Log sample contribution to see structure
+    if (allContributions.length > 0) {
+      console.log('Sample contribution structure:', allContributions[0]);
+    }
+    
     const charityTypeCounts = {};
     const charityTypeContributions = {};
 
     // Count contributions by charity type
     allContributions.forEach(contribution => {
-      const charityType = contribution.charityType;
+      // Try multiple field names for charity type
+      const charityType = contribution.charityType || contribution.category || contribution.charityCategory;
+      // Try multiple field names for charity name
+      const charityName = contribution.charityName || contribution.charity || contribution.recipientName || 'Unknown Charity';
+      
       if (charityType) {
         charityTypeCounts[charityType] = (charityTypeCounts[charityType] || 0) + 1;
         
@@ -177,9 +187,9 @@ const BadgesDisplay = ({ isActive }) => {
           charityTypeContributions[charityType] = [];
         }
         charityTypeContributions[charityType].push({
-          amount: contribution.amount,
-          date: contribution.createdAt,
-          charityName: contribution.charityName
+          amount: contribution.amount || contribution.donationAmount || 0,
+          date: contribution.createdAt || contribution.date || contribution.donationDate,
+          charityName: charityName
         });
       }
     });
@@ -194,11 +204,13 @@ const BadgesDisplay = ({ isActive }) => {
         const badge = allBadges.find(b => b.title === badgeTitle);
         if (badge) {
           if (count >= 3 && !collected.some(b => b.title === badge.title)) {
+            const contributions = charityTypeContributions[charityType] || [];
+            const latestContribution = contributions[Math.min(2, contributions.length - 1)];
             collected.push({
               ...badge,
-              earnedDate: new Date(charityTypeContributions[charityType][2].date).toLocaleDateString(),
-              contributions: charityTypeContributions[charityType].slice(0, 3).map(c => 
-                `Donated $${c.amount} to ${c.charityName}`
+              earnedDate: latestContribution?.date ? new Date(latestContribution.date).toLocaleDateString() : 'Recently',
+              contributions: contributions.slice(0, 3).map(c => 
+                `Donated $${c.amount || 0} to ${c.charityName || 'a charity'}`
               )
             });
           }
@@ -220,8 +232,8 @@ const BadgesDisplay = ({ isActive }) => {
     setSelectedBadge({
       ...badge,
       earnedDate: collected?.earnedDate,
-      contributions: collected?.contributions || progress.contributions.map(c => 
-        `Donated $${c.amount} to ${c.charityName}`
+      contributions: collected?.contributions || (progress.contributions || []).map(c => 
+        `Donated $${c.amount || 0} to ${c.charityName || 'a charity'}`
       )
     });
     setModalOpen(true);
