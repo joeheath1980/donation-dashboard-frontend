@@ -4,6 +4,17 @@ import { useAuth } from '../contexts/AuthContext';
 import businessAPI from '../services/businessAPI';
 import { exportToCSV, exportCampaignAnalytics } from '../utils/csvExport';
 import {
+  RiBarChartLine,
+  RiFileLine,
+  RiMailLine,
+  RiArrowUpLine,
+  RiArrowDownLine,
+  RiArrowRightLine,
+  RiMoneyDollarCircleLine,
+  RiGroupLine,
+  RiFocusLine
+} from 'react-icons/ri';
+import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
@@ -735,13 +746,13 @@ User Types:
         <h3>Export Analytics</h3>
         <div className={styles.exportButtons}>
           <button className={styles.exportButton} onClick={handleExportCSV}>
-            📊 Export as CSV
+            <RiBarChartLine /> Export as CSV
           </button>
           <button className={styles.exportButton} onClick={handleExportPDF}>
-            📄 Generate PDF Report
+            <RiFileLine /> Generate PDF Report
           </button>
           <button className={styles.exportButton} onClick={handleScheduleEmail}>
-            📧 Schedule Email Reports
+            <RiMailLine /> Schedule Email Reports
           </button>
         </div>
       </div>

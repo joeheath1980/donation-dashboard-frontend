@@ -3,6 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import businessAPI from '../services/businessAPI';
 import styles from './BusinessCampaignList.module.css';
+import { 
+  RiAddLine,
+  RiEyeLine,
+  RiEditLine,
+  RiFileCopyLine,
+  RiBarChartLine,
+  RiArrowUpLine,
+  RiArrowDownLine,
+  RiSubtractLine,
+  RiMoreFill,
+  RiDeleteBinLine,
+  RiPauseLine,
+  RiPlayLine,
+  RiDownloadLine,
+  RiArrowLeftLine,
+  RiArrowRightLine
+} from 'react-icons/ri';
 
 function BusinessCampaignList() {
   const navigate = useNavigate();
@@ -323,7 +340,7 @@ function BusinessCampaignList() {
       <div className={styles.header}>
         <h1>Campaign Management</h1>
         <Link to="/create-business-campaign" className={styles.createButton}>
-          + Create New Campaign
+          <RiAddLine /> Create New Campaign
         </Link>
       </div>
 
@@ -478,7 +495,7 @@ function BusinessCampaignList() {
                     <td>
                       <div className={styles.dateRange}>
                         <span>{formatDate(campaign.startDate)}</span>
-                        <span className={styles.dateSeparator}>→</span>
+                        <span className={styles.dateSeparator}><RiArrowRightLine /></span>
                         <span>{formatDate(campaign.endDate)}</span>
                       </div>
                     </td>
@@ -507,8 +524,8 @@ function BusinessCampaignList() {
                         </div>
                         <div className={styles.metric}>
                           <span className={`${styles.metricValue} ${styles[`trend${campaign.performance.trend}`]}`}>
-                            {campaign.performance.trend === 'up' ? '↑' : 
-                             campaign.performance.trend === 'down' ? '↓' : '→'}
+                            {campaign.performance.trend === 'up' ? <RiArrowUpLine /> : 
+                             campaign.performance.trend === 'down' ? <RiArrowDownLine /> : <RiSubtractLine />}
                             {Math.abs(campaign.performance.percentage)}%
                           </span>
                           <span className={styles.metricLabel}>Trend</span>
@@ -522,7 +539,7 @@ function BusinessCampaignList() {
                           className={styles.actionButton}
                           title="View Details"
                         >
-                          👁️
+                          <RiEyeLine />
                         </button>
                         <button
                           onClick={() => navigate(`/business/campaigns/${campaign._id}/edit`)}
@@ -530,24 +547,24 @@ function BusinessCampaignList() {
                           title="Edit"
                           disabled={campaign.status === 'completed'}
                         >
-                          ✏️
+                          <RiEditLine />
                         </button>
                         <button
                           onClick={() => handleDuplicate(campaign)}
                           className={styles.actionButton}
                           title="Duplicate"
                         >
-                          📋
+                          <RiFileCopyLine />
                         </button>
                         <button
                           onClick={() => navigate(`/business/campaigns/${campaign._id}/analytics`)}
                           className={styles.actionButton}
                           title="Analytics"
                         >
-                          📊
+                          <RiBarChartLine />
                         </button>
                         <div className={styles.moreActions}>
-                          <button className={styles.moreButton}>⋮</button>
+                          <button className={styles.moreButton}><RiMoreFill /></button>
                           <div className={styles.dropdown}>
                             {campaign.status === 'active' && (
                               <button onClick={() => handleStatusChange(campaign._id, 'paused')}>

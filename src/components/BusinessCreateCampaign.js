@@ -4,6 +4,15 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import businessAPI from '../services/businessAPI';
 import styles from './BusinessCreateCampaign.module.css';
+import {
+  RiEditLine,
+  RiMoneyDollarCircleLine,
+  RiHeartLine,
+  RiFocusLine,
+  RiRocketLine,
+  RiCheckLine,
+  RiAddLine
+} from 'react-icons/ri';
 
 function BusinessCreateCampaign() {
   const navigate = useNavigate();
@@ -91,11 +100,11 @@ function BusinessCreateCampaign() {
   };
 
   const sections = [
-    { id: 'basic', title: 'Basic Information', icon: '📝' },
-    { id: 'budget', title: 'Budget Allocation', icon: '💰' },
-    { id: 'charities', title: 'Charity Selection', icon: '❤️' },
-    { id: 'targeting', title: 'Targeting Rules', icon: '🎯' },
-    { id: 'preview', title: 'Preview & Launch', icon: '🚀' }
+    { id: 'basic', title: 'Basic Information', icon: <RiEditLine /> },
+    { id: 'budget', title: 'Budget Allocation', icon: <RiMoneyDollarCircleLine /> },
+    { id: 'charities', title: 'Charity Selection', icon: <RiHeartLine /> },
+    { id: 'targeting', title: 'Targeting Rules', icon: <RiFocusLine /> },
+    { id: 'preview', title: 'Preview & Launch', icon: <RiRocketLine /> }
   ];
 
   const handleInputChange = (field, value) => {
@@ -582,7 +591,7 @@ const CharitySelectionSection = ({ data, portfolioCharities, onCharityToggle, on
             </div>
             <p className={styles.charityCategory}>{charity.category}</p>
             <div className={styles.selectionIndicator}>
-              {data.selectedCharities.includes(charity._id) ? '✓' : '+'}
+              {data.selectedCharities.includes(charity._id) ? <RiCheckLine /> : <RiAddLine />}
             </div>
           </div>
         ))}

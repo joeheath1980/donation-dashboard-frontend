@@ -1,6 +1,23 @@
+/* Design system variables */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+}
+
 .container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--light-gray);
   padding: 2rem;
 }
 
@@ -13,39 +30,46 @@
 
 .header h1 {
   font-size: 32px;
-  color: #2c3e50;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .createButton {
-  padding: 0.75rem 1.5rem;
-  background: #007bff;
-  color: white;
+  padding: 14px 28px;
+  background: var(--primary-color);
+  color: var(--white);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: 16px;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .createButton:hover {
-  background: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  background: var(--primary-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 /* Filters Section */
 .filtersSection {
-  background: white;
+  background: var(--white);
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
   align-items: flex-end;
+  transition: all 0.3s ease;
+}
+
+.filtersSection:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .filterGroup {
@@ -59,24 +83,24 @@
 .filterGroup label {
   font-size: 14px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .filterSelect,
 .searchInput {
   padding: 0.5rem 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
   font-size: 14px;
-  background: white;
+  background: var(--white);
   transition: border-color 0.3s ease;
 }
 
 .filterSelect:focus,
 .searchInput:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(45, 143, 123, 0.1);
 }
 
 .searchInput {
@@ -99,13 +123,13 @@
 }
 
 .sortOrderButton:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--light-gray);
+  border-color: var(--primary-color);
 }
 
 /* Bulk Actions */
 .bulkActions {
-  background: #e3f2fd;
+  background: linear-gradient(135deg, rgba(45, 143, 123, 0.1) 0%, rgba(94, 207, 182, 0.1) 100%);
   padding: 1rem 1.5rem;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -116,23 +140,24 @@
 
 .bulkActions span {
   font-weight: 600;
-  color: #1976d2;
+  color: var(--primary-color);
 }
 
 .bulkButton {
   padding: 0.5rem 1rem;
-  background: white;
-  color: #1976d2;
-  border: 1px solid #1976d2;
-  border-radius: 6px;
+  background: var(--white);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .bulkButton:hover {
-  background: #1976d2;
-  color: white;
+  background: var(--primary-color);
+  color: var(--white);
 }
 
 .bulkButtonDanger {
@@ -153,11 +178,16 @@
 
 /* Table Container */
 .tableContainer {
-  background: white;
-  border-radius: 12px;
+  background: var(--white);
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.tableContainer:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .campaignsTable {
@@ -174,7 +204,7 @@
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 14px;
   text-transform: uppercase;
 }
@@ -196,13 +226,14 @@
 /* Campaign Info */
 .campaignInfo h3 {
   font-size: 16px;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
+  font-weight: 600;
 }
 
 .campaignCharities {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -272,13 +303,13 @@
 
 .budgetFill {
   height: 100%;
-  background: #007bff;
+  background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   transition: width 0.5s ease;
 }
 
 .budgetText {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Performance Metrics */
@@ -296,12 +327,12 @@
 .metricValue {
   font-size: 16px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .metricLabel {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-top: 0.125rem;
 }
@@ -341,8 +372,9 @@
 }
 
 .actionButton:hover:not(:disabled) {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--light-gray);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
 }
 
 .actionButton:disabled {
@@ -367,8 +399,8 @@
 }
 
 .moreButton:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--light-gray);
+  border-color: var(--primary-color);
 }
 
 .dropdown {
@@ -397,7 +429,7 @@
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  color: #2c3e50;
+  color: var(--text-primary);
   transition: background 0.2s ease;
 }
 
@@ -429,8 +461,8 @@
 }
 
 .paginationButton:hover:not(:disabled) {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--light-gray);
+  border-color: var(--primary-color);
 }
 
 .paginationButton:disabled {
@@ -457,14 +489,14 @@
 }
 
 .pageNumber:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
+  background: var(--light-gray);
+  border-color: var(--primary-color);
 }
 
 .pageNumber.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
 }
 
 /* Summary Stats */
@@ -475,24 +507,33 @@
 }
 
 .statCard {
-  background: white;
+  background: var(--white);
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .statCard h3 {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
 
 .statValue {
   font-size: 32px;
-  font-weight: bold;
-  color: #2c3e50;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
 }
 
@@ -511,19 +552,20 @@
 .emptyState {
   text-align: center;
   padding: 4rem;
-  background: white;
-  border-radius: 12px;
+  background: var(--white);
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .emptyState h3 {
   font-size: 24px;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .emptyState p {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Responsive Design */

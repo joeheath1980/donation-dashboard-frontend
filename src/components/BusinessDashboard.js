@@ -3,6 +3,16 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './BusinessDashboard.module.css';
+import {
+  RiAddLine,
+  RiBarChartLine,
+  RiFolderLine,
+  RiSettings4Line,
+  RiUserLine,
+  RiLightbulbLine,
+  RiFocusLine,
+  RiLineChartLine
+} from 'react-icons/ri';
 
 function BusinessDashboard() {
   const { getAuthHeaders, user } = useAuth();
@@ -429,33 +439,33 @@ function BusinessDashboard() {
           
           <div className={styles.actionButtons}>
             <Link to="/create-business-campaign" className={styles.actionButton}>
-              <div className={styles.actionIcon}>➕</div>
+              <div className={styles.actionIcon}><RiAddLine /></div>
               <span>Create Campaign</span>
             </Link>
             
             <Link to="/business/analytics" className={styles.actionButton}>
-              <div className={styles.actionIcon}>📊</div>
+              <div className={styles.actionIcon}><RiBarChartLine /></div>
               <span>View Analytics</span>
             </Link>
             
             <Link to="/business/portfolio" className={styles.actionButton}>
-              <div className={styles.actionIcon}>📁</div>
+              <div className={styles.actionIcon}><RiFolderLine /></div>
               <span>Manage Portfolio</span>
             </Link>
             
             <Link to="/business-dashboard/account-settings" className={styles.actionButton}>
-              <div className={styles.actionIcon}>⚙️</div>
+              <div className={styles.actionIcon}><RiSettings4Line /></div>
               <span>Account Settings</span>
             </Link>
             
             <Link to="/business/tax-center" className={styles.actionButton}>
-              <div className={styles.actionIcon}>📊</div>
+              <div className={styles.actionIcon}><RiBarChartLine /></div>
               <span>Tax Centre</span>
             </Link>
             
             {businessData.slug && (
               <Link to={`/business/${businessData.slug}`} className={styles.actionButton}>
-                <div className={styles.actionIcon}>👤</div>
+                <div className={styles.actionIcon}><RiUserLine /></div>
                 <span>View Public Profile</span>
               </Link>
             )}
@@ -490,7 +500,7 @@ function BusinessDashboard() {
         <h2>Insights & Recommendations</h2>
         <div className={styles.insightsGrid}>
           <div className={styles.insightCard}>
-            <div className={styles.insightIcon}>💡</div>
+            <div className={styles.insightIcon}><RiLightbulbLine /></div>
             <div className={styles.insightContent}>
               <h3>Optimize Your Impact</h3>
               <p>Your Education category is performing 23% better than average. Consider increasing allocation.</p>
@@ -499,7 +509,7 @@ function BusinessDashboard() {
           </div>
           
           <div className={styles.insightCard}>
-            <div className={styles.insightIcon}>🎯</div>
+            <div className={styles.insightIcon}><RiFocusLine /></div>
             <div className={styles.insightContent}>
               <h3>Campaign Opportunity</h3>
               <p>Year-end giving season is approaching. Start planning your holiday campaign now.</p>
@@ -508,7 +518,7 @@ function BusinessDashboard() {
           </div>
           
           <div className={styles.insightCard}>
-            <div className={styles.insightIcon}>📈</div>
+            <div className={styles.insightIcon}><RiLineChartLine /></div>
             <div className={styles.insightContent}>
               <h3>Engagement Trending Up</h3>
               <p>User engagement increased by 34% this month. Keep up the momentum!</p>
