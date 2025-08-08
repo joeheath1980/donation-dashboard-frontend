@@ -78,6 +78,7 @@ const PublicCharityProfile = lazy(() => import('./components/Profile/PublicChari
 const ProfileEditor = lazy(() => import('./components/Profile/ProfileEditor'));
 const ProfileSearch = lazy(() => import('./components/Search/ProfileSearch'));
 const PrivacySettings = lazy(() => import('./components/Settings/PrivacySettings'));
+const AccountSettings = lazy(() => import('./components/Settings/AccountSettings'));
 const PaymentMethods = lazy(() => import('./components/PaymentMethods/PaymentMethods'));
 const EmailForwardingSetup = lazy(() => import('./components/EmailForwarding/EmailForwardingSetup'));
 
@@ -230,6 +231,7 @@ function App() {
                 <Route path="/search-charities" element={<ProtectedRoute><Layout><SuspenseWrapper><SearchCharities /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/manage-payments" element={<ProtectedRoute><Layout><ChunkErrorBoundary><SuspenseWrapper><PaymentMethods /></SuspenseWrapper></ChunkErrorBoundary></Layout></ProtectedRoute>} />
                 <Route path="/privacy-settings" element={<ProtectedRoute><Layout><SuspenseWrapper><PrivacySettings /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/account-settings" element={<ProtectedRoute><Layout><SuspenseWrapper><AccountSettings /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/email-forwarding" element={<ProtectedRoute><Layout><SuspenseWrapper><EmailForwardingSetup /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-impact" element={<ProtectedRoute><Layout><SuspenseWrapper><YourImpact /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 
