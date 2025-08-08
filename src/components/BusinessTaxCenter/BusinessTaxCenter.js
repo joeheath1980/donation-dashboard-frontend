@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './BusinessTaxCenter.module.css';
+import {
+  RiMoneyDollarCircleLine,
+  RiBarChartLine,
+  RiFileTextLine,
+  RiCalendarLine,
+  RiLineChartLine,
+  RiFilePaper2Line,
+  RiDownloadLine,
+  RiFocusLine,
+  RiInformationLine
+} from 'react-icons/ri';
 
 const BusinessTaxCenter = () => {
   const [stats, setStats] = useState({
@@ -62,7 +73,7 @@ const BusinessTaxCenter = () => {
 
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.statIcon}>💰</div>
+          <div className={styles.statIcon}><RiMoneyDollarCircleLine /></div>
           <div className={styles.statContent}>
             <h3>YTD Donations</h3>
             <p className={styles.statValue}>{formatCurrency(stats.ytdDonations)}</p>
@@ -71,7 +82,7 @@ const BusinessTaxCenter = () => {
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statIcon}>📊</div>
+          <div className={styles.statIcon}><RiBarChartLine /></div>
           <div className={styles.statContent}>
             <h3>Tax Savings</h3>
             <p className={styles.statValue}>{formatCurrency(stats.taxSavings)}</p>
@@ -80,7 +91,7 @@ const BusinessTaxCenter = () => {
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statIcon}>📄</div>
+          <div className={styles.statIcon}><RiFileTextLine /></div>
           <div className={styles.statContent}>
             <h3>Tax Receipts</h3>
             <p className={styles.statValue}>{stats.receiptsCount}</p>
@@ -89,7 +100,7 @@ const BusinessTaxCenter = () => {
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statIcon}>📅</div>
+          <div className={styles.statIcon}><RiCalendarLine /></div>
           <div className={styles.statContent}>
             <h3>Last Export</h3>
             <p className={styles.statValue}>
@@ -102,28 +113,28 @@ const BusinessTaxCenter = () => {
 
       <div className={styles.sectionsGrid}>
         <Link to="/business/tax-center/summary" className={styles.sectionCard}>
-          <div className={styles.sectionIcon}>📈</div>
+          <div className={styles.sectionIcon}><RiLineChartLine /></div>
           <h2>Tax Summary</h2>
           <p>View detailed breakdowns of your charitable contributions by quarter, month, and charity</p>
           <span className={styles.sectionAction}>View Summary →</span>
         </Link>
 
         <Link to="/business/tax-center/receipts" className={styles.sectionCard}>
-          <div className={styles.sectionIcon}>🧾</div>
+          <div className={styles.sectionIcon}><RiFilePaper2Line /></div>
           <h2>Tax Receipts</h2>
           <p>Access and download all your charitable donation receipts for tax filing</p>
           <span className={styles.sectionAction}>Manage Receipts →</span>
         </Link>
 
         <Link to="/business/tax-center/export" className={styles.sectionCard}>
-          <div className={styles.sectionIcon}>📥</div>
+          <div className={styles.sectionIcon}><RiDownloadLine /></div>
           <h2>Export Documents</h2>
           <p>Export tax documents in various formats including CSV, Excel, PDF, and accounting software</p>
           <span className={styles.sectionAction}>Export Data →</span>
         </Link>
 
         <Link to="/business/tax-center/planning" className={styles.sectionCard}>
-          <div className={styles.sectionIcon}>🎯</div>
+          <div className={styles.sectionIcon}><RiFocusLine /></div>
           <h2>Tax Planning</h2>
           <p>Calculate optimal donation strategies and maximise your tax benefits</p>
           <span className={styles.sectionAction}>Plan Strategy →</span>
@@ -131,7 +142,7 @@ const BusinessTaxCenter = () => {
       </div>
 
       <div className={styles.alertBanner}>
-        <div className={styles.alertIcon}>ℹ️</div>
+        <div className={styles.alertIcon}><RiInformationLine /></div>
         <div className={styles.alertContent}>
           <h3>Tax Year Reminder</h3>
           <p>The UK tax year ends on 5 April. You have {Math.ceil((new Date(new Date().getFullYear() + (new Date().getMonth() < 3 ? 0 : 1), 3, 5) - new Date()) / (1000 * 60 * 60 * 24))} days remaining to maximise your charitable tax deductions for this tax year.</p>

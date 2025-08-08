@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
 import styles from './TaxSummary.module.css';
+import { RiLightbulbLine } from 'react-icons/ri';
 
 const TaxSummary = () => {
   const currentYear = new Date().getFullYear();
@@ -188,7 +189,7 @@ const TaxSummary = () => {
         <div className={styles.recommendationsList}>
           {summaryData?.recommendations?.map((rec, index) => (
             <div key={index} className={styles.recommendation}>
-              <div className={styles.recIcon}>💡</div>
+              <div className={styles.recIcon}><RiLightbulbLine /></div>
               <div className={styles.recContent}>
                 <h4>{rec.title}</h4>
                 <p>{rec.description}</p>

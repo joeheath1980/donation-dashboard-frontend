@@ -92,7 +92,7 @@
 }
 
 .stepCircle.active {
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  background: var(--primary-color);
   border-color: var(--primary-color);
   color: var(--white);
   transform: scale(1.1);
@@ -134,7 +134,7 @@
 }
 
 .stepLine.completed {
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  background: var(--success-green);
 }
 
 /* Form Sections */
@@ -558,7 +558,7 @@
 }
 
 .addRangeButton:hover {
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  background: var(--primary-color);
   color: var(--white);
   border-color: var(--primary-color);
   transform: translateY(-2px);
@@ -768,7 +768,7 @@
 
 .nextButton,
 .submitButton {
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  background: var(--primary-color);
   color: var(--white);
   margin-left: auto;
   box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
