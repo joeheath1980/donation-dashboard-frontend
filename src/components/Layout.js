@@ -52,7 +52,11 @@ function Layout({ children }) {
           {!user?.isBusiness && (
             <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
           )}
-          <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
+          {user?.isBusiness ? (
+            <NavLink to="/business-dashboard/account-settings" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Account Settings</NavLink>
+          ) : (
+            <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
+          )}
           <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
           <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>

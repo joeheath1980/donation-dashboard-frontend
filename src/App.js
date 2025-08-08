@@ -62,6 +62,7 @@ const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));
 const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCampaign'));
 const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
 const BusinessCampaignList = lazy(() => import('./components/BusinessCampaignList'));
+const BusinessAccountSettings = lazy(() => import('./components/BusinessAccountSettings/BusinessAccountSettings'));
 const GoogleAuthCallback = lazy(() => import('./components/GoogleAuthCallback'));
 const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallback'));
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
@@ -237,6 +238,7 @@ function App() {
                 
                 {/* Business routes */}
                 <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessDashboard /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/business-dashboard/account-settings" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessAccountSettings /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/business-onboarding" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessOnboarding /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/business/campaigns" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignList /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/business/campaigns/:campaignId/analytics" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessCampaignAnalytics /></SuspenseWrapper></Layout></ProtectedRoute>} />
