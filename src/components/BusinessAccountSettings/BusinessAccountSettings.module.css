@@ -1,121 +1,178 @@
+/* Business Account Settings - Clean Design System */
+@import '../../styles/businessDesignSystem.css';
+
+/* Page Container */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
   min-height: 100vh;
+  background: var(--light-gray);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+/* Header Section */
 .header {
-  margin-bottom: 2rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--border-light);
+  padding: 48px 0 32px;
+  margin-bottom: 32px;
 }
 
 .header h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .subtitle {
-  color: #666;
-  font-size: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  font-size: 18px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
+/* Content Wrapper */
 .content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
 }
 
+/* Tab Navigation */
 .tabNavigation {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f9f9f9;
-  overflow-x: auto;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
 }
 
 .tabButton {
   flex: 1;
   min-width: 150px;
-  padding: 1rem 1.5rem;
-  background: none;
+  padding: 20px 24px;
+  background: var(--white);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 500;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 600;
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tabButton:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 24px;
+  background: var(--border-light);
 }
 
 .tabButton:hover {
-  background: rgba(0, 123, 255, 0.05);
-  color: #333;
+  background: var(--light-gray);
+  color: var(--text-primary);
 }
 
 .tabButton.active {
-  color: #007bff;
-  background: white;
-  border-bottom-color: #007bff;
+  color: var(--primary-color);
+  background: var(--white);
+  border-bottom-color: var(--primary-color);
+}
+
+.tabButton.active::after {
+  opacity: 0;
 }
 
 .tabIcon {
-  font-size: 1.2rem;
+  font-size: 20px;
+  line-height: 1;
 }
 
 .tabLabel {
-  font-size: 0.95rem;
+  font-size: 15px;
+  font-weight: 600;
 }
 
+/* Tab Content */
 .tabContent {
-  padding: 2rem;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 32px;
   min-height: 500px;
 }
 
+/* Loading State */
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  color: #666;
-  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
+/* Error State */
 .error {
-  padding: 2rem;
-  background: #fee;
-  color: #c00;
+  padding: 32px;
+  background: rgba(255, 68, 68, 0.05);
+  color: var(--error-red);
   border-radius: 8px;
   text-align: center;
+  font-size: 16px;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
-  .container {
-    padding: 1rem;
+  .header h1 {
+    font-size: 32px;
   }
-
+  
+  .subtitle {
+    font-size: 16px;
+  }
+  
+  .content {
+    padding: 0 16px 32px;
+  }
+  
   .tabNavigation {
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-
+  
+  .tabNavigation::-webkit-scrollbar {
+    display: none;
+  }
+  
   .tabButton {
     min-width: 120px;
-    padding: 0.75rem 1rem;
+    padding: 16px 20px;
+    font-size: 14px;
   }
-
+  
   .tabIcon {
     display: none;
   }
-
+  
   .tabContent {
-    padding: 1rem;
+    padding: 24px 16px;
   }
 }

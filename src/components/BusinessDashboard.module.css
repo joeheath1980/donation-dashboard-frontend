@@ -1,80 +1,119 @@
+/* Business Dashboard - Clean Design System */
+@import '../styles/businessDesignSystem.css';
+
+/* Page Container */
 .dashboardContainer {
   min-height: 100vh;
-  background: #f5f7fa;
-  padding: 2rem;
+  background: var(--light-gray);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+/* Header Section */
 .dashboardHeader {
-  margin-bottom: 2rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--border-light);
+  padding: 48px 0 32px;
+  margin-bottom: 32px;
 }
 
 .dashboardHeader h1 {
-  font-size: 32px;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .subtitle {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
   font-size: 18px;
-  color: #64748b;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
+/* Loading & Error States */
 .loadingContainer,
 .errorContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--white);
+}
+
+.loadingContainer {
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 .errorMessage {
-  color: #e74c3c;
-  font-size: 18px;
-  padding: 2rem;
-  background: white;
+  color: var(--error-red);
+  font-size: 16px;
+  padding: 24px 32px;
+  background: var(--white);
+  border: 1px solid rgba(255, 68, 68, 0.2);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  text-align: center;
 }
 
-/* Dashboard Grid Layout */
+/* Main Dashboard Grid */
 .dashboardGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 24px;
+}
+
+/* Card Base Styles */
+.givingFootprintCard,
+.campaignsSummaryCard,
+.recentMatchesCard,
+.quickActionsCard {
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.givingFootprintCard:hover,
+.campaignsSummaryCard:hover,
+.recentMatchesCard:hover,
+.quickActionsCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 /* Giving Footprint Card */
 .givingFootprintCard {
   grid-column: span 4;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.givingFootprintCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .givingFootprintCard h2 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin-bottom: 2rem;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
 }
 
+/* Budget Progress Circle */
 .budgetProgress {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 32px;
 }
 
 .progressCircle {
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
 }
 
 .progressBar {
@@ -82,239 +121,257 @@
 }
 
 .progressText {
-  font-size: 36px;
-  font-weight: bold;
-  fill: #2c3e50;
+  font-size: 32px;
+  font-weight: 700;
+  fill: var(--primary-color);
 }
 
 .progressLabel {
   font-size: 14px;
-  fill: #64748b;
+  fill: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Giving Score */
 .givingScore {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .scoreCircle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  width: 120px;
-  height: 120px;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  text-align: center;
 }
 
 .scoreNumber {
-  font-size: 36px;
-  font-weight: bold;
-  color: white;
+  display: block;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 4px;
 }
 
 .scoreLabel {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-top: 0.25rem;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Category Breakdown */
+.categoryBreakdown {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
 }
 
 .categoryBreakdown h3 {
-  font-size: 18px;
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
 }
 
 .categoryChart {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .categoryItem {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .categoryBar {
-  height: 20px;
-  background: #e0e0e0;
-  border-radius: 10px;
+  height: 8px;
+  background: var(--light-gray);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .categoryFill {
   height: 100%;
-  transition: width 1s ease;
-  border-radius: 10px;
+  transition: width 0.6s ease;
+  border-radius: 4px;
 }
 
 .categoryInfo {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  align-items: center;
 }
 
 .categoryName {
-  color: #2c3e50;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
 .categoryPercent {
-  color: #64748b;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--primary-color);
 }
 
-/* Active Campaigns Summary */
+/* Campaigns Summary Card */
 .campaignsSummaryCard {
   grid-column: span 4;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.campaignsSummaryCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
 }
 
 .cardHeader h2 {
-  font-size: 24px;
-  color: #2c3e50;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .viewAllLink {
-  color: #007bff;
+  color: var(--primary-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .viewAllLink:hover {
-  color: #0056b3;
+  color: var(--primary-color-hover);
 }
 
+/* Empty Campaigns State */
 .emptyCampaigns {
   text-align: center;
-  padding: 3rem 0;
+  padding: 48px 24px;
 }
 
 .emptyCampaigns p {
-  color: #64748b;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
 }
 
 .createButton {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: #007bff;
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-color);
+  color: var(--white);
   text-decoration: none;
-  border-radius: 8px;
   font-weight: 600;
-  transition: background 0.3s ease;
+  font-size: 15px;
+  padding: 12px 24px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .createButton:hover {
-  background: #0056b3;
+  background: var(--primary-color-hover);
+  transform: translateY(-1px);
 }
 
+/* Campaign Cards */
 .campaignsList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .campaignCard {
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: background 0.3s ease;
+  padding: 20px;
+  background: var(--light-gray);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .campaignCard:hover {
-  background: #e9ecef;
+  background: #f0f0f5;
 }
 
 .campaignHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .campaignHeader h3 {
   font-size: 16px;
-  color: #2c3e50;
-  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .statusBadge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .statusBadge.active {
-  background: #d4edda;
-  color: #155724;
+  background: rgba(0, 212, 170, 0.1);
+  color: var(--success-green);
 }
 
 .statusBadge.paused {
-  background: #fff3cd;
-  color: #856404;
+  background: rgba(255, 165, 0, 0.1);
+  color: var(--warning-yellow);
 }
 
 .statusBadge.completed {
-  background: #cce5ff;
-  color: #004085;
+  background: rgba(74, 144, 226, 0.1);
+  color: var(--info-blue);
 }
 
+/* Campaign Progress */
 .campaignProgress {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .progressInfo {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 8px;
   font-size: 14px;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.progressInfo span:first-child {
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
 .progressBarContainer {
   height: 8px;
-  background: #e0e0e0;
+  background: var(--border-light);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progressBarFill {
   height: 100%;
-  background: #007bff;
-  transition: width 0.5s ease;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  transition: width 0.3s ease;
+  border-radius: 4px;
 }
 
+/* Campaign Stats */
 .campaignStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 12px;
 }
 
 .stat {
@@ -323,120 +380,93 @@
 
 .statNumber {
   display: block;
-  font-size: 20px;
-  font-weight: bold;
-  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
 }
 
 .statLabel {
-  display: block;
   font-size: 12px;
-  color: #64748b;
-  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-/* Recent Matches Feed */
+/* Recent Matches Card */
 .recentMatchesCard {
   grid-column: span 4;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.recentMatchesCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .liveIndicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   font-size: 14px;
-  color: #64748b;
+  color: var(--success-green);
+  font-weight: 600;
 }
 
 .liveDot {
   width: 8px;
   height: 8px;
-  background: #28a745;
+  background: var(--success-green);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
   0% {
-    opacity: 1;
-    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.7);
   }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.1);
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 212, 170, 0);
   }
   100% {
-    opacity: 1;
-    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 212, 170, 0);
   }
 }
 
+/* Matches List */
 .matchesList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-.matchesList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.matchesList::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.matchesList::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-.matchesList::-webkit-scrollbar-thumb:hover {
-  background: #555;
 }
 
 .noMatches {
   text-align: center;
-  color: #64748b;
-  padding: 2rem 0;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 .matchItem {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: background 0.3s ease;
+  gap: 12px;
+  padding: 12px;
+  background: var(--light-gray);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .matchItem:hover {
-  background: #e9ecef;
+  background: #f0f0f5;
 }
 
 .matchAvatar {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: var(--white);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -446,137 +476,164 @@
 
 .matchInfo {
   font-size: 14px;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.matchInfo strong {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .matchMeta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 12px;
-  color: #64748b;
 }
 
 .matchMultiplier {
-  color: #007bff;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
-/* Quick Actions */
+.matchTime {
+  color: var(--text-secondary);
+}
+
+/* Quick Actions Card */
 .quickActionsCard {
   grid-column: span 12;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .quickActionsCard h2 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin-bottom: 2rem;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
 }
 
 .actionButtons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .actionButton {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
-  background: #f8f9fa;
-  border-radius: 12px;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--light-gray);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
   text-decoration: none;
-  color: #2c3e50;
-  transition: all 0.3s ease;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  text-align: center;
 }
 
 .actionButton:hover {
-  background: #e9ecef;
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  background: var(--white);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.15);
 }
 
 .actionIcon {
-  font-size: 36px;
-  margin-bottom: 0.5rem;
+  font-size: 32px;
+  line-height: 1;
 }
 
 .actionButton span {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
+/* Quick Stats */
 .quickStats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
 }
 
 .quickStat {
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
+  padding: 20px;
+  background: var(--light-gray);
+  border-radius: 8px;
+  text-align: center;
 }
 
 .quickStat h3 {
-  font-size: 16px;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
 
 .quickStatValue {
   font-size: 32px;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 8px;
 }
 
 .quickStatChange {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
-.positive {
-  color: #28a745;
+.quickStatChange .positive {
+  color: var(--success-green);
+  font-weight: 600;
+}
+
+.quickStatChange .negative {
+  color: var(--error-red);
   font-weight: 600;
 }
 
 /* Insights Section */
 .insightsSection {
-  margin-top: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
 }
 
 .insightsSection h2 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .insightsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 24px;
 }
 
 .insightCard {
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 32px;
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  gap: 20px;
+  transition: all 0.3s ease;
 }
 
 .insightCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .insightIcon {
@@ -590,157 +647,33 @@
 
 .insightContent h3 {
   font-size: 18px;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
 .insightContent p {
   font-size: 14px;
-  color: #64748b;
-  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
 }
 
 .insightAction {
-  padding: 0.5rem 1rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 8px 16px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .insightAction:hover {
-  background: #0056b3;
-}
-
-/* Legacy styles (kept for backward compatibility) */
-.dashboardTitle {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.sectionTitle {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-}
-
-.businessOverview,
-.financialSummary,
-.createdCampaigns {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  padding: 30px;
-  margin-bottom: 30px;
-}
-
-.createCampaignContainer {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.createCampaignButton {
-  display: inline-block;
-  padding: 12px 24px;
-  background: var(--primary-gradient);
-  color: white;
-  text-decoration: none;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: var(--transition-standard);
-}
-
-.createCampaignButton:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-.categoriesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 30px;
-}
-
-.categoryCard {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  padding: 20px;
-}
-
-.categoryTitle {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 15px;
-}
-
-.summaryCard {
-  background-color: var(--background-light);
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-.cardTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-}
-
-.list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.listItem {
-  margin-bottom: 10px;
-}
-
-.campaignName {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 5px;
-}
-
-.campaignsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.campaignTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 10px;
-}
-
-.noCampaigns {
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.link:hover {
-  text-decoration: underline;
+  background: var(--primary-color);
+  color: var(--white);
 }
 
 /* Responsive Design */
@@ -754,35 +687,32 @@
   .recentMatchesCard {
     grid-column: span 6;
   }
-  
-  .actionButtons {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 768px) {
-  .dashboardContainer {
-    padding: 1rem;
+  .dashboardHeader h1 {
+    font-size: 32px;
+  }
+  
+  .subtitle {
+    font-size: 16px;
   }
   
   .dashboardGrid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    padding: 0 16px 32px;
+    gap: 16px;
   }
   
   .givingFootprintCard,
   .campaignsSummaryCard,
   .recentMatchesCard,
   .quickActionsCard {
-    grid-column: span 1;
+    grid-column: span 12;
+    padding: 24px;
   }
   
   .actionButtons {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .quickStats {
-    grid-template-columns: 1fr;
   }
   
   .insightsGrid {
@@ -790,37 +720,11 @@
   }
   
   .campaignStats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .quickStats {
     grid-template-columns: 1fr;
-    text-align: left;
-  }
-  
-  .stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .statLabel {
-    margin-top: 0;
-  }
-  
-  .dashboardTitle {
-    font-size: 28px;
-  }
-
-  .sectionTitle {
-    font-size: 22px;
-  }
-
-  .categoryCard {
-    padding: 15px;
-  }
-
-  .cardTitle {
-    font-size: 16px;
-  }
-
-  .campaignTitle {
-    font-size: 16px;
   }
 }
