@@ -38,14 +38,18 @@
 }
 
 .header {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  font-size: 20px;
+  color: var(--primary-color);
 }
 
 .activitiesGrid {

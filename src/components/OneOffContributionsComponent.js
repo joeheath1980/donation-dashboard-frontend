@@ -348,9 +348,6 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
       <div className={oneOffStyles.oneOffSection}>
         <div className={oneOffStyles.headerSection}>
           <div className={oneOffStyles.headerActions}>
-            <button onClick={handleAddNew} className={oneOffStyles.addNewContributionButton}>
-              <FaPlus /> Add New One-Off Contribution
-            </button>
             <button 
               onClick={() => setShowFilters(!showFilters)} 
               className={`${oneOffStyles.filterButton} ${hasActiveFilters ? oneOffStyles.active : ''}`}

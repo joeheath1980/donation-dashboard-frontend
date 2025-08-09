@@ -297,7 +297,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
     <>
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <h2 className={`${styles.header} gradientTitle`}>
+          <h2 className={styles.header}>
             <FaHandsHelping className={styles.icon} /> Volunteer Activities
           </h2>
           <button 

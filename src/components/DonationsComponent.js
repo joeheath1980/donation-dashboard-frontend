@@ -308,9 +308,6 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
       <div className={styles.donationSection}>
         <div className={styles.headerSection}>
           <div className={styles.headerActions}>
-            <button onClick={handleAddNew} className={styles.addNewDonationButton}>
-              <FaPlus /> Add New Donation
-            </button>
             <button 
               onClick={() => setShowFilters(!showFilters)} 
               className={`${styles.filterButton} ${hasActiveFilters ? styles.active : ''}`}

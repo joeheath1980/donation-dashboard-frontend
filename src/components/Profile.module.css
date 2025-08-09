@@ -234,6 +234,8 @@
   box-sizing: border-box;
   align-self: start;
   transition: var(--transition-standard);
+  position: relative;
+  overflow: visible;
 }
 
 .donationCard:hover, .activityCard:hover {
@@ -325,6 +327,12 @@
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid var(--border-light);
+  margin-left: -32px;
+  margin-right: -32px;
+  padding-left: 32px;
+  padding-right: 32px;
+  width: calc(100% + 64px);
+  overflow: visible;
 }
 
 .deleteButton {
