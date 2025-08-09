@@ -450,7 +450,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
     <>
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <h2 className={`${styles.header} gradientTitle`}>
+          <h2 className={styles.header}>
             <FaBullhorn className={styles.icon} /> Fundraising Campaigns
           </h2>
           <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>

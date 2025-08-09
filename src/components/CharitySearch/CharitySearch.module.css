@@ -12,31 +12,33 @@
 .searchIcon {
   position: absolute;
   left: 1rem;
-  color: #6b7280;
+  color: #2d8f7b;
   font-size: 1rem;
   pointer-events: none;
+  z-index: 1;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  padding: 0.75rem 2.5rem 0.75rem 3rem;
   border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
   font-size: 0.9375rem;
   transition: all 0.2s;
   background: white;
+  position: relative;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #2d8f7b;
+  box-shadow: 0 0 0 3px rgba(45, 143, 123, 0.1);
 }
 
 .loadingIcon {
   position: absolute;
   right: 1rem;
-  color: #3b82f6;
+  color: #2d8f7b;
   font-size: 1rem;
   animation: spin 1s linear infinite;
 }
@@ -133,7 +135,7 @@
 }
 
 .selectedIcon {
-  color: #3b82f6;
+  color: #2d8f7b;
   font-size: 1.25rem;
   flex-shrink: 0;
 }
