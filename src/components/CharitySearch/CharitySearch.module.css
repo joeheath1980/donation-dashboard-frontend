@@ -11,22 +11,23 @@
 
 .searchIcon {
   position: absolute;
-  left: 1rem;
+  left: 0.75rem;
   color: #2d8f7b;
   font-size: 1rem;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 3rem;
+  padding: 0.75rem 2.5rem 0.75rem 2.75rem;
   border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
   font-size: 0.9375rem;
   transition: all 0.2s;
   background: white;
   position: relative;
+  text-indent: 0.25rem;
 }
 
 .searchInput:focus {
