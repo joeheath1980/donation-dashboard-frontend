@@ -1,44 +1,101 @@
+/* Do-Nation design system - Donation Modal */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --transition-standard: all 0.3s ease;
+}
+
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalContent {
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--white);
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-light);
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modalTitle {
   font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   text-align: center;
+  line-height: 1.2;
 }
 
 .closeButton {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 20px;
   cursor: pointer;
   color: var(--text-secondary);
+  transition: var(--transition-standard);
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.closeButton:hover {
+  background: var(--light-gray);
+  border-color: var(--border-light);
+  color: var(--text-primary);
 }
 
 .form {
@@ -50,92 +107,218 @@
 .formGroup {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 5px;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
 }
 
 .input,
 .select {
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 15px;
+  transition: var(--transition-standard);
+  background: var(--white);
+  color: var(--text-primary);
+  font-family: inherit;
 }
 
 .input:focus,
 .select:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(45, 143, 123, 0.1);
+}
+
+.input:hover,
+.select:hover {
+  border-color: var(--primary-light);
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-secondary);
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px 0;
 }
 
 .checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 .fileInput {
   font-size: 14px;
+  padding: 12px;
+  border: 2px dashed var(--border-light);
+  border-radius: 4px;
+  background: var(--light-gray);
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.fileInput:hover {
+  border-color: var(--primary-color);
+  background: #F0F0F5;
 }
 
 .buttonGroup {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
 }
 
 .button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 4px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: var(--transition-standard);
+  font-family: inherit;
+  flex: 1;
 }
 
 .primaryButton {
-  background-color: var(--primary-color);
-  color: white;
+  background: var(--primary-color);
+  color: var(--white);
 }
 
 .primaryButton:hover {
-  background-color: var(--primary-dark);
+  background: var(--primary-color-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .secondaryButton {
-  background-color: var(--background-light);
+  background: transparent;
   color: var(--text-primary);
+  border: 1px solid var(--border-light);
 }
 
 .secondaryButton:hover {
-  background-color: var(--background-dark);
+  background: var(--light-gray);
+  border-color: var(--text-secondary);
 }
 
+/* Error states */
+.inputError {
+  border-color: #dc3545;
+}
+
+.errorText {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Success states */
+.inputSuccess {
+  border-color: var(--success-green);
+}
+
+.successText {
+  color: var(--success-green);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Helper text */
+.helperText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Loading state */
+.loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .modalContent {
     width: 95%;
-    padding: 20px;
+    padding: 24px;
   }
 
   .modalTitle {
     font-size: 20px;
+    margin-bottom: 20px;
   }
 
   .button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 14px;
+  }
+
+  .buttonGroup {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .modalContent {
+    padding: 20px;
+    width: 100%;
+    max-width: none;
+  }
+
+  .modalTitle {
+    font-size: 18px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .input,
+  .select {
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 }
