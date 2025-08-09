@@ -1,43 +1,69 @@
+/* Do-Nation design system */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+}
+
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(45, 45, 50, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .modalContent {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2.5rem;
+  background: var(--white);
+  border-radius: 8px;
+  padding: 32px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-light);
 }
 
 .closeButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
+  top: 16px;
+  right: 16px;
+  background: var(--light-gray);
   border: none;
-  color: #6b7280;
-  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
 }
 
 .closeButton:hover {
-  color: #1a1a1a;
+  background: var(--border-light);
+  color: var(--text-primary);
+  transform: scale(1.05);
 }
 
 .header {
@@ -54,15 +80,16 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .impactSection {
-  background: #f9fafb;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  background: var(--light-gray);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-light);
 }
 
 .calculation {
@@ -80,36 +107,39 @@
 .amount {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .operator {
   font-size: 1.5rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .multiplier {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #10b981;
+  color: var(--success-green);
 }
 
 .totalAmount {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #3b82f6;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .impactLabel {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0;
 }
 
 .breakdown {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
 }
 
 .breakdownItem {
@@ -122,47 +152,49 @@
 
 .breakdownAmount {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .matchedAmount {
   font-weight: 600;
-  color: #10b981;
+  color: var(--success-green);
 }
 
 .breakdownTotal {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
   font-weight: 600;
 }
 
 .totalBreakdownAmount {
   font-size: 1.125rem;
-  color: #3b82f6;
+  color: var(--primary-color);
 }
 
 .thankYouMessage {
-  background: #eff6ff;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  background: rgba(45, 143, 123, 0.05);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(45, 143, 123, 0.1);
 }
 
 .thankYouMessage p:first-child {
   font-style: italic;
-  color: #1e40af;
+  color: var(--primary-color);
   line-height: 1.5;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 8px 0;
 }
 
 .businessName {
   font-size: 0.875rem;
-  color: #3730a3;
+  color: var(--text-secondary);
   margin: 0;
+  font-weight: 500;
 }
 
 .shareSection {
@@ -172,23 +204,24 @@
 
 .shareButton {
   width: 100%;
-  padding: 0.875rem;
-  background: #f3f4f6;
-  border: none;
-  border-radius: 0.75rem;
+  padding: 14px;
+  background: var(--light-gray);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: background 0.2s;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .shareButton:hover {
-  background: #e5e7eb;
+  background: var(--border-light);
+  transform: translateY(-1px);
 }
 
 .shareMenu {
@@ -196,32 +229,33 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin-top: 0.5rem;
-  background: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
+  margin-top: 8px;
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-light);
+  padding: 8px;
   z-index: 10;
 }
 
 .shareOption {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
   background: none;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 4px;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  transition: background 0.2s;
+  gap: 12px;
+  transition: all 0.2s ease;
 }
 
 .shareOption:hover {
-  background: #f3f4f6;
+  background: var(--light-gray);
 }
 
 .shareOption svg {
@@ -245,30 +279,36 @@
 }
 
 .primaryButton {
-  background: #3b82f6;
-  color: white;
+  background: var(--primary-color);
+  color: var(--white);
   border: none;
 }
 
 .primaryButton:hover {
-  background: #2563eb;
+  background: var(--primary-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.2);
 }
 
 .secondaryButton {
-  background: white;
-  color: #1a1a1a;
-  border: 2px solid #e5e7eb;
+  background: var(--white);
+  color: var(--text-primary);
+  border: 2px solid var(--border-light);
 }
 
 .secondaryButton:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--light-gray);
+  border-color: var(--text-secondary);
 }
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
+  .modalOverlay {
+    padding: 20px;
+  }
+  
   .modalContent {
-    padding: 1.5rem;
+    padding: 24px;
   }
   
   .title {
@@ -276,7 +316,7 @@
   }
   
   .calculationRow {
-    gap: 0.5rem;
+    gap: 8px;
   }
   
   .amount,
