@@ -1,14 +1,33 @@
+/* Do-Nation design system */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+}
+
 .container {
-  padding: 16px;
-  background-color: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  padding: 32px;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   margin: 16px auto;
   width: calc(100% - 32px);
   max-width: 1200px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  border: 1px solid var(--border-light);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .headerContainer {
@@ -20,44 +39,48 @@
 
 .header {
   font-size: 28px;
-  font-weight: 500;
-  color: #2d8f7b;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sectionHeader {
   font-size: 22px;
-  font-weight: 500;
-  color: #2d8f7b;
-  margin: 24px 0 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 24px 0 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid rgba(45, 143, 123, 0.1);
+  border-bottom: 2px solid var(--border-light);
 }
 
 .campaignsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
-  padding: 4px;
+  padding: 8px;
   width: 100%;
   overflow-y: auto;
   max-height: 500px;
   scrollbar-width: thin;
-  scrollbar-color: #2d8f7b rgba(45, 143, 123, 0.1);
+  scrollbar-color: var(--primary-color) rgba(45, 143, 123, 0.1);
 }
 
 .campaignsGrid::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .campaignsGrid::-webkit-scrollbar-track {
-  background: rgba(45, 143, 123, 0.1);
-  border-radius: 3px;
+  background: var(--light-gray);
+  border-radius: 4px;
 }
 
 .campaignsGrid::-webkit-scrollbar-thumb {
-  background-color: #2d8f7b;
-  border-radius: 3px;
+  background-color: var(--primary-color);
+  border-radius: 4px;
 }
 
 .campaignsGrid:empty {
@@ -69,12 +92,12 @@
 }
 
 .campaignCard {
-  background-color: #ffffff;
-  border: 1px solid rgba(45, 143, 123, 0.12);
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  background-color: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   height: auto;
@@ -129,8 +152,8 @@
 }
 
 .campaignCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .cardHeader {
@@ -143,8 +166,8 @@
 
 .cardTitle {
   font-size: 18px;
-  font-weight: 500;
-  color: #2d8f7b;
+  font-weight: 600;
+  color: var(--text-primary);
   padding-right: 32px;
   word-break: break-word;
   flex: 1;
@@ -156,19 +179,19 @@
   flex-grow: 1;
   font-size: 14px;
   line-height: 1.5;
-  color: #2d8f7b;
+  color: var(--text-secondary);
 }
 
 .cardContent p {
   margin: 12px 0;
-  color: #2d8f7b;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
 }
 
 .cardContent strong {
-  color: #2d8f7b;
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: 600;
   min-width: 100px;
   margin-right: 12px;
 }
@@ -182,8 +205,8 @@
 }
 
 .raisedAmount strong {
-  color: #2d8f7b;
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: 600;
   min-width: 100px;
   margin-right: 12px;
 }
@@ -242,13 +265,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  background-color: transparent;
-  color: #2d8f7b;
-  border: 2px solid #2d8f7b;
-  padding: 12px 20px;
-  border-radius: 50px;
-  font-size: 14px;
+  gap: 8px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 4px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -257,9 +280,9 @@
 }
 
 .createButton:hover {
-  background-color: #5BA890;
-  border-color: #5BA890;
-  color: white;
+  background-color: var(--primary-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.2);
 }
 
 .error {
@@ -270,54 +293,56 @@
 
 .textCenter {
   text-align: center;
-  color: #2d8f7b;
+  color: var(--text-secondary);
   font-size: 14px;
   padding: 24px;
-  background-color: rgba(45, 143, 123, 0.02);
-  border-radius: 12px;
+  background-color: var(--light-gray);
+  border-radius: 8px;
   margin: 12px 0;
+  border: 1px solid var(--border-light);
 }
 
 .progressBar {
   width: 100%;
-  height: 3px;
-  background-color: rgba(45, 143, 123, 0.08);
+  height: 4px;
+  background-color: var(--light-gray);
   border-radius: 2px;
   overflow: hidden;
   margin: 16px 0;
+  border: 1px solid var(--border-light);
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(to right, #5ecfb6, #2d8f7b);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   transition: width 0.3s ease;
 }
 
 .input {
-  padding: 6px 10px;
-  border: 1px solid rgba(45, 143, 123, 0.15);
-  border-radius: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
   font-size: 14px;
-  color: #2d8f7b;
-  transition: border-color 0.2s ease;
+  color: var(--text-primary);
+  transition: border-color 0.3s ease;
   width: 90px;
   margin: 0 6px;
 }
 
 .input:focus {
   outline: none;
-  border-color: rgba(45, 143, 123, 0.4);
+  border-color: var(--primary-color);
 }
 
 .tealButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
-  color: #2d8f7b;
-  border: 2px solid #2d8f7b;
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: 2px solid var(--border-light);
   padding: 12px 20px;
-  border-radius: 50px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -328,23 +353,22 @@
 }
 
 .tealButton:hover {
-  background-color: #5BA890;
-  border-color: #5BA890;
-  color: white;
+  border-color: var(--text-primary);
+  background-color: var(--light-gray);
 }
 
 .campaignLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #2d8f7b;
+  gap: 8px;
+  color: var(--primary-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
   padding: 12px 20px;
-  border-radius: 50px;
-  background-color: transparent;
-  border: 2px solid #2d8f7b;
+  border-radius: 4px;
+  background-color: var(--white);
+  border: 2px solid var(--border-light);
   transition: all 0.3s ease;
   margin-top: 16px;
   width: fit-content;
@@ -352,17 +376,16 @@
 }
 
 .campaignLink:hover {
-  background-color: #5BA890;
-  border-color: #5BA890;
-  color: white;
+  border-color: var(--text-primary);
+  background-color: var(--light-gray);
   text-decoration: none;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 12px;
-    width: calc(100% - 24px);
-    margin: 12px auto;
+    padding: 24px;
+    width: calc(100% - 32px);
+    margin: 16px auto;
   }
 
   .headerContainer {
@@ -387,7 +410,7 @@
   }
 
   .campaignCard {
-    padding: 16px;
+    padding: 20px;
     min-height: 200px;
   }
 
@@ -406,8 +429,8 @@
   }
 
   .createButton {
-    font-size: 13px;
-    padding: 10px 16px;
+    font-size: 14px;
+    padding: 12px 20px;
   }
 
   .campaignLink {

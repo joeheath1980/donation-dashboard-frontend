@@ -1,53 +1,73 @@
+/* Do-Nation design system - Profile Page */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+  --transition-standard: all 0.3s ease;
+}
+
 .profileBackground {
-  background-color: #f7fafc;
+  background-color: var(--white);
   min-height: 100vh;
-  padding: 3rem 0;
+  padding: 80px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .profileContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 0 24px;
   position: relative;
   overflow: visible;
 }
 
 .profileButtonWrapper {
   position: absolute;
-  top: 0;
-  right: 1rem;
+  top: -40px;
+  right: 24px;
   z-index: 10;
 }
 
 .viewProfileButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--white);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
   text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  font-size: 15px;
+  transition: var(--transition-standard);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .viewProfileButton:hover {
-  background: #667eea;
-  color: white;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.15);
 }
 
 .viewProfileButton svg {
-  font-size: 1.1rem;
+  font-size: 18px;
 }
 
 .impactScoreWrapper {
   background-color: transparent;
-  margin: 0 0 3rem 0;
+  margin: 0 0 60px 0;
   position: relative;
   max-width: 900px;
   margin-left: auto;
@@ -55,47 +75,52 @@
 }
 
 .section {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 48px 32px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-light);
+  transition: var(--transition-standard);
+}
+
+.section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .impactSection {
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(to bottom, var(--white), var(--light-gray));
 }
 
 .impactContent {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-top: 32px;
 }
 
 /* Total Impact Summary */
 .totalImpactSummary {
-  background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
-  border: 2px solid #3b82f6;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  border-radius: 8px;
+  padding: 32px;
+  margin: 32px 0;
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.15);
 }
 
 .totalImpactSummary h3 {
-  font-size: 1.25rem;
-  color: #1e40af;
-  margin-bottom: 1rem;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 24px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .impactBreakdown {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 16px;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -104,114 +129,132 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1rem;
+  font-size: 16px;
+  padding: 8px 0;
 }
 
 .impactLabel {
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
 }
 
 .impactAmount {
-  color: #1f2937;
-  font-weight: 600;
-  font-size: 1.1rem;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .matchAmount {
-  color: #3b82f6;
-  font-weight: 600;
-  font-size: 1.1rem;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .impactDivider {
-  height: 2px;
-  background: linear-gradient(to right, transparent, #3b82f6, transparent);
-  margin: 0.5rem 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 8px 0;
 }
 
 .totalAmount {
-  color: #059669;
+  color: var(--white);
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 28px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Section Headers */
 .sectionHeader {
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
 }
 
 .sectionTitle {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
 }
 
 .sectionIcon {
-  margin-right: 0.75rem;
-  font-size: 1.5rem;
-  vertical-align: middle;
+  margin-right: 12px;
+  font-size: 28px;
   color: var(--primary-color);
 }
 
 .gradientTitle {
-  background: var(--primary-gradient);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sectionTitleUnderline {
   height: 3px;
   width: 60px;
-  background: var(--primary-gradient);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   border-radius: 2px;
+  margin-bottom: 16px;
 }
 
 .sectionSubtitle {
-  color: #718096;
-  font-size: 1rem;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 32px;
 }
 
+/* Grid Layouts */
 .donationsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  align-items: start; /* Changed from default stretch to start */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+  align-items: start;
 }
 
 .activitiesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  align-items: start; /* Prevent columns from affecting each other */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  align-items: start;
 }
 
+/* Cards */
 .donationCard, .activityCard {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  min-height: 200px;
+  min-height: 240px;
   box-sizing: border-box;
-  align-self: start; /* Ensures each card aligns to the top independently */
+  align-self: start;
+  transition: var(--transition-standard);
+}
+
+.donationCard:hover, .activityCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-light);
 }
 
 .cardTitle {
   display: flex;
   align-items: center;
-  font-size: 1.25rem;
+  font-size: 20px;
   font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--primary-color);
+  margin-bottom: 20px;
+  color: var(--text-primary);
 }
 
 .icon {
-  margin-right: 0.75rem;
+  margin-right: 12px;
   color: var(--primary-color);
+  font-size: 20px;
 }
 
 .list {
@@ -226,82 +269,133 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  border-radius: 6px;
-  background: #f7fafc;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  color: #4a5568;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background: var(--light-gray);
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: var(--transition-standard);
+}
+
+.listItem:hover {
+  background: #E8E8ED;
 }
 
 .listItem:last-child {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
+/* Buttons */
 .actionButton {
-  composes: button from './SharedStyles.css';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: auto;
   width: 100%;
+  padding: 12px 24px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background: var(--primary-color-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 .buttonIcon {
-  margin-left: 0.5rem;
+  font-size: 14px;
   transition: transform 0.2s;
 }
 
 .actionButton:hover .buttonIcon {
   transform: translateX(4px);
-  color: white;
 }
 
 .expandedContent {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
 }
 
 .deleteButton {
-  composes: iconButton from './SharedStyles.css';
-  color: #e53e3e;
-  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  margin-left: 8px;
 }
 
 .deleteButton:hover {
-  background: #fed7d7;
-  color: #e53e3e;
+  background: #fff5f5;
+  border-color: #dc3545;
+  transform: scale(1.1);
 }
 
 .followNewButton {
-  composes: button from './SharedStyles.css';
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
   margin-top: auto;
-  padding: 0.75rem;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  text-decoration: none;
   box-sizing: border-box;
-  border-radius: 50px;
+}
+
+.followNewButton:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 .fullWidth {
   width: 100%;
 }
 
+/* Loading & Error States */
 .loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 48px;
   text-align: center;
-  color: #4a5568;
+  color: var(--text-secondary);
 }
 
 .loadingSpinner {
   animation: spin 1s linear infinite;
-  font-size: 2rem;
+  font-size: 32px;
   color: var(--primary-color);
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .errorContainer {
@@ -309,14 +403,28 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 48px;
   text-align: center;
-  color: #e53e3e;
+  color: #dc3545;
 }
 
 .retryButton {
-  composes: button from './SharedStyles.css';
-  margin-top: 1rem;
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #dc3545;
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.retryButton:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 @keyframes spin {
@@ -328,80 +436,39 @@
   }
 }
 
-@media (max-width: 768px) {
-  .profileContainer {
-    padding: 0 0.5rem;
-  }
-
-  .section {
-    padding: 1.5rem;
-  }
-
-  .sectionTitle {
-    font-size: 1.5rem;
-  }
-
-  .donationsGrid, .activitiesGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .cardTitle {
-    font-size: 1.1rem;
-  }
-
-  .listItem {
-    font-size: 0.9rem;
-  }
-
-  .donationCard {
-    padding: 1.25rem;
-  }
-
-  .impactContent {
-    padding: 0.75rem;
-  }
-
-  .actionButton {
-    padding: 8px 20px;
-    font-size: 14px;
-  }
-}
-
 /* Matching Opportunities Styles */
 .matchingOpportunitiesPreview {
   text-align: center;
-  padding: 2rem;
+  padding: 32px;
+  background: var(--light-gray);
+  border-radius: 8px;
 }
 
 .exploreMatchesButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  color: var(--white);
   border: none;
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
+  padding: 16px 32px;
+  font-size: 18px;
   font-weight: 600;
-  border-radius: 0.75rem;
+  border-radius: 4px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  gap: 12px;
+  transition: var(--transition-standard);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 .exploreMatchesButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.buttonIcon {
-  font-size: 1.25rem;
+  box-shadow: 0 6px 20px rgba(45, 143, 123, 0.4);
 }
 
 .matchesAvailable {
-  margin-top: 1rem;
-  color: #666;
-  font-size: 0.875rem;
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 .matchingSection {
@@ -411,28 +478,146 @@
 
 .matchingFeedContainer {
   position: relative;
-  margin-top: 1rem;
+  margin-top: 24px;
   min-height: 500px;
 }
 
 .closeMatchingButton {
   position: absolute;
-  top: -2rem;
+  top: -40px;
   right: 0;
-  background: #f3f4f6;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  padding: 8px 16px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #666;
-  transition: background 0.2s;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: var(--transition-standard);
   z-index: 10;
 }
 
 .closeMatchingButton:hover {
-  background: #e5e7eb;
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profileContainer {
+    padding: 0 20px;
+  }
+
+  .section {
+    padding: 32px 24px;
+  }
+
+  .sectionTitle {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profileBackground {
+    padding: 60px 0;
+  }
+
+  .profileContainer {
+    padding: 0 16px;
+  }
+
+  .section {
+    padding: 24px 20px;
+    margin-bottom: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+
+  .sectionIcon {
+    font-size: 24px;
+  }
+
+  .sectionSubtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .donationsGrid, .activitiesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .donationCard, .activityCard {
+    padding: 20px;
+    min-height: 200px;
+  }
+
+  .cardTitle {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .listItem {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .actionButton, .followNewButton {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .totalImpactSummary {
+    padding: 24px 20px;
+  }
+
+  .totalImpactSummary h3 {
+    font-size: 20px;
+  }
+
+  .totalAmount {
+    font-size: 24px;
+  }
+
+  .exploreMatchesButton {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+
+  .profileButtonWrapper {
+    position: static;
+    margin-bottom: 24px;
+  }
+
+  .viewProfileButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileBackground {
+    padding: 40px 0;
+  }
+
+  .section {
+    padding: 20px 16px;
+    border-radius: 0;
+    margin-left: -16px;
+    margin-right: -16px;
+    width: calc(100% + 32px);
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .donationCard, .activityCard {
+    padding: 16px;
+  }
 }

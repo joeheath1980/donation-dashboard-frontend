@@ -1,3 +1,20 @@
+/* Do-Nation design system */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --gradient-start: #2d8f7b;
+  --gradient-end: #5ecfb6;
+}
+
 /* DonationsComponent.module.css */
 .donationComponentContainer {
   width: 100%;
@@ -5,6 +22,7 @@
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .donationSection {
@@ -18,11 +36,11 @@
 .donationList {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 15px;
+  gap: 16px;
   max-height: 600px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 15px;
+  padding: 32px;
   width: 100%;
   box-sizing: border-box;
   max-width: 100%;
@@ -30,12 +48,12 @@
 
 /* Style for the donation card */
 .donationCard {
-  background-color: white;
+  background-color: var(--white);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 24px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 8px;
@@ -43,8 +61,8 @@
 }
 
 .donationCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Ensure text colors are consistent */
@@ -231,22 +249,24 @@
 
 /* Add New Donation button styles */
 .addNewDonationButton {
-  background: var(--primary-gradient);
-  color: white;
+  background: var(--primary-color);
+  color: var(--white);
   border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
+  padding: 14px 28px;
+  border-radius: 4px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .addNewDonationButton:hover {
-  opacity: 0.9;
+  background: var(--primary-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.2);
 }
 
 .addNewDonationButton svg {
@@ -255,11 +275,11 @@
 
 /* Filter Button */
 .filterButton {
-  background: white;
+  background: var(--white);
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-  padding: 10px 20px;
-  border-radius: 50px;
+  border: 2px solid var(--border-light);
+  padding: 14px 28px;
+  border-radius: 4px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -270,22 +290,23 @@
 }
 
 .filterButton:hover {
-  background: var(--primary-color);
-  color: white;
+  border-color: var(--text-primary);
+  background: var(--light-gray);
 }
 
 .filterButton.active {
   background: var(--primary-color);
-  color: white;
+  color: var(--white);
+  border-color: var(--primary-color);
 }
 
 /* Download Button */
 .downloadButton {
-  background: white;
+  background: var(--white);
   color: var(--text-primary);
-  border: 2px solid #ddd;
-  padding: 10px 20px;
-  border-radius: 50px;
+  border: 2px solid var(--border-light);
+  padding: 14px 28px;
+  border-radius: 4px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -296,8 +317,8 @@
 }
 
 .downloadButton:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: var(--light-gray);
+  border-color: var(--text-secondary);
 }
 
 .downloadButton:disabled {
@@ -309,10 +330,11 @@
 .summaryStats {
   display: flex;
   gap: 24px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
+  padding: 20px;
+  background: var(--light-gray);
+  border-radius: 8px;
   flex-wrap: wrap;
+  border: 1px solid var(--border-light);
 }
 
 .statItem {
@@ -336,10 +358,10 @@
 
 /* Filter Panel */
 .filterPanel {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 24px;
   margin-bottom: 16px;
 }
 
@@ -371,12 +393,13 @@
 
 .filterSelect,
 .filterInput {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
   font-size: 14px;
-  background: white;
+  background: var(--white);
   transition: border-color 0.3s ease;
+  color: var(--text-primary);
 }
 
 .filterSelect:focus,
@@ -408,12 +431,12 @@
   .donationList {
     grid-template-columns: 1fr;
     max-height: 500px;
-    gap: 12px;
-    padding: 10px;
+    gap: 16px;
+    padding: 24px;
   }
 
   .donationCard {
-    padding: 15px;
+    padding: 20px;
   }
 
   .donationContent {
@@ -422,6 +445,6 @@
 
   .addNewDonationButton {
     font-size: 14px;
-    padding: 8px 16px;
+    padding: 12px 20px;
   }
 }
