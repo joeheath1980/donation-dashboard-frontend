@@ -1,8 +1,25 @@
+/* Do-Nation design system */
+:root {
+  --primary-color: #2d8f7b;
+  --primary-color-hover: #1e6b59;
+  --primary-light: #5ecfb6;
+  --dark-gray: #2D2D32;
+  --medium-gray: #6D6D78;
+  --light-gray: #F5F5FA;
+  --white: #FFFFFF;
+  --border-light: #E5E5EA;
+  --text-primary: #2D2D32;
+  --text-secondary: #6D6D78;
+  --success-green: #00D4AA;
+  --transition-standard: all 0.3s ease;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .carouselWrapper {
@@ -14,24 +31,25 @@
   text-align: center;
   padding: 2rem;
   color: var(--text-secondary);
-  font-size: 1.1rem;
-  background-color: rgba(45, 143, 123, 0.05);
-  border-radius: 12px;
+  font-size: 16px;
+  background-color: var(--light-gray);
+  border-radius: 8px;
   margin: 2rem 0;
+  border: 1px solid var(--border-light);
 }
 
 .error {
   text-align: center;
   padding: 2rem;
   background-color: #fff5f5;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 2rem 0;
   border: 1px solid #dc3545;
 }
 
 .error p {
   color: #dc3545;
-  font-size: 1.1rem;
+  font-size: 16px;
   margin-bottom: 1rem;
 }
 
@@ -39,30 +57,32 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #dc3545;
-  border-radius: 50px;
-  font-size: 1rem;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
   font-weight: 600;
-  color: #dc3545;
-  background-color: transparent;
+  color: var(--white);
+  background-color: #dc3545;
   cursor: pointer;
   transition: var(--transition-standard);
 }
 
 .retryButton:hover {
-  background-color: #dc3545;
-  color: white;
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 .noProjects {
   text-align: center;
   padding: 2rem;
   color: var(--text-secondary);
-  font-size: 1.1rem;
-  background-color: var(--background-light);
-  border-radius: 12px;
+  font-size: 16px;
+  background-color: var(--light-gray);
+  border-radius: 8px;
   margin: 2rem 0;
+  border: 1px solid var(--border-light);
 }
 
 .carouselItemWrapper {
@@ -72,24 +92,25 @@
 }
 
 .carouselItem {
-  background-color: #f8f8f8;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition-standard);
   border: 1px solid var(--border-light);
-  max-height: 340px;
+  max-height: 360px;
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .carouselItem:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-light);
 }
 
 .itemContent {
@@ -100,20 +121,20 @@
 }
 
 .itemTitle {
-  font-size: 1.2rem;
+  font-size: 20px;
   font-weight: 600;
-  color: var(--primary-color);
-  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
   line-height: 1.3;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border-light);
 }
 
 .projectSummary {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 4;
@@ -123,23 +144,25 @@
 }
 
 .projectDetails {
-  padding-top: 8px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-light);
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .projectGoalLabel {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--medium-gray);
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 
 .projectGoal {
   color: var(--primary-color);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 24px;
+  margin: 0;
 }
 
 .buttonWrapper {
@@ -152,13 +175,13 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 8px 16px;
-  border: 2px solid var(--primary-color);
-  border-radius: 50px;
-  font-size: 0.95rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--primary-color);
-  background-color: transparent;
+  color: var(--white);
+  background-color: var(--primary-color);
   text-decoration: none;
   transition: var(--transition-standard);
   cursor: pointer;
@@ -169,9 +192,9 @@
 }
 
 .learnMoreButton:hover {
-  background-color: var(--hover-color);
-  border-color: var(--hover-color);
-  color: white;
+  background-color: var(--primary-color-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 /* Carousel Navigation */
@@ -179,30 +202,47 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   display: flex !important;
   align-items: center;
   justify-content: center;
   z-index: 1;
   cursor: pointer;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  transition: var(--transition-standard);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.slickArrow:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
 }
 
 .slickArrow::before {
   content: '';
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   border-top: 2px solid var(--primary-color);
   border-right: 2px solid var(--primary-color);
+  transition: var(--transition-standard);
+}
+
+.slickArrow:hover::before {
+  border-color: var(--white);
 }
 
 .slickPrev {
-  left: -40px;
+  left: -50px;
 }
 
 .slickNext {
-  right: -40px;
+  right: -50px;
 }
 
 .slickPrev::before {
@@ -233,18 +273,33 @@
 }
 
 :global(.slick-dots) {
-  bottom: -35px;
+  bottom: -40px;
+}
+
+:global(.slick-dots li button) {
+  width: 10px;
+  height: 10px;
+  padding: 0;
 }
 
 :global(.slick-dots li button:before) {
-  font-size: 8px;
+  font-size: 10px;
+  line-height: 10px;
+  width: 10px;
+  height: 10px;
   color: var(--border-light);
   opacity: 1;
+  transition: var(--transition-standard);
+}
+
+:global(.slick-dots li button:hover:before) {
+  color: var(--primary-light);
 }
 
 :global(.slick-dots li.slick-active button:before) {
   color: var(--primary-color);
   opacity: 1;
+  transform: scale(1.2);
 }
 
 :global(.slick-slide > div) {
@@ -266,7 +321,6 @@
 
 :global(.slick-slide) {
   height: auto;
-  opacity: 0.5;
   transition: all 0.3s ease;
 }
 
@@ -291,17 +345,17 @@
   }
 
   .carouselItem {
-    padding: 16px;
-    max-height: 320px;
+    padding: 24px;
+    max-height: 340px;
   }
 
   .itemTitle {
-    font-size: 1.1rem;
-    margin-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 12px;
   }
 
   .projectGoal {
-    font-size: 1rem;
+    font-size: 20px;
   }
 }
 
@@ -315,26 +369,26 @@
   }
 
   .carouselItem {
-    padding: 14px;
-    max-height: 300px;
+    padding: 20px;
+    max-height: 320px;
   }
 
   .itemTitle {
-    font-size: 1rem;
-    margin-bottom: 8px;
-  }
-
-  .projectSummary {
-    font-size: 0.9rem;
+    font-size: 16px;
     margin-bottom: 10px;
   }
 
+  .projectSummary {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
   .projectGoal {
-    font-size: 0.95rem;
+    font-size: 18px;
   }
 
   .learnMoreButton {
-    padding: 6px 14px;
-    font-size: 0.9rem;
+    padding: 10px 20px;
+    font-size: 14px;
   }
 }
