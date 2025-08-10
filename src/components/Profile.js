@@ -410,17 +410,6 @@ function Profile() {
                 <button className={`${styles.actionButton} button`} onClick={toggleRegularContributions}>
                   {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
-                {showRegularContributions && (
-                  <>
-                    <div className={styles.expandedOverlay} onClick={toggleRegularContributions} />
-                    <div className={styles.expandedContent}>
-                      <button className={styles.closeExpanded} onClick={toggleRegularContributions}>
-                        <FaTimes />
-                      </button>
-                      <DonationsComponent displayAll={true} ref={regularDonationsRef} />
-                    </div>
-                  </>
-                )}
               </div>
               
               <div className={`${styles.donationCard} card`}>
@@ -435,17 +424,6 @@ function Profile() {
                 <button className={`${styles.actionButton} button`} onClick={toggleOneOffContributions}>
                   {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
-                {showOneOffContributions && (
-                  <>
-                    <div className={styles.expandedOverlay} onClick={toggleOneOffContributions} />
-                    <div className={styles.expandedContent}>
-                      <button className={styles.closeExpanded} onClick={toggleOneOffContributions}>
-                        <FaTimes />
-                      </button>
-                      <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
-                    </div>
-                  </>
-                )}
               </div>
               
               <div className={`${styles.donationCard} card`}>
@@ -476,6 +454,19 @@ function Profile() {
                 </Link>
               </div>
             </div>
+
+            {/* Expanded content sections */}
+            {showRegularContributions && (
+              <div className={styles.expandedSection}>
+                <DonationsComponent displayAll={true} ref={regularDonationsRef} />
+              </div>
+            )}
+            
+            {showOneOffContributions && (
+              <div className={styles.expandedSection}>
+                <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
+              </div>
+            )}
 
             <div className={styles.activitiesGrid}>
               <div className={`${styles.activityCard} card`}>

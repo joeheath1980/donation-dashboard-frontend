@@ -212,6 +212,8 @@
   gap: 20px;
   margin-bottom: 24px;
   align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 .activitiesGrid {
@@ -358,76 +360,26 @@
   transform: translateX(4px);
 }
 
-.expandedOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  backdrop-filter: blur(4px);
-}
-
-.expandedContent {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw;
-  max-width: 1200px;
-  max-height: 80vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+.expandedSection {
+  margin: 24px 0;
+  padding: 32px;
   background: var(--white);
-  border-radius: 12px;
-  padding: 48px 32px 32px 32px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  border-radius: 8px;
   border: 1px solid var(--border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.2s ease-out;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
-/* Custom scrollbar for expanded content */
-.expandedContent::-webkit-scrollbar {
-  width: 8px;
-}
-
-.expandedContent::-webkit-scrollbar-track {
-  background: var(--light-gray);
-  border-radius: 4px;
-}
-
-.expandedContent::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
-}
-
-.expandedContent::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color-hover);
-}
-
-.closeExpanded {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--white);
-  border: 2px solid var(--border-light);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--transition-standard);
-  z-index: 1001;
-}
-
-.closeExpanded:hover {
-  background: var(--light-gray);
-  color: var(--text-primary);
-  transform: rotate(90deg);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .deleteButton {
@@ -624,6 +576,11 @@
 }
 
 @media (max-width: 768px) {
+  .expandedSection {
+    padding: 20px;
+    margin: 16px 0;
+  }
+
   .profileBackground {
     padding: 60px 0;
   }
@@ -704,6 +661,13 @@
 }
 
 @media (max-width: 480px) {
+  .expandedSection {
+    padding: 16px;
+    margin: 12px -16px;
+    border-radius: 0;
+    width: calc(100% + 32px);
+  }
+
   .profileBackground {
     padding: 40px 0;
   }
