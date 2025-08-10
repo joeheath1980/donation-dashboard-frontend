@@ -43,7 +43,9 @@ function DonorManagement() {
   const [activeTab, setActiveTab] = useState('list'); // list, segments, communications
 
   useEffect(() => {
-    if (!user?.isCharity) {
+    // Check if user is a charity (check multiple possible fields)
+    const isCharity = user?.isCharity || user?.userType === 'charity' || user?.type === 'charity';
+    if (user && !isCharity) {
       navigate('/charity-dashboard');
       return;
     }
