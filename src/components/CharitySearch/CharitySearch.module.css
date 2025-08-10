@@ -12,6 +12,8 @@
 .searchIcon {
   position: absolute;
   left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #2d8f7b;
   font-size: 1rem;
   pointer-events: none;
@@ -47,6 +49,14 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.searchHint {
+  color: #6b7280;
+  font-size: 0.8125rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-style: italic;
 }
 
 .errorMessage {

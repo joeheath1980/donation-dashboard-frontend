@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FaSearch, FaSpinner, FaCheckCircle, FaBuilding } from 'react-icons/fa';
 import styles from './CharitySearch.module.css';
 
-const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search for a charity...", required = false }) => {
+const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by charity name, ABN, or category...", required = false }) => {
   const [searchTerm, setSearchTerm] = useState(initialValue || '');
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -149,6 +149,10 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search fo
         />
         {isLoading && <FaSpinner className={styles.loadingIcon} />}
       </div>
+      
+      {!searchTerm && !selectedCharity && (
+        <p className={styles.searchHint}>Start typing to see matching charities</p>
+      )}
 
       {error && (
         <div className={styles.errorMessage}>{error}</div>

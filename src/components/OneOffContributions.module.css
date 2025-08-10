@@ -516,3 +516,40 @@
     gap: 12px;
   }
 }
+
+/* Empty State Styles */
+.emptyState {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.emptyState p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.emptyStateSubtext {
+  font-size: 0.875rem;
+  color: var(--medium-gray);
+  margin-bottom: 1.5rem !important;
+}
+
+.findCauseButton {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.findCauseButton:hover {
+  background: var(--primary-color-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.25);
+}
