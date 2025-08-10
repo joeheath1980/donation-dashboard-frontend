@@ -27,58 +27,107 @@ ChartJS.register(
   Filler
 );
 
+import { 
+  fetchWithFallback, 
+  hasValidPerformanceMetrics,
+  getDataQualityBadge
+} from '../../../utils/dataValidation';
+
+// Data Quality Badge Component
+const DataQualityBadge = ({ quality }) => {
+  if (!quality) return null;
+  
+  // Override badges for performance metrics context
+  const badges = {
+    high: { color: 'green', label: 'Verified Metrics' },
+    medium: { color: 'yellow', label: 'Partial Metrics' },
+    low: { color: 'orange', label: 'Sample Metrics' },
+    none: { color: 'gray', label: 'Estimated' }
+  };
+  
+  const badge = badges[quality] || badges.none;
+  
+  return (
+    <span className={`${styles.qualityBadge} ${styles[badge.color]}`}>
+      {badge.label}
+    </span>
+  );
+};
+
 function PerformanceMetrics({ businessSlug }) {
-  const [metrics, setMetrics] = useState({
-    monthlyTrend: [],
-    employeeEngagement: 0.68,
-    budgetUtilization: 0.75,
-    averageMultiplier: 2.3,
-    donorRetention: 0.82,
-    yearOverYear: { amount: 0.35, donors: 0.28 }
-  });
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dataQuality, setDataQuality] = useState('none');
 
   useEffect(() => {
     fetchMetrics();
   }, [businessSlug]);
 
   const fetchMetrics = async () => {
-    // Mock data for demo
-    setMetrics({
-      monthlyTrend: [
-        { month: 'Jan', amount: 15000, matches: 234 },
-        { month: 'Feb', amount: 18000, matches: 267 },
-        { month: 'Mar', amount: 22000, matches: 312 },
-        { month: 'Apr', amount: 19000, matches: 289 },
-        { month: 'May', amount: 25000, matches: 356 },
-        { month: 'Jun', amount: 28000, matches: 401 }
-      ],
-      employeeEngagement: 0.68,
-      budgetUtilization: 0.75,
-      averageMultiplier: 2.3,
-      donorRetention: 0.82,
-      yearOverYear: { amount: 0.35, donors: 0.28 }
-    });
+    setLoading(true);
+    try {
+      const data = await fetchWithFallback(
+        `/api/public/business/${businessSlug}/performance-metrics`,
+        {
+          monthlyTrend: [],
+          employeeEngagement: 0,
+          budgetUtilization: 0,
+          averageMultiplier: 0,
+          donorRetention: 0,
+          yearOverYear: { amount: 0, donors: 0 },
+          dataQuality: 'none'
+        }
+      );
+      
+      setMetrics(data);
+      setDataQuality(data.dataQuality || 'none');
+    } catch (error) {
+      console.error('Error fetching performance metrics:', error);
+      setMetrics(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Don't display if loading or no meaningful data
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.skeleton}>
+          <div className={styles.skeletonHeader}></div>
+          <div className={styles.skeletonChart}></div>
+          <div className={styles.skeletonGrid}></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if no valid metrics
+  if (!hasValidPerformanceMetrics(metrics)) {
+    return null;
+  }
+
   const chartData = {
-    labels: metrics.monthlyTrend.map(m => m.month),
+    labels: metrics.monthlyTrend?.map(m => m.month) || [],
     datasets: [
-      {
-        label: 'Amount Matched ($)',
-        data: metrics.monthlyTrend.map(m => m.amount),
-        borderColor: '#2d8f7b',
-        backgroundColor: 'rgba(45, 143, 123, 0.1)',
-        yAxisID: 'y',
-        tension: 0.4
-      },
-      {
-        label: 'Number of Matches',
-        data: metrics.monthlyTrend.map(m => m.matches),
-        borderColor: '#5ecfb6',
-        backgroundColor: 'rgba(94, 207, 182, 0.1)',
-        yAxisID: 'y1',
-        tension: 0.4
-      }
+      ...(metrics.monthlyTrend && metrics.monthlyTrend.length > 0 ? [
+        {
+          label: 'Amount Matched ($)',
+          data: metrics.monthlyTrend.map(m => m.amount),
+          borderColor: '#2d8f7b',
+          backgroundColor: 'rgba(45, 143, 123, 0.1)',
+          yAxisID: 'y',
+          tension: 0.4
+        },
+        {
+          label: 'Number of Matches',
+          data: metrics.monthlyTrend.map(m => m.matches),
+          borderColor: '#5ecfb6',
+          backgroundColor: 'rgba(94, 207, 182, 0.1)',
+          yAxisID: 'y1',
+          tension: 0.4
+        }
+      ] : [])
     ]
   };
 
@@ -107,47 +156,65 @@ function PerformanceMetrics({ businessSlug }) {
 
   return (
     <div className={styles.container}>
-      <h3>Performance Metrics</h3>
-      
-      <div className={styles.chartSection}>
-        <h4>Monthly Trends</h4>
-        <div className={styles.chart}>
-          <Line data={chartData} options={options} />
-        </div>
+      <div className={styles.header}>
+        <h3>Performance Metrics</h3>
+        <DataQualityBadge quality={dataQuality} />
       </div>
+      
+      {/* Only show chart if monthly trend data exists */}
+      {metrics.monthlyTrend && metrics.monthlyTrend.length > 0 && (
+        <div className={styles.chartSection}>
+          <h4>Monthly Trends</h4>
+          <div className={styles.chart}>
+            <Line data={chartData} options={options} />
+          </div>
+        </div>
+      )}
 
       <div className={styles.metricsGrid}>
-        <div className={styles.metric}>
-          <FaUsers className={styles.metricIcon} />
-          <div className={styles.metricContent}>
-            <div className={styles.metricValue}>{(metrics.employeeEngagement * 100).toFixed(0)}%</div>
-            <div className={styles.metricLabel}>Employee Engagement</div>
+        {metrics.employeeEngagement > 0 && (
+          <div className={styles.metric}>
+            <FaUsers className={styles.metricIcon} />
+            <div className={styles.metricContent}>
+              <div className={styles.metricValue}>{(metrics.employeeEngagement * 100).toFixed(0)}%</div>
+              <div className={styles.metricLabel}>Employee Engagement</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className={styles.metric}>
-          <FaPercent className={styles.metricIcon} />
-          <div className={styles.metricContent}>
-            <div className={styles.metricValue}>{(metrics.budgetUtilization * 100).toFixed(0)}%</div>
-            <div className={styles.metricLabel}>Budget Utilization</div>
+        {metrics.budgetUtilization > 0 && (
+          <div className={styles.metric}>
+            <FaPercent className={styles.metricIcon} />
+            <div className={styles.metricContent}>
+              <div className={styles.metricValue}>{(metrics.budgetUtilization * 100).toFixed(0)}%</div>
+              <div className={styles.metricLabel}>Budget Utilization</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className={styles.metric}>
-          <FaChartLine className={styles.metricIcon} />
-          <div className={styles.metricContent}>
-            <div className={styles.metricValue}>{metrics.averageMultiplier}x</div>
-            <div className={styles.metricLabel}>Avg Multiplier</div>
+        {metrics.averageMultiplier > 1 && (
+          <div className={styles.metric}>
+            <FaChartLine className={styles.metricIcon} />
+            <div className={styles.metricContent}>
+              <div className={styles.metricValue}>{metrics.averageMultiplier}x</div>
+              <div className={styles.metricLabel}>Avg Multiplier</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className={styles.metric}>
-          <FaArrowUp className={styles.metricIcon} />
-          <div className={styles.metricContent}>
-            <div className={styles.metricValue}>+{(metrics.yearOverYear.amount * 100).toFixed(0)}%</div>
-            <div className={styles.metricLabel}>YoY Growth</div>
+        {metrics.yearOverYear && (metrics.yearOverYear.amount > 0 || metrics.yearOverYear.donors > 0) && (
+          <div className={styles.metric}>
+            <FaArrowUp className={styles.metricIcon} />
+            <div className={styles.metricContent}>
+              <div className={styles.metricValue}>
+                {metrics.yearOverYear.amount > 0 
+                  ? `+${(metrics.yearOverYear.amount * 100).toFixed(0)}%`
+                  : `+${(metrics.yearOverYear.donors * 100).toFixed(0)}% donors`}
+              </div>
+              <div className={styles.metricLabel}>YoY Growth</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,31 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import styles from './BusinessImpactScore.module.css';
 import { FaTrophy, FaChartLine, FaBalanceScale, FaUsers } from 'react-icons/fa';
-
-// Utility function for API calls with fallback
-const fetchWithFallback = async (endpoint, fallbackData = {}) => {
-  try {
-    const response = await fetch(endpoint);
-    if (!response.ok) throw new Error('API Error');
-    return await response.json();
-  } catch (error) {
-    console.warn(`Failed to fetch ${endpoint}, using fallback`);
-    return fallbackData;
-  }
-};
+import { 
+  fetchWithFallback, 
+  hasValidImpactScore, 
+  isProvisionalScore,
+  getDataQualityBadge
+} from '../../../utils/dataValidation';
 
 // Data Quality Badge Component
 const DataQualityBadge = ({ quality }) => {
   if (!quality) return null;
   
-  const badges = {
-    high: { color: 'green', label: 'Verified Data' },
-    medium: { color: 'yellow', label: 'Partial Data' },
-    low: { color: 'orange', label: 'Limited Data' },
-    none: { color: 'gray', label: 'Estimated' }
-  };
-  
-  const badge = badges[quality] || badges.none;
+  const badge = getDataQualityBadge(quality);
   
   return (
     <span className={`${styles.qualityBadge} ${styles[badge.color]}`}>
@@ -86,7 +73,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
   };
 
   // Don't display if score is 0 or missing
-  if (!loading && (!impactData?.score || impactData.score === 0)) {
+  if (!loading && !hasValidImpactScore(impactData?.score)) {
     return null; // Component not rendered
   }
 
@@ -105,7 +92,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
   const { score, breakdown = {}, industryComparison, dataQuality } = impactData;
 
   // Display with confidence indicator if score is low
-  if (score < 30) {
+  if (isProvisionalScore(score)) {
     return (
       <div className={`${styles.container} ${styles.provisional}`}>
         <div className={styles.header}>
