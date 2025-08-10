@@ -35,15 +35,14 @@
 
 .oneOffList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
   max-height: 600px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 32px;
+  padding: 24px;
   width: 100%;
   box-sizing: border-box;
-  max-width: 100%;
 }
 
 /* Style for the contribution card */
