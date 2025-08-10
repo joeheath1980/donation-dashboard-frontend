@@ -1,0 +1,255 @@
+.container {
+  padding: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6D6D78;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E5E5EA;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.editButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #2d8f7b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.editButton:hover {
+  background: #1e6b59;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.metricCard {
+  background: linear-gradient(135deg, rgba(45, 143, 123, 0.05), rgba(94, 207, 182, 0.05));
+  border: 1px solid #E5E5EA;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #5ecfb6;
+}
+
+.metricIcon {
+  width: 48px;
+  height: 48px;
+  background: #2d8f7b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metricIcon svg {
+  font-size: 24px;
+  color: white;
+}
+
+.metricContent {
+  flex: 1;
+}
+
+.metricContent h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6D6D78;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metricValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d8f7b;
+  margin: 0;
+}
+
+.metricUnit {
+  font-size: 16px;
+  font-weight: 400;
+  color: #6D6D78;
+  margin-left: 4px;
+}
+
+/* Edit Mode Styles */
+.editInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.editRow {
+  display: flex;
+  gap: 8px;
+}
+
+.editInputSmall {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.deleteButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deleteButton:hover {
+  background: #c82333;
+}
+
+.deleteButton svg {
+  font-size: 14px;
+}
+
+/* Add Metric Form */
+.addMetricForm {
+  width: 100%;
+}
+
+.addMetricForm h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: #2d8f7b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.addButton:hover {
+  background: #1e6b59;
+}
+
+/* Impact Stories */
+.impactStories {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #E5E5EA;
+}
+
+.impactStories h3 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.story {
+  color: #6D6D78;
+  line-height: 1.8;
+}
+
+.story p {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+}
+
+.story blockquote {
+  background: linear-gradient(135deg, rgba(45, 143, 123, 0.05), rgba(94, 207, 182, 0.05));
+  border-left: 4px solid #2d8f7b;
+  padding: 20px 24px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-style: italic;
+}
+
+.story blockquote cite {
+  display: block;
+  margin-top: 12px;
+  font-style: normal;
+  font-weight: 600;
+  color: #2d8f7b;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .editButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
