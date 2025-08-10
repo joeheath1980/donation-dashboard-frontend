@@ -431,7 +431,7 @@ function CharityAnalytics() {
           <div className={styles.chartsGrid}>
             <div className={styles.chartCard}>
               <h2>Donor Demographics</h2>
-              <DonorDemographics data={analyticsData.donors.demographics} />
+              <DonorDemographics data={analyticsData?.donors?.demographics} />
             </div>
             
             <div className={styles.chartCard}>
