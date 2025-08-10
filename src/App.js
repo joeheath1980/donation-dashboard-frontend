@@ -73,6 +73,9 @@ const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallb
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
 const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsComponent'));
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
+const CharityAnalytics = lazy(() => import('./components/CharityAnalytics/CharityAnalytics'));
+const DonorManagement = lazy(() => import('./components/DonorManagement/DonorManagement'));
+const CharityProfileEditorNew = lazy(() => import('./components/CharityProfileEditor/CharityProfileEditor'));
 const DonationForm = lazy(() => import('./components/DonationForm'));
 const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
 const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
@@ -258,8 +261,10 @@ function App() {
 
                 {/* Charity routes */}
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-analytics" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityAnalytics /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-donors" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><DonorManagement /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditorNew /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-onboarding" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityOnboarding /></SuspenseWrapper></ProtectedRoute>} />
-                <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity/:charityId/edit" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
 
                 {/* Donation routes */}

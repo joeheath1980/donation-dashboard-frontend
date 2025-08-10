@@ -1,0 +1,361 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.loading {
+  padding: 60px;
+  text-align: center;
+  color: #6D6D78;
+  font-size: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #E5E5EA;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6D6D78;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  color: #2D2D32;
+  transform: rotate(90deg);
+}
+
+.profileSection {
+  padding: 32px;
+  background: #F5F5FA;
+}
+
+.profileHeader {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #2d8f7b, #5ecfb6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar svg {
+  font-size: 36px;
+  color: white;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileInfo h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.email,
+.phone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6D6D78;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.email svg,
+.phone svg {
+  font-size: 14px;
+  color: #2d8f7b;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: white;
+  color: #2d8f7b;
+  border: 1px solid #2d8f7b;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.quickActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #2d8f7b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actionButton:hover {
+  background: #1e6b59;
+  transform: translateY(-1px);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #E5E5EA;
+}
+
+.statIcon {
+  font-size: 24px;
+  color: #2d8f7b;
+}
+
+.stat > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #6D6D78;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.tabsContainer {
+  padding: 0 32px 32px;
+}
+
+.tabContent {
+  margin-bottom: 32px;
+}
+
+.tabContent h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #E5E5EA;
+}
+
+.tabContent h4 svg {
+  color: #2d8f7b;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #F5F5FA;
+  border-radius: 8px;
+  border: 1px solid #E5E5EA;
+}
+
+.historyDate {
+  font-size: 14px;
+  color: #6D6D78;
+}
+
+.historyDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d8f7b;
+}
+
+.campaign {
+  font-size: 14px;
+  color: #6D6D78;
+}
+
+.matchedIcon {
+  color: #5ecfb6;
+  font-size: 16px;
+}
+
+.commList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commItem {
+  padding: 12px 16px;
+  background: #F5F5FA;
+  border-radius: 8px;
+  border: 1px solid #E5E5EA;
+}
+
+.commDate {
+  font-size: 12px;
+  color: #6D6D78;
+  margin-bottom: 4px;
+}
+
+.commSubject {
+  font-size: 14px;
+  color: #2D2D32;
+  font-weight: 500;
+}
+
+.notesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.existingNotes {
+  padding: 16px;
+  background: #F5F5FA;
+  border-radius: 8px;
+  color: #2D2D32;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  min-height: 100px;
+}
+
+.addNote {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.noteInput {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.saveButton {
+  align-self: flex-end;
+  padding: 10px 24px;
+  background: #2d8f7b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveButton:hover {
+  background: #1e6b59;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
