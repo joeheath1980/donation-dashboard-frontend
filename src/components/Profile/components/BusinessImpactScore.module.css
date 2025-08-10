@@ -1,0 +1,210 @@
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.percentile {
+  background: linear-gradient(135deg, #2d8f7b, #5ecfb6);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.scoreDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.scoreCircle {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.scoreProgress {
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+
+.scoreNumber {
+  font-size: 56px;
+  font-weight: 700;
+  fill: #2D2D32;
+}
+
+.scoreLabel {
+  font-size: 18px;
+  font-weight: 600;
+  fill: #2d8f7b;
+}
+
+.scoreSubtext {
+  font-size: 14px;
+  fill: #6D6D78;
+}
+
+.comparison {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  background: #F5F5FA;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.comparisonItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.comparisonLabel {
+  font-size: 12px;
+  color: #6D6D78;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.comparisonValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.comparisonDivider {
+  width: 1px;
+  height: 40px;
+  background: #E5E5EA;
+}
+
+.breakdown {
+  margin-bottom: 24px;
+}
+
+.breakdown h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.breakdownItems {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.breakdownItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.breakdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breakdownIcon {
+  font-size: 16px;
+  color: #2d8f7b;
+}
+
+.breakdownLabel {
+  flex: 1;
+  font-size: 14px;
+  color: #6D6D78;
+  font-weight: 500;
+}
+
+.breakdownValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.breakdownBar {
+  height: 8px;
+  background: #F5F5FA;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.breakdownFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.5s ease-in-out;
+}
+
+.insights {
+  padding-top: 20px;
+  border-top: 1px solid #E5E5EA;
+}
+
+.insight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #F5F5FA;
+  border-radius: 8px;
+}
+
+.insightIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.insight p {
+  margin: 0;
+  font-size: 14px;
+  color: #2D2D32;
+  line-height: 1.5;
+}
+
+.insight strong {
+  color: #2d8f7b;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  
+  .scoreCircle svg {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .scoreNumber {
+    font-size: 48px;
+  }
+  
+  .comparison {
+    max-width: 100%;
+  }
+}

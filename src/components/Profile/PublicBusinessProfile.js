@@ -21,6 +21,12 @@ import styles from './PublicBusinessProfile.module.css';
 import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
 
+// Import new components
+import BusinessImpactScore from './components/BusinessImpactScore';
+import CSRInsights from './components/CSRInsights';
+import LiveActivityFeed from './components/LiveActivityFeed';
+import PerformanceMetrics from './components/PerformanceMetrics';
+
 const PublicBusinessProfile = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -208,6 +214,19 @@ const PublicBusinessProfile = () => {
             <p>"{business.impactStatement}"</p>
           </div>
         )}
+
+        {/* New components section */}
+        <div className={styles.enhancedMetrics}>
+          <div className={styles.metricsGrid}>
+            <BusinessImpactScore businessSlug={slug} initialScore={stats?.impactScore || 85} />
+            <LiveActivityFeed businessSlug={slug} />
+          </div>
+          
+          <div className={styles.insightsSection}>
+            <CSRInsights businessSlug={slug} />
+            <PerformanceMetrics businessSlug={slug} />
+          </div>
+        </div>
 
         <div className={styles.tabNavigation}>
           <button 

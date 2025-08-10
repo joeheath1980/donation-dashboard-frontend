@@ -1,0 +1,69 @@
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.container h3 {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+.chartSection {
+  margin-bottom: 32px;
+}
+
+.chartSection h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.chart {
+  height: 300px;
+  padding: 16px;
+  background: #F5F5FA;
+  border-radius: 8px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #F5F5FA, #FFFFFF);
+  border-radius: 8px;
+  border: 1px solid #E5E5EA;
+}
+
+.metricIcon {
+  font-size: 32px;
+  color: #2d8f7b;
+}
+
+.metricContent {
+  flex: 1;
+}
+
+.metricValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D2D32;
+  margin-bottom: 4px;
+}
+
+.metricLabel {
+  font-size: 12px;
+  color: #6D6D78;
+  font-weight: 500;
+}
