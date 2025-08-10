@@ -1,0 +1,313 @@
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+/* ESG Section */
+.esgSection {
+  margin-bottom: 32px;
+}
+
+.esgSection h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.esgScores {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.esgScore {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #F5F5FA;
+  border-radius: 8px;
+}
+
+.esgIconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.esgIcon {
+  font-size: 24px;
+  color: white;
+}
+
+.esgContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esgLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6D6D78;
+}
+
+.esgBar {
+  height: 8px;
+  background: #E5E5EA;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.esgFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-in-out;
+}
+
+.esgValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2D2D32;
+}
+
+/* Metrics Section */
+.metricsSection {
+  margin-bottom: 32px;
+}
+
+.metricsSection h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #F5F5FA 0%, #FFFFFF 100%);
+  border: 1px solid #E5E5EA;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.metricIcon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.metricValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D2D32;
+  margin-bottom: 4px;
+}
+
+.metricLabel {
+  font-size: 12px;
+  color: #6D6D78;
+  font-weight: 500;
+}
+
+/* SDG Section */
+.sdgSection {
+  margin-bottom: 32px;
+}
+
+.sdgSection h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D2D32;
+}
+
+.sdgGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.sdgBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.sdgBadge:hover {
+  transform: scale(1.05);
+}
+
+.sdgNumber {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sdgName {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Multiplier Section */
+.multiplierSection {
+  padding-top: 24px;
+  border-top: 1px solid #E5E5EA;
+}
+
+.multiplierCard {
+  background: linear-gradient(135deg, #2d8f7b 0%, #5ecfb6 100%);
+  border-radius: 12px;
+  padding: 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.multiplierCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+.multiplierIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.multiplierContent {
+  position: relative;
+  z-index: 1;
+}
+
+.multiplierValue {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.multiplierLabel {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.multiplierDescription {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.multiplierVisual {
+  position: relative;
+  z-index: 1;
+}
+
+.multiplierBar {
+  display: flex;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+}
+
+.donorPortion {
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.businessPortion {
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.multiplierTotal {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .sdgGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .multiplierValue {
+    font-size: 36px;
+  }
+}

@@ -598,6 +598,24 @@
   background: #1976d2;
 }
 
+/* Enhanced Metrics Section */
+.enhancedMetrics {
+  margin-bottom: 32px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.insightsSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .headerContent {
@@ -634,6 +652,14 @@
   .campaignStats {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .insightsSection {
+    grid-template-columns: 1fr;
   }
 }
 
