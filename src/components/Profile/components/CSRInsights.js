@@ -10,46 +10,25 @@ import {
   FaHandsHelping,
   FaBullseye
 } from 'react-icons/fa';
-
-// Utility function for API calls with fallback
-const fetchWithFallback = async (endpoint, fallbackData = {}) => {
-  try {
-    const response = await fetch(endpoint);
-    if (!response.ok) throw new Error('API Error');
-    return await response.json();
-  } catch (error) {
-    console.warn(`Failed to fetch ${endpoint}, using fallback`);
-    return fallbackData;
-  }
-};
+import { 
+  fetchWithFallback, 
+  hasValidESGScores, 
+  hasValidMetrics,
+  getDataQualityBadge,
+  formatNumber
+} from '../../../utils/dataValidation';
 
 // Data Quality Badge Component
 const DataQualityBadge = ({ quality }) => {
   if (!quality) return null;
   
-  const badges = {
-    high: { color: 'green', label: 'Verified Data' },
-    medium: { color: 'yellow', label: 'Partial Data' },
-    low: { color: 'orange', label: 'Limited Data' },
-    none: { color: 'gray', label: 'Estimated' }
-  };
-  
-  const badge = badges[quality] || badges.none;
+  const badge = getDataQualityBadge(quality);
   
   return (
     <span className={`${styles.qualityBadge} ${styles[badge.color]}`}>
       {badge.label}
     </span>
   );
-};
-
-// Helper validation functions
-const hasValidESGScores = (scores) => {
-  return scores && (scores.environmental > 0 || scores.social > 0 || scores.governance > 0);
-};
-
-const hasValidMetrics = (metrics) => {
-  return metrics && Object.values(metrics).some(v => v > 0);
 };
 
 // ESG Scores Component
@@ -147,11 +126,7 @@ const SustainabilityMetrics = ({ metrics }) => {
     return null; // Don't display if no metrics
   }
 
-  const formatNumber = (num) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
+  // Use shared formatNumber function
 
   const getIconForMetric = (key) => {
     const icons = {

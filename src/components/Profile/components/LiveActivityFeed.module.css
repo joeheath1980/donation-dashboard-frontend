@@ -16,6 +16,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .titleSection h3 {
@@ -297,6 +298,95 @@
   font-weight: 700;
 }
 
+/* Loading skeleton */
+.skeleton {
+  padding: 24px;
+}
+
+.skeletonHeader {
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  width: 150px;
+}
+
+.skeletonStats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.skeletonStats::before,
+.skeletonStats::after {
+  content: '';
+  height: 60px;
+  width: 120px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeletonActivity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonActivity::before,
+.skeletonActivity::after {
+  content: '';
+  height: 80px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Data quality badges */
+.qualityBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.qualityBadge.green {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.qualityBadge.yellow {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.qualityBadge.orange {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.qualityBadge.gray {
+  background: #f5f5f5;
+  color: #757575;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 20px;
@@ -314,5 +404,9 @@
   
   .feedContainer {
     max-height: 400px;
+  }
+  
+  .skeletonStats {
+    flex-direction: column;
   }
 }

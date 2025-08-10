@@ -9,93 +9,100 @@ import {
   FaTrophy,
   FaBolt
 } from 'react-icons/fa';
+import { 
+  fetchWithFallback, 
+  hasValidActivityStats,
+  getDataQualityBadge
+} from '../../../utils/dataValidation';
+
+// Data Quality Badge Component
+const DataQualityBadge = ({ quality }) => {
+  if (!quality) return null;
+  
+  // Override badges for activity feed context
+  const badges = {
+    high: { color: 'green', label: 'Live Data' },
+    medium: { color: 'yellow', label: 'Recent Data' },
+    low: { color: 'orange', label: 'Sample Data' },
+    none: { color: 'gray', label: 'Demo Data' }
+  };
+  
+  const badge = badges[quality] || badges.none;
+  
+  return (
+    <span className={`${styles.qualityBadge} ${styles[badge.color]}`}>
+      {badge.label}
+    </span>
+  );
+};
 
 function LiveActivityFeed({ businessSlug }) {
   const [activities, setActivities] = useState([]);
-  const [stats, setStats] = useState({
-    activeDonors: 45,
-    todayTotal: 2500,
-    currentStreak: 7
-  });
-  const [isLive, setIsLive] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dataQuality, setDataQuality] = useState('none');
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
-    // Initial fetch
     fetchRecentActivity();
-    
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      addNewActivity();
-    }, 15000); // Add new activity every 15 seconds
-
-    return () => clearInterval(interval);
   }, [businessSlug]);
 
   const fetchRecentActivity = async () => {
+    setLoading(true);
     try {
-      // API call would go here
-      // const response = await fetch(`/api/public/business/${businessSlug}/live-activity`);
-      // const data = await response.json();
-      
-      // For demo, use mock data
-      const mockActivities = [
+      const data = await fetchWithFallback(
+        `/api/public/business/${businessSlug}/live-activity`,
         {
-          id: 1,
-          timestamp: new Date(Date.now() - 2 * 60 * 1000),
-          type: 'match',
-          amount: 50,
-          multiplier: 2,
-          category: 'Education',
-          donorInitials: 'JD',
-          anonymous: false
-        },
-        {
-          id: 2,
-          timestamp: new Date(Date.now() - 15 * 60 * 1000),
-          type: 'match',
-          amount: 100,
-          multiplier: 3,
-          category: 'Health',
-          donorInitials: 'SM',
-          anonymous: false
-        },
-        {
-          id: 3,
-          timestamp: new Date(Date.now() - 45 * 60 * 1000),
-          type: 'milestone',
-          milestone: '$10,000 reached for Clean Water Initiative',
-          icon: 'trophy'
-        },
-        {
-          id: 4,
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          type: 'match',
-          amount: 25,
-          multiplier: 2,
-          category: 'Environment',
-          anonymous: true
-        },
-        {
-          id: 5,
-          timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-          type: 'campaign',
-          campaign: 'Holiday Giving Campaign launched',
-          target: 50000
+          activities: [],
+          stats: {
+            activeDonors: 0,
+            todayTotal: 0,
+            currentStreak: 0
+          },
+          dataQuality: 'none'
         }
-      ];
+      );
       
-      setActivities(mockActivities);
-      setStats({
-        activeDonors: 45,
-        todayTotal: 2500,
-        currentStreak: 7
-      });
+      // Check if we have real activity data
+      const hasRealData = data.activities && data.activities.length > 0;
+      const hasValidStats = hasValidActivityStats(data.stats);
+
+      if (!hasRealData && !hasValidStats) {
+        // Don't show component if no meaningful data
+        setActivities([]);
+        setStats(null);
+        setDataQuality('none');
+        setIsLive(false);
+      } else {
+        // Use real data if available, otherwise show meaningful sample
+        setActivities(data.activities || []);
+        setStats(data.stats);
+        setDataQuality(data.dataQuality || 'medium');
+        setIsLive(hasRealData && data.stats?.activeDonors > 0);
+        
+        // Start live updates only if we have real data
+        if (hasRealData && data.stats?.activeDonors > 0) {
+          const interval = setInterval(() => {
+            addNewActivity();
+          }, 30000); // Update every 30 seconds for real data
+          
+          return () => clearInterval(interval);
+        }
+      }
     } catch (error) {
       console.error('Error fetching activity:', error);
+      setActivities([]);
+      setStats(null);
+      setDataQuality('none');
+    } finally {
+      setLoading(false);
     }
   };
 
   const addNewActivity = () => {
+    // Only add new activities if we have real data and are live
+    if (!isLive || !stats) return;
+    
     const newActivity = {
       id: Date.now(),
       timestamp: new Date(),
@@ -220,11 +227,35 @@ function LiveActivityFeed({ businessSlug }) {
     }
   };
 
+  // Don't display if loading or no meaningful data
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.skeleton}>
+          <div className={styles.skeletonHeader}></div>
+          <div className={styles.skeletonStats}></div>
+          <div className={styles.skeletonActivity}></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if no stats or meaningful activity
+  if (!stats || (
+    stats.activeDonors === 0 && 
+    stats.todayTotal === 0 && 
+    stats.currentStreak === 0 &&
+    activities.length === 0
+  )) {
+    return null;
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titleSection}>
           <h3>Live Activity</h3>
+          <DataQualityBadge quality={dataQuality} />
           {isLive && (
             <span className={styles.liveIndicator}>
               <span className={styles.liveDot}></span>
@@ -233,21 +264,27 @@ function LiveActivityFeed({ businessSlug }) {
           )}
         </div>
         <div className={styles.statsBar}>
-          <div className={styles.stat}>
-            <FaUser className={styles.statIcon} />
-            <span className={styles.statValue}>{stats.activeDonors}</span>
-            <span className={styles.statLabel}>Active Now</span>
-          </div>
-          <div className={styles.stat}>
-            <FaHeart className={styles.statIcon} />
-            <span className={styles.statValue}>${stats.todayTotal.toLocaleString()}</span>
-            <span className={styles.statLabel}>Today</span>
-          </div>
-          <div className={styles.stat}>
-            <FaChartLine className={styles.statIcon} />
-            <span className={styles.statValue}>{stats.currentStreak}</span>
-            <span className={styles.statLabel}>Day Streak</span>
-          </div>
+          {stats.activeDonors > 0 && (
+            <div className={styles.stat}>
+              <FaUser className={styles.statIcon} />
+              <span className={styles.statValue}>{stats.activeDonors}</span>
+              <span className={styles.statLabel}>Active Now</span>
+            </div>
+          )}
+          {stats.todayTotal > 0 && (
+            <div className={styles.stat}>
+              <FaHeart className={styles.statIcon} />
+              <span className={styles.statValue}>${stats.todayTotal.toLocaleString()}</span>
+              <span className={styles.statLabel}>Today</span>
+            </div>
+          )}
+          {stats.currentStreak > 0 && (
+            <div className={styles.stat}>
+              <FaChartLine className={styles.statIcon} />
+              <span className={styles.statValue}>{stats.currentStreak}</span>
+              <span className={styles.statLabel}>Day Streak</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -255,7 +292,7 @@ function LiveActivityFeed({ businessSlug }) {
         {activities.length === 0 ? (
           <div className={styles.emptyState}>
             <FaHeart className={styles.emptyIcon} />
-            <p>No recent activity</p>
+            <p>Activity will appear as donations are made</p>
           </div>
         ) : (
           <div className={styles.activityList}>
@@ -264,11 +301,13 @@ function LiveActivityFeed({ businessSlug }) {
         )}
       </div>
 
-      <div className={styles.poweredBy}>
-        <span>Powered by</span>
-        <strong>{stats.activeDonors} donors</strong>
-        <span>making a difference</span>
-      </div>
+      {stats.activeDonors > 0 && (
+        <div className={styles.poweredBy}>
+          <span>Powered by</span>
+          <strong>{stats.activeDonors} donors</strong>
+          <span>making a difference</span>
+        </div>
+      )}
     </div>
   );
 }
