@@ -416,6 +416,8 @@
 .icon {
   margin-right: 0.5rem;
   color: var(--primary-color);
+  font-size: 1.125rem;
+  vertical-align: middle;
 }
 
 .sectionTitle {

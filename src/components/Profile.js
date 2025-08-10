@@ -399,11 +399,14 @@ function Profile() {
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegHandshake className={styles.icon} /> Regular Donations
                 </h3>
-                <ul className={styles.list}>
+                <div className={styles.charityPills}>
                   {getUniqueCharities().map((charity, index) => (
-                    <li key={index} className={styles.listItem}>{charity}</li>
+                    <div key={index} className={styles.charityPill}>
+                      <FaRegHeart className={styles.pillIcon} />
+                      <span>{charity}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
                 <button className={`${styles.actionButton} button`} onClick={toggleRegularContributions}>
                   {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>

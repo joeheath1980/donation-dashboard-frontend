@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fa';
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
+import { FaQuestionCircle } from 'react-icons/fa';
 import axios from 'axios';
 import DefaultBusinessLogo from './DefaultBusinessLogo';
 
@@ -358,6 +359,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
               onClick={handleBulkDownload} 
               className={oneOffStyles.downloadButton}
               disabled={downloadingReceipts || filteredContributions.filter(c => c.receiptUrl).length === 0}
+              title={filteredContributions.filter(c => c.receiptUrl).length === 0 ? "Available once you have at least one donation with a receipt" : "Download all available receipts"}
             >
               <FaFileDownload /> {downloadingReceipts ? 'Downloading...' : 'Download Receipts'}
             </button>
@@ -374,7 +376,12 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
               <span className={oneOffStyles.statValue}>{summaryStats.count}</span>
             </div>
             <div className={oneOffStyles.statItem}>
-              <span className={oneOffStyles.statLabel}>Matched:</span>
+              <span className={oneOffStyles.statLabel}>
+                Matched:
+                <InstantTooltip text="Matched donations are contributions doubled by partner sponsors">
+                  <FaQuestionCircle style={{ marginLeft: '4px', fontSize: '12px', color: '#6b7280', cursor: 'help' }} />
+                </InstantTooltip>
+              </span>
               <span className={oneOffStyles.statValue}>{summaryStats.matched}</span>
             </div>
           </div>
@@ -593,9 +600,22 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
               })}
             </>
           ) : (
-            <p className="textCenter">
-              {hasActiveFilters ? 'No contributions match your filters.' : 'No one-off contributions found.'}
-            </p>
+            <div className={oneOffStyles.emptyState}>
+              {hasActiveFilters ? (
+                <p>No contributions match your filters.</p>
+              ) : (
+                <>
+                  <p>No one-off donations yet.</p>
+                  <p className={oneOffStyles.emptyStateSubtext}>Explore causes to make your first impact.</p>
+                  <button 
+                    onClick={() => window.location.href = '/search-charities'} 
+                    className={oneOffStyles.findCauseButton}
+                  >
+                    Find a Cause
+                  </button>
+                </>
+              )}
+            </div>
           )}
           {showScrollIndicator && <div className="scrollIndicator" />}
         </div>
