@@ -411,9 +411,15 @@ function Profile() {
                   {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
                 {showRegularContributions && (
-                  <div className={styles.expandedContent}>
-                    <DonationsComponent displayAll={true} ref={regularDonationsRef} />
-                  </div>
+                  <>
+                    <div className={styles.expandedOverlay} onClick={toggleRegularContributions} />
+                    <div className={styles.expandedContent}>
+                      <button className={styles.closeExpanded} onClick={toggleRegularContributions}>
+                        <FaTimes />
+                      </button>
+                      <DonationsComponent displayAll={true} ref={regularDonationsRef} />
+                    </div>
+                  </>
                 )}
               </div>
               
@@ -430,9 +436,15 @@ function Profile() {
                   {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                 </button>
                 {showOneOffContributions && (
-                  <div className={styles.expandedContent}>
-                    <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
-                  </div>
+                  <>
+                    <div className={styles.expandedOverlay} onClick={toggleOneOffContributions} />
+                    <div className={styles.expandedContent}>
+                      <button className={styles.closeExpanded} onClick={toggleOneOffContributions}>
+                        <FaTimes />
+                      </button>
+                      <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
+                    </div>
+                  </>
                 )}
               </div>
               
