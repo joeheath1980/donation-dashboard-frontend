@@ -13,6 +13,12 @@ import {
   RiLineChartLine
 } from 'react-icons/ri';
 
+// Import enhanced components from Profile
+import BusinessImpactScore from './Profile/components/BusinessImpactScore';
+import CSRInsights from './Profile/components/CSRInsights';
+import PerformanceMetrics from './Profile/components/PerformanceMetrics';
+import LiveActivityFeed from './Profile/components/LiveActivityFeed';
+
 function BusinessDashboard() {
   const { getAuthHeaders, user } = useAuth();
   const navigate = useNavigate();
@@ -268,69 +274,35 @@ function BusinessDashboard() {
       </div>
 
       <div className={styles.dashboardGrid}>
-        {/* Giving Footprint Card */}
-        <div className={styles.givingFootprintCard}>
-          <h2>Giving Footprint</h2>
-          
-          <div className={styles.budgetProgress}>
-            <svg className={styles.progressCircle} viewBox="0 0 200 200">
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke="#e0e0e0"
-                strokeWidth="12"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke="#007bff"
-                strokeWidth="12"
-                strokeDasharray={`${calculateBudgetPercentage() * 5.65} 565`}
-                strokeDashoffset="0"
-                transform="rotate(-90 100 100)"
-                className={styles.progressBar}
-              />
-              <text x="100" y="85" textAnchor="middle" className={styles.progressText}>
-                {calculateBudgetPercentage()}%
-              </text>
-              <text x="100" y="115" textAnchor="middle" className={styles.progressLabel}>
-                Budget Utilised
-              </text>
-            </svg>
-          </div>
+        {/* Enhanced Impact Score Card */}
+        <div className={styles.impactScoreCard}>
+          <BusinessImpactScore 
+            businessSlug={businessData.slug} 
+            initialScore={businessData.givingScore || 85}
+          />
+        </div>
 
-          <div className={styles.givingScore}>
-            <div className={styles.scoreCircle}>
-              <span className={styles.scoreNumber}>{businessData.givingScore || 85}</span>
-              <span className={styles.scoreLabel}>Giving Score</span>
-            </div>
-          </div>
-
-          <div className={styles.categoryBreakdown}>
-            <h3>Category Breakdown</h3>
-            <div className={styles.categoryChart}>
-              {categoryBreakdown.map((category, index) => (
-                <div key={index} className={styles.categoryItem}>
-                  <div className={styles.categoryBar}>
-                    <div 
-                      className={styles.categoryFill}
-                      style={{ 
-                        width: `${category.percentage}%`,
-                        backgroundColor: category.color 
-                      }}
-                    />
-                  </div>
-                  <div className={styles.categoryInfo}>
-                    <span className={styles.categoryName}>{category.category}</span>
-                    <span className={styles.categoryPercent}>{category.percentage}%</span>
-                  </div>
+        {/* Category Breakdown Card */}
+        <div className={styles.categoryCard}>
+          <h2>Category Breakdown</h2>
+          <div className={styles.categoryChart}>
+            {categoryBreakdown.map((category, index) => (
+              <div key={index} className={styles.categoryItem}>
+                <div className={styles.categoryBar}>
+                  <div 
+                    className={styles.categoryFill}
+                    style={{ 
+                      width: `${category.percentage}%`,
+                      backgroundColor: category.color 
+                    }}
+                  />
                 </div>
-              ))}
-            </div>
+                <div className={styles.categoryInfo}>
+                  <span className={styles.categoryName}>{category.category}</span>
+                  <span className={styles.categoryPercent}>{category.percentage}%</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -394,42 +366,9 @@ function BusinessDashboard() {
           )}
         </div>
 
-        {/* Recent Matches Feed */}
-        <div className={styles.recentMatchesCard}>
-          <div className={styles.cardHeader}>
-            <h2>Recent Matches</h2>
-            <span className={styles.liveIndicator}>
-              <span className={styles.liveDot}></span>
-              Live
-            </span>
-          </div>
-
-          <div className={styles.matchesList}>
-            {recentMatches.length === 0 ? (
-              <p className={styles.noMatches}>No matches yet</p>
-            ) : (
-              recentMatches.map(match => (
-                <div key={match._id} className={styles.matchItem}>
-                  <div className={styles.matchAvatar}>
-                    {match.userAvatar}
-                  </div>
-                  <div className={styles.matchDetails}>
-                    <div className={styles.matchInfo}>
-                      <strong>{match.userName}</strong> donated ${match.amount} to {match.charityName}
-                    </div>
-                    <div className={styles.matchMeta}>
-                      <span className={styles.matchMultiplier}>
-                        {match.multiplier}x match = ${match.matchAmount}
-                      </span>
-                      <span className={styles.matchTime}>
-                        {formatTimeAgo(match.timestamp)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+        {/* Live Activity Feed */}
+        <div className={styles.liveActivityCard}>
+          <LiveActivityFeed businessSlug={businessData.slug} />
         </div>
 
         {/* Quick Actions */}
@@ -480,6 +419,18 @@ function BusinessDashboard() {
                 Across {categoryBreakdown.length} categories
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Metrics Section */}
+      <div className={styles.enhancedMetricsSection}>
+        <div className={styles.metricsGrid}>
+          <div className={styles.csrInsightsCard}>
+            <CSRInsights businessSlug={businessData.slug} />
+          </div>
+          <div className={styles.performanceMetricsCard}>
+            <PerformanceMetrics businessSlug={businessData.slug} />
           </div>
         </div>
       </div>
