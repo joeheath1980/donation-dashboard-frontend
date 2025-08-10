@@ -6,10 +6,19 @@ import styles from './DonorDemographics.module.css';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function DonorDemographics({ data }) {
+  // Add null checks and default values
+  if (!data || !data.geographic || !data.frequency) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading donor demographics...</div>
+      </div>
+    );
+  }
+
   const geographicData = {
-    labels: Object.keys(data.geographic),
+    labels: Object.keys(data.geographic || {}),
     datasets: [{
-      data: Object.values(data.geographic),
+      data: Object.values(data.geographic || {}),
       backgroundColor: [
         '#2d8f7b',
         '#5ecfb6',
@@ -24,9 +33,9 @@ function DonorDemographics({ data }) {
   };
 
   const frequencyData = {
-    labels: Object.keys(data.frequency),
+    labels: Object.keys(data.frequency || {}),
     datasets: [{
-      data: Object.values(data.frequency),
+      data: Object.values(data.frequency || {}),
       backgroundColor: [
         '#2d8f7b',
         '#5ecfb6',

@@ -2,6 +2,13 @@
   padding: 20px;
 }
 
+.loading {
+  text-align: center;
+  padding: 60px;
+  color: #6D6D78;
+  font-size: 16px;
+}
+
 .chartGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
