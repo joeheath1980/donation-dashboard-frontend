@@ -728,3 +728,71 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Enhanced Metrics Section for new components */
+.impactScoreCard {
+  grid-column: span 5;
+}
+
+.categoryCard {
+  grid-column: span 3;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.categoryCard h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.liveActivityCard {
+  grid-column: span 4;
+}
+
+.enhancedMetricsSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 32px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.csrInsightsCard,
+.performanceMetricsCard {
+  min-height: 400px;
+}
+
+/* Responsive Updates for Enhanced Components */
+@media (max-width: 1024px) {
+  .impactScoreCard {
+    grid-column: span 6;
+  }
+  
+  .categoryCard {
+    grid-column: span 6;
+  }
+  
+  .liveActivityCard {
+    grid-column: span 12;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .impactScoreCard,
+  .categoryCard,
+  .liveActivityCard {
+    grid-column: span 12;
+  }
+}
