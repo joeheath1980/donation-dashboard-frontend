@@ -407,9 +407,11 @@ function Profile() {
                     </div>
                   ))}
                 </div>
-                <button className={`${styles.actionButton} button`} onClick={toggleRegularContributions}>
-                  {showRegularContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-                </button>
+                {!showRegularContributions && (
+                  <button className={`${styles.actionButton} button`} onClick={toggleRegularContributions}>
+                    See All <FaChevronRight className={styles.buttonIcon} />
+                  </button>
+                )}
               </div>
               
               <div className={`${styles.donationCard} card`}>
@@ -421,9 +423,11 @@ function Profile() {
                     <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
                   ))}
                 </ul>
-                <button className={`${styles.actionButton} button`} onClick={toggleOneOffContributions}>
-                  {showOneOffContributions ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
-                </button>
+                {!showOneOffContributions && (
+                  <button className={`${styles.actionButton} button`} onClick={toggleOneOffContributions}>
+                    See All <FaChevronRight className={styles.buttonIcon} />
+                  </button>
+                )}
               </div>
               
               <div className={`${styles.donationCard} card`}>
@@ -458,12 +462,24 @@ function Profile() {
             {/* Expanded content sections */}
             {showRegularContributions && (
               <div className={styles.expandedSection}>
+                <div className={styles.expandedHeader}>
+                  <h3 className={styles.expandedTitle}>All Regular Donations</h3>
+                  <button className={styles.hideButton} onClick={toggleRegularContributions}>
+                    <FaTimes /> Hide
+                  </button>
+                </div>
                 <DonationsComponent displayAll={true} ref={regularDonationsRef} />
               </div>
             )}
             
             {showOneOffContributions && (
               <div className={styles.expandedSection}>
+                <div className={styles.expandedHeader}>
+                  <h3 className={styles.expandedTitle}>All One-off Contributions</h3>
+                  <button className={styles.hideButton} onClick={toggleOneOffContributions}>
+                    <FaTimes /> Hide
+                  </button>
+                </div>
                 <OneOffContributionsComponent displayAll={true} ref={oneOffContributionsRef} />
               </div>
             )}
