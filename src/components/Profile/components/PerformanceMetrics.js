@@ -14,6 +14,11 @@ import {
 } from 'chart.js';
 import styles from './PerformanceMetrics.module.css';
 import { FaChartLine, FaUsers, FaPercent, FaArrowUp } from 'react-icons/fa';
+import { 
+  fetchWithFallback, 
+  hasValidPerformanceMetrics,
+  getDataQualityBadge
+} from '../../../utils/dataValidation';
 
 ChartJS.register(
   CategoryScale,
@@ -26,12 +31,6 @@ ChartJS.register(
   Legend,
   Filler
 );
-
-import { 
-  fetchWithFallback, 
-  hasValidPerformanceMetrics,
-  getDataQualityBadge
-} from '../../../utils/dataValidation';
 
 // Data Quality Badge Component
 const DataQualityBadge = ({ quality }) => {
