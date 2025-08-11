@@ -296,6 +296,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
       <div className={styles.formGroup}>
         <label>Company Description</label>
         <textarea
+          id="companyDescription"
+          name="companyDescription"
           value={formData.companyDescription}
           onChange={(e) => onChange('companyDescription', e.target.value)}
           placeholder="Tell us about your company and its mission..."
@@ -308,6 +310,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <label>Phone Number</label>
         <input
           type="tel"
+          id="phoneNumber"
+          name="phoneNumber"
           value={formData.phoneNumber}
           onChange={(e) => onChange('phoneNumber', e.target.value)}
           placeholder="+1 (555) 123-4567"
@@ -320,6 +324,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <div className={styles.addressGrid}>
           <input
             type="text"
+            id="addressStreet"
+            name="addressStreet"
             placeholder="Street Address"
             value={formData.address.street}
             onChange={(e) => onAddressChange('address', 'street', e.target.value)}
@@ -327,6 +333,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="addressCity"
+            name="addressCity"
             placeholder="City"
             value={formData.address.city}
             onChange={(e) => onAddressChange('address', 'city', e.target.value)}
@@ -334,6 +342,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="addressState"
+            name="addressState"
             placeholder="State/Province"
             value={formData.address.state}
             onChange={(e) => onAddressChange('address', 'state', e.target.value)}
@@ -341,6 +351,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="addressZipCode"
+            name="addressZipCode"
             placeholder="ZIP/Postal Code"
             value={formData.address.zipCode}
             onChange={(e) => onAddressChange('address', 'zipCode', e.target.value)}
@@ -348,6 +360,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="addressCountry"
+            name="addressCountry"
             placeholder="Country"
             value={formData.address.country}
             onChange={(e) => onAddressChange('address', 'country', e.target.value)}
@@ -360,6 +374,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <label>Billing Email</label>
         <input
           type="email"
+          id="billingEmail"
+          name="billingEmail"
           value={formData.billingEmail}
           onChange={(e) => onChange('billingEmail', e.target.value)}
           placeholder="billing@company.com"
@@ -372,6 +388,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <label className={styles.checkboxLabel}>
           <input
             type="checkbox"
+            id="sameAsCompanyAddress"
+            name="sameAsCompanyAddress"
             onChange={(e) => {
               if (e.target.checked) {
                 onChange('billingAddress', formData.address);
@@ -383,6 +401,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <div className={styles.addressGrid}>
           <input
             type="text"
+            id="billingStreet"
+            name="billingStreet"
             placeholder="Street Address"
             value={formData.billingAddress.street}
             onChange={(e) => onAddressChange('billingAddress', 'street', e.target.value)}
@@ -390,6 +410,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="billingCity"
+            name="billingCity"
             placeholder="City"
             value={formData.billingAddress.city}
             onChange={(e) => onAddressChange('billingAddress', 'city', e.target.value)}
@@ -397,6 +419,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="billingState"
+            name="billingState"
             placeholder="State/Province"
             value={formData.billingAddress.state}
             onChange={(e) => onAddressChange('billingAddress', 'state', e.target.value)}
@@ -404,6 +428,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="billingZipCode"
+            name="billingZipCode"
             placeholder="ZIP/Postal Code"
             value={formData.billingAddress.zipCode}
             onChange={(e) => onAddressChange('billingAddress', 'zipCode', e.target.value)}
@@ -411,6 +437,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           />
           <input
             type="text"
+            id="billingCountry"
+            name="billingCountry"
             placeholder="Country"
             value={formData.billingAddress.country}
             onChange={(e) => onAddressChange('billingAddress', 'country', e.target.value)}
@@ -425,6 +453,8 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           <span className={styles.currencySymbol}>$</span>
           <input
             type="number"
+            id="annualGivingBudget"
+            name="annualGivingBudget"
             value={formData.annualGivingBudget}
             onChange={(e) => onChange('annualGivingBudget', parseInt(e.target.value) || 0)}
             min="0"
@@ -434,12 +464,15 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         </div>
         <input
           type="range"
+          id="annualGivingBudgetSlider"
+          name="annualGivingBudgetSlider"
           value={formData.annualGivingBudget}
           onChange={(e) => onChange('annualGivingBudget', parseInt(e.target.value))}
           min="0"
           max="1000000"
           step="1000"
           className={styles.slider}
+          aria-label="Annual Giving Budget Slider"
         />
         <div className={styles.sliderLabels}>
           <span>$0</span>
@@ -633,10 +666,13 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
       <div className={styles.charitySearch}>
         <input
           type="text"
+          id="charitySearch"
+          name="charitySearch"
           placeholder="Search charities..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={styles.searchInput}
+          aria-label="Search charities"
         />
       </div>
 
@@ -707,9 +743,12 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
                 <div className={styles.settingGroup}>
                   <label>Support Level</label>
                   <select
+                    id={`supportLevel-${charityKey}`}
+                    name={`supportLevel-${charityKey}`}
                     value={charity.supportLevel}
                     onChange={(e) => handleCharityUpdate(charityKey, 'supportLevel', e.target.value)}
                     className={styles.select}
+                    aria-label="Support Level"
                   >
                     <option value="major">Major Partner</option>
                     <option value="regular">Regular Partner</option>
@@ -722,10 +761,13 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
                     <span>$</span>
                     <input
                       type="number"
+                      id={`annualCommitment-${charityKey}`}
+                      name={`annualCommitment-${charityKey}`}
                       value={charity.annualCommitment}
                       onChange={(e) => handleCharityUpdate(charityKey, 'annualCommitment', parseInt(e.target.value) || 0)}
                       min="0"
                       step="1000"
+                      aria-label="Annual Commitment"
                     />
                   </div>
                 </div>
