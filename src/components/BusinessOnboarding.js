@@ -218,7 +218,7 @@ const BusinessOnboarding = () => {
   if (useEnhancedOnboarding) {
     return (
       <EnhancedOnboarding 
-        businessId={user?.businessId || user?.id}
+        businessId={user?._id || user?.id || localStorage.getItem('businessId')}
         onComplete={handleEnhancedComplete}
       />
     );

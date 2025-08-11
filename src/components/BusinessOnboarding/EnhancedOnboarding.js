@@ -29,11 +29,28 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
     website: '',
     industry: '',
     country: 'Australia',
-    additionalContext: ''
+    additionalContext: '',
+    abn: ''
   });
   const [editedData, setEditedData] = useState(null);
+  const [abnSearchResults, setAbnSearchResults] = useState([]);
+  const [searchingABN, setSearchingABN] = useState(false);
+  const [showABNResults, setShowABNResults] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+
+  // Get the actual business ID from props or localStorage
+  const getBusinessId = () => {
+    if (businessId) return businessId;
+    // Fallback to localStorage
+    const storedBusinessId = localStorage.getItem('businessId');
+    if (storedBusinessId) return storedBusinessId;
+    // If still no ID, log warning
+    console.warn('No business ID found');
+    return null;
+  };
+
+  const effectiveBusinessId = getBusinessId();
 
   // Get auth token
   const getAuthHeaders = () => {
@@ -46,13 +63,15 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
 
   // Track progress
   useEffect(() => {
-    fetchProgress();
-  }, [businessId]);
+    if (effectiveBusinessId) {
+      fetchProgress();
+    }
+  }, [effectiveBusinessId]);
 
   const fetchProgress = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${businessId}`,
+        `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
         { headers: getAuthHeaders() }
       );
       if (response.ok) {
@@ -63,6 +82,75 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       console.error('Error fetching progress:', error);
     }
   };
+
+  // Search for Australian businesses by name
+  const searchBusinessByName = async (searchTerm) => {
+    if (searchTerm.length < 2) {
+      setAbnSearchResults([]);
+      setShowABNResults(false);
+      return;
+    }
+
+    setSearchingABN(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(searchTerm)}`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAbnSearchResults(data.results || []);
+        setShowABNResults(true);
+      }
+    } catch (error) {
+      console.error('Error searching ABN:', error);
+    } finally {
+      setSearchingABN(false);
+    }
+  };
+
+  // Select a business from ABN search results
+  const selectBusiness = async (business) => {
+    setFormData({
+      ...formData,
+      companyName: business.businessName || business.tradingName,
+      abn: business.abn
+    });
+    setShowABNResults(false);
+    
+    // Fetch full details
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-details/${encodeURIComponent(business.abn)}`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Auto-fill additional fields if available
+        if (data.mappedData) {
+          setFormData(prev => ({
+            ...prev,
+            companyName: data.mappedData.name || prev.companyName,
+            abn: data.mappedData.abn || prev.abn,
+            // You can map more fields as needed
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching ABN details:', error);
+    }
+  };
+
+  // Debounced search for Australian businesses
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.companyName && formData.country === 'Australia') {
+        searchBusinessByName(formData.companyName);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.companyName, formData.country]);
 
   // Step 1: Method Selection
   const MethodSelection = () => (
@@ -147,15 +235,59 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
             <RiBuilding2Line />
             Company Name *
           </label>
-          <input
-            type="text"
-            value={formData.companyName}
-            onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-            placeholder="e.g., Coles Supermarkets"
-            required
-          />
-          <small>Enter your company's official name</small>
+          <div className={styles.abnSearchWrapper}>
+            <input
+              type="text"
+              value={formData.companyName}
+              onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+              placeholder={formData.country === 'Australia' ? "Start typing to search Australian businesses..." : "e.g., Coles Supermarkets"}
+              required
+              autoComplete="off"
+            />
+            {formData.country === 'Australia' && searchingABN && (
+              <div className={styles.searchingIndicator}>Searching...</div>
+            )}
+            {formData.country === 'Australia' && showABNResults && abnSearchResults.length > 0 && (
+              <div className={styles.abnSearchResults}>
+                <div className={styles.resultsHeader}>
+                  Select your business from the Australian Business Register:
+                </div>
+                {abnSearchResults.map((business, index) => (
+                  <div
+                    key={index}
+                    className={styles.abnResult}
+                    onClick={() => selectBusiness(business)}
+                  >
+                    <div className={styles.businessName}>
+                      {business.businessName || business.tradingName}
+                    </div>
+                    <div className={styles.businessDetails}>
+                      ABN: {business.abn} • {business.state} {business.postcode}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <small>
+            {formData.country === 'Australia' 
+              ? "We'll automatically find your ABN and business details" 
+              : "Enter your company's official name"}
+          </small>
         </div>
+
+        {formData.abn && (
+          <div className={styles.formGroup}>
+            <label>ABN (Australian Business Number)</label>
+            <input
+              type="text"
+              value={formData.abn}
+              readOnly
+              className={styles.readOnlyField}
+            />
+            <small>Automatically retrieved from the Australian Business Register</small>
+          </div>
+        )}
 
         <div className={styles.formGroup}>
           <label>
@@ -479,8 +611,13 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
                 type="button"
                 className={styles.primaryButton}
                 onClick={handleConfirm}
+                disabled={loading}
               >
-                <RiCheckLine /> Confirm & Save
+                {loading ? (
+                  <>Saving...</>
+                ) : (
+                  <><RiCheckLine /> Confirm & Save (Sets Annual Budget)</>  
+                )}
               </button>
             </div>
           </>
@@ -533,7 +670,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify({ 
-            businessId, 
+            businessId: effectiveBusinessId, 
             preference: method 
           })
         }
@@ -568,26 +705,41 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
     setLoading(true);
     setStep('loading');
     
+    console.log('Starting AI research with form data:', formData);
+    
     try {
+      const requestBody = {
+        ...formData,
+        businessId: effectiveBusinessId
+      };
+      
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/ai-research`,
         {
           method: 'POST',
           headers: getAuthHeaders(),
-          body: JSON.stringify(formData)
+          body: JSON.stringify(requestBody)
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'AI research failed');
+        throw new Error(errorData.details || errorData.message || 'AI research failed');
       }
 
       const data = await response.json();
       
+      console.log('AI research completed:', {
+        success: data.success,
+        hasData: !!data.researchData,
+        totalContributions: data.researchData?.csrActivities?.totalContributions
+      });
+      
       if (data.success && data.researchData) {
         setResearchData(data.researchData);
         setStep('review-research');
+        // Show a message guiding the user
+        alert('✅ AI Research complete! Please review the findings and click "Confirm & Save" to set your Annual Giving Budget.');
       } else {
         throw new Error('No research data received');
       }
@@ -610,6 +762,12 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
     setError(null);
     setLoading(true);
     
+    console.log('Confirming AI research with data:', {
+      businessId: effectiveBusinessId,
+      hasResearchData: !!researchData,
+      annualBudget: researchData?.csrActivities?.totalContributions
+    });
+    
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/confirm-research`,
@@ -617,7 +775,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify({
-            businessId,
+            businessId: effectiveBusinessId,
             confirmedData: editedData || researchData,
             corrections: {},
             additionalData: {}
@@ -626,22 +784,38 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to save research data');
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to save research data');
       }
 
       const data = await response.json();
       
+      console.log('Research confirmed successfully:', {
+        completionPercentage: data.completionPercentage,
+        nextStep: data.nextStep
+      });
+      
+      // Show success message with budget amount
+      const budgetAmount = researchData?.csrActivities?.totalContributions;
+      if (budgetAmount) {
+        alert(`✅ AI Research confirmed! Annual Giving Budget set to $${(budgetAmount / 1000000).toFixed(1)}M`);
+      }
+      
       setProgress(data.completionPercentage || 75);
+      
+      // Refresh the page to update progress
+      fetchProgress();
       
       // Call parent callback or navigate to next step
       if (onComplete) {
         onComplete(data);
       } else {
-        navigate(`/business/onboarding/${data.nextStep || 'targeting-preferences'}`);
+        // Navigate back to main onboarding flow
+        navigate('/business/onboarding');
       }
     } catch (error) {
       console.error('Error confirming research:', error);
-      setError('Failed to save data. Please try again.');
+      setError(`Failed to save data: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -660,6 +834,26 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
         </div>
         <span className={styles.progressLabel}>{progress}% Complete</span>
       </div>
+      
+      {/* Help Message for AI Research Flow */}
+      {step === 'choose-method' && progress === 50 && (
+        <div className={styles.helpMessage} style={{ 
+          padding: '15px', 
+          backgroundColor: '#fff3cd', 
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <RiAlertLine style={{ color: '#856404', fontSize: '20px' }} />
+          <div>
+            <strong>Complete your AI Research:</strong> You've selected AI Research but haven't completed it yet. 
+            Click "AI Research" below to finish setting up your Annual Giving Budget.
+          </div>
+        </div>
+      )}
 
       {/* Step Content */}
       <div className={styles.stepContent}>
