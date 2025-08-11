@@ -238,11 +238,14 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           <div className={styles.abnSearchWrapper}>
             <input
               type="text"
+              id="companyName"
+              name="companyName"
               value={formData.companyName}
               onChange={(e) => setFormData({...formData, companyName: e.target.value})}
               placeholder={formData.country === 'Australia' ? "Start typing to search Australian businesses..." : "e.g., Coles Supermarkets"}
               required
               autoComplete="off"
+              aria-label="Company Name"
             />
             {formData.country === 'Australia' && searchingABN && (
               <div className={styles.searchingIndicator}>Searching...</div>
@@ -281,9 +284,12 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
             <label>ABN (Australian Business Number)</label>
             <input
               type="text"
+              id="abn"
+              name="abn"
               value={formData.abn}
               readOnly
               className={styles.readOnlyField}
+              aria-label="ABN (Australian Business Number)"
             />
             <small>Automatically retrieved from the Australian Business Register</small>
           </div>
@@ -296,9 +302,12 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           </label>
           <input
             type="url"
+            id="website"
+            name="website"
             value={formData.website}
             onChange={(e) => setFormData({...formData, website: e.target.value})}
             placeholder="https://www.example.com"
+            aria-label="Company Website"
           />
           <small>Helps AI find accurate information</small>
         </div>
@@ -307,8 +316,11 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           <div className={styles.formGroup}>
             <label>Industry</label>
             <select
+              id="industry"
+              name="industry"
               value={formData.industry}
               onChange={(e) => setFormData({...formData, industry: e.target.value})}
+              aria-label="Industry"
             >
               <option value="">Select Industry</option>
               <option value="Retail">Retail</option>
@@ -330,8 +342,11 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           <div className={styles.formGroup}>
             <label>Country</label>
             <select
+              id="country"
+              name="country"
               value={formData.country}
               onChange={(e) => setFormData({...formData, country: e.target.value})}
+              aria-label="Country"
             >
               <option value="Australia">Australia</option>
               <option value="New Zealand">New Zealand</option>
@@ -346,10 +361,13 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
         <div className={styles.formGroup}>
           <label>Additional Context (Optional)</label>
           <textarea
+            id="additionalContext"
+            name="additionalContext"
             value={formData.additionalContext}
             onChange={(e) => setFormData({...formData, additionalContext: e.target.value})}
             placeholder="Any specific information about your CSR activities, charity partnerships, or focus areas..."
             rows={4}
+            aria-label="Additional Context"
           />
           <small>Help AI understand your specific CSR focus</small>
         </div>
