@@ -52,8 +52,9 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
   const fetchImpactScore = async () => {
     setLoading(true);
     try {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
       const data = await fetchWithFallback(
-        `/api/public/business/${businessSlug}/impact-score`,
+        `${API_BASE_URL}/api/public/business/${businessSlug}/impact-score`,
         {
           score: initialScore,
           breakdown: {},

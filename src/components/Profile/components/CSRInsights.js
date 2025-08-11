@@ -28,8 +28,9 @@ function CSRInsights({ businessSlug }) {
   const fetchCSRInsights = async () => {
     setLoading(true);
     try {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
       const data = await fetchWithFallback(
-        `/api/public/business/${businessSlug}/csr-insights`,
+        `${API_BASE_URL}/api/public/business/${businessSlug}/csr-insights`,
         {
           hasReport: false,
           year: null,
