@@ -50,8 +50,9 @@ function LiveActivityFeed({ businessSlug }) {
   const fetchRecentActivity = async () => {
     setLoading(true);
     try {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
       const data = await fetchWithFallback(
-        `/api/public/business/${businessSlug}/live-activity`,
+        `${API_BASE_URL}/api/public/business/${businessSlug}/live-activity`,
         {
           activities: [],
           stats: {

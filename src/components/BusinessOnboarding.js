@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import businessAPI from '../services/businessAPI';
+import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
 import styles from './BusinessOnboarding.module.css';
 import {
   RiBuildingLine,
@@ -13,7 +14,8 @@ import {
   RiCheckLine,
   RiFileLine,
   RiAlertLine,
-  RiArrowRightLine
+  RiArrowRightLine,
+  RiSparklingLine
 } from 'react-icons/ri';
 
 const BusinessOnboarding = () => {
@@ -23,6 +25,7 @@ const BusinessOnboarding = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [useEnhancedOnboarding, setUseEnhancedOnboarding] = useState(false);
 
   const [formData, setFormData] = useState({
     // Step 1: Business Profile
@@ -175,12 +178,33 @@ const BusinessOnboarding = () => {
     }
   };
 
+  const handleUseEnhancedOnboarding = () => {
+    setUseEnhancedOnboarding(true);
+  };
+
+  const handleEnhancedComplete = (data) => {
+    // Handle the completed enhanced onboarding data
+    setFormData(prev => ({
+      ...prev,
+      csrReportData: data.confirmedData,
+      givingScore: data.confirmedData?.csrActivities?.givingScore || null
+    }));
+    setUseEnhancedOnboarding(false);
+    setCurrentStep(3); // Move to primary charities step
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return <BusinessProfileStep formData={formData} onChange={handleInputChange} onAddressChange={handleAddressChange} />;
       case 2:
-        return <CSRReportStep formData={formData} onFileUpload={handleFileUpload} uploadProgress={uploadProgress} loading={loading} />;
+        return <CSRReportStep 
+          formData={formData} 
+          onFileUpload={handleFileUpload} 
+          uploadProgress={uploadProgress} 
+          loading={loading}
+          onUseEnhanced={handleUseEnhancedOnboarding}
+        />;
       case 3:
         return <PrimaryCharitiesStep formData={formData} onChange={handleInputChange} />;
       case 4:
@@ -189,6 +213,16 @@ const BusinessOnboarding = () => {
         return null;
     }
   };
+
+  // If using enhanced onboarding, show that instead
+  if (useEnhancedOnboarding) {
+    return (
+      <EnhancedOnboarding 
+        businessId={user?.businessId || user?.id}
+        onComplete={handleEnhancedComplete}
+      />
+    );
+  }
 
   return (
     <div className={styles.onboardingContainer}>
@@ -418,9 +452,26 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
 };
 
 // Step 2: CSR Report Component
-const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading }) => {
+const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading, onUseEnhanced }) => {
   return (
     <div className={styles.stepContent}>
+      <div className={styles.enhancedOption}>
+        <div className={styles.enhancedCard}>
+          <RiSparklingLine className={styles.enhancedIcon} />
+          <h3>New: AI-Powered Setup</h3>
+          <p>Let AI research your company's CSR data automatically</p>
+          <button 
+            className={styles.enhancedButton}
+            onClick={onUseEnhanced}
+          >
+            Try Enhanced Setup
+          </button>
+        </div>
+        <div className={styles.dividerOr}>
+          <span>OR</span>
+        </div>
+      </div>
+      
       <div className={styles.uploadSection}>
         <div className={styles.uploadBox}>
           <input

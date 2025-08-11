@@ -65,8 +65,9 @@ function PerformanceMetrics({ businessSlug }) {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
       const data = await fetchWithFallback(
-        `/api/public/business/${businessSlug}/performance-metrics`,
+        `${API_BASE_URL}/api/public/business/${businessSlug}/performance-metrics`,
         {
           monthlyTrend: [],
           employeeEngagement: 0,
