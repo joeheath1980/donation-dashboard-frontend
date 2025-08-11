@@ -759,6 +759,75 @@
   margin-bottom: 20px;
 }
 
+/* ABN Search Styles */
+.abnSearchWrapper {
+  position: relative;
+}
+
+.searchingIndicator {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  color: #2d8f7b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.abnSearchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #2d8f7b;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.resultsHeader {
+  padding: 12px;
+  background: #f5f5fa;
+  border-bottom: 1px solid #e5e5ea;
+  font-size: 14px;
+  color: #6d6d78;
+  font-weight: 600;
+}
+
+.abnResult {
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.abnResult:hover {
+  background: #f0f9f7;
+}
+
+.abnResult:last-child {
+  border-bottom: none;
+}
+
+.businessName {
+  font-weight: 600;
+  color: #2d2d32;
+  margin-bottom: 4px;
+}
+
+.businessDetails {
+  font-size: 13px;
+  color: #6d6d78;
+}
+
+.readOnlyField {
+  background: #f5f5fa !important;
+  cursor: not-allowed;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
