@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_CONFIG, API_ENDPOINTS, SECURITY_HEADERS } from '../config/api.config';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import { createLogger } from '../utils/logger';
+import csrfService from './csrf.service';
 
 const logger = createLogger('APIService');
 
@@ -9,22 +10,28 @@ const logger = createLogger('APIService');
 const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
-  headers: SECURITY_HEADERS
+  headers: SECURITY_HEADERS,
+  withCredentials: true // Enable cookies for CSRF token
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and CSRF token
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Add JWT token if available
     const token = SecureTokenStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
+    // Add CSRF token for state-changing requests
+    config = await csrfService.addTokenToRequest(config);
+    
     // Log request in development
     logger.debug('API Request', {
       method: config.method,
       url: config.url,
-      hasAuth: !!token
+      hasAuth: !!token,
+      hasCSRF: !!config.headers['X-CSRF-Token']
     });
     
     return config;
@@ -44,7 +51,7 @@ apiClient.interceptors.response.use(
     });
     return response;
   },
-  (error) => {
+  async (error) => {
     const { response } = error;
     
     if (response) {
@@ -58,7 +65,14 @@ apiClient.interceptors.response.use(
       if (response.status === 401) {
         logger.info('Unauthorized - clearing auth data');
         SecureTokenStorage.removeToken();
+        csrfService.clearToken(); // Clear CSRF token on logout
         // Don't redirect here - let components handle it
+      }
+      
+      // Handle CSRF token errors (403 with CSRF message)
+      if (response.status === 403 && response.data?.error?.includes('CSRF')) {
+        logger.warn('CSRF token error detected');
+        return csrfService.handleCSRFError(error);
       }
     } else {
       logger.error('Network Error', { message: error.message });
@@ -300,6 +314,21 @@ export const emailForwardingService = {
   }
 };
 
+// CSRF Service for token management
+export const csrfServiceAPI = {
+  async initializeToken() {
+    return csrfService.getToken();
+  },
+  
+  async refreshToken() {
+    return csrfService.refreshToken();
+  },
+  
+  clearToken() {
+    csrfService.clearToken();
+  }
+};
+
 // Export the axios instance for custom requests
 export { apiClient };
 
@@ -314,6 +343,7 @@ const apiServices = {
   matching: matchingService,
   globalGiving: globalGivingService,
   emailForwarding: emailForwardingService,
+  csrf: csrfServiceAPI,
   client: apiClient
 };
 

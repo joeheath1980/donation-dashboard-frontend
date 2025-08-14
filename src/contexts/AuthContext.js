@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
 import { createLogger } from '../utils/logger';
+import { csrfServiceAPI } from '../services/api.service';
 
 const AuthContext = createContext();
 const logger = createLogger('AuthContext');
@@ -353,6 +354,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     // Clear all user data
     clearUserData();
+    
+    // Clear CSRF token
+    csrfServiceAPI.clearToken();
     
     // Reset user state
     setUser(null);
