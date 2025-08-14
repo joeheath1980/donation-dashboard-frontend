@@ -163,7 +163,7 @@ const AdminUserManagement = () => {
       )}
 
       <div className={styles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+        <div className="display-flex gap-20 mb-20">
           <div className={styles.searchBar}>
             <input
               type="text"
@@ -232,13 +232,13 @@ const AdminUserManagement = () => {
                   {filteredUsers.map(user => (
                     <tr key={user._id}>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="flex-align-center gap-10">
                           <FaUser />
                           {user.name}
                         </div>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="flex-align-center gap-10">
                           <FaEnvelope />
                           {user.email}
                         </div>
@@ -253,13 +253,13 @@ const AdminUserManagement = () => {
                           <option value="business">Business</option>
                           <option value="admin">Admin</option>
                         </select>
-                        <span className={`${styles.badge} ${getRoleBadge(user.role).className}`} style={{ marginLeft: '10px' }}>
+                        <span className={`${styles.badge} ${getRoleBadge(user.role).className}`} className="ml-10">
                           {getRoleBadge(user.role).text}
                         </span>
                       </td>
                       <td>
                         <div className={userStyles.scoreCell}>
-                          <FaStar style={{ color: '#FFD700' }} />
+                          <FaStar className="color-hex-ffd700" />
                           <span className={userStyles.scoreValue}>{user.impactScore || 0}</span>
                         </div>
                       </td>
@@ -283,21 +283,21 @@ const AdminUserManagement = () => {
                           <option value="active">Active</option>
                           <option value="suspended">Suspended</option>
                         </select>
-                        <span className={`${styles.badge} ${getStatusBadge(user.status).className}`} style={{ marginLeft: '10px' }}>
+                        <span className={`${styles.badge} ${getStatusBadge(user.status).className}`} className="ml-10">
                           {user.status === 'active' ? <FaCheckCircle /> : <FaTimesCircle />}
                           {getStatusBadge(user.status).text}
                         </span>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="display-flex gap-10">
                           <button 
                             onClick={() => openScoreModal(user)}
                             className={`${styles.button} ${styles.primaryButton}`} 
-                            style={{ fontSize: '12px', padding: '5px 15px' }}
+                            className="font-size-12 p-5px-15px"
                           >
                             <FaEdit /> Edit Score
                           </button>
-                          <button className={`${styles.button} ${styles.primaryButton}`} style={{ fontSize: '12px', padding: '5px 15px' }}>
+                          <button className={`${styles.button} ${styles.primaryButton}`} className="font-size-12 p-5px-15px">
                             View Details
                           </button>
                         </div>

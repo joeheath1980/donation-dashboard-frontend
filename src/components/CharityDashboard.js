@@ -360,7 +360,7 @@ function CharityDashboard() {
                           <button
                             onClick={() => setShowStripeOnboarding(true)}
                             className={`${styles.button} ${styles.compact}`}
-                            style={{ marginTop: '10px' }}
+                            className="mt-10"
                           >
                             Continue Setup
                           </button>

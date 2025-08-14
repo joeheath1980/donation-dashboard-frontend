@@ -34,7 +34,7 @@ class ChunkErrorBoundary extends React.Component {
         }}>
           <h2>Loading Payment Management...</h2>
           <p>Please wait while we refresh the page.</p>
-          <div style={{ marginTop: '20px' }}>
+          <div className="mt-20">
             <div style={{ 
               border: '4px solid #f3f3f3',
               borderTop: '4px solid #3498db',

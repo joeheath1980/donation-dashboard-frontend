@@ -572,7 +572,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                               handleReceiptDownload(contribution);
                             }}
                             className={oneOffStyles.receiptDownloadButton}
-                            style={{ marginLeft: '10px', padding: '2px 8px', fontSize: '12px' }}
+                            className="ml-10 p-2px-8px font-size-12"
                           >
                             <FaDownload /> Download
                           </button>

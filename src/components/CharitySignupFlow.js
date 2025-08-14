@@ -505,7 +505,7 @@ const CharitySignupFlow = () => {
       <div className={styles.progressBar}>
         <div 
           className={styles.progressFill} 
-          style={{ width: `${(currentStep / 3) * 100}%` }}
+          data-width={Math.round(((currentStep / 3) * 100) / 5) * 5}
         />
       </div>
       <div className={styles.steps}>
@@ -694,7 +694,7 @@ const CharitySignupFlow = () => {
           gap: '8px'
         }}>
           <span>ℹ️</span>
-          <span>Category auto-selected from ACNC: <strong style={{color: '#0d47a1'}}>{formData.category}</strong></span>
+          <span>Category auto-selected from ACNC: <strong className="color-hex-0d47a1">{formData.category}</strong></span>
         </div>
       )}
       

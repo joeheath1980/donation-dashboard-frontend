@@ -132,7 +132,7 @@ const AdminContentManagement = () => {
       )}
 
       <div className={styles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div className="display-flex gap-20 mb-20 flex-wrap">
           <div className={styles.searchBar}>
             <input
               type="text"
@@ -221,26 +221,26 @@ const AdminContentManagement = () => {
                           <div>
                             <strong>{item.title}</strong>
                             {item.excerpt && (
-                              <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+                              <div className="font-size-12 text-muted mt-4">
                                 {item.excerpt.substring(0, 60)}...
                               </div>
                             )}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <TypeIcon style={{ color: '#2d8f7b' }} />
-                            <span style={{ textTransform: 'capitalize' }}>{item.type}</span>
+                          <div className="flex-align-center gap-8">
+                            <TypeIcon className="color-hex-2d8f7b" />
+                            <span className="text-capitalize">{item.type}</span>
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div className="flex-align-center gap-8">
                             <FaUser />
                             {item.author}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <div className="flex-align-center gap-5">
                             <FaCalendarAlt />
                             {new Date(item.createdAt).toLocaleDateString()}
                           </div>
@@ -253,35 +253,35 @@ const AdminContentManagement = () => {
                             value={item.status} 
                             onChange={(e) => handleStatusChange(item._id, e.target.value)}
                             className={styles.select}
-                            style={{ maxWidth: '150px' }}
+                            className="max-width-150"
                           >
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
                             <option value="archived">Archived</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} style={{ marginLeft: '10px' }}>
+                          <span className={`${styles.badge} ${statusBadge.className}`} className="ml-10">
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '5px' }}>
+                          <div className="display-flex gap-5">
                             <button 
                               className={`${styles.button} ${styles.primaryButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className="font-size-12 p-5px-10px"
                               title="View Content"
                             >
                               <FaEye />
                             </button>
                             <button 
                               className={`${styles.button} ${styles.secondaryButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className="font-size-12 p-5px-10px"
                               title="Edit Content"
                             >
                               <FaEdit />
                             </button>
                             <button 
                               className={`${styles.button} ${styles.dangerButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className="font-size-12 p-5px-10px"
                               onClick={() => handleDelete(item._id)}
                               title="Delete Content"
                             >

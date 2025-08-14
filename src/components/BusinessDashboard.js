@@ -291,10 +291,8 @@ function BusinessDashboard() {
                 <div className={styles.categoryBar}>
                   <div 
                     className={styles.categoryFill}
-                    style={{ 
-                      width: `${category.percentage}%`,
-                      backgroundColor: category.color 
-                    }}
+                    data-percentage={Math.round(category.percentage / 5) * 5}
+                    data-color={category.color}
                   />
                 </div>
                 <div className={styles.categoryInfo}>
@@ -341,7 +339,7 @@ function BusinessDashboard() {
                     <div className={styles.progressBarContainer}>
                       <div 
                         className={styles.progressBarFill}
-                        style={{ width: `${((campaign.currentAmount || 0) / (campaign.goal || 1)) * 100}%` }}
+                        data-progress={Math.round(((campaign.currentAmount || 0) / (campaign.goal || 1)) * 100 / 5) * 5}
                       />
                     </div>
                   </div>

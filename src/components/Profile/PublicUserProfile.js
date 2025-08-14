@@ -536,7 +536,7 @@ const PublicUserProfile = () => {
               </div>
               
               {charityPortfolio.length > 3 && (
-                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <div className="text-center mt-20">
                   <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
                     {showAllFollowedCharities ? "Show Less" : `View All ${charityPortfolio.length} Charities`} <FaChevronRight className={styles.buttonIcon} />
                   </button>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './AdminReceiptApproval.module.css';
 import sharedStyles from './AdminSharedStyles.module.css';
+import { getStatusColorClass, getTierColorClass, getColorClass } from '../utils/dynamicStyles';
 
 const AdminReceiptApproval = () => {
   const { user } = useAuth();
@@ -219,7 +220,7 @@ const AdminReceiptApproval = () => {
                   <td>${approval.parsedData?.amount?.toFixed(2) || '0.00'}</td>
                   <td>{new Date(approval.parsedData?.date || approval.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <span style={{ color: getConfidenceColor(approval.parsedData?.confidence?.overall || 0) }}>
+                    <span className={getStatusColorClass(approval.parsedData?.confidence?.overall || 0)}>
                       {((approval.parsedData?.confidence?.overall || 0) * 100).toFixed(0)}%
                     </span>
                   </td>

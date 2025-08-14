@@ -153,7 +153,7 @@ const AdminAnalyticsReporting = () => {
     <div className={styles.adminContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Analytics & Reporting</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="display-flex gap-10">
           <button 
             className={`${styles.button} ${styles.primaryButton}`}
             onClick={() => exportReport('csv')}
@@ -175,8 +175,8 @@ const AdminAnalyticsReporting = () => {
         </div>
       )}
 
-      <div className={styles.card} style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div className={styles.card} className="mb-20">
+        <div className="flex-align-center gap-20">
           <FaCalendarAlt />
           <div className={styles.filters}>
             <button
@@ -245,14 +245,14 @@ const AdminAnalyticsReporting = () => {
                 <div className={styles.statCard}>
                   <h3><FaReceipt /> Pending Receipts</h3>
                   <p>{receiptStats.pending || 0}</p>
-                  <span style={{ fontSize: '12px', color: '#666' }}>
+                  <span className="font-size-12 text-muted">
                     Approval Rate: {receiptStats.approvalRate?.toFixed(1) || 0}%
                   </span>
                 </div>
                 <div className={styles.statCard}>
                   <h3><FaExchangeAlt /> Active Matches</h3>
                   <p>{matchingStats?.activeMatches || 0}</p>
-                  <span style={{ fontSize: '12px', color: '#666' }}>
+                  <span className="font-size-12 text-muted">
                     Total: {formatCurrency(matchingStats?.totalMatched || 0)}
                   </span>
                 </div>
@@ -263,7 +263,7 @@ const AdminAnalyticsReporting = () => {
           <div className={styles.grid}>
             <div className={styles.card}>
               <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FaTrophy style={{ color: '#f59e0b' }} /> Top Performing Charities
+                <FaTrophy className="color-hex-f59e0b" /> Top Performing Charities
               </h2>
               <div className={styles.table}>
                 <div className={styles.tableWrapper}>
@@ -303,7 +303,7 @@ const AdminAnalyticsReporting = () => {
               <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <FaClock /> Recent Activity
               </h2>
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div className="max-height-400 overflow-y-auto">
                 {analytics.recentActivity?.map((activity, index) => (
                   <div key={index} style={{
                     padding: '12px',
@@ -312,7 +312,7 @@ const AdminAnalyticsReporting = () => {
                     alignItems: 'center',
                     gap: '10px'
                   }}>
-                    <FaChartLine style={{ color: '#2d8f7b', flexShrink: 0 }} />
+                    <FaChartLine className="color-hex-2d8f7b flex-shrink-0" />
                     <span style={{ fontSize: '14px', color: '#343a40' }}>{activity}</span>
                   </div>
                 ))}
@@ -325,7 +325,7 @@ const AdminAnalyticsReporting = () => {
 
           <div className={analyticsStyles.chartsContainer}>
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px' }}>Donation Trends</h2>
+              <h2 className="mb-20">Donation Trends</h2>
               <div className={analyticsStyles.chartWrapper}>
                 <Line
                   data={{
@@ -376,7 +376,7 @@ const AdminAnalyticsReporting = () => {
             </div>
 
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px' }}>Donation Distribution</h2>
+              <h2 className="mb-20">Donation Distribution</h2>
               <div className={analyticsStyles.chartWrapper}>
                 <Doughnut
                   data={{
@@ -406,7 +406,7 @@ const AdminAnalyticsReporting = () => {
             </div>
 
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px' }}>User Growth</h2>
+              <h2 className="mb-20">User Growth</h2>
               <div className={analyticsStyles.chartWrapper}>
                 <Bar
                   data={{
@@ -439,7 +439,7 @@ const AdminAnalyticsReporting = () => {
             </div>
 
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px' }}>Receipt Processing Analytics</h2>
+              <h2 className="mb-20">Receipt Processing Analytics</h2>
               <div className={analyticsStyles.chartWrapper}>
                 <Bar
                   data={{

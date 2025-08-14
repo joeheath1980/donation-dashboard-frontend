@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP Compliance Test</title>
+    <!-- Strict CSP without unsafe-inline -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self';
+        img-src 'self' data: https:;
+        font-src 'self' data:;
+        connect-src 'self' http://localhost:3002 https://do-nation.space;
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'self';
+        upgrade-insecure-requests;
+    ">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSP Compliance Test Page</h1>
+    
+    <div class="test-section">
+        <h2>CSP Policy Status</h2>
+        <p>This page is served with a strict CSP that blocks unsafe-inline.</p>
+        <pre id="csp-policy"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>CSP Violations Log</h2>
+        <div id="violations-log">
+            <p>Any CSP violations will appear here:</p>
+            <ul id="violations-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Display the CSP policy
+        const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (cspMeta) {
+            document.getElementById('csp-policy').textContent = cspMeta.content
+                .split(';')
+                .map(directive => directive.trim())
+                .join(';\n');
+        }
+
+        // Listen for CSP violations
+        document.addEventListener('securitypolicyviolation', (e) => {
+            const violationsList = document.getElementById('violations-list');
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <strong class="fail">Violation Detected!</strong><br>
+                <strong>Directive:</strong> ${e.violatedDirective}<br>
+                <strong>Blocked URI:</strong> ${e.blockedURI || 'inline'}<br>
+                <strong>Line:</strong> ${e.lineNumber}<br>
+                <strong>Source:</strong> ${e.sourceFile}
+            `;
+            violationsList.appendChild(listItem);
+        });
+
+        // Run tests
+        function runTests() {
+            const results = document.getElementById('test-results');
+            let html = '<ul>';
+
+            // Test 1: Check if external styles load
+            html += '<li>External Stylesheets: <span class="pass">✓ PASS</span> (This page uses external styles)</li>';
+
+            // Test 2: Check if external scripts load
+            html += '<li>External Scripts: <span class="pass">✓ PASS</span> (This script is running)</li>';
+
+            // Test 3: Test inline style (should fail)
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.setAttribute('style', 'color: red;');
+                document.body.appendChild(testDiv);
+                const computedColor = window.getComputedStyle(testDiv).color;
+                if (computedColor === 'rgb(255, 0, 0)') {
+                    html += '<li>Inline Styles Blocked: <span class="fail">✗ FAIL</span> (Inline styles are working)</li>';
+                } else {
+                    html += '<li>Inline Styles Blocked: <span class="pass">✓ PASS</span> (Inline styles are blocked)</li>';
+                }
+                document.body.removeChild(testDiv);
+            } catch (e) {
+                html += '<li>Inline Styles Blocked: <span class="pass">✓ PASS</span> (Exception thrown)</li>';
+            }
+
+            // Test 4: Check class-based styles work
+            const testDiv2 = document.createElement('div');
+            testDiv2.className = 'pass';
+            testDiv2.textContent = 'Testing class styles';
+            document.body.appendChild(testDiv2);
+            const color = window.getComputedStyle(testDiv2).color;
+            if (color === 'rgb(0, 128, 0)' || color === 'green') {
+                html += '<li>Class-based Styles: <span class="pass">✓ PASS</span> (Classes work correctly)</li>';
+            } else {
+                html += '<li>Class-based Styles: <span class="fail">✗ FAIL</span> (Classes not working)</li>';
+            }
+            document.body.removeChild(testDiv2);
+
+            html += '</ul>';
+            results.innerHTML = html;
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

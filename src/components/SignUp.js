@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { validateEmail, validatePassword, validateName } from '../utils/validation';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { FaGoogle, FaMicrosoft, FaEye, FaEyeSlash, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import styles from './SignUp.module.css';
 import logo from '../assets/logo.png';
@@ -21,92 +23,63 @@ const SignUp = () => {
   const [validations, setValidations] = useState({
     name: { valid: true, message: '' },
     email: { valid: true, message: '' },
-    password: { valid: true, message: '', strength: 0 },
+    password: { valid: true, message: '', strength: 0, requirements: {
+      length: false,
+      uppercase: false,
+      lowercase: false,
+      number: false,
+      special: false
+    }},
     confirmPassword: { valid: true, message: '' }
   });
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+  });
 
-  const validatePassword = (password) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-    if (password.match(/[0-9]/)) strength++;
-    if (password.match(/[^a-zA-Z0-9]/)) strength++;
-    return strength;
-  };
-
-  const getPasswordStrengthText = (strength) => {
-    switch (strength) {
-      case 0:
-      case 1:
-        return 'Weak';
-      case 2:
-        return 'Medium';
-      case 3:
-        return 'Strong';
-      case 4:
-        return 'Very Strong';
-      default:
-        return '';
-    }
-  };
-
-  const getPasswordStrengthClass = (strength) => {
-    switch (strength) {
-      case 0:
-      case 1:
-        return styles.weak;
-      case 2:
-        return styles.medium;
-      case 3:
-        return styles.strong;
-      case 4:
-        return styles.veryStrong;
-      default:
-        return '';
-    }
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError('');
 
     const newValidations = { ...validations };
-    switch (name) {
-      case 'name':
-        newValidations.name = {
-          valid: value.trim().length >= 2,
-          message: value.trim().length < 2 ? 'Name must be at least 2 characters' : ''
-        };
-        break;
-      case 'email':
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        newValidations.email = {
-          valid: emailRegex.test(value),
-          message: !emailRegex.test(value) ? 'Please enter a valid email address' : ''
-        };
-        break;
-      case 'password':
-        const strength = validatePassword(value);
-        newValidations.password = {
-          valid: value.length >= 6,
-          message: value.length < 6 ? 'Password must be at least 6 characters' : '',
-          strength
-        };
-        if (formData.confirmPassword) {
+    
+    if (touched[name] || name === 'password') {
+      switch (name) {
+        case 'name':
+          const nameValidation = validateName(value);
+          newValidations.name = nameValidation;
+          break;
+        case 'email':
+          const emailValidation = validateEmail(value);
+          newValidations.email = emailValidation;
+          break;
+        case 'password':
+          const passwordValidation = validatePassword(value);
+          newValidations.password = passwordValidation;
+          if (formData.confirmPassword) {
+            newValidations.confirmPassword = {
+              valid: value === formData.confirmPassword,
+              message: value !== formData.confirmPassword ? 'Passwords do not match' : ''
+            };
+          }
+          break;
+        case 'confirmPassword':
           newValidations.confirmPassword = {
-            valid: value === formData.confirmPassword,
-            message: value !== formData.confirmPassword ? 'Passwords do not match' : ''
+            valid: value === formData.password,
+            message: value !== formData.password ? 'Passwords do not match' : ''
           };
-        }
-        break;
-      case 'confirmPassword':
-        newValidations.confirmPassword = {
-          valid: value === formData.password,
-          message: value !== formData.password ? 'Passwords do not match' : ''
-        };
-        break;
-      default:
-        break;
+          break;
+        default:
+          break;
+      }
     }
     setValidations(newValidations);
   };
@@ -115,33 +88,32 @@ const SignUp = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
+    // Mark all fields as touched
+    setTouched({ name: true, email: true, password: true, confirmPassword: true });
 
-    let formIsValid = true;
-    const currentValidations = { ...validations };
+    // Validate all fields
+    const nameValidation = validateName(formData.name);
+    const emailValidation = validateEmail(formData.email);
+    const passwordValidation = validatePassword(formData.password);
+    const confirmPasswordValid = formData.password === formData.confirmPassword;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.name.trim().length < 2) {
-        currentValidations.name = { valid: false, message: 'Name must be at least 2 characters' };
-        formIsValid = false;
-    }
-    if (!emailRegex.test(formData.email)) {
-        currentValidations.email = { valid: false, message: 'Please enter a valid email address' };
-        formIsValid = false;
-    }
-    if (formData.password.length < 6) {
-        currentValidations.password = { 
-            valid: false, 
-            message: 'Password must be at least 6 characters',
-            strength: currentValidations.password.strength 
-        };
-        formIsValid = false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-        currentValidations.confirmPassword = { valid: false, message: 'Passwords do not match' };
-        formIsValid = false;
-    }
+    const currentValidations = {
+      name: nameValidation,
+      email: emailValidation,
+      password: passwordValidation,
+      confirmPassword: {
+        valid: confirmPasswordValid,
+        message: !confirmPasswordValid ? 'Passwords do not match' : ''
+      }
+    };
 
     setValidations(currentValidations);
+
+    const formIsValid = nameValidation.valid && 
+                       emailValidation.valid && 
+                       passwordValidation.valid && 
+                       confirmPasswordValid;
 
     if (!formIsValid) {
         setError('Please correct the errors in the form');
@@ -160,8 +132,24 @@ const SignUp = () => {
       }
     } catch (error) {
       console.error('Signup error:', error);
-      // Use the error message from the catch block
-      setError(error.message || 'An unexpected error occurred. Please try again.');
+      
+      // Handle validation errors from backend
+      if (error.response?.data?.details && Array.isArray(error.response.data.details)) {
+        const backendValidations = { ...validations };
+        error.response.data.details.forEach(detail => {
+          if (detail.field === 'email') {
+            backendValidations.email = { valid: false, message: detail.message };
+          } else if (detail.field === 'password') {
+            backendValidations.password = { ...backendValidations.password, valid: false, message: detail.message };
+          } else if (detail.field === 'name') {
+            backendValidations.name = { valid: false, message: detail.message };
+          }
+        });
+        setValidations(backendValidations);
+        setError('Please correct the validation errors.');
+      } else {
+        setError(error.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -204,11 +192,12 @@ const SignUp = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your full name"
               required
-              className={!validations.name.valid ? styles.error : ''}
+              className={!validations.name.valid && touched.name ? styles.error : ''}
             />
-            {!validations.name.valid && (
+            {!validations.name.valid && touched.name && (
               <span className={`${styles.validationMessage} ${styles.error}`}>
                 {validations.name.message}
               </span>
@@ -223,11 +212,12 @@ const SignUp = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your email"
               required
-              className={!validations.email.valid ? styles.error : ''}
+              className={!validations.email.valid && touched.email ? styles.error : ''}
             />
-            {!validations.email.valid && (
+            {!validations.email.valid && touched.email && (
               <span className={`${styles.validationMessage} ${styles.error}`}>
                 {validations.email.message}
               </span>
@@ -243,9 +233,10 @@ const SignUp = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Create a password"
                 required
-                className={!validations.password.valid ? styles.error : ''}
+                className={!validations.password.valid && touched.password ? styles.error : ''}
               />
               <button
                 type="button"
@@ -257,18 +248,13 @@ const SignUp = () => {
               </button>
             </div>
             {formData.password && (
-              <>
-                <div className={styles.passwordStrength}>
-                  <div 
-                    className={`${styles.passwordStrengthBar} ${getPasswordStrengthClass(validations.password.strength)}`}
-                  />
-                </div>
-                <span className={styles.passwordStrengthText}>
-                  {getPasswordStrengthText(validations.password.strength)}
-                </span>
-              </>
+              <PasswordStrengthIndicator 
+                password={formData.password}
+                requirements={validations.password.requirements || {}}
+                strength={validations.password.strength || 0}
+              />
             )}
-            {!validations.password.valid && (
+            {!validations.password.valid && touched.password && !formData.password && (
               <span className={`${styles.validationMessage} ${styles.error}`}>
                 {validations.password.message}
               </span>
@@ -283,11 +269,12 @@ const SignUp = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Confirm your password"
               required
-              className={!validations.confirmPassword.valid ? styles.error : ''}
+              className={!validations.confirmPassword.valid && touched.confirmPassword ? styles.error : ''}
             />
-            {!validations.confirmPassword.valid && (
+            {!validations.confirmPassword.valid && touched.confirmPassword && (
               <span className={`${styles.validationMessage} ${styles.error}`}>
                 {validations.confirmPassword.message}
               </span>

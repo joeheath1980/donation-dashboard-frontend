@@ -421,7 +421,7 @@ function DonationFormWrapper() {
 
   if (loading) {
     return (
-      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="donation-form" className="text-center p-50">
         <h2>Loading...</h2>
       </div>
     );
@@ -429,7 +429,7 @@ function DonationFormWrapper() {
 
   if (error) {
     return (
-      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="donation-form" className="text-center p-50">
         <h2>Error</h2>
         <p>{error}</p>
         <button onClick={() => navigate(-1)}>
@@ -441,7 +441,7 @@ function DonationFormWrapper() {
 
   if (!charity) {
     return (
-      <div className="donation-form" style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="donation-form" className="text-center p-50">
         <h2>Charity not found</h2>
         <button onClick={() => navigate(-1)}>
           Go Back

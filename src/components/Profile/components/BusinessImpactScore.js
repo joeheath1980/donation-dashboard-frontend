@@ -306,7 +306,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
       {percentile && (
         <div className={styles.insights}>
           <div className={styles.insight}>
-            <FaTrophy className={styles.insightIcon} style={{ color: '#FFD700' }} />
+            <FaTrophy className={styles.insightIcon} className="color-hex-ffd700" />
             <p>This business ranks in the <strong>top {100 - percentile}%</strong> for corporate giving</p>
           </div>
         </div>

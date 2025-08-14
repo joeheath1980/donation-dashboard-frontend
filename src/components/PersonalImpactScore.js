@@ -199,7 +199,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 fill="none"
                 stroke="transparent"
                 strokeWidth={ring.strokeWidth + 10}
-                style={{ cursor: 'pointer' }}
+                className="cursor-pointer"
                 onMouseEnter={() => setHoveredRing(index)}
                 onMouseLeave={() => setHoveredRing(null)}
               />

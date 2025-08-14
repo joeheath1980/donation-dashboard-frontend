@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
+import './styles/csp-utilities.css';
+import './styles/dynamic-colors.css';
 import App from './App';
 
 // Keep StrictMode enabled for better development experience

@@ -123,17 +123,17 @@ const AdminDonationManagement = () => {
         <div className={styles.statCard}>
           <h3><FaGift /> Direct Donations</h3>
           <p>{stats.directDonations}</p>
-          <span style={{ fontSize: '12px', color: '#666' }}>${stats.totalDirectAmount.toFixed(2)}</span>
+          <span className="font-size-12 text-muted">${stats.totalDirectAmount.toFixed(2)}</span>
         </div>
         <div className={styles.statCard}>
           <h3><FaExchangeAlt /> Micro-Matched</h3>
           <p>{stats.microMatched}</p>
-          <span style={{ fontSize: '12px', color: '#666' }}>${stats.totalMatchedAmount.toFixed(2)}</span>
+          <span className="font-size-12 text-muted">${stats.totalMatchedAmount.toFixed(2)}</span>
         </div>
       </div>
 
       <div className={styles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+        <div className="display-flex gap-20 mb-20">
           <div className={styles.searchBar}>
             <input
               type="text"
@@ -226,14 +226,14 @@ const AdminDonationManagement = () => {
                     return (
                       <tr key={donation._id}>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <FaHeart style={{ color: '#ec4899' }} />
+                          <div className="flex-align-center gap-10">
+                            <FaHeart className="color-hex-ec4899" />
                             {donation.donor?.name || 'Anonymous'}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <FaDollarSign style={{ color: '#10b981' }} />
+                          <div className="flex-align-center gap-10">
+                            <FaDollarSign className="text-success" />
                             <strong>${donation.amount?.toFixed(2) || '0.00'}</strong>
                           </div>
                         </td>
@@ -241,7 +241,7 @@ const AdminDonationManagement = () => {
                           <div className={donationStyles.typeIndicator}>
                             {donation.isMatched ? (
                               <>
-                                <FaExchangeAlt style={{ color: '#f59e0b' }} />
+                                <FaExchangeAlt className="color-hex-f59e0b" />
                                 <span className={donationStyles.matchedBadge}>Micro-Matched</span>
                                 {donation.matchDetails && (
                                   <span className={donationStyles.matchInfo}>
@@ -251,7 +251,7 @@ const AdminDonationManagement = () => {
                               </>
                             ) : (
                               <>
-                                <FaGift style={{ color: '#2d8f7b' }} />
+                                <FaGift className="color-hex-2d8f7b" />
                                 <span className={donationStyles.directBadge}>Direct</span>
                               </>
                             )}
@@ -259,7 +259,7 @@ const AdminDonationManagement = () => {
                         </td>
                         <td>{donation.charity?.name || 'Unknown Charity'}</td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="flex-align-center gap-10">
                             <FaCalendarAlt />
                             {new Date(donation.date).toLocaleDateString()}
                           </div>
@@ -269,18 +269,18 @@ const AdminDonationManagement = () => {
                             value={donation.status} 
                             onChange={(e) => handleStatusChange(donation._id, e.target.value)}
                             className={styles.select}
-                            style={{ maxWidth: '150px' }}
+                            className="max-width-150"
                           >
                             <option value="pending">Pending</option>
                             <option value="completed">Completed</option>
                             <option value="failed">Failed</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} style={{ marginLeft: '10px' }}>
+                          <span className={`${styles.badge} ${statusBadge.className}`} className="ml-10">
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
-                          <button className={`${styles.button} ${styles.primaryButton}`} style={{ fontSize: '12px', padding: '5px 15px' }}>
+                          <button className={`${styles.button} ${styles.primaryButton}`} className="font-size-12 p-5px-15px">
                             View Details
                           </button>
                         </td>

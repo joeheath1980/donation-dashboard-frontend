@@ -89,7 +89,7 @@ function CharityOnboarding({ charity, onComplete }) {
             <button 
               onClick={handleCheckStatus}
               className={styles.setupButton}
-              style={{ marginTop: '15px' }}
+              className="mt-15"
             >
               I've Completed Setup
             </button>

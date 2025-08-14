@@ -881,16 +881,16 @@ const ProfileEditor = () => {
           {activeSection === 'privacy' && (
             <section className={styles.section}>
               <h2>Privacy Settings</h2>
-              <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <div className="p-2rem text-center">
                 <FaLock style={{ fontSize: '3rem', color: '#666', marginBottom: '1rem' }} />
-                <p style={{ marginBottom: '1.5rem', color: '#666' }}>
+                <p className="mb-1-5rem text-muted">
                   Privacy settings have been moved to a dedicated page for better organization and control.
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate('/privacy-settings')}
                   className={styles.saveButton}
-                  style={{ width: 'auto' }}
+                  className="width-auto"
                 >
                   Go to Privacy Settings
                 </button>
