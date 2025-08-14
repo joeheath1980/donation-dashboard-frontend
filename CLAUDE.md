@@ -42,3 +42,141 @@ npm start  # Runs on http://localhost:3000
 - **Frontend Directory**: /var/www/donation-dashboard
 - **Backend Directory**: /home/ubuntu/giving-dashboard
 - **SSH Key**: /Users/josephheath/Desktop/Do-Nation/AWS Server/donation-key2.pem
+
+## 🚨 CRITICAL: CASA Security Compliance Standards (Frontend) 🚨
+
+### ⛔ NEVER DO THE FOLLOWING (CASA Violations):
+
+#### 1. **Sensitive Data & Storage**
+- **NEVER** store sensitive data in localStorage (use httpOnly cookies or sessionStorage)
+- **NEVER** log API keys, tokens, or user passwords to console
+- **NEVER** expose API keys in React environment variables (they're visible in build)
+- **NEVER** store credit card details or payment info in state/storage
+- **NEVER** commit .env files with production values
+- **NEVER** include sensitive data in React DevTools visible state
+
+#### 2. **API Security**
+- **NEVER** make API calls without proper authentication headers
+- **NEVER** trust data from API responses without validation
+- **NEVER** expose internal API endpoints in error messages
+- **NEVER** disable HTTPS in production builds
+- **NEVER** skip CSRF token validation for state-changing operations
+- **ALWAYS** use the csrfServiceAPI from src/services/api.service.js
+
+#### 3. **Input Validation & XSS Prevention**
+- **NEVER** use dangerouslySetInnerHTML without sanitization
+- **NEVER** render user input directly without escaping
+- **NEVER** eval() user input or use Function constructor with user data
+- **NEVER** trust URL parameters without validation
+- **NEVER** allow HTML/script tags in user input fields
+- **ALWAYS** sanitize rich text content before rendering
+
+#### 4. **Authentication & Authorization**
+- **NEVER** store passwords in plain text (even temporarily)
+- **NEVER** expose JWT tokens in URLs or query parameters
+- **NEVER** implement "remember me" with sensitive data in cookies
+- **NEVER** auto-fill password fields with stored values
+- **NEVER** log authentication tokens or session data
+- **ALWAYS** clear sensitive data on logout
+
+#### 5. **Content Security**
+- **NEVER** load scripts from untrusted CDNs
+- **NEVER** use inline scripts without CSP nonce
+- **NEVER** disable React's built-in XSS protection
+- **NEVER** load external resources over HTTP in production
+- **NEVER** embed third-party content without validation
+
+### ✅ ALWAYS DO THE FOLLOWING (CASA Requirements):
+
+#### 1. **Before Making Changes**
+- Verify no sensitive data is exposed in browser DevTools
+- Check Network tab doesn't show sensitive data in requests
+- Ensure console has no security-related warnings
+- Test authentication flows remain secure
+
+#### 2. **When Handling User Input**
+- Validate all form inputs before submission
+- Sanitize data before rendering
+- Use controlled components for forms
+- Implement proper error boundaries
+- Escape special characters in display
+
+#### 3. **When Managing State**
+- Clear sensitive data from Redux/Context on logout
+- Don't store passwords in component state
+- Use sessionStorage for temporary sensitive data
+- Implement proper cleanup in useEffect
+- Avoid storing tokens in Redux DevTools-visible state
+
+#### 4. **API Integration**
+- Always include CSRF tokens for POST/PUT/DELETE
+- Implement request/response interceptors for auth
+- Handle 401/403 responses properly
+- Never expose full error details to users
+- Use environment-specific API endpoints
+
+#### 5. **Production Builds**
+- Ensure source maps are disabled in production
+- Verify no console.log statements remain
+- Check bundle size for accidentally included dev dependencies
+- Validate all environment variables are production-ready
+- Test Content Security Policy compliance
+
+### 🔒 Frontend Security Checklist
+
+Before committing ANY code:
+- [ ] No sensitive data in localStorage
+- [ ] No API keys or secrets in code
+- [ ] No console.log with sensitive data
+- [ ] All user inputs are validated
+- [ ] No dangerouslySetInnerHTML without sanitization
+- [ ] CSRF tokens included for state-changing operations
+- [ ] Authentication tokens in httpOnly cookies or Authorization headers
+- [ ] No inline scripts or styles
+- [ ] All external resources use HTTPS
+- [ ] Proper error handling without exposing system details
+
+### 📊 Current Frontend CASA Compliance
+
+| Security Requirement | Status | Notes |
+|---------------------|---------|-------|
+| XSS Prevention | ✅ Active | React escaping + input validation |
+| CSRF Protection | ⚠️ Partial | csrfServiceAPI ready, backend needs fix |
+| Secure Storage | ⚠️ Needs Review | Some tokens still in localStorage |
+| Input Validation | ✅ Implemented | All forms have validation |
+| HTTPS Only | ✅ Enforced | Production uses HTTPS |
+| CSP Compliance | ⚠️ Partial | Some inline styles need fixing |
+| Secure Auth | ✅ Active | JWT with httpOnly cookies planned |
+| API Security | ✅ Active | Interceptors and error handling |
+
+### 🔐 Handling CSRF Tokens (When Backend Fixed)
+
+```javascript
+// Always use this pattern for state-changing operations:
+import { csrfServiceAPI } from '../services/api.service';
+
+// Before making POST/PUT/DELETE requests:
+const token = await csrfServiceAPI.getToken();
+const response = await fetch('/api/endpoint', {
+  method: 'POST',
+  headers: {
+    'X-CSRF-Token': token,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+});
+```
+
+### 🛑 Security Violations Will Result In:
+1. **Failed CASA security audit**
+2. **Vulnerability to XSS/CSRF attacks**
+3. **Potential data breaches**
+4. **Loss of user trust**
+5. **Legal liability**
+
+### 📝 Security Resources
+- OWASP React Security Cheatsheet
+- Backend security requirements: `/Users/josephheath/giving-dashboard/CLAUDE.md`
+- Security testing guide: Run security audit with `npm audit`
+
+**Remember: Frontend security is the first line of defense. Every component must be secure by default.**
