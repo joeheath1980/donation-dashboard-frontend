@@ -164,7 +164,7 @@ const AchievementShowcase = ({ userId, compact = false }) => {
                 key={achievement._id}
                 className={styles.compactAchievement}
                 title={achievementData.name}
-                style={{ '--tier-color': getTierColor(achievementData.tier) }}
+                data-tier-color={getTierColor(achievementData.tier)}
               >
                 <Icon />
               </div>
@@ -197,7 +197,7 @@ const AchievementShowcase = ({ userId, compact = false }) => {
             key={category.id}
             className={`${styles.categoryButton} ${selectedCategory === category.id ? styles.active : ''}`}
             onClick={() => setSelectedCategory(category.id)}
-            style={{ '--category-color': category.color }}
+            data-category-color={category.color }
           >
             {category.label}
           </button>

@@ -162,7 +162,7 @@ const DailyActions = ({ onPointsEarned }) => {
               className={`${styles.actionCard} ${isCompleted ? styles.completed : ''} ${isAnimating ? styles.animating : ''}`}
               onClick={() => completeAction(action)}
               disabled={isCompleted}
-              style={{ '--action-color': action.color }}
+              data-action-color={action.color }
             >
               <div className={styles.actionIcon}>
                 {isCompleted ? (

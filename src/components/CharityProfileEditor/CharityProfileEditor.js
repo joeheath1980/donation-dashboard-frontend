@@ -439,7 +439,7 @@ function CharityProfileEditor() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileSelect(e, 'logo')}
-                  style={{ display: 'none' }}
+                  className="display-none"
                 />
               </div>
               
@@ -463,7 +463,7 @@ function CharityProfileEditor() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileSelect(e, 'coverImage')}
-                  style={{ display: 'none' }}
+                  className="display-none"
                 />
               </div>
             </div>

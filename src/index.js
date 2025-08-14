@@ -4,6 +4,9 @@ import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import './styles/csp-utilities.css';
 import './styles/dynamic-colors.css';
+import './styles/dynamic-css-variables.css';
+import './styles/final-cleanup.css';
+import './styles/dynamic-styles.css';
 import App from './App';
 
 // Keep StrictMode enabled for better development experience

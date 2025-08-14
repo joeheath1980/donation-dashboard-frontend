@@ -486,7 +486,7 @@ const ProfileEditor = () => {
                         console.log('File input clicked');
                         e.stopPropagation();
                       }}
-                      style={{ display: 'none' }}
+                      className="display-none"
                     />
                   </label>
                 </div>
@@ -882,7 +882,7 @@ const ProfileEditor = () => {
             <section className={styles.section}>
               <h2>Privacy Settings</h2>
               <div className="p-2rem text-center">
-                <FaLock style={{ fontSize: '3rem', color: '#666', marginBottom: '1rem' }} />
+                <FaLock className="font-size-3rem text-muted mb-1rem" />
                 <p className="mb-1-5rem text-muted">
                   Privacy settings have been moved to a dedicated page for better organization and control.
                 </p>

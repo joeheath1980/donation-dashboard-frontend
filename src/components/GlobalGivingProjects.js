@@ -13,7 +13,7 @@ const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectse
 const PrevArrow = ({ className, style, onClick }) => (
   <div
     className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
-    style={{ ...style }}
+    className="style-spread-base"
     onClick={onClick}
   />
 );
@@ -21,7 +21,7 @@ const PrevArrow = ({ className, style, onClick }) => (
 const NextArrow = ({ className, style, onClick }) => (
   <div
     className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
-    style={{ ...style }}
+    className="style-spread-base"
     onClick={onClick}
   />
 );

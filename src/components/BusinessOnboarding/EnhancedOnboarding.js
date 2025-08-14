@@ -865,7 +865,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           alignItems: 'center',
           gap: '10px'
         }}>
-          <RiAlertLine style={{ color: '#856404', fontSize: '20px' }} />
+          <RiAlertLine className="color-hex-856404 font-size-20" />
           <div>
             <strong>Complete your AI Research:</strong> You've selected AI Research but haven't completed it yet. 
             Click "AI Research" below to finish setting up your Annual Giving Budget.

@@ -312,7 +312,7 @@ function CharityDashboard() {
           {/* Stripe Payment Setup Section */}
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
-              <FaCreditCard style={{ marginRight: '8px' }} />
+              <FaCreditCard className="mr-8" />
               Payment Setup
             </h3>
             
@@ -350,12 +350,12 @@ function CharityDashboard() {
                       
                       {stripeStatus.chargesEnabled ? (
                         <div className={styles.successMessage}>
-                          <FaCheckCircle style={{ marginRight: '8px' }} />
+                          <FaCheckCircle className="mr-8" />
                           Your organization is ready to receive donations!
                         </div>
                       ) : (
                         <div className={styles.warningMessage}>
-                          <FaExclamationCircle style={{ marginRight: '8px' }} />
+                          <FaExclamationCircle className="mr-8" />
                           Please complete your Stripe setup to receive donations.
                           <button
                             onClick={() => setShowStripeOnboarding(true)}
@@ -378,7 +378,7 @@ function CharityDashboard() {
                       className={styles.button}
                       disabled={stripeLoading}
                     >
-                      <FaCreditCard style={{ marginRight: '8px' }} />
+                      <FaCreditCard className="mr-8" />
                       Start Payment Setup
                     </button>
                   </div>

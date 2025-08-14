@@ -262,7 +262,7 @@ const AdminAnalyticsReporting = () => {
 
           <div className={styles.grid}>
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 className="mb-20 display-flex align-center gap-10">
                 <FaTrophy className="color-hex-f59e0b" /> Top Performing Charities
               </h2>
               <div className={styles.table}>
@@ -300,7 +300,7 @@ const AdminAnalyticsReporting = () => {
             </div>
 
             <div className={styles.card}>
-              <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 className="mb-20 display-flex align-center gap-10">
                 <FaClock /> Recent Activity
               </h2>
               <div className="max-height-400 overflow-y-auto">

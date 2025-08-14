@@ -138,7 +138,7 @@ const PrevArrow = (props) => {
   return (
     <div
       className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
-      style={{ ...style, display: 'block' }}
+      className="style-spread-base display-block"
       onClick={onClick}
     />
   );
@@ -149,7 +149,7 @@ const NextArrow = (props) => {
   return (
     <div
       className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
-      style={{ ...style, display: 'block' }}
+      className="style-spread-base display-block"
       onClick={onClick}
     />
   );

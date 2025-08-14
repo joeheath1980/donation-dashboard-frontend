@@ -1,6 +1,8 @@
 import React from 'react';
+import { DynamicWidth, ProgressBar, DynamicGradient } from './DynamicStyleManager';
 import styles from './TierProgressModal.module.css';
 import './SharedStyles.css';
+import '../styles/dynamic-styles.css';
 import { 
   FaChartLine, 
   FaArrowUp,
@@ -53,7 +55,7 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
               <div className={styles.tierLeft}>
                 <div 
                   className={`${styles.tierIcon} ${isAchieved ? styles.achieved : ''} ${isNext ? styles.next : ''}`}
-                  style={{ color: tier.color }}
+                  data-tier-color={tier.color} className="tier-color-dynamic"
                 >
                   <Icon />
                 </div>
@@ -67,32 +69,29 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
                 <div className={styles.tierBarBackground}>
                   {/* Filled progress */}
                   <div
-                    className={`${styles.tierBar} ${isAchieved ? styles.achieved : ''} ${isNext ? styles.inProgress : ''}`}
-                    style={{ 
-                      width: `${progressPercentage}%`,
-                      background: isAchieved ? 
-                        `linear-gradient(90deg, ${tier.color}dd, ${tier.color})` :
-                        isNext ? 
-                          `linear-gradient(90deg, ${tier.color}99, ${tier.color}dd)` :
-                          'transparent'
-                    }}
+                    className={`${styles.tierBar} ${isAchieved ? styles.achieved : ''} ${isNext ? styles.inProgress : ''} progress-bar-fill ${isAchieved ? 'gradient-tier-achieved' : isNext ? 'gradient-tier-active' : ''}`}
+                    data-progress-width={progressPercentage}
+                    ref={el => el && el.style.setProperty('--progress', `${progressPercentage}%`)}
                   />
                   {/* Remaining progress (washed out) */}
                   {isNext && progressPercentage < 100 && (
                     <div
-                      className={styles.tierBarRemaining}
-                      style={{ 
-                        left: `${progressPercentage}%`,
-                        width: `${100 - progressPercentage}%`,
-                        background: `linear-gradient(90deg, ${tier.color}33, ${tier.color}22)`
+                      className={`${styles.tierBarRemaining} gradient-progress-remaining`}
+                      data-position-left={progressPercentage}
+                      data-progress-width={100 - progressPercentage}
+                      ref={el => {
+                        if (el) {
+                          el.style.setProperty('--progress', `${100 - progressPercentage}%`);
+                          el.style.setProperty('--left', `${progressPercentage}%`);
+                        }
                       }}
                     />
                   )}
                   {/* Current score badge */}
                   {isNext && (
                     <div 
-                      className={styles.currentScoreBadge} 
-                      style={{ left: `${progressPercentage}%` }}
+                      className={`${styles.currentScoreBadge} progress-indicator`}
+                      ref={el => el && el.style.setProperty('--progress', `${progressPercentage}%`)}
                     >
                       <span>{impactScore}</span>
                     </div>

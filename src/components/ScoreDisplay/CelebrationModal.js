@@ -128,7 +128,7 @@ const CelebrationModal = ({ isOpen, onClose, celebrationData }) => {
           >
             <div 
               className={styles.newTierBadge}
-              style={{ backgroundColor: getTierColor(celebrationData.tier) }}
+              data-tier-color={getTierColor(celebrationData.tier)} className="bg-tier"
             >
               <span className={styles.tierEmoji}>
                 {celebrationData.tier === 'Silver' && '🥈'}
