@@ -58,7 +58,7 @@ const Activity = lazy(() => import('./components/Activity'));
 const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
-const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor'));
+const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor/CharityProfileEditor'));
 const BusinessDashboard = lazy(() => import('./components/BusinessDashboard'));
 const BusinessCreateCampaign = lazy(() => import('./components/BusinessCreateCampaign'));
 const BusinessOnboarding = lazy(() => import('./components/BusinessOnboarding'));
@@ -76,7 +76,6 @@ const ManagePaymentsComponent = lazy(() => import('./components/ManagePaymentsCo
 const CharityDashboard = lazy(() => import('./components/CharityDashboard'));
 const CharityAnalytics = lazy(() => import('./components/CharityAnalytics/CharityAnalytics'));
 const DonorManagement = lazy(() => import('./components/DonorManagement/DonorManagement'));
-const CharityProfileEditorNew = lazy(() => import('./components/CharityProfileEditor/CharityProfileEditor'));
 const DonationForm = lazy(() => import('./components/DonationForm'));
 const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
 const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
@@ -286,7 +285,7 @@ function App() {
                 <Route path="/charity-dashboard" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityDashboard /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-analytics" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityAnalytics /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-donors" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><DonorManagement /></SuspenseWrapper></ProtectedRoute>} />
-                <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditorNew /></SuspenseWrapper></ProtectedRoute>} />
+                <Route path="/charity-profile-editor" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity-onboarding" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityOnboarding /></SuspenseWrapper></ProtectedRoute>} />
                 <Route path="/charity/:charityId/edit" element={<ProtectedRoute allowedUserTypes={['charity']}><SuspenseWrapper><CharityProfileEditor /></SuspenseWrapper></ProtectedRoute>} />
 
