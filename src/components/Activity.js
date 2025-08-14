@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import styles from '../Impact.module.css';
 
@@ -7,6 +8,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
+  const { getAuthHeaders } = useAuth();
   const location = useLocation();
 
   const [emailResults, setEmailResults] = useState([]);
@@ -51,15 +53,15 @@ function Activity() {
     setError(null);
     try {
       console.log('Sending request to search emails');
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
         throw new Error('No authentication token found. Please log in again.');
       }
       const response = await fetch(`${API_URL}/api/scrape-gmail`, { 
         mode: 'cors',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });
@@ -92,15 +94,15 @@ function Activity() {
     setError(null);
     try {
       console.log('Sending request to search Outlook emails');
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
         throw new Error('No authentication token found. Please log in again.');
       }
       const response = await fetch(`${API_URL}/api/scrape-outlook`, { 
         mode: 'cors',
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          ...authHeaders,
           'Content-Type': 'application/json'
         }
       });

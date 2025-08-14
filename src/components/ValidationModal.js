@@ -1,6 +1,7 @@
 // src/components/ValidationModal.js
 
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './ValidationModal.module.css';
 
 /**
@@ -15,6 +16,7 @@ import styles from './ValidationModal.module.css';
  * - onValidate: Function to call when the validation is successful.
  */
 const ValidationModal = ({ item, onCancel, onValidate }) => {
+  const { getAuthHeaders } = useAuth();
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,7 +61,7 @@ const ValidationModal = ({ item, onCancel, onValidate }) => {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...getAuthHeaders()
           // Note: When using FormData, you should NOT set the 'Content-Type' header manually.
           // The browser will set it including the correct boundary.
         },

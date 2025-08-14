@@ -211,12 +211,7 @@ export const ImpactProvider = ({ children }) => {
   const [followedCharities, setFollowedCharities] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { user } = useAuth();
-
-  const getAuthHeaders = useCallback(() => {
-    const token = localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-  }, []);
+  const { user, getAuthHeaders } = useAuth();
 
   const fetchImpactData = useCallback(async () => {
     setError(null);
@@ -343,7 +338,7 @@ export const ImpactProvider = ({ children }) => {
     setFollowedCharities(prevCharities => {
       if (!prevCharities.some(c => c.ABN === charity.ABN)) {
         const newCharities = [...prevCharities, charity];
-        localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+        // Store in database only, not localStorage
         saveFollowedCharitiesToDb(charity);
         return newCharities;
       }
@@ -364,7 +359,7 @@ export const ImpactProvider = ({ children }) => {
 
       setFollowedCharities(prevCharities => {
         const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
-        localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+        // Store in database only, not localStorage
         return newCharities;
       });
     } catch (error) {
@@ -373,7 +368,7 @@ export const ImpactProvider = ({ children }) => {
         // If the charity is not found on the server, remove it from the local state
         setFollowedCharities(prevCharities => {
           const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
-          localStorage.setItem('followed-charities', JSON.stringify(newCharities));
+          // Store in database only, not localStorage
           return newCharities;
         });
       } else {
@@ -384,7 +379,7 @@ export const ImpactProvider = ({ children }) => {
   }, [getAuthHeaders]);
 
   const clearFollowedCharities = useCallback(() => {
-    localStorage.removeItem('followed-charities');
+    // Clear from state only, not localStorage
     setFollowedCharities([]);
   }, []);
 
@@ -438,7 +433,7 @@ export const ImpactProvider = ({ children }) => {
   // === End of New Function ===
 
   useEffect(() => {
-    const storedCharities = localStorage.getItem('followed-charities');
+    const storedCharities = null; // Remove localStorage dependency
     if (storedCharities) {
       setFollowedCharities(JSON.parse(storedCharities));
     }
@@ -463,7 +458,7 @@ export const ImpactProvider = ({ children }) => {
           const dbCharities = response.data;
 
           setFollowedCharities(dbCharities);
-          localStorage.setItem('followed-charities', JSON.stringify(dbCharities));
+          // Store in state only, not localStorage
         } catch (error) {
           console.error('Error syncing followed charities:', error);
         }

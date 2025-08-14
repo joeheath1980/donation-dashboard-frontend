@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 function MatchingOpportunitiesComponent({ userId }) {
+  const { getAuthHeaders } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchOpportunities = async () => {
-      const token = localStorage.getItem('token');
       try {
         console.log('Fetching matching opportunities...');
         console.log('User ID:', userId);
-        console.log('Token:', token);
         const response = await axios.get('http://localhost:3002/api/matchingOpportunities', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         });
 
         console.log('Response:', response);

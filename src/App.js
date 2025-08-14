@@ -37,23 +37,33 @@ import 'slick-carousel/slick/slick-theme.css';
 import './styles/global.css';
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
-  const { user } = useAuth();
-  const token = localStorage.getItem('token');
-  const userType = localStorage.getItem('userType');
+  const { user, loading } = useAuth();
   
-  if (!token) {
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
     return <Navigate to="/login" />;
   }
   
-  if (allowedUserTypes && !allowedUserTypes.includes(userType)) {
-    return <Navigate to="/dashboard" />;
+  if (allowedUserTypes) {
+    const userType = user.isBusiness ? 'business' : user.isCharity ? 'charity' : 'user';
+    if (!allowedUserTypes.includes(userType)) {
+      return <Navigate to="/dashboard" />;
+    }
   }
   
   return children;
 };
 
 const AdminRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
   console.log('AdminRoute - Current user:', user);
   const isAdmin = user && user.email === 'admin@example.com';
   console.log('AdminRoute - Is admin:', isAdmin);

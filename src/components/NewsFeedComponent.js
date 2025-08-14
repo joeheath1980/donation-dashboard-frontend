@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import styles from '../NewsFeed.module.css'; // Create this CSS module
 
 function NewsFeedComponent() {
+  const { getAuthHeaders } = useAuth();
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchNews = async () => {
-      const token = localStorage.getItem('token');
       setIsLoading(true);
       setError(null);
       try {
         const response = await axios.get('http://localhost:3002/api/news/personalized', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         });
 
         const fetchedNews = response.data;

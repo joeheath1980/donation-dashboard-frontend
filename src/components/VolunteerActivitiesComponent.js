@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import cleanStyles from './CleanDesign.module.css';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 
 function VolunteerActivitiesComponent({ userId }) {
+  const { getAuthHeaders } = useAuth();
   const [activities, setActivities] = useState([]);
   const [newActivity, setNewActivity] = useState({
     organization: '',
@@ -19,12 +21,9 @@ function VolunteerActivitiesComponent({ userId }) {
   }, [userId]);
 
   const fetchActivities = async () => {
-    const token = localStorage.getItem('token');
     try {
       const response = await axios.get(`http://localhost:3002/api/volunteerActivities`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
       });
       setActivities(response.data);
     } catch (error) {
@@ -39,11 +38,10 @@ function VolunteerActivitiesComponent({ userId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
     try {
       const response = await axios.post('http://localhost:3002/api/volunteerActivities', newActivity, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          ...getAuthHeaders(),
           'Content-Type': 'application/json'
         },
       });
@@ -58,12 +56,9 @@ function VolunteerActivitiesComponent({ userId }) {
   };
 
   const handleDeleteActivity = async (activityId) => {
-    const token = localStorage.getItem('token');
     try {
       await axios.delete(`http://localhost:3002/api/volunteerActivities/${activityId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
       });
       setActivities(activities.filter(activity => activity._id !== activityId));
     } catch (error) {

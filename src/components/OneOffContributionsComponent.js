@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { useAuth } from '../contexts/AuthContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import OneOffContributionModal from './OneOffContributionModal';
@@ -25,6 +26,7 @@ function formatDate(dateString) {
 
 function OneOffContributionsComponent({ displayAll }) {
   const { oneOffContributions, onDeleteContribution, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
+  const { getAuthHeaders } = useAuth();
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -76,7 +78,7 @@ function OneOffContributionsComponent({ displayAll }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...getAuthHeaders()
         },
         body: JSON.stringify({ ...editedContribution, needsValidation: true })
       });

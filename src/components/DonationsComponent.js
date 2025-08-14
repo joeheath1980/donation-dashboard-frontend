@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { useAuth } from '../contexts/AuthContext';
 import cleanStyles from './CleanDesign.module.css';
 import { format, parseISO, parse } from 'date-fns';
 import DonationConfirmationModal from './DonationConfirmationModal';
@@ -25,6 +26,7 @@ function formatDate(dateString) {
 
 function DonationsComponent({ displayAll }) {
   const { donations, fetchImpactData, isAuthenticated } = useContext(ImpactContext);
+  const { getAuthHeaders } = useAuth();
   const [localDonations, setLocalDonations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
@@ -48,7 +50,7 @@ function DonationsComponent({ displayAll }) {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            ...getAuthHeaders()
           },
         });
 
@@ -88,7 +90,7 @@ function DonationsComponent({ displayAll }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...getAuthHeaders()
         },
         body: JSON.stringify({ ...editedDonation, amount, needsValidation: true })
       });
