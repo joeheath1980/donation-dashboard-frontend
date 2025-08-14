@@ -215,7 +215,7 @@ const ManagePaymentsComponent = () => {
                   createOrder={createOrder}
                   onApprove={onApprove}
                   disabled={!isAmountValid || !selectedCharity}
-                  style={{ layout: "horizontal" }}
+                  data-layout="horizontal"
                 />
               </PayPalScriptProvider>
             </div>

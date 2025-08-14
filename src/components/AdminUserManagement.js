@@ -268,7 +268,7 @@ const AdminUserManagement = () => {
                           <span className={userStyles.tierIcon}>{getTierIcon(user.tier)}</span>
                           <span 
                             className={userStyles.tierBadge}
-                            style={{ backgroundColor: getTierColor(user.tier) }}
+                            data-tier-color={getTierColor(user.tier)} className="bg-tier"
                           >
                             {user.tier ? user.tier.charAt(0).toUpperCase() + user.tier.slice(1) : 'None'}
                           </span>

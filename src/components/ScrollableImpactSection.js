@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
+import { DynamicWidth, ProgressBar, DynamicGradient } from './DynamicStyleManager';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import ImpactVisualization from './ImpactVisualization';
@@ -28,6 +29,7 @@ import {
   FaTimes,
   FaShare
 } from 'react-icons/fa';
+import '../styles/dynamic-styles.css';
 import styles from './ScrollableImpactSection.module.css';
 
 const allBadges = [
@@ -84,7 +86,7 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader} style={{ background: `linear-gradient(135deg, ${badge.color}dd, ${badge.color})` }}>
+        <div className={`${styles.modalHeader} dynamic-gradient`} data-gradient-color={badge.color?.replace('#', '')?.toLowerCase()}>
           <div className={styles.modalBadge}>
             <badge.icon size={48} color="white" />
           </div>
@@ -117,7 +119,7 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
               </div>
               
               <div className={styles.modalActions}>
-                <button className={styles.shareButton} style={{ backgroundColor: badge.color }}>
+                <button className={styles.shareButton} data-badge-color={badge.color} className="bg-badge-dynamic">
                   <FaShare /> Share Badge
                 </button>
               </div>
@@ -128,11 +130,10 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
               <p>Make at least 3 contributions to {badge.title.replace(' Hero', '').replace(' Champion', '').replace(' Guardian', '')} causes</p>
               <div className={styles.progressBar}>
                 <div 
-                  className={styles.progressFill} 
-                  style={{ 
-                    width: `${(contributions.length / 3) * 100}%`,
-                    backgroundColor: badge.color 
-                  }}
+                  className={`${styles.progressFill} progress-bar-fill`}
+                  data-progress-width={(contributions.length / 3) * 100}
+                  data-color={badge.color}
+                  ref={el => el && el.style.setProperty('--progress', `${(contributions.length / 3) * 100}%`)}
                 />
               </div>
               <p className={styles.progressText}>{contributions.length} / 3 contributions</p>
@@ -258,18 +259,16 @@ const BadgesDisplay = ({ isActive }) => {
               tabIndex={0}
             >
               <div 
-                className={styles.badgeCircle}
-                style={isCollected ? { 
-                  background: `linear-gradient(135deg, ${badge.color}, ${badge.color}dd)`,
-                  borderColor: 'rgba(255, 255, 255, 0.3)'
-                } : {}}
+                className={`${styles.badgeCircle} ${isCollected ? 'dynamic-gradient' : ''}`}
+                data-gradient-color={badge.color?.replace('#', '')?.toLowerCase()}
               >
                 <badge.icon size={36} color={isCollected ? 'white' : '#999'} />
                 {isCollected && <div className={styles.badgeShine} />}
               </div>
               <div 
                 className={styles.badgeTitle}
-                style={isCollected ? { color: badge.color } : {}}
+                data-badge-color={isCollected ? badge.color : null}
+                ref={el => el && isCollected && el.style.setProperty('--badge-color', badge.color)}
               >
                 {badge.title}
               </div>

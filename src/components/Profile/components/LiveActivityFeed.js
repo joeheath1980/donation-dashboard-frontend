@@ -152,7 +152,7 @@ function LiveActivityFeed({ businessSlug }) {
       case 'match':
         return (
           <div className={styles.activityItem} key={activity.id}>
-            <div className={styles.activityIcon} style={{ background: getCategoryColor(activity.category) }}>
+            <div className={styles.activityIcon} data-category-color={getCategoryColor(activity.category)} className="bg-category">
               <FaHandHoldingHeart />
             </div>
             <div className={styles.activityContent}>
@@ -167,7 +167,7 @@ function LiveActivityFeed({ businessSlug }) {
                 )}
                 <span className={styles.activityText}>
                   donated <strong>${activity.amount}</strong> to{' '}
-                  <span className={styles.category} style={{ color: getCategoryColor(activity.category) }}>
+                  <span className={styles.category} data-category-color={getCategoryColor(activity.category)} className="dynamic-color">
                     {activity.category}
                   </span>
                 </span>
@@ -187,7 +187,7 @@ function LiveActivityFeed({ businessSlug }) {
       case 'milestone':
         return (
           <div className={styles.activityItem} key={activity.id}>
-            <div className={styles.activityIcon} style={{ background: '#FFD700' }}>
+            <div className={styles.activityIcon} className="bg-gold">
               <FaTrophy />
             </div>
             <div className={styles.activityContent}>
@@ -204,7 +204,7 @@ function LiveActivityFeed({ businessSlug }) {
       case 'campaign':
         return (
           <div className={styles.activityItem} key={activity.id}>
-            <div className={styles.activityIcon} style={{ background: '#2d8f7b' }}>
+            <div className={styles.activityIcon} className="bg-primary">
               <FaBolt />
             </div>
             <div className={styles.activityContent}>

@@ -7,11 +7,7 @@ const DefaultBusinessLogo = ({ size = 32 }) => (
     viewBox="0 0 32 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ 
-      borderRadius: '6px',
-      background: '#f3f4f6',
-      border: '1px solid #e5e7eb'
-    }}
+    className="border-rounded-6 bg-gradient-primary"
   >
     <rect width="32" height="32" fill="#f3f4f6" />
     <path

@@ -888,7 +888,7 @@ function ImpactVisualization({ hideTitle = false }) {
       {!hideTitle && (
         <div className={styles.header}>
           <h2 className={`${styles.title} gradientTitle`}>
-            <FaChartBar style={{ marginRight: '10px', color: '#2d8f7b' }} /> Impact Journey
+            <FaChartBar className="mr-10 text-primary" /> Impact Journey
           </h2>
           <div className={styles.controls}>
             <select 
@@ -933,23 +933,23 @@ function ImpactVisualization({ hideTitle = false }) {
       </div>
       <div className={styles.legend}>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ background: COLORS.REGULAR_DONATION }}></span>
+          <span className={styles.legendDot} className="bg-regular-donation"></span>
           <span>Regular Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ background: COLORS.ONE_OFF_DONATION }}></span>
+          <span className={styles.legendDot} className="bg-one-off-donation"></span>
           <span>One-off Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ background: COLORS.FUNDRAISING_CAMPAIGN }}></span>
+          <span className={styles.legendDot} className="bg-fundraising-campaign"></span>
           <span>Fundraising Campaigns</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ background: COLORS.VOLUNTEER }}></span>
+          <span className={styles.legendDot} className="bg-volunteer"></span>
           <span>Volunteer Hours</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} style={{ background: COLORS.DENSE, transform: 'rotate(45deg)' }}></span>
+          <span className={styles.legendDot} className="bg-dense-pattern"></span>
           <span>Multiple Activities</span>
         </div>
       </div>

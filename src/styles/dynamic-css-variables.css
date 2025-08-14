@@ -1,0 +1,235 @@
+/* Dynamic CSS Variables using Data Attributes */
+
+/* Tier Colors */
+[data-tier-color="bronze"] {
+  --tier-color: #CD7F32;
+}
+
+[data-tier-color="silver"] {
+  --tier-color: #C0C0C0;
+}
+
+[data-tier-color="gold"] {
+  --tier-color: #FFD700;
+}
+
+[data-tier-color="platinum"] {
+  --tier-color: #E5E4E2;
+}
+
+[data-tier-color="diamond"] {
+  --tier-color: #B9F2FF;
+}
+
+/* Category Colors - Common palette */
+[data-category-color="#2D8F7B"] {
+  --category-color: #2D8F7B;
+}
+
+[data-category-color="#48BB78"] {
+  --category-color: #48BB78;
+}
+
+[data-category-color="#38A169"] {
+  --category-color: #38A169;
+}
+
+[data-category-color="#68D391"] {
+  --category-color: #68D391;
+}
+
+[data-category-color="#9AE6B4"] {
+  --category-color: #9AE6B4;
+}
+
+[data-category-color="#10b981"] {
+  --category-color: #10b981;
+}
+
+[data-category-color="#f59e0b"] {
+  --category-color: #f59e0b;
+}
+
+[data-category-color="#dc2626"] {
+  --category-color: #dc2626;
+}
+
+[data-category-color="#3b82f6"] {
+  --category-color: #3b82f6;
+}
+
+/* Action Colors */
+[data-action-color="green"] {
+  --action-color: #10b981;
+}
+
+[data-action-color="blue"] {
+  --action-color: #3b82f6;
+}
+
+[data-action-color="yellow"] {
+  --action-color: #f59e0b;
+}
+
+[data-action-color="red"] {
+  --action-color: #dc2626;
+}
+
+[data-action-color="purple"] {
+  --action-color: #8b5cf6;
+}
+
+/* Hover Colors */
+[data-hover-color="#2D8F7B"] {
+  --hover-color: #2D8F7B;
+}
+
+[data-hover-color="#48BB78"] {
+  --hover-color: #48BB78;
+}
+
+[data-hover-color="#10b981"] {
+  --hover-color: #10b981;
+}
+
+/* Ring Colors (for charts/visualizations) */
+[data-ring-color="#FFD700"] {
+  --ring-color: #FFD700;
+}
+
+[data-ring-color="#C0C0C0"] {
+  --ring-color: #C0C0C0;
+}
+
+[data-ring-color="#CD7F32"] {
+  --ring-color: #CD7F32;
+}
+
+/* Dynamic Background Colors */
+[data-bg-dynamic="#FFD700"] {
+  --dynamic-bg: #FFD700;
+}
+
+[data-bg-dynamic="#2d8f7b"] {
+  --dynamic-bg: #2d8f7b;
+}
+
+[data-bg-dynamic="#10b981"] {
+  --dynamic-bg: #10b981;
+}
+
+/* Score Colors */
+[data-score-color="low"] {
+  --score-color: #dc2626;
+}
+
+[data-score-color="medium"] {
+  --score-color: #f59e0b;
+}
+
+[data-score-color="high"] {
+  --score-color: #10b981;
+}
+
+[data-score-color="excellent"] {
+  --score-color: #3b82f6;
+}
+
+/* Generic dynamic color mappings */
+[data-dynamic-color] {
+  color: var(--dynamic-color);
+}
+
+[data-dynamic-bg] {
+  background-color: var(--dynamic-bg);
+}
+
+/* Status-based dynamic colors */
+[data-status-color="active"] {
+  --status-color: #10b981;
+}
+
+[data-status-color="inactive"] {
+  --status-color: #6c757d;
+}
+
+[data-status-color="pending"] {
+  --status-color: #f59e0b;
+}
+
+[data-status-color="error"] {
+  --status-color: #dc2626;
+}
+
+/* Confidence level colors */
+[data-confidence="high"] {
+  --confidence-color: #10b981;
+}
+
+[data-confidence="medium"] {
+  --confidence-color: #f59e0b;
+}
+
+[data-confidence="low"] {
+  --confidence-color: #dc2626;
+}
+
+/* Layout styles for spread operators */
+.style-spread-base {
+  /* Base styles that can be extended */
+  display: block;
+  position: relative;
+}
+
+.style-spread-flex {
+  display: flex;
+  align-items: center;
+}
+
+.style-spread-grid {
+  display: grid;
+}
+
+/* Conditional visibility classes */
+.show-if-true {
+  display: block !important;
+}
+
+.hide-if-true {
+  display: none !important;
+}
+
+.show-if-false {
+  display: none !important;
+}
+
+.hide-if-false {
+  display: block !important;
+}
+
+/* Opacity transitions */
+.opacity-transition {
+  transition: opacity 0.3s ease;
+}
+
+.opacity-0 { opacity: 0; }
+.opacity-10 { opacity: 0.1; }
+.opacity-20 { opacity: 0.2; }
+.opacity-30 { opacity: 0.3; }
+.opacity-40 { opacity: 0.4; }
+.opacity-50 { opacity: 0.5; }
+.opacity-60 { opacity: 0.6; }
+.opacity-70 { opacity: 0.7; }
+.opacity-80 { opacity: 0.8; }
+.opacity-90 { opacity: 0.9; }
+.opacity-100 { opacity: 1; }
+
+/* Height variations for dynamic content */
+.height-detailed-400 { height: 400px; }
+.height-simple-300 { height: 300px; }
+
+/* Border and background utilities */
+.border-rounded-6 { border-radius: 6px; }
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #2D8F7B 0%, #48BB78 100%);
+}

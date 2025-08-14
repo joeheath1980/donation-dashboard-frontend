@@ -149,7 +149,7 @@ const AdminContentManagement = () => {
               value={filterType} 
               onChange={(e) => setFilterType(e.target.value)}
               className={styles.select}
-              style={{ minWidth: '150px' }}
+              className="min-width-150"
             >
               <option value="all">All Types</option>
               <option value="article">Articles</option>

@@ -536,7 +536,7 @@ const CharityProfileEditor = () => {
               type="file"
               accept="image/*"
               onChange={(e) => handleImageChange(e, 'logo')}
-              style={{ display: 'none' }}
+              className="display-none"
             />
           </label>
         </div>
@@ -569,7 +569,7 @@ const CharityProfileEditor = () => {
               type="file"
               accept="image/*"
               onChange={(e) => handleImageChange(e, 'coverImage')}
-              style={{ display: 'none' }}
+              className="display-none"
             />
           </label>
         </div>

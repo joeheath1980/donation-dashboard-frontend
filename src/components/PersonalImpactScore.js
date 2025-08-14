@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { DynamicWidth, ProgressBar, DynamicGradient } from './DynamicStyleManager';
 import { Link } from 'react-router-dom';
 import { FaArrowUp, FaArrowDown, FaPlus, FaChartPie, FaChartLine } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './PersonalImpactScore.module.css';
+import '../styles/dynamic-styles.css';
 
 const tierColors = {
   Visionary: { start: '#F6E3BE', end: '#D4AF37', gap: '#FFF8E7' },
@@ -162,9 +164,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
                 strokeWidth={ring.strokeWidth}
                 opacity={hoveredRing !== null && hoveredRing !== index ? "0.3" : "0.5"}
                 className={styles.bgRing}
-                style={{
-                  transition: 'opacity 0.3s ease'
-                }}
+                className="opacity-transition"
               />
               {/* Progress ring */}
               <circle
@@ -242,13 +242,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       {/* Hover tooltip */}
       {hoveredRing !== null && (
         <div 
-          className={styles.ringTooltip}
-          style={{
-            '--ring-color': rings[hoveredRing].color.end,
-            left: '50%',
-            bottom: '-80px', // Position below the rings
-            transform: 'translateX(-50%)' // Center horizontally
-          }}
+          className={`${styles.ringTooltip} tooltip-bottom-center`}
+          data-ring-color={rings[hoveredRing].color.end}
         >
           <div className={styles.tooltipHeader}>{rings[hoveredRing].name}</div>
           {rings[hoveredRing].score > 0 ? (
@@ -256,18 +251,18 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
               <div className={styles.tooltipScore}>
                 Weighted: {rings[hoveredRing].score} points
               </div>
-              <div className={styles.tooltipScore} style={{fontSize: '0.9em', opacity: 0.8}}>
+              <div className={styles.tooltipScore} className="font-size-0-9em opacity-80">
                 Raw: {rings[hoveredRing].rawScore} × {rings[hoveredRing].weight}
               </div>
               <div className={styles.tooltipPercentage}>
                 {rings[hoveredRing].score >= rings[hoveredRing].maxScore ? (
-                  <span style={{color: '#4CAF50', fontWeight: 'bold'}}>
+                  <span className="text-success font-bold">
                     Exceptional! ({Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}%)
                   </span>
                 ) : (
                   <>
                     {Math.round((rings[hoveredRing].score / rings[hoveredRing].maxScore) * 100)}% progress
-                    <div style={{fontSize: '0.85em', opacity: 0.7, marginTop: '2px'}}>
+                    <div className="font-size-0-85em opacity-70 mt-2">
                       {Math.round(rings[hoveredRing].maxScore - rings[hoveredRing].score)} points to fill
                     </div>
                   </>
@@ -378,7 +373,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
             </span>
           </div>
         </div>
-        <div className={styles.tierName} style={{ color: color.end }}>
+        <div className={styles.tierName} data-tier-color={tier}>
           {tier}
         </div>
       </div>

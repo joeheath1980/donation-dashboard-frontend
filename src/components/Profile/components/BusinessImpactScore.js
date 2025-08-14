@@ -205,7 +205,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
           <div className={styles.comparison}>
             <div className={styles.comparisonItem}>
               <span className={styles.comparisonLabel}>Your Score</span>
-              <span className={styles.comparisonValue} style={{ color: getScoreColor(score) }}>
+              <span className={styles.comparisonValue} data-score-color={getScoreColor(score)} className="dynamic-color">
                 {score}
               </span>
             </div>

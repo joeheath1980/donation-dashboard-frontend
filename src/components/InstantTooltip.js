@@ -69,7 +69,7 @@ const InstantTooltip = ({ children, text }) => {
         ref={childRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={{ display: 'inline-block' }}
+        className="inline-block"
       >
         {children}
       </div>

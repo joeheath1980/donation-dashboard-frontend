@@ -136,7 +136,7 @@ function DonationChart({ data, dateRange, detailed = false }) {
   };
 
   return (
-    <div style={{ height: detailed ? '400px' : '300px' }}>
+    <div className={detailed ? "height-detailed-400" : "height-simple-300"}>
       <Line data={chartData} options={options} />
     </div>
   );

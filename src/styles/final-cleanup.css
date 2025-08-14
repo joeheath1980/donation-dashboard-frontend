@@ -1,0 +1,34 @@
+
+/* Additional specific classes for final cleanup */
+.min-width-150 { min-width: 150px; }
+.font-size-0-9em { font-size: 0.9em; }
+.font-size-0-85em { font-size: 0.85em; }
+.bg-gold { background: #FFD700; }
+.bg-primary { background: #2d8f7b; }
+.text-primary { color: #2d8f7b; }
+.rounded-8 { border-radius: 8px; }
+.border-4-light { border: 4px solid #f3f3f3; }
+.spinner-border { animation: spin 1s linear infinite; }
+.bg-badge-dynamic { background-color: var(--badge-color); }
+.bg-demo-dynamic { background-color: var(--demo-color); }
+.bg-tier-dynamic { background-color: var(--tier-bg); }
+.tier-color-dynamic { color: var(--tier-color); }
+
+/* Donation type backgrounds */
+.bg-regular-donation { background: #48BB78; }
+.bg-one-off-donation { background: #38A169; }
+.bg-fundraising-campaign { background: #2D8F7B; }
+.bg-volunteer { background: #68D391; }
+.bg-dense-pattern { background: #9AE6B4; transform: rotate(45deg); }
+
+/* Dynamic color attributes */
+[data-type-color] { color: var(--type-color); }
+[data-item-color] { color: var(--item-color); }
+[data-badge-color] { --badge-color: attr(data-badge-color); }
+[data-demo-color] { --demo-color: attr(data-demo-color); }
+[data-tier] { --tier-bg: var(--tier-color); }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

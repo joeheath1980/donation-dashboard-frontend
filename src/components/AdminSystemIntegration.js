@@ -255,7 +255,7 @@ const AdminSystemIntegration = () => {
             <div className={integrationStyles.serviceStatus}>
               <span 
                 className={integrationStyles.statusBadge}
-                style={{ backgroundColor: getStatusColor(service.status) }}
+                data-status-color={getStatusColor(service.status)} className="bg-status"
               >
                 {service.status.toUpperCase()}
               </span>

@@ -62,9 +62,9 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
               key={type.id}
               className={styles.optionCard}
               onClick={() => handleSelect(type.id)}
-              style={{ '--hover-color': type.color }}
+              data-hover-color={type.color }
             >
-              <type.icon className={styles.optionIcon} style={{ color: type.color }} />
+              <type.icon className={styles.optionIcon} data-type-color={type.color} className="dynamic-color" />
               <h3 className={styles.optionTitle}>{type.title}</h3>
               <p className={styles.optionDescription}>{type.description}</p>
             </button>
