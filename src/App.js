@@ -11,6 +11,7 @@ import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { csrfServiceAPI } from './services/api.service';
 
 // Eagerly loaded components (used frequently)
 import Layout from './components/Layout';
@@ -99,6 +100,27 @@ const SuspenseWrapper = ({ children }) => (
     {children}
   </Suspense>
 );
+
+// CSRF Token Initializer
+const CSRFInitializer = () => {
+  useEffect(() => {
+    // Initialize CSRF token on app load
+    csrfServiceAPI.initializeToken()
+      .then(token => {
+        if (token) {
+          logger.info('CSRF token initialized successfully');
+        } else {
+          logger.warn('CSRF token initialization returned null - backend may not require CSRF');
+        }
+      })
+      .catch(error => {
+        logger.error('Failed to initialize CSRF token', { error: error.message });
+        // Don't block app initialization on CSRF failure
+      });
+  }, []);
+
+  return null; // This component doesn't render anything
+};
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
@@ -202,6 +224,7 @@ function App() {
             <ImpactProvider>
               <MatchSelectionProvider>
                 <Router>
+                  <CSRFInitializer />
                   <RouteChangeHandler />
                   <ErrorBoundary name="Router">
                     <DemoBanner />
