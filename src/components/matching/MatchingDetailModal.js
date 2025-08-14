@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaHeart, FaBuilding, FaHandHoldingHeart, FaClock, FaInfoCircle } from 'react-icons/fa';
 import axios from 'axios';
-import LoadingSpinner from '../LoadingSpinner';
+import LoadingSpinner from '../Common/LoadingSpinner';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import styles from './MatchingDetailModal.module.css';
 

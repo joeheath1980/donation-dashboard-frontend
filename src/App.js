@@ -17,7 +17,7 @@ import { csrfServiceAPI } from './services/api.service';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import WelcomePage from './components/WelcomePage';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from './components/Common/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import ChunkErrorBoundary from './components/ChunkErrorBoundary';
 import DemoBanner from './components/DemoBanner';
