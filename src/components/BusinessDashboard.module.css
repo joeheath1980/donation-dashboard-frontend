@@ -197,7 +197,39 @@
   height: 100%;
   transition: width 0.6s ease;
   border-radius: 4px;
+  width: 0%;
+  background-color: var(--category-color, var(--primary-color));
 }
+
+/* Category colors using data attributes */
+.categoryFill[data-color="#2D8F7B"] { background-color: #2D8F7B; }
+.categoryFill[data-color="#48BB78"] { background-color: #48BB78; }
+.categoryFill[data-color="#38A169"] { background-color: #38A169; }
+.categoryFill[data-color="#68D391"] { background-color: #68D391; }
+.categoryFill[data-color="#9AE6B4"] { background-color: #9AE6B4; }
+
+/* Dynamic width for category fill using data attributes */
+.categoryFill[data-percentage="0"] { width: 0%; }
+.categoryFill[data-percentage="5"] { width: 5%; }
+.categoryFill[data-percentage="10"] { width: 10%; }
+.categoryFill[data-percentage="15"] { width: 15%; }
+.categoryFill[data-percentage="20"] { width: 20%; }
+.categoryFill[data-percentage="25"] { width: 25%; }
+.categoryFill[data-percentage="30"] { width: 30%; }
+.categoryFill[data-percentage="35"] { width: 35%; }
+.categoryFill[data-percentage="40"] { width: 40%; }
+.categoryFill[data-percentage="45"] { width: 45%; }
+.categoryFill[data-percentage="50"] { width: 50%; }
+.categoryFill[data-percentage="55"] { width: 55%; }
+.categoryFill[data-percentage="60"] { width: 60%; }
+.categoryFill[data-percentage="65"] { width: 65%; }
+.categoryFill[data-percentage="70"] { width: 70%; }
+.categoryFill[data-percentage="75"] { width: 75%; }
+.categoryFill[data-percentage="80"] { width: 80%; }
+.categoryFill[data-percentage="85"] { width: 85%; }
+.categoryFill[data-percentage="90"] { width: 90%; }
+.categoryFill[data-percentage="95"] { width: 95%; }
+.categoryFill[data-percentage="100"] { width: 100%; }
 
 .categoryInfo {
   display: flex;
@@ -365,7 +397,31 @@
   background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
   transition: width 0.3s ease;
   border-radius: 4px;
+  width: 0%;
 }
+
+/* Dynamic width for progress bar using data attributes */
+.progressBarFill[data-progress="0"] { width: 0%; }
+.progressBarFill[data-progress="5"] { width: 5%; }
+.progressBarFill[data-progress="10"] { width: 10%; }
+.progressBarFill[data-progress="15"] { width: 15%; }
+.progressBarFill[data-progress="20"] { width: 20%; }
+.progressBarFill[data-progress="25"] { width: 25%; }
+.progressBarFill[data-progress="30"] { width: 30%; }
+.progressBarFill[data-progress="35"] { width: 35%; }
+.progressBarFill[data-progress="40"] { width: 40%; }
+.progressBarFill[data-progress="45"] { width: 45%; }
+.progressBarFill[data-progress="50"] { width: 50%; }
+.progressBarFill[data-progress="55"] { width: 55%; }
+.progressBarFill[data-progress="60"] { width: 60%; }
+.progressBarFill[data-progress="65"] { width: 65%; }
+.progressBarFill[data-progress="70"] { width: 70%; }
+.progressBarFill[data-progress="75"] { width: 75%; }
+.progressBarFill[data-progress="80"] { width: 80%; }
+.progressBarFill[data-progress="85"] { width: 85%; }
+.progressBarFill[data-progress="90"] { width: 90%; }
+.progressBarFill[data-progress="95"] { width: 95%; }
+.progressBarFill[data-progress="100"] { width: 100%; }
 
 /* Campaign Stats */
 .campaignStats {

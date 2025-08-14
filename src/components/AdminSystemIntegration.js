@@ -186,13 +186,13 @@ const AdminSystemIntegration = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'operational':
-        return <FaCheckCircle style={{ color: '#10b981' }} />;
+        return <FaCheckCircle className="text-success" />;
       case 'degraded':
-        return <FaExclamationTriangle style={{ color: '#f59e0b' }} />;
+        return <FaExclamationTriangle className="color-hex-f59e0b" />;
       case 'error':
-        return <FaTimesCircle style={{ color: '#ef4444' }} />;
+        return <FaTimesCircle className="color-hex-ef4444" />;
       default:
-        return <FaSync className={styles.spinner} style={{ color: '#3b82f6' }} />;
+        return <FaSync className={styles.spinner} className="color-hex-3b82f6" />;
     }
   };
 
@@ -307,7 +307,7 @@ const AdminSystemIntegration = () => {
             </div>
             <div className={integrationStyles.statItem}>
               <span className={integrationStyles.statLabel}>Failed</span>
-              <span className={integrationStyles.statValue} style={{ color: '#ef4444' }}>
+              <span className={integrationStyles.statValue} className="color-hex-ef4444">
                 {emailStats.failed}
               </span>
             </div>

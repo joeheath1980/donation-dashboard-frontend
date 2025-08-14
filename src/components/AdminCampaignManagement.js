@@ -17,6 +17,7 @@ import {
   FaPlus
 } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
+import localStyles from './AdminCampaignManagement.module.css';
 
 const AdminCampaignManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -164,7 +165,7 @@ const AdminCampaignManagement = () => {
       </div>
 
       <div className={styles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div className={localStyles.flexRow}>
           <div className={styles.searchBar}>
             <input
               type="text"
@@ -240,20 +241,20 @@ const AdminCampaignManagement = () => {
                         <td>
                           <div>
                             <strong>{campaign.name}</strong>
-                            <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+                            <div className={localStyles.smallText}>
                               {campaign.description?.substring(0, 50)}...
                             </div>
                           </div>
                         </td>
                         <td>{campaign.charity?.name || 'Unknown'}</td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <div className={localStyles.flexAlignCenter}>
                             <FaCalendarAlt />
                             {formatDate(campaign.startDate)}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <div className={localStyles.flexAlignCenter}>
                             <FaCalendarAlt />
                             {formatDate(campaign.endDate)}
                           </div>
@@ -263,22 +264,14 @@ const AdminCampaignManagement = () => {
                         </td>
                         <td>
                           <div>
-                            <strong style={{ color: '#10b981' }}>${campaign.amountRaised?.toFixed(2) || '0.00'}</strong>
-                            <div style={{ 
-                              marginTop: '5px',
-                              height: '6px',
-                              background: '#e9ecef',
-                              borderRadius: '3px',
-                              overflow: 'hidden'
-                            }}>
-                              <div style={{
-                                width: `${Math.min(progress, 100)}%`,
-                                height: '100%',
-                                background: '#10b981',
-                                transition: 'width 0.3s ease'
-                              }}></div>
+                            <strong className={localStyles.successText}>${campaign.amountRaised?.toFixed(2) || '0.00'}</strong>
+                            <div className={localStyles.progressContainer}>
+                              <div 
+                                className={localStyles.progressBar}
+                                data-progress={Math.round(Math.min(progress, 100) / 5) * 5}
+                              ></div>
                             </div>
-                            <div style={{ fontSize: '11px', color: '#6c757d', marginTop: '2px' }}>
+                            <div className={localStyles.tinyText}>
                               {progress.toFixed(0)}% of goal
                             </div>
                           </div>
@@ -288,29 +281,27 @@ const AdminCampaignManagement = () => {
                             value={campaign.status} 
                             onChange={(e) => handleStatusChange(campaign._id, e.target.value)}
                             className={styles.select}
-                            style={{ maxWidth: '150px' }}
+                            className={`${styles.select} ${localStyles.selectSmall}`}
                           >
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                             <option value="completed">Completed</option>
                             <option value="cancelled">Cancelled</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} style={{ marginLeft: '10px' }}>
+                          <span className={`${styles.badge} ${statusBadge.className} ${localStyles.badgeWithMargin}`}>
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '5px' }}>
+                          <div className={localStyles.flexRowSmall}>
                             <button 
-                              className={`${styles.button} ${styles.primaryButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className={`${styles.button} ${styles.primaryButton} ${localStyles.buttonSmall}`}
                               title="Edit Campaign"
                             >
                               <FaEdit />
                             </button>
                             <button 
-                              className={`${styles.button} ${styles.dangerButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className={`${styles.button} ${styles.dangerButton} ${localStyles.buttonSmall}`}
                               onClick={() => handleDelete(campaign._id)}
                               title="Delete Campaign"
                             >

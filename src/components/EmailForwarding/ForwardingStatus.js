@@ -151,7 +151,7 @@ const ForwardingStatus = ({ refreshTrigger }) => {
         <div className={styles.error}>
           {error}
           {error.includes('log in') && (
-            <div style={{ marginTop: '10px' }}>
+            <div className="mt-10">
               <a href="/login" className={styles.loginLink}>Go to Login</a>
             </div>
           )}

@@ -155,7 +155,7 @@ const AdminBusinessPartnerManagement = () => {
       </div>
 
       <div className={styles.card}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div className="display-flex gap-20 mb-20 flex-wrap">
           <div className={styles.searchBar}>
             <input
               type="text"
@@ -225,25 +225,25 @@ const AdminBusinessPartnerManagement = () => {
                     return (
                       <tr key={partner._id}>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <FaBuilding style={{ color: '#2d8f7b' }} />
+                          <div className="flex-align-center gap-10">
+                            <FaBuilding className="color-hex-2d8f7b" />
                             <strong>{partner.companyName}</strong>
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="flex-align-center gap-10">
                             <FaUser />
                             {partner.contactPerson}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="flex-align-center gap-10">
                             <FaEnvelope />
                             {partner.email}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="flex-align-center gap-10">
                             <FaCalendarAlt />
                             {new Date(partner.joinDate).toLocaleDateString()}
                           </div>
@@ -253,28 +253,28 @@ const AdminBusinessPartnerManagement = () => {
                             value={partner.status} 
                             onChange={(e) => handleStatusChange(partner._id, e.target.value)}
                             className={styles.select}
-                            style={{ maxWidth: '150px' }}
+                            className="max-width-150"
                           >
                             <option value="pending">Pending</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} style={{ marginLeft: '10px' }}>
+                          <span className={`${styles.badge} ${statusBadge.className}`} className="ml-10">
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '5px' }}>
+                          <div className="display-flex gap-5">
                             <button 
                               className={`${styles.button} ${styles.primaryButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className="font-size-12 p-5px-10px"
                               title="Edit Partner"
                             >
                               <FaEdit />
                             </button>
                             <button 
                               className={`${styles.button} ${styles.dangerButton}`} 
-                              style={{ fontSize: '12px', padding: '5px 10px' }}
+                              className="font-size-12 p-5px-10px"
                               onClick={() => handleDelete(partner._id)}
                               title="Remove Partner"
                             >

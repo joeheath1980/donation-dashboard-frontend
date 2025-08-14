@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-do
 import { useAuth } from '../contexts/AuthContext';
 import { API_CONFIG, STORAGE_KEYS } from '../config/api.config';
 import { createLogger } from '../utils/logger';
+import { validateEmail, validatePassword } from '../utils/validation';
 import { useDemoMode } from '../hooks/useDemoMode';
 import DemoQuickLogin from './DemoQuickLogin';
 import axios from 'axios';
@@ -27,6 +28,14 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [socialLoginInProgress, setSocialLoginInProgress] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    password: ''
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false
+  });
 
   const handleSocialLoginCallback = useCallback(async (token) => {
     try {
@@ -94,14 +103,58 @@ function Login() {
     setFormData(prev => ({ ...prev, [name]: value }));
     // Clear any previous errors when user starts typing
     setError(null);
+    
+    // Validate on change if field has been touched
+    if (touched[name]) {
+      validateField(name, value);
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    validateField(name, value);
+  };
+
+  const validateField = (name, value) => {
+    let fieldError = '';
+    
+    if (name === 'email') {
+      const emailValidation = validateEmail(value);
+      if (!emailValidation.valid) {
+        fieldError = emailValidation.message;
+      }
+    } else if (name === 'password' && value) {
+      // For login, we only check if password is provided, not strength
+      if (value.length === 0) {
+        fieldError = 'Password is required';
+      }
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    return fieldError === '';
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!formData.email || !formData.password) {
-      setError('Please enter both email and password.');
+    // Validate all fields
+    const emailValid = validateField('email', formData.email);
+    const passwordValid = formData.password.length > 0;
+    
+    setTouched({ email: true, password: true });
+    
+    if (!emailValid) {
+      setFieldErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+    }
+    
+    if (!passwordValid) {
+      setFieldErrors(prev => ({ ...prev, password: 'Password is required' }));
+    }
+    
+    if (!emailValid || !passwordValid) {
+      setError('Please correct the errors below.');
       return;
     }
 
@@ -139,7 +192,20 @@ function Login() {
       }
     } catch (err) {
       logger.error('Login error', { message: err.message });
-      setError(err.response?.data?.message || 'Failed to log in. Please try again.');
+      
+      // Handle validation errors from backend
+      if (err.response?.data?.details && Array.isArray(err.response.data.details)) {
+        const validationErrors = {};
+        err.response.data.details.forEach(detail => {
+          if (detail.field === 'email' || detail.field === 'password') {
+            validationErrors[detail.field] = detail.message;
+          }
+        });
+        setFieldErrors(prev => ({ ...prev, ...validationErrors }));
+        setError('Please correct the validation errors.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to log in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -182,11 +248,18 @@ function Login() {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your email"
               required
-              className={`${styles.loginInput} ${error ? styles.error : ''}`}
-              aria-invalid={error ? 'true' : 'false'}
+              className={`${styles.loginInput} ${fieldErrors.email ? styles.error : ''}`}
+              aria-invalid={fieldErrors.email ? 'true' : 'false'}
+              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
             />
+            {fieldErrors.email && touched.email && (
+              <span id="email-error" className={styles.fieldError}>
+                {fieldErrors.email}
+              </span>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -198,10 +271,12 @@ function Login() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Enter your password"
                 required
-                className={`${styles.loginInput} ${error ? styles.error : ''}`}
-                aria-invalid={error ? 'true' : 'false'}
+                className={`${styles.loginInput} ${fieldErrors.password ? styles.error : ''}`}
+                aria-invalid={fieldErrors.password ? 'true' : 'false'}
+                aria-describedby={fieldErrors.password ? 'password-error' : undefined}
               />
               <button
                 type="button"
@@ -212,6 +287,11 @@ function Login() {
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
+            {fieldErrors.password && touched.password && (
+              <span id="password-error" className={styles.fieldError}>
+                {fieldErrors.password}
+              </span>
+            )}
           </div>
 
           <div className={styles.formGroup}>

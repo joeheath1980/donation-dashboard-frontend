@@ -290,6 +290,14 @@
   margin: 4px 0 0;
 }
 
+.fieldError {
+  font-size: 13px;
+  color: #dc2626;
+  margin-top: 6px;
+  display: block;
+  width: 100%;
+}
+
 .links {
   text-align: center;
   margin-top: 24px;
