@@ -14,25 +14,13 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       if (user && user._id) {
-        // Generate unique forwarding email for this user
         const email = `donor-${user._id}@forward.do-nation.space`;
         setForwardingEmail(email);
         setLoading(false);
         setError('');
       } else {
-        // Try to get from localStorage as fallback
-        const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('currentUserId');
-        
-        if (token && userId) {
-          const email = `donor-${userId}@forward.do-nation.space`;
-          setForwardingEmail(email);
-          setLoading(false);
-          setError('');
-        } else {
-          setError('Please log in to view your forwarding email');
-          setLoading(false);
-        }
+        setError('Please log in to view your forwarding email');
+        setLoading(false);
       }
     }
   }, [isOpen, user]);

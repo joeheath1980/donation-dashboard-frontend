@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { API_CONFIG, API_ENDPOINTS, SECURITY_HEADERS } from '../config/api.config';
-import { SecureTokenStorage } from '../utils/auth.utils';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('APIService');
@@ -9,24 +8,17 @@ const logger = createLogger('APIService');
 const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
-  headers: SECURITY_HEADERS
+  headers: SECURITY_HEADERS,
+  withCredentials: API_CONFIG.WITH_CREDENTIALS,
 });
 
-// Request interceptor to add auth token
+// Request interceptor for logging only
 apiClient.interceptors.request.use(
   (config) => {
-    const token = SecureTokenStorage.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Log request in development
     logger.debug('API Request', {
       method: config.method,
       url: config.url,
-      hasAuth: !!token
     });
-    
     return config;
   },
   (error) => {
@@ -56,9 +48,7 @@ apiClient.interceptors.response.use(
       
       // Handle 401 Unauthorized
       if (response.status === 401) {
-        logger.info('Unauthorized - clearing auth data');
-        SecureTokenStorage.removeToken();
-        // Don't redirect here - let components handle it
+        logger.info('Unauthorized API response');
       }
     } else {
       logger.error('Network Error', { message: error.message });

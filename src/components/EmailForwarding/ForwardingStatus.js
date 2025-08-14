@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/api.config';
 import { createLogger } from '../../utils/logger';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './ForwardingStatus.module.css';
 import '../SharedStyles.css';
 
@@ -15,6 +16,7 @@ const ForwardingStatus = ({ refreshTrigger }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const { user } = useAuth();
 
   const ITEMS_PER_PAGE = 10;
 
@@ -35,10 +37,8 @@ const ForwardingStatus = ({ refreshTrigger }) => {
       setLoading(true);
       setError('');
       
-      // Check if token exists before making request
-      const token = localStorage.getItem('token');
-      if (!token) {
-        logger.warn('No authentication token found');
+      if (!user) {
+        logger.warn('No authenticated user found');
         setError('Please log in to view forwarded emails');
         setLoading(false);
         return;
@@ -47,7 +47,7 @@ const ForwardingStatus = ({ refreshTrigger }) => {
       logger.debug('Fetching forwarded emails', { 
         page, 
         limit: ITEMS_PER_PAGE,
-        hasToken: !!token 
+        hasAuth: !!user
       });
       
       const response = await apiClient.get(API_ENDPOINTS.EMAIL_FORWARD_STATUS, {
@@ -67,7 +67,7 @@ const ForwardingStatus = ({ refreshTrigger }) => {
       setTotalPages(Math.ceil((response.data.total || 0) / ITEMS_PER_PAGE));
       setLoading(false);
     } catch (err) {
-      logger.error('Failed to fetch forwarded emails', { 
+      logger.error('Failed to fetch forwarded emails', {
         error: err.message,
         status: err.response?.status,
         data: err.response?.data

@@ -7,7 +7,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
 import { MatchSelectionProvider } from './contexts/MatchSelectionContext';
-import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
+import { USER_TYPES } from './config/api.config';
 import { createLogger } from './utils/logger';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -101,17 +101,17 @@ const SuspenseWrapper = ({ children }) => (
 );
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
-  
-  if (!token) {
+  const { user } = useAuth();
+  const userType = user?.role || user?.userType;
+
+  if (!user) {
     return <Navigate to="/login" />;
   }
-  
-  if (allowedUserTypes && !allowedUserTypes.includes(userType)) {
+
+  if (allowedUserTypes && userType && !allowedUserTypes.includes(userType)) {
     return <Navigate to="/dashboard" />;
   }
-  
+
   return children;
 };
 

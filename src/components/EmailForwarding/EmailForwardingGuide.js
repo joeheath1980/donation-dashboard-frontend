@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '../../services/api.service';
+import { API_ENDPOINTS } from '../../config/api.config';
 import styles from './EmailForwardingGuide.module.css';
 
 const EmailForwardingGuide = () => {
@@ -12,8 +13,6 @@ const EmailForwardingGuide = () => {
   const [copied, setCopied] = useState(false);
   const [userInstructions, setUserInstructions] = useState(null);
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -21,19 +20,13 @@ const EmailForwardingGuide = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
-      // Get forwarding email address
-      const emailResponse = await axios.get(`${API_URL}/api/email/forward-address`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      // Use the forwardToEmail instead of the old donor-specific email
+      const emailResponse = await apiClient.get(API_ENDPOINTS.EMAIL_FORWARD_SETUP);
       setForwardingEmail(emailResponse.data.forwardToEmail || emailResponse.data.email);
       setUserInstructions(emailResponse.data.instructions);
 
-      // Get search templates
-      const templatesResponse = await axios.get(`${API_URL}/api/email/search-templates`);
+      const templatesResponse = await apiClient.get('/api/email/search-templates');
       setSearchTemplates(templatesResponse.data);
-      
+
       setLoading(false);
     } catch (err) {
       setError('Failed to load email forwarding information');
