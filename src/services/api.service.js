@@ -74,6 +74,32 @@ apiClient.interceptors.response.use(
         logger.warn('CSRF token error detected');
         return csrfService.handleCSRFError(error);
       }
+      
+      // Handle rate limiting (429 Too Many Requests)
+      if (response.status === 429) {
+        const retryAfter = response.headers['retry-after'];
+        const message = response.data?.message || 'Too many requests. Please try again later.';
+        
+        logger.warn('Rate limit exceeded', {
+          retryAfter,
+          message,
+          url: response.config.url
+        });
+        
+        // Create enhanced error with rate limit info
+        const rateLimitError = new Error(message);
+        rateLimitError.response = response;
+        rateLimitError.retryAfter = retryAfter ? parseInt(retryAfter) : null;
+        rateLimitError.isRateLimit = true;
+        
+        // Show user-friendly notification if toast is available
+        if (typeof window !== 'undefined' && window.showToast) {
+          const waitTime = retryAfter ? `Please wait ${retryAfter} seconds and try again.` : 'Please wait a moment and try again.';
+          window.showToast(`${message} ${waitTime}`, 'warning');
+        }
+        
+        return Promise.reject(rateLimitError);
+      }
     } else {
       logger.error('Network Error', { message: error.message });
     }

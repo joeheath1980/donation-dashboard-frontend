@@ -6,6 +6,7 @@ import { createLogger } from '../utils/logger';
 import { validateEmail, validatePassword } from '../utils/validation';
 import { useDemoMode } from '../hooks/useDemoMode';
 import DemoQuickLogin from './DemoQuickLogin';
+import RateLimitHandler, { useRateLimitHandler } from './Common/RateLimitHandler';
 import axios from 'axios';
 import styles from './Login.module.css';
 import logo from '../assets/logo.png';
@@ -28,6 +29,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [socialLoginInProgress, setSocialLoginInProgress] = useState(false);
+  const { rateLimitError, handleError: handleRateLimitError, clearError: clearRateLimitError } = useRateLimitHandler();
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
     password: ''
@@ -138,6 +140,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    clearRateLimitError();
 
     // Validate all fields
     const emailValid = validateField('email', formData.email);
@@ -193,6 +196,12 @@ function Login() {
     } catch (err) {
       logger.error('Login error', { message: err.message });
       
+      // Check if it's a rate limit error
+      if (handleRateLimitError(err)) {
+        // Rate limit error is handled by the handler
+        return;
+      }
+      
       // Handle validation errors from backend
       if (err.response?.data?.details && Array.isArray(err.response.data.details)) {
         const validationErrors = {};
@@ -230,7 +239,17 @@ function Login() {
         <img src={logo} alt="Logo" className={styles.logo} />
         <h1 className={styles.title}>Welcome Back</h1>
 
-        {error && (
+        {rateLimitError && (
+          <RateLimitHandler 
+            error={rateLimitError} 
+            onRetry={() => {
+              clearRateLimitError();
+              handleSubmit({ preventDefault: () => {} });
+            }}
+          />
+        )}
+        
+        {error && !rateLimitError && (
           <div className={styles.error} role="alert">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>

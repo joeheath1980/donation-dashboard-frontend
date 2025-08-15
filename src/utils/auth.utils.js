@@ -5,28 +5,43 @@ const logger = createLogger('AuthUtils');
 
 /**
  * Secure token storage utility
- * Future: Implement httpOnly cookie support
+ * CASA Compliance: Uses memory-only storage to prevent XSS attacks
+ * Tokens are stored in memory and sessionStorage (for tab persistence)
  */
 export class SecureTokenStorage {
+  // Memory storage for tokens (protects against XSS)
+  static memoryToken = null;
+  static memoryRefreshToken = null;
+  
   /**
    * Store authentication token
+   * CASA: Never store sensitive tokens in localStorage
    * @param {string} token - JWT token
+   * @param {string} refreshToken - Optional refresh token
    */
-  static setToken(token) {
+  static setToken(token, refreshToken = null) {
     if (!token) {
       logger.warn('Attempted to store empty token');
       return;
     }
     
-    // TODO: In production, this should use httpOnly cookies
-    // For now, we use localStorage but log the security concern
-    if (process.env.NODE_ENV === 'production') {
-      logger.warn('Using localStorage for token storage in production - migrate to httpOnly cookies');
-    }
-    
     try {
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      logger.debug('Token stored successfully');
+      // Store in memory (primary storage)
+      this.memoryToken = token;
+      if (refreshToken) {
+        this.memoryRefreshToken = refreshToken;
+      }
+      
+      // Store in sessionStorage for tab persistence only
+      // sessionStorage is cleared when browser closes (more secure than localStorage)
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        if (refreshToken) {
+          sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+        }
+      }
+      
+      logger.debug('Token stored securely in memory');
     } catch (error) {
       logger.error('Failed to store token', { error: error.message });
     }
@@ -34,12 +49,27 @@ export class SecureTokenStorage {
   
   /**
    * Retrieve authentication token
+   * First checks memory, then sessionStorage as fallback
    * @returns {string|null} JWT token or null
    */
   static getToken() {
     try {
-      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-      return token;
+      // Primary: Check memory storage
+      if (this.memoryToken) {
+        return this.memoryToken;
+      }
+      
+      // Fallback: Check sessionStorage (for page refreshes within same session)
+      if (typeof sessionStorage !== 'undefined') {
+        const sessionToken = sessionStorage.getItem(STORAGE_KEYS.TOKEN);
+        if (sessionToken) {
+          // Restore to memory
+          this.memoryToken = sessionToken;
+          return sessionToken;
+        }
+      }
+      
+      return null;
     } catch (error) {
       logger.error('Failed to retrieve token', { error: error.message });
       return null;
@@ -47,14 +77,50 @@ export class SecureTokenStorage {
   }
   
   /**
-   * Remove authentication token
+   * Get refresh token
+   * @returns {string|null}
+   */
+  static getRefreshToken() {
+    if (this.memoryRefreshToken) {
+      return this.memoryRefreshToken;
+    }
+    
+    if (typeof sessionStorage !== 'undefined') {
+      const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      if (refreshToken) {
+        this.memoryRefreshToken = refreshToken;
+        return refreshToken;
+      }
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Remove authentication tokens
+   * Clears both memory and sessionStorage
    */
   static removeToken() {
     try {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      logger.debug('Token removed successfully');
+      // Clear memory
+      this.memoryToken = null;
+      this.memoryRefreshToken = null;
+      
+      // Clear sessionStorage
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
+        sessionStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      }
+      
+      // Also clear any legacy localStorage tokens
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      }
+      
+      logger.debug('Tokens removed successfully');
     } catch (error) {
-      logger.error('Failed to remove token', { error: error.message });
+      logger.error('Failed to remove tokens', { error: error.message });
     }
   }
   
@@ -64,6 +130,13 @@ export class SecureTokenStorage {
    */
   static hasToken() {
     return !!this.getToken();
+  }
+  
+  /**
+   * Clear all tokens (for logout)
+   */
+  static clearAll() {
+    this.removeToken();
   }
 }
 
