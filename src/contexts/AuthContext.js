@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
 import { createLogger } from '../utils/logger';
 import { csrfServiceAPI } from '../services/api.service';
+import { SecureTokenStorage, UserDataStorage } from '../utils/auth.utils';
 
 const AuthContext = createContext();
 const logger = createLogger('AuthContext');
@@ -28,14 +29,14 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
       
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = SecureTokenStorage.getRefreshToken();
         if (refreshToken) {
           const response = await axios.post(getApiUrl('/auth/refresh-token'), {
             refreshToken
           });
           
           const { accessToken } = response.data;
-          localStorage.setItem(STORAGE_KEYS.TOKEN, accessToken);
+          SecureTokenStorage.setToken(accessToken);
           setupAxiosDefaults(accessToken);
           
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -44,7 +45,8 @@ axios.interceptors.response.use(
       } catch (refreshError) {
         logger.error('Token refresh failed', refreshError);
         // Clear auth and redirect to login
-        localStorage.clear();
+        SecureTokenStorage.clearAll();
+        UserDataStorage.clearAll();
         window.location.href = '/login';
       }
     }
@@ -59,8 +61,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-      const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+      const token = SecureTokenStorage.getToken();
+      const userType = UserDataStorage.getUserType();
       if (token && userType) {
         setupAxiosDefaults(token);
         try {
@@ -112,31 +114,28 @@ export const AuthProvider = ({ children }) => {
       // Use accessToken if available, fallback to token for backward compatibility
       const authToken = accessToken || token;
       
-      localStorage.setItem(STORAGE_KEYS.TOKEN, authToken);
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
-      }
+      SecureTokenStorage.setToken(authToken, refreshToken);
       
       // Check if user is admin
       if (userData && (userData.isAdmin || userData.role === USER_TYPES.ADMIN)) {
-        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.ADMIN);
+        UserDataStorage.setUserType(USER_TYPES.ADMIN);
         setUser({ ...userData, isAdmin: true });
         setupAxiosDefaults(authToken);
         return userData;
       }
       
       // Regular user flow
-      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
+      UserDataStorage.setUserType(USER_TYPES.USER);
       setupAxiosDefaults(authToken);
       
       // If user data is in response, use it; otherwise fetch profile
       if (userData) {
-        localStorage.setItem(STORAGE_KEYS.USER_ID, userData._id || userData.id);
+        UserDataStorage.setUserId(userData._id || userData.id);
         setUser({ ...userData, isBusiness: false, isCharity: false });
         return userData;
       } else {
         const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
-        localStorage.setItem(STORAGE_KEYS.USER_ID, userResponse.data._id || userResponse.data.id);
+        UserDataStorage.setUserId(userResponse.data._id || userResponse.data.id);
         setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
         return userResponse.data;
       }
@@ -154,13 +153,13 @@ export const AuthProvider = ({ children }) => {
       logger.debug('Registration successful');
 
       if (response.data.token) {
-        localStorage.setItem(STORAGE_KEYS.TOKEN, response.data.token);
-        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
-        logger.debug('Token stored in localStorage');
+        SecureTokenStorage.setToken(response.data.token);
+        UserDataStorage.setUserType(USER_TYPES.USER);
+        logger.debug('Token stored securely');
         setupAxiosDefaults(response.data.token);
 
         const validatedUser = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
-        localStorage.setItem(STORAGE_KEYS.USER_ID, validatedUser.data._id || validatedUser.data.id);
+        UserDataStorage.setUserId(validatedUser.data._id || validatedUser.data.id);
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
       } else {
@@ -195,9 +194,9 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       const { token, businessId } = response.data;
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.BUSINESS);
-      localStorage.setItem(STORAGE_KEYS.BUSINESS_ID, businessId);
+      SecureTokenStorage.setToken(token);
+      UserDataStorage.setUserType(USER_TYPES.BUSINESS);
+      UserDataStorage.setBusinessId(businessId);
       setupAxiosDefaults(token);
       const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
       setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
@@ -214,9 +213,9 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_SIGNUP), signupData);
       if (response.status === 201 || response.status === 200) {
         const { token, businessId } = response.data;
-        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.BUSINESS);
-        localStorage.setItem(STORAGE_KEYS.BUSINESS_ID, businessId);
+        SecureTokenStorage.setToken(token);
+        UserDataStorage.setUserType(USER_TYPES.BUSINESS);
+        UserDataStorage.setBusinessId(businessId);
         setupAxiosDefaults(token);
         const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
         setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
@@ -237,10 +236,10 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       const { token, charity } = response.data;
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.CHARITY);
+      SecureTokenStorage.setToken(token);
+      UserDataStorage.setUserType(USER_TYPES.CHARITY);
       if (charity) {
-        localStorage.setItem(STORAGE_KEYS.CHARITY_ID, charity._id || charity.id || charity.charityId);
+        UserDataStorage.setCharityId(charity._id || charity.id || charity.charityId);
       }
       setupAxiosDefaults(token);
       const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
@@ -258,8 +257,8 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_SIGNUP), signupData);
       if (response.status === 201 || response.status === 200) {
         const { token } = response.data;
-        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.CHARITY);
+        SecureTokenStorage.setToken(token);
+        UserDataStorage.setUserType(USER_TYPES.CHARITY);
         setupAxiosDefaults(token);
         const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
@@ -275,19 +274,19 @@ export const AuthProvider = ({ children }) => {
   const socialLogin = async (token) => {
     try {
       logger.debug('Social login: Starting');
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
-      logger.debug('Social login: Token and userType set in localStorage');
+      SecureTokenStorage.setToken(token);
+      UserDataStorage.setUserType(USER_TYPES.USER);
+      logger.debug('Social login: Token and userType stored securely');
       setupAxiosDefaults(token);
 
       logger.debug('Social login: Fetching user data from API');
       const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
       logger.debug('Social login: User data received');
 
-      // Store user ID in localStorage
+      // Store user ID securely
       const userId = userResponse.data._id || userResponse.data.id;
       if (userId) {
-        localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+        UserDataStorage.setUserId(userId);
         logger.debug('Social login: User ID stored', { userId });
       }
 
@@ -309,7 +308,7 @@ export const AuthProvider = ({ children }) => {
     logger.debug('Clearing all user data from localStorage');
     
     // Get current user ID for targeted cleaning
-    const currentUserId = localStorage.getItem(STORAGE_KEYS.USER_ID);
+    const currentUserId = UserDataStorage.getUserId();
     
     // Activity-specific data for the current user
     if (currentUserId) {
@@ -325,9 +324,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('selectedCharityTypes');
     
     // Clear auth-related data
-    Object.values(STORAGE_KEYS).forEach(key => {
-      localStorage.removeItem(key);
-    });
+    SecureTokenStorage.clearAll();
+    UserDataStorage.clearAll();
     
     // Comprehensive cleanup of any other Activity-specific or user data
     Object.keys(localStorage).forEach(key => {
@@ -366,7 +364,7 @@ export const AuthProvider = ({ children }) => {
 
   // Function to get auth headers
   const getAuthHeaders = () => {
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const token = SecureTokenStorage.getToken();
     logger.debug('Retrieved auth headers');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };

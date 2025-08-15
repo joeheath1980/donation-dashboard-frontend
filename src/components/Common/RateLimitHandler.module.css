@@ -1,0 +1,104 @@
+.rateLimitContainer {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rateLimitIcon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.rateLimitMessage {
+  flex: 1;
+}
+
+.rateLimitMessage h4 {
+  margin: 0 0 8px 0;
+  color: #856404;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rateLimitMessage p {
+  margin: 0 0 8px 0;
+  color: #856404;
+  font-size: 14px;
+}
+
+.countdown {
+  font-size: 14px;
+  color: #856404;
+  margin-top: 8px;
+}
+
+.countdown strong {
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.retryButton {
+  padding: 8px 16px;
+  background: #ffc107;
+  color: #212529;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.retryButton:hover:not(:disabled) {
+  background: #e0a800;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.retryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #e0e0e0;
+  color: #666;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .rateLimitContainer {
+    background: #3a3a2e;
+    border-color: #ffc107;
+  }
+  
+  .rateLimitMessage h4,
+  .rateLimitMessage p,
+  .countdown {
+    color: #fff3cd;
+  }
+  
+  .retryButton {
+    background: #ffc107;
+    color: #212529;
+  }
+  
+  .retryButton:hover:not(:disabled) {
+    background: #ffca28;
+  }
+}

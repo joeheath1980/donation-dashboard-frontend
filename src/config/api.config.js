@@ -17,6 +17,7 @@ export const SECURITY_HEADERS = {
 // Local Storage Keys
 export const STORAGE_KEYS = {
   TOKEN: 'token',
+  REFRESH_TOKEN: 'refreshToken',
   USER_TYPE: 'userType',
   USER_ID: 'currentUserId',
   BUSINESS_ID: 'businessId',
