@@ -27,10 +27,48 @@ npm start  # Runs on http://localhost:3000
 ## DEPLOYMENT INSTRUCTIONS - CRITICAL
 **IMPORTANT**: Do NOT use `npm run deploy` or GitHub Pages deployment!
 
-### Correct Deployment Process:
-1. **Build locally**: `npm run build`
-2. **Deploy to production**: Use the deployment guide at `/Users/josephheath/giving-dashboard/docs/deployment/COMPLETE_DEPLOYMENT_GUIDE.md`
-3. **Production URL**: https://do-nation.space (NOT GitHub Pages)
+### 🚨 CRITICAL NGINX CONFIGURATION 🚨
+**⚠️ NGINX SERVES FROM A SYMLINK - MUST UNDERSTAND THIS! ⚠️**
+- **Nginx document root**: `/var/www/do-nation.space` (THIS IS A SYMLINK!)
+- **Actual deployment directory**: `/var/www/donation-dashboard/`
+- **The symlink**: `/var/www/do-nation.space` → `/var/www/donation-dashboard`
+- **NEVER** delete the symlink or deploy directly to `/var/www/do-nation.space/`
+- **ALWAYS** deploy to `/var/www/donation-dashboard/`
+- **See**: `/Users/josephheath/donation-dashboard/docs/DEPLOYMENT_CRITICAL.md` for full details
+
+### Correct Frontend Deployment Process (FOLLOW EXACTLY):
+1. **Build locally with production env**: 
+   ```bash
+   REACT_APP_API_BASE_URL=https://do-nation.space REACT_APP_API_URL=https://do-nation.space/api npm run build
+   ```
+2. **Copy build to server**:
+   ```bash
+   rsync -avz build/ do-nation-server:/home/ubuntu/build/
+   ```
+3. **Deploy on server to CORRECT directory**:
+   ```bash
+   ssh do-nation-server "sudo rsync -avz --delete /home/ubuntu/build/ /var/www/donation-dashboard/"
+   ```
+4. **Set permissions**:
+   ```bash
+   ssh do-nation-server "sudo chown -R www-data:www-data /var/www/donation-dashboard && sudo chmod -R 755 /var/www/donation-dashboard"
+   ```
+5. **Verify symlink exists** (CRITICAL!):
+   ```bash
+   ssh do-nation-server "ls -la /var/www/ | grep do-nation.space"
+   # Should show: lrwxrwxrwx ... do-nation.space -> /var/www/donation-dashboard
+   # If not, run: ssh do-nation-server "sudo ln -sf /var/www/donation-dashboard /var/www/do-nation.space"
+   ```
+6. **Reload nginx**:
+   ```bash
+   ssh do-nation-server "sudo systemctl reload nginx"
+   ```
+7. **Verify deployment**:
+   ```bash
+   curl -I https://do-nation.space | head -1
+   # Should show: HTTP/1.1 200 OK
+   ```
+8. **Production URL**: https://do-nation.space (NOT GitHub Pages)
 
 ### Git Workflow:
 - **Push code**: `git push origin <branch-name>` (YES - always push to GitHub)
@@ -39,9 +77,13 @@ npm start  # Runs on http://localhost:3000
 
 ### Server Details:
 - **Server**: ubuntu@54.156.33.223
-- **Frontend Directory**: /var/www/donation-dashboard
+- **Frontend Deploy To**: /var/www/donation-dashboard (⚠️ ACTUAL DIRECTORY)
+- **Nginx Serves From**: /var/www/do-nation.space (⚠️ SYMLINK to donation-dashboard!)
+- **NEVER Deploy To**: /var/www/html/ or /var/www/do-nation.space/ directly
 - **Backend Directory**: /home/ubuntu/giving-dashboard
 - **SSH Key**: /Users/josephheath/Desktop/Do-Nation/AWS Server/donation-key2.pem
+- **SSH Config Alias**: do-nation-server (configured in ~/.ssh/config)
+- **Critical Doc**: See /Users/josephheath/donation-dashboard/docs/DEPLOYMENT_CRITICAL.md
 
 ## 🚨 CRITICAL: CASA Security Compliance Standards (Frontend) 🚨
 

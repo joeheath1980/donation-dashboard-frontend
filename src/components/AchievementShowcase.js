@@ -101,12 +101,8 @@ const AchievementShowcase = ({ userId, compact = false }) => {
     return (
       <div
         key={achievementData._id}
-        className={`${styles.achievementCard} ${styles[status]}`}
+        className={`${styles.achievementCard} ${styles[status]} ${styles[`tier-${achievementData.tier}`]} ${status === 'locked' ? styles.locked : ''}`}
         onClick={() => setShowDetails(achievement)}
-        style={{
-          '--tier-color': getTierColor(achievementData.tier),
-          opacity: status === 'locked' ? 0.5 : 1
-        }}
       >
         <div className={styles.iconWrapper}>
           <Icon className={styles.icon} />
@@ -195,9 +191,8 @@ const AchievementShowcase = ({ userId, compact = false }) => {
         {categories.map(category => (
           <button
             key={category.id}
-            className={`${styles.categoryButton} ${selectedCategory === category.id ? styles.active : ''}`}
+            className={`${styles.categoryButton} ${styles[`category-${category.id}`]} ${selectedCategory === category.id ? styles.active : ''}`}
             onClick={() => setSelectedCategory(category.id)}
-            data-category-color={category.color }
           >
             {category.label}
           </button>

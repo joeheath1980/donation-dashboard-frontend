@@ -140,6 +140,15 @@
   background: linear-gradient(90deg, rgba(var(--color-rgb, 33, 150, 243), 0.3), rgba(var(--color-rgb, 33, 150, 243), 0.1));
 }
 
+/* Tier-specific gradients */
+.gradient-tier-achieved {
+  background: linear-gradient(90deg, #4CAF50, #45a049);
+}
+
+.gradient-tier-active {
+  background: linear-gradient(90deg, #FF9800, #F57C00);
+}
+
 /* ====================================
    3. COMPLEX POSITIONING (4 styles)
    ==================================== */

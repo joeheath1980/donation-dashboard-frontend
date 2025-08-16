@@ -4,23 +4,23 @@ import { useAuth } from './AuthContext';
 
 export const ImpactContext = createContext();
 
-// Category weights for the new system
+// Category weights for the new FAIR system (deployed on backend)
 const CATEGORY_WEIGHTS = {
-  donations: 0.30,         // 30% - All monetary contributions
-  volunteering: 0.25,      // 25% - Time contributions
-  fundraising: 0.20,       // 20% - Network effects
-  consistency: 0.15,       // 15% - Regular engagement (any pattern)
-  engagement: 0.10         // 10% - Platform participation
+  donations: 1.0,          // 100% - Full credit for all monetary contributions
+  volunteering: 1.0,       // 100% - Full credit for time contributions
+  fundraising: 1.0,        // 100% - Full credit for network effects
+  consistency: 1.0,        // 100% - Full credit for regular engagement
+  engagement: 1.0          // 100% - Full credit for platform participation
 };
 
-// Temporal decay factors
+// Temporal decay factors - GENEROUS (matching backend)
 const TIME_DECAY_FACTORS = {
   fresh: 1.0,         // Last 30 days: 100% value
-  recent: 0.85,       // 1-3 months: 85% value
-  quarter: 0.65,      // 3-6 months: 65% value
-  halfYear: 0.45,     // 6-12 months: 45% value
-  annual: 0.25,       // 1-2 years: 25% value
-  legacy: 0.10        // 2+ years: 10% value
+  recent: 0.95,       // 1-3 months: 95% value (was 85%)
+  quarter: 0.85,      // 3-6 months: 85% value (was 65%)
+  halfYear: 0.75,     // 6-12 months: 75% value (was 45%)
+  annual: 0.60,       // 1-2 years: 60% value (was 25%)
+  legacy: 0.40        // 2+ years: 40% value (was 10%)
 };
 
 // Micro donation configuration
@@ -442,39 +442,60 @@ export const ImpactProvider = ({ children }) => {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }, []);
 
-  const updateImpactScore = useCallback(() => {
-    const userData = {
-      regularDonations: donations,
-      oneOffDonations: oneOffContributions,
-      volunteeringActivities: volunteerActivities,
-      fundraisingCampaigns: fundraisingCampaigns,
-      // Add user data for engagement score calculation
-      profileComplete: user?.profileComplete,
-      bio: user?.bio,
-      profilePictureUrl: user?.profilePictureUrl,
-      impactStatement: user?.impactStatement,
-      followedCharities: followedCharities,
-      dailyActionsCount: user?.dailyActionsCount || 0
-    };
+  const updateImpactScore = useCallback(async () => {
+    // CRITICAL: Fetch from backend to get properly calculated score with FAIR weights
+    const headers = getAuthHeaders();
+    try {
+      const scoreRes = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/impact-score/calculate`, 
+        {}, 
+        { headers }
+      );
+      
+      if (scoreRes.data && scoreRes.data.impactScore !== undefined) {
+        console.log('Updated impact score from backend:', scoreRes.data);
+        setImpactScore(scoreRes.data.impactScore);
+        setScoreDetails({
+          totalScore: scoreRes.data.impactScore,
+          donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
+          volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
+          fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
+          consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
+          engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
+          breakdown: scoreRes.data.breakdown || {},
+          multiplier: scoreRes.data.multiplier || 1.0
+        });
+        
+        const currentTier = getTier(scoreRes.data.impactScore);
+        setTier(currentTier.name);
+        setPointsToNextTier(currentTier.pointsToNextTier);
+      }
+    } catch (error) {
+      console.error('Error fetching updated score from backend:', error);
+      // Fallback to local calculation only if backend fails
+      const userData = {
+        regularDonations: donations,
+        oneOffDonations: oneOffContributions,
+        volunteeringActivities: volunteerActivities,
+        fundraisingCampaigns: fundraisingCampaigns,
+        profileComplete: user?.profileComplete,
+        bio: user?.bio,
+        profilePictureUrl: user?.profilePictureUrl,
+        impactStatement: user?.impactStatement,
+        followedCharities: followedCharities,
+        dailyActionsCount: user?.dailyActionsCount || 0
+      };
 
-    const scoreResult = calculateComplexImpactScore(userData);
-    console.log('ImpactContext score calculation:', {
-      totalScore: scoreResult.totalScore,
-      breakdown: scoreResult,
-      userData
-    });
-    setImpactScore(scoreResult.totalScore);
-    setScoreDetails(scoreResult);
+      const scoreResult = calculateComplexImpactScore(userData);
+      console.log('Fallback to local calculation:', scoreResult);
+      setImpactScore(scoreResult.totalScore);
+      setScoreDetails(scoreResult);
 
-    const currentTier = getTier(scoreResult.totalScore);
-    console.log('Tier calculation:', {
-      score: scoreResult.totalScore,
-      tier: currentTier.name,
-      pointsToNextTier: currentTier.pointsToNextTier
-    });
-    setTier(currentTier.name);
-    setPointsToNextTier(currentTier.pointsToNextTier);
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, user, followedCharities]);
+      const currentTier = getTier(scoreResult.totalScore);
+      setTier(currentTier.name);
+      setPointsToNextTier(currentTier.pointsToNextTier);
+    }
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, user, followedCharities, getAuthHeaders]);
 
   const fetchImpactData = useCallback(async () => {
     setError(null);
@@ -486,12 +507,16 @@ export const ImpactProvider = ({ children }) => {
         donationsRes,
         oneOffRes,
         volunteerRes,
-        fundraisingRes
+        fundraisingRes,
+        // CRITICAL: Fetch the backend-calculated score with FAIR weights
+        scoreRes
       ] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`, { headers }),
         axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`, { headers }),
         axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities`, { headers }),
-        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`, { headers })
+        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`, { headers }),
+        // Fetch the properly calculated score from backend
+        axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/impact-score/calculate`, {}, { headers })
       ]);
 
 
@@ -501,6 +526,42 @@ export const ImpactProvider = ({ children }) => {
       setVolunteerActivities(Array.isArray(volunteerRes.data) ? volunteerRes.data : []);
       setFundraisingCampaigns(Array.isArray(fundraisingRes.data) ? fundraisingRes.data : []);
 
+      // Use the backend-calculated score instead of local calculation
+      if (scoreRes.data && scoreRes.data.impactScore !== undefined) {
+        console.log('Using backend-calculated impact score:', scoreRes.data);
+        setImpactScore(scoreRes.data.impactScore);
+        setScoreDetails({
+          totalScore: scoreRes.data.impactScore,
+          donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
+          volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
+          fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
+          consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
+          engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
+          breakdown: scoreRes.data.breakdown || {},
+          multiplier: scoreRes.data.multiplier || 1.0
+        });
+        
+        const currentTier = getTier(scoreRes.data.impactScore);
+        setTier(currentTier.name);
+        setPointsToNextTier(currentTier.pointsToNextTier);
+      } else {
+        // Fallback to local calculation if backend fails
+        const userData = {
+          regularDonations: donationsRes.data,
+          oneOffDonations: oneOffRes.data,
+          volunteeringActivities: volunteerRes.data,
+          fundraisingCampaigns: fundraisingRes.data
+        };
+        const scoreResult = calculateComplexImpactScore(userData);
+        setImpactScore(scoreResult.totalScore);
+        setScoreDetails(scoreResult);
+        
+        const currentTier = getTier(scoreResult.totalScore);
+        setTier(currentTier.name);
+        setPointsToNextTier(currentTier.pointsToNextTier);
+      }
+
+      // Calculate last year's score
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
       const lastYearUserData = {

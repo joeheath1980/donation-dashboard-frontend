@@ -33,26 +33,26 @@ import '../styles/dynamic-styles.css';
 import styles from './ScrollableImpactSection.module.css';
 
 const allBadges = [
-  { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', description: 'Impact in the health sector' },
-  { icon: FaGraduationCap, title: 'Education Champion', color: '#4ECDC4', description: 'Supporting educational initiatives' },
-  { icon: FaTree, title: 'Environmental Guardian', color: '#45B649', description: 'Protecting the environment' },
-  { icon: FaHandHoldingHeart, title: 'Humanitarian Helper', color: '#FF8C00', description: 'Aiding humanitarian causes' },
-  { icon: FaGlobeAmericas, title: 'Global Impact', color: '#3498DB', description: 'Making a worldwide difference' },
-  { icon: FaWater, title: 'Clean Water Advocate', color: '#00CED1', description: 'Providing access to clean water' },
-  { icon: FaBook, title: 'Literacy Promoter', color: '#9B59B6', description: 'Advancing literacy and education' },
-  { icon: FaPaw, title: 'Animal Welfare Champion', color: '#E67E22', description: 'Supporting animal rights and welfare' },
-  { icon: FaLeaf, title: 'Sustainability Steward', color: '#27AE60', description: 'Promoting sustainable practices' },
-  { icon: FaBriefcaseMedical, title: 'Medical Research Supporter', color: '#E74C3C', description: 'Funding crucial medical research' },
-  { icon: FaUtensils, title: 'Hunger Fighter', color: '#F39C12', description: 'Combating hunger and malnutrition' },
-  { icon: FaHome, title: 'Housing Hero', color: '#8E44AD', description: 'Providing shelter and housing support' },
-  { icon: FaSeedling, title: 'Community Grower', color: '#2ECC71', description: 'Nurturing community development' },
-  { icon: FaHandHoldingHeart, title: 'Disaster Relief Ally', color: '#D35400', description: 'Supporting disaster relief efforts' },
-  { icon: FaHeartbeat, title: 'Child Welfare Protector', color: '#C0392B', description: 'Safeguarding children\'s rights' },
-  { icon: FaBook, title: 'Arts and Culture Patron', color: '#1ABC9C', description: 'Supporting arts and cultural initiatives' },
-  { icon: FaGlobeAmericas, title: 'Climate Action Advocate', color: '#16A085', description: 'Fighting climate change' },
-  { icon: FaBook, title: 'STEM Education Booster', color: '#2980B9', description: 'Advancing STEM education' },
-  { icon: FaHandHoldingHeart, title: 'Elder Care Supporter', color: '#7F8C8D', description: 'Supporting elderly care' },
-  { icon: FaLeaf, title: 'Conservation Champion', color: '#27AE60', description: 'Preserving biodiversity' },
+  { icon: FaHeartbeat, title: 'Healthcare Hero', color: '#FF6B6B', colorName: 'red', description: 'Impact in the health sector' },
+  { icon: FaGraduationCap, title: 'Education Champion', color: '#4ECDC4', colorName: 'blue', description: 'Supporting educational initiatives' },
+  { icon: FaTree, title: 'Environmental Guardian', color: '#45B649', colorName: 'green', description: 'Protecting the environment' },
+  { icon: FaHandHoldingHeart, title: 'Humanitarian Helper', color: '#FF8C00', colorName: 'orange', description: 'Aiding humanitarian causes' },
+  { icon: FaGlobeAmericas, title: 'Global Impact', color: '#3498DB', colorName: 'blue', description: 'Making a worldwide difference' },
+  { icon: FaWater, title: 'Clean Water Advocate', color: '#00CED1', colorName: 'blue', description: 'Providing access to clean water' },
+  { icon: FaBook, title: 'Literacy Promoter', color: '#9B59B6', colorName: 'purple', description: 'Advancing literacy and education' },
+  { icon: FaPaw, title: 'Animal Welfare Champion', color: '#E67E22', colorName: 'orange', description: 'Supporting animal rights and welfare' },
+  { icon: FaLeaf, title: 'Sustainability Steward', color: '#27AE60', colorName: 'green', description: 'Promoting sustainable practices' },
+  { icon: FaBriefcaseMedical, title: 'Medical Research Supporter', color: '#E74C3C', colorName: 'red', description: 'Funding crucial medical research' },
+  { icon: FaUtensils, title: 'Hunger Fighter', color: '#F39C12', colorName: 'orange', description: 'Combating hunger and malnutrition' },
+  { icon: FaHome, title: 'Housing Hero', color: '#8E44AD', colorName: 'purple', description: 'Providing shelter and housing support' },
+  { icon: FaSeedling, title: 'Community Grower', color: '#2ECC71', colorName: 'green', description: 'Nurturing community development' },
+  { icon: FaHandHoldingHeart, title: 'Disaster Relief Ally', color: '#D35400', colorName: 'orange', description: 'Supporting disaster relief efforts' },
+  { icon: FaHeartbeat, title: 'Child Welfare Protector', color: '#C0392B', colorName: 'red', description: 'Safeguarding children\'s rights' },
+  { icon: FaBook, title: 'Arts and Culture Patron', color: '#1ABC9C', colorName: 'green', description: 'Supporting arts and cultural initiatives' },
+  { icon: FaGlobeAmericas, title: 'Climate Action Advocate', color: '#16A085', colorName: 'green', description: 'Fighting climate change' },
+  { icon: FaBook, title: 'STEM Education Booster', color: '#2980B9', colorName: 'blue', description: 'Advancing STEM education' },
+  { icon: FaHandHoldingHeart, title: 'Elder Care Supporter', color: '#7F8C8D', colorName: 'silver', description: 'Supporting elderly care' },
+  { icon: FaLeaf, title: 'Conservation Champion', color: '#27AE60', colorName: 'green', description: 'Preserving biodiversity' },
 ];
 
 const tiers = [
@@ -86,7 +86,7 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={`${styles.modalHeader} dynamic-gradient`} data-gradient-color={badge.color?.replace('#', '')?.toLowerCase()}>
+        <div className={`${styles.modalHeader} dynamic-gradient`} data-gradient-color={badge.colorName}>
           <div className={styles.modalBadge}>
             <badge.icon size={48} color="white" />
           </div>
@@ -119,7 +119,7 @@ const BadgeModal = ({ badge, isOpen, onClose, earnedDate, contributions }) => {
               </div>
               
               <div className={styles.modalActions}>
-                <button className={styles.shareButton} data-badge-color={badge.color} className="bg-badge-dynamic">
+                <button className={styles.shareButton} style={{ background: badge.color }}>
                   <FaShare /> Share Badge
                 </button>
               </div>
@@ -260,15 +260,14 @@ const BadgesDisplay = ({ isActive }) => {
             >
               <div 
                 className={`${styles.badgeCircle} ${isCollected ? 'dynamic-gradient' : ''}`}
-                data-gradient-color={badge.color?.replace('#', '')?.toLowerCase()}
+                data-gradient-color={isCollected ? badge.colorName : null}
               >
                 <badge.icon size={36} color={isCollected ? 'white' : '#999'} />
                 {isCollected && <div className={styles.badgeShine} />}
               </div>
               <div 
                 className={styles.badgeTitle}
-                data-badge-color={isCollected ? badge.color : null}
-                ref={el => el && isCollected && el.style.setProperty('--badge-color', badge.color)}
+                style={isCollected ? { color: badge.color } : null}
               >
                 {badge.title}
               </div>

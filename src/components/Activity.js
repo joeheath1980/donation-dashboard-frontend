@@ -8,6 +8,7 @@ import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
 import { EmailForwardingModal } from './EmailForwarding';
+import { UserDataStorage } from '../utils/auth.utils';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -103,6 +104,10 @@ function Activity() {
   const [hasGmailAuth, setHasGmailAuth] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(false);
   const [loadingForwarded, setLoadingForwarded] = useState(false);
+  
+  // Check user type - Gmail search is only for regular users
+  const userType = UserDataStorage.getUserType();
+  const isRegularUser = userType === 'user' || !userType; // Default to user if not set
 
   const isInitialized = useRef(false);
   const hasSavedData = useRef(false);
@@ -880,24 +885,42 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       </h1>
 
       <div className={`${styles.emailSection} card`}>
+        {!isRegularUser && userType === 'charity' && (
+          <div className={styles.infoMessage} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f8ff', borderRadius: '8px' }}>
+            <p style={{ margin: 0, color: '#2c5282' }}>
+              As a charity account, you can view donations made to your organization in the dashboard. 
+              Email search is available for individual donors to import their personal donation receipts.
+            </p>
+          </div>
+        )}
+        {!isRegularUser && userType === 'business' && (
+          <div className={styles.infoMessage} style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f8ff', borderRadius: '8px' }}>
+            <p style={{ margin: 0, color: '#2c5282' }}>
+              As a business account, you can manage corporate donations through the business dashboard. 
+              Email search is available for individual donors to import their personal donation receipts.
+            </p>
+          </div>
+        )}
         <div className={styles.buttonContainer}>
-          <button
-            id="start-search-btn"
-            onClick={async () => {
-              if (!hasGmailAuth) {
-                const hasAuth = await checkGmailAuth();
-                if (!hasAuth) {
-                  window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
-                  return;
+          {isRegularUser && (
+            <button
+              id="start-search-btn"
+              onClick={async () => {
+                if (!hasGmailAuth) {
+                  const hasAuth = await checkGmailAuth();
+                  if (!hasAuth) {
+                    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+                    return;
+                  }
                 }
-              }
-              handleSearchEmails();
-            }}
-            disabled={loading || isClearing || checkingAuth}
-            className={`${styles.scrapeButton} button`}
-          >
-            {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail for Donations' : 'Connect Gmail & Search'}
-          </button>
+                handleSearchEmails();
+              }}
+              disabled={loading || isClearing || checkingAuth}
+              className={`${styles.scrapeButton} button`}
+            >
+              {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail for Donations' : 'Connect Gmail & Search'}
+            </button>
+          )}
           <button
             onClick={handleSearchOutlookEmails}
             disabled={loading || isClearing}

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
@@ -9,6 +9,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext';
 import { MatchSelectionProvider } from './contexts/MatchSelectionContext';
 import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
+import { SecureTokenStorage } from './utils/auth.utils';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { csrfServiceAPI } from './services/api.service';
@@ -122,17 +123,63 @@ const CSRFInitializer = () => {
 };
 
 const ProtectedRoute = ({ children, allowedUserTypes }) => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+  const { user, loading } = useAuth();
+  const [isInitializing, setIsInitializing] = React.useState(true);
+  const location = useLocation();
   
-  if (!token) {
-    return <Navigate to="/login" />;
+  React.useEffect(() => {
+    // Check for token in both sessionStorage and localStorage
+    const token = SecureTokenStorage.getToken() || 
+                 sessionStorage.getItem(STORAGE_KEYS.TOKEN) || 
+                 localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+    
+    console.log('ProtectedRoute initialization:', { 
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+      hasUser: !!user,
+      loading,
+      userType,
+      path: location.pathname
+    });
+    
+    // If we have a token, wait a bit for AuthContext to load user
+    if (token) {
+      const timer = setTimeout(() => {
+        setIsInitializing(false);
+      }, 300); // Increased delay to ensure AuthContext loads
+      return () => clearTimeout(timer);
+    } else {
+      // No token, no need to wait
+      setIsInitializing(false);
+    }
+  }, [user, loading, location]);
+  
+  // Show loading while auth is being checked
+  if (loading || isInitializing) {
+    console.log('ProtectedRoute: Still loading/initializing');
+    return <LoadingSpinner />;
   }
   
-  if (allowedUserTypes && !allowedUserTypes.includes(userType)) {
+  // Check for authentication after loading
+  const token = SecureTokenStorage.getToken() || 
+               sessionStorage.getItem(STORAGE_KEYS.TOKEN) || 
+               localStorage.getItem(STORAGE_KEYS.TOKEN);
+  const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+  
+  // Must have either token or user to be authenticated
+  if (!token && !user) {
+    console.log('ProtectedRoute: No authentication found, redirecting to login');
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
+  // Check user type restrictions
+  if (allowedUserTypes && userType && !allowedUserTypes.includes(userType)) {
+    console.log('ProtectedRoute: User type not allowed for this route');
     return <Navigate to="/dashboard" />;
   }
   
+  console.log('ProtectedRoute: Access granted');
   return children;
 };
 
