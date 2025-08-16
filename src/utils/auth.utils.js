@@ -32,8 +32,7 @@ export class SecureTokenStorage {
         this.memoryRefreshToken = refreshToken;
       }
       
-      // Store in sessionStorage for tab persistence only
-      // sessionStorage is cleared when browser closes (more secure than localStorage)
+      // Store in sessionStorage for tab persistence
       if (typeof sessionStorage !== 'undefined') {
         sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
         if (refreshToken) {
@@ -41,7 +40,16 @@ export class SecureTokenStorage {
         }
       }
       
-      logger.debug('Token stored securely in memory');
+      // ALSO store in localStorage as backup for persistence
+      // This helps with navigation issues
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        if (refreshToken) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+        }
+      }
+      
+      logger.debug('Token stored in memory, sessionStorage, and localStorage');
     } catch (error) {
       logger.error('Failed to store token', { error: error.message });
     }
@@ -59,13 +67,26 @@ export class SecureTokenStorage {
         return this.memoryToken;
       }
       
-      // Fallback: Check sessionStorage (for page refreshes within same session)
+      // Secondary: Check sessionStorage (for page refreshes within same session)
       if (typeof sessionStorage !== 'undefined') {
         const sessionToken = sessionStorage.getItem(STORAGE_KEYS.TOKEN);
         if (sessionToken) {
           // Restore to memory
           this.memoryToken = sessionToken;
           return sessionToken;
+        }
+      }
+      
+      // Tertiary: Check localStorage as backup
+      if (typeof localStorage !== 'undefined') {
+        const localToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
+        if (localToken) {
+          // Restore to memory and sessionStorage
+          this.memoryToken = localToken;
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem(STORAGE_KEYS.TOKEN, localToken);
+          }
+          return localToken;
         }
       }
       

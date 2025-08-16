@@ -63,6 +63,9 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       const token = SecureTokenStorage.getToken();
       const userType = UserDataStorage.getUserType();
+      
+      logger.info('CheckAuth on mount', { hasToken: !!token, userType });
+      
       if (token && userType) {
         setupAxiosDefaults(token);
         try {
@@ -82,6 +85,7 @@ export const AuthProvider = ({ children }) => {
             response = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
             localStorage.setItem(STORAGE_KEYS.USER_ID, response.data._id || response.data.id);
             setUser({ ...response.data, isBusiness: false, isCharity: false });
+            logger.info('User profile loaded on mount', { userId: response.data._id || response.data.id });
           }
         } catch (error) {
           logger.error('Authentication error', { 
@@ -95,6 +99,7 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } else {
+        logger.info('No token or userType found on mount');
         setUser(null);
         setupAxiosDefaults(null);
       }
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }) => {
   // Regular user login (also handles admin)
   const login = async (email, password) => {
     try {
+      logger.info('Starting login process', { email });
       const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_LOGIN), { email, password });
       
       // Handle new token format
@@ -114,6 +120,12 @@ export const AuthProvider = ({ children }) => {
       // Use accessToken if available, fallback to token for backward compatibility
       const authToken = accessToken || token;
       
+      logger.info('Login response received', { 
+        hasToken: !!authToken, 
+        hasUserData: !!userData,
+        userDataId: userData?._id || userData?.id 
+      });
+      
       SecureTokenStorage.setToken(authToken, refreshToken);
       
       // Check if user is admin
@@ -121,6 +133,7 @@ export const AuthProvider = ({ children }) => {
         UserDataStorage.setUserType(USER_TYPES.ADMIN);
         setUser({ ...userData, isAdmin: true });
         setupAxiosDefaults(authToken);
+        logger.info('Admin user logged in successfully');
         return userData;
       }
       
@@ -132,11 +145,14 @@ export const AuthProvider = ({ children }) => {
       if (userData) {
         UserDataStorage.setUserId(userData._id || userData.id);
         setUser({ ...userData, isBusiness: false, isCharity: false });
+        logger.info('User state set from login response', { userId: userData._id || userData.id });
         return userData;
       } else {
+        logger.info('Fetching user profile after login');
         const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
         UserDataStorage.setUserId(userResponse.data._id || userResponse.data.id);
         setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
+        logger.info('User state set from profile fetch', { userId: userResponse.data._id || userResponse.data.id });
         return userResponse.data;
       }
     } catch (error) {

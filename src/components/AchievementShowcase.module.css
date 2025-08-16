@@ -54,13 +54,68 @@
 }
 
 .categoryButton:hover {
-  border-color: var(--category-color);
-  color: var(--category-color);
+  border-color: #6b7280;
+  color: #6b7280;
 }
 
-.categoryButton.active {
-  background: var(--category-color);
-  border-color: var(--category-color);
+/* Category-specific colors */
+.categoryButton.category-all:hover {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+.categoryButton.category-all.active {
+  background: #6b7280;
+  border-color: #6b7280;
+  color: white;
+}
+
+.categoryButton.category-micro-giving:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.categoryButton.category-micro-giving.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.categoryButton.category-consistency:hover {
+  border-color: #10b981;
+  color: #10b981;
+}
+.categoryButton.category-consistency.active {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+.categoryButton.category-impact:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+.categoryButton.category-impact.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: white;
+}
+
+.categoryButton.category-social:hover {
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+}
+.categoryButton.category-social.active {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  color: white;
+}
+
+.categoryButton.category-special:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+.categoryButton.category-special.active {
+  background: #ef4444;
+  border-color: #ef4444;
   color: white;
 }
 
@@ -95,7 +150,32 @@
 .achievementCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: var(--tier-color);
+}
+
+/* Tier-specific hover colors */
+.achievementCard.tier-bronze:hover {
+  border-color: #CD7F32;
+}
+
+.achievementCard.tier-silver:hover {
+  border-color: #C0C0C0;
+}
+
+.achievementCard.tier-gold:hover {
+  border-color: #FFD700;
+}
+
+.achievementCard.tier-platinum:hover {
+  border-color: #E5E5E5;
+}
+
+.achievementCard.tier-diamond:hover {
+  border-color: #B9F2FF;
+}
+
+/* Locked state */
+.achievementCard.locked {
+  opacity: 0.5;
 }
 
 .achievementCard.earned {

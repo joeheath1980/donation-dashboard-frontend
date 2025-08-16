@@ -28,14 +28,24 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
 
   if (!scoreDetails || !scoreDetails.breakdown) return null;
 
-  // Use weighted scores from breakdown for proper visualization
+  // Get the tier multiplier from scoreDetails
+  const multiplier = scoreDetails.multiplier || 1.0;
+
+  // Use weighted scores from breakdown and apply multiplier to match total score
   const { 
-    donations: weightedDonationScore = 0,
-    volunteering: weightedVolunteerScore = 0,
-    fundraising: weightedFundraisingScore = 0,
-    consistency: weightedConsistencyScore = 0,
-    engagement: weightedEngagementScore = 0
+    donations: baseWeightedDonationScore = 0,
+    volunteering: baseWeightedVolunteerScore = 0,
+    fundraising: baseWeightedFundraisingScore = 0,
+    consistency: baseWeightedConsistencyScore = 0,
+    engagement: baseWeightedEngagementScore = 0
   } = scoreDetails.breakdown;
+
+  // Apply multiplier to get actual contribution to total score
+  const weightedDonationScore = baseWeightedDonationScore * multiplier;
+  const weightedVolunteerScore = baseWeightedVolunteerScore * multiplier;
+  const weightedFundraisingScore = baseWeightedFundraisingScore * multiplier;
+  const weightedConsistencyScore = baseWeightedConsistencyScore * multiplier;
+  const weightedEngagementScore = baseWeightedEngagementScore * multiplier;
 
   // Also get raw scores for tooltip display
   const { 

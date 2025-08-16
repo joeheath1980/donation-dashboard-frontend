@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { API_CONFIG, STORAGE_KEYS } from '../config/api.config';
 import { createLogger } from '../utils/logger';
 import { validateEmail, validatePassword } from '../utils/validation';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import { useDemoMode } from '../hooks/useDemoMode';
 import DemoQuickLogin from './DemoQuickLogin';
 import RateLimitHandler, { useRateLimitHandler } from './Common/RateLimitHandler';
@@ -63,7 +64,11 @@ function Login() {
 
     const token = params.get('token');
     if (token) {
+      console.log('Token found in URL, handling social login callback');
       handleSocialLoginCallback(token);
+    } else {
+      // Make sure socialLoginInProgress is false if there's no token
+      setSocialLoginInProgress(false);
     }
 
     // Handle demo mode auto-fill
@@ -137,7 +142,11 @@ function Login() {
     return fieldError === '';
   };
 
+  // Debug logging
+  console.log('Login component state:', { loading, socialLoginInProgress, formData });
+
   const handleSubmit = async (e) => {
+    console.log('handleSubmit called!');
     e.preventDefault();
     setError(null);
     clearRateLimitError();
@@ -164,25 +173,36 @@ function Login() {
     setLoading(true);
 
     try {
+      console.log('Starting login with:', { email: formData.email, accountType: formData.accountType });
       let loginResult;
       switch (formData.accountType) {
         case 'business':
           loginResult = await businessLogin(formData.email, formData.password);
           // For business logins, set the currentUserId using either _id or businessId
+          console.log('Business login successful:', loginResult);
           logger.debug('Business login successful');
           localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.businessId);
-          navigate('/business-dashboard');
+          // Small delay to ensure state updates complete
+          setTimeout(() => {
+            navigate('/business-dashboard');
+          }, 100);
           break;
         case 'charity':
           loginResult = await charityLogin(formData.email, formData.password);
           // For charity logins, set the currentUserId using either _id or id
+          console.log('Charity login successful:', loginResult);
           logger.debug('Charity login successful');
           localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.id);
-          navigate('/charity-dashboard');
+          // Small delay to ensure state updates complete
+          setTimeout(() => {
+            navigate('/charity-dashboard');
+          }, 100);
           break;
         default:
+          console.log('Calling login function...');
           loginResult = await login(formData.email, formData.password);
           // For regular user logins, set the currentUserId using either _id or id
+          console.log('User login successful:', loginResult);
           logger.debug('User login successful', { loginResult });
           const userId = loginResult._id || loginResult.id;
           if (userId) {
@@ -191,9 +211,22 @@ function Login() {
           } else {
             logger.error('No user ID found in login result', { loginResult });
           }
-          navigate(loginResult?.isAdmin ? '/admin' : '/profile');
+          
+          // Verify token was stored
+          const storedToken = SecureTokenStorage.getToken();
+          console.log('Token stored after login:', !!storedToken);
+          
+          const targetPath = loginResult?.isAdmin ? '/admin' : '/dashboard';
+          console.log('Navigating to:', targetPath);
+          
+          // Increased delay to ensure all state updates complete
+          setTimeout(() => {
+            console.log('Executing navigation to:', targetPath);
+            navigate(targetPath, { replace: true });
+          }, 500); // Increased to 500ms
       }
     } catch (err) {
+      console.error('Login error caught:', err);
       logger.error('Login error', { message: err.message });
       
       // Check if it's a rate limit error
@@ -333,6 +366,12 @@ function Login() {
             type="submit"
             disabled={loading || socialLoginInProgress}
             className={styles.loginButton}
+            onClick={(e) => {
+              console.log('Button clicked!', { loading, socialLoginInProgress, formData });
+              if (!loading && !socialLoginInProgress) {
+                console.log('Calling handleSubmit...');
+              }
+            }}
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>

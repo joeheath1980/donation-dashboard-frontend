@@ -88,6 +88,9 @@
   min-height: 400px;
   position: relative;
   pointer-events: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-right: 10px;
 }
 
 /* Ensure Swiper slides are interactive */
@@ -102,11 +105,13 @@
 /* Badges Display Styles */
 .badgesGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
   padding: 20px;
   position: relative;
   z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .badgeItem {
@@ -114,7 +119,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 15px;
+  padding: 10px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -123,12 +128,14 @@
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
   z-index: 10;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Circular badge design */
 .badgeCircle {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -136,6 +143,7 @@
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* Locked badge styles */
@@ -208,11 +216,14 @@
 }
 
 .badgeTitle {
-  margin-top: 12px;
-  font-size: 13px;
+  margin-top: 8px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-primary);
   transition: all 0.3s ease;
+  word-wrap: break-word;
+  max-width: 100%;
+  line-height: 1.3;
 }
 
 .badgeItem.collected .badgeTitle {
@@ -515,8 +526,8 @@
   }
   
   .badgesGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
     padding: 15px;
   }
   

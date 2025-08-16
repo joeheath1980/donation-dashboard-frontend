@@ -55,7 +55,7 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
               <div className={styles.tierLeft}>
                 <div 
                   className={`${styles.tierIcon} ${isAchieved ? styles.achieved : ''} ${isNext ? styles.next : ''}`}
-                  data-tier-color={tier.color} className="tier-color-dynamic"
+                  style={{ color: tier.color }}
                 >
                   <Icon />
                 </div>
@@ -91,9 +91,10 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
                   {isNext && (
                     <div 
                       className={`${styles.currentScoreBadge} progress-indicator`}
+                      style={{ borderColor: tier.color }}
                       ref={el => el && el.style.setProperty('--progress', `${progressPercentage}%`)}
                     >
-                      <span>{impactScore}</span>
+                      <span style={{ color: tier.color }}>{impactScore}</span>
                     </div>
                   )}
                 </div>

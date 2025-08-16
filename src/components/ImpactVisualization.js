@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useMemo, useState } from 'react';
 import Chart from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
+import AuthContext from '../contexts/AuthContext';
 import { FaChartBar } from 'react-icons/fa';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
@@ -73,14 +74,19 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       displayAmount: `${Number(v.hours) || 0} hours`
     })),
     ...(fundraisingCampaigns || [])
-      .filter(campaign => campaign.status === 'archived')
+      .filter(campaign => {
+        // Include campaigns that have raised money or are completed/archived
+        const hasRaisedMoney = (campaign.amountRaised && campaign.amountRaised > 0) || 
+                               (campaign.raisedAmount && campaign.raisedAmount > 0);
+        return hasRaisedMoney || campaign.status === 'archived' || campaign.status === 'completed';
+      })
       .map(campaign => ({
         ...campaign,
         type: 'fundraisingCampaign',
-        date: new Date(campaign.completedDate || campaign.endDate || campaign.createdAt),
-        amount: Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
-        displayAmount: `$${Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0} raised`,
-        charity: campaign.title
+        date: new Date(campaign.completedDate || campaign.endDate || campaign.createdAt || campaign.date),
+        amount: Number(campaign.amountRaised) || Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
+        displayAmount: `$${Number(campaign.amountRaised) || Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0} raised`,
+        charity: campaign.title || campaign.name || 'Fundraising Campaign'
       }))
   ].filter(activity => activity.date && !isNaN(activity.date.getTime()));
 
@@ -186,18 +192,37 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: [activity]
         });
         singleActivityScore = tempScore.fundraisingScore;
+        
+        // Calculate raw score for display
+        const raisedAmount = activity.amountRaised || activity.raisedAmount || activity.amount || 0;
+        rawScore = 0;
+        let remaining = raisedAmount;
+        
+        // Progressive scoring based on amount raised
+        if (remaining > 0) rawScore += Math.min(remaining, 100) * 0.5;
+        remaining -= 100;
+        if (remaining > 0) rawScore += Math.min(remaining, 400) * 0.3;
+        remaining -= 400;
+        if (remaining > 0) rawScore += Math.min(remaining, 1500) * 0.2;
+        remaining -= 1500;
+        if (remaining > 0) rawScore += Math.min(remaining, 3000) * 0.1;
+        remaining -= 3000;
+        if (remaining > 0) rawScore += remaining * 0.05;
+        
+        decayFactor = rawScore > 0 ? singleActivityScore / rawScore : 1;
       }
       
       // Debug log
-      if (activity.amount >= 100 || activity.hours >= 10) {
+      if (activity.amount >= 100 || activity.hours >= 10 || activity.type === 'fundraisingCampaign') {
         console.log('Activity scoring:', {
           type: activity.type,
-          amount: activity.amount,
+          amount: activity.amount || activity.amountRaised || activity.raisedAmount,
           hours: activity.hours,
           date: activity.date,
           rawScore: Math.round(rawScore),
           decayFactor: decayFactor.toFixed(2),
-          finalScore: singleActivityScore
+          finalScore: singleActivityScore,
+          campaign: activity.type === 'fundraisingCampaign' ? activity.title || activity.name : undefined
         });
       }
       
@@ -231,14 +256,44 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
 
 function ImpactVisualization({ hideTitle = false }) {
   const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore } = useContext(ImpactContext);
+  const { token } = useContext(AuthContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
   const [isVisible, setIsVisible] = useState(false);
+  const [impactHistory, setImpactHistory] = useState(null);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const containerRef = useRef(null);
   const isMountedRef = useRef(true);
   const chartIdRef = useRef(null);
   
+  // Fetch impact history from the new endpoint
+  useEffect(() => {
+    const fetchImpactHistory = async () => {
+      if (!token) return;
+      
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/impact-score/history`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Impact history fetched:', data);
+          setImpactHistory(data.timeline);
+        } else {
+          console.error('Failed to fetch impact history:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching impact history:', error);
+      }
+    };
+    
+    fetchImpactHistory();
+  }, [token, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
+
   // Track mounted state
   useEffect(() => {
     isMountedRef.current = true;
@@ -269,6 +324,77 @@ function ImpactVisualization({ hideTitle = false }) {
 
   const dataPoints = useMemo(() => {
     console.log('Recalculating data points for period:', timePeriod);
+    
+    // If we have impact history from the API, use that instead
+    if (impactHistory && impactHistory.length > 0) {
+      console.log('Using impact history from API:', impactHistory);
+      
+      // Transform the API timeline data into our chart format
+      const points = impactHistory.map((entry, index) => {
+        const activities = [];
+        
+        // Calculate the actual points added to total score
+        // This is the difference between current total and previous total
+        const previousTotal = index > 0 ? (impactHistory[index - 1].totalScore || 0) : 0;
+        const actualPointsEarned = (entry.totalScore || 0) - previousTotal;
+        
+        // Build activities array from the entry
+        if (entry.type === 'donation') {
+          activities.push({
+            type: 'donation',
+            details: `$${entry.amount || 0}`,
+            recipient: entry.charity || 'Unknown',
+            pointsEarned: actualPointsEarned,
+            rawPoints: entry.score || 0,
+            isDecayed: false
+          });
+        } else if (entry.type === 'oneOff') {
+          activities.push({
+            type: 'oneOff',
+            details: `$${entry.amount || 0}`,
+            recipient: entry.charity || 'Unknown',
+            pointsEarned: actualPointsEarned,
+            rawPoints: entry.score || 0,
+            isDecayed: false
+          });
+        } else if (entry.type === 'volunteer') {
+          activities.push({
+            type: 'volunteer',
+            details: `${entry.hours || 0} hours`,
+            recipient: entry.organization || 'Unknown',
+            pointsEarned: actualPointsEarned,
+            rawPoints: entry.score || 0,
+            isDecayed: false
+          });
+        } else if (entry.type === 'fundraising') {
+          activities.push({
+            type: 'fundraisingCampaign',
+            details: `$${entry.amount || 0} raised`,
+            recipient: entry.title || entry.charity || 'Fundraising Campaign',
+            pointsEarned: actualPointsEarned,
+            rawPoints: entry.score || 0,
+            isDecayed: false
+          });
+        }
+        
+        return {
+          x: new Date(entry.date),
+          y: entry.totalScore || 0,
+          activities: activities,
+          pointsEarned: actualPointsEarned,
+          isDense: false,
+          // Include the cumulative fundraising total for debugging
+          fundraisingTotal: entry.fundraisingTotal || 0
+        };
+      });
+      
+      console.log('Processed impact history points:', points);
+      console.log('Chart Y values (total scores):', points.map(p => p.y));
+      console.log('Fundraising totals:', points.map(p => p.fundraisingTotal));
+      return points;
+    }
+    
+    // Fall back to the old processing if no history available
     console.log('Raw data:', {
       donations,
       oneOffContributions,
@@ -280,7 +406,7 @@ function ImpactVisualization({ hideTitle = false }) {
     console.log('Processed data points:', points);
     console.log('Chart Y values:', points.map(p => p.y));
     return points;
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
+  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
 
   // Set up intersection observer to detect visibility
   useEffect(() => {
@@ -615,6 +741,11 @@ function ImpactVisualization({ hideTitle = false }) {
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
 
+                // Calculate previous total for clarity
+                const currentIndex = context.tooltip.dataPoints[0].dataIndex;
+                const previousTotal = currentIndex > 0 ? dataPoints[currentIndex - 1].y : 0;
+                const pointsEarnedTotal = dataPoint.pointsEarned;
+                
                 tooltipEl.innerHTML = `
                   <div class="${styles.tooltipContent}">
                     <div class="${styles.tooltipHeader}">
@@ -623,9 +754,18 @@ function ImpactVisualization({ hideTitle = false }) {
                     </div>
                     <div class="${styles.tooltipBody}">
                       ${activitiesHtml}
+                      <hr class="${styles.tooltipDivider}">
+                      <div class="${styles.tooltipRow}">
+                        <span class="${styles.tooltipLabel}">Previous Total:</span>
+                        <span class="${styles.tooltipValue}">${previousTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div class="${styles.tooltipRow}">
+                        <span class="${styles.tooltipLabel}">Points Added:</span>
+                        <span class="${styles.tooltipValue}" style="color: #4CAF50;">+${pointsEarnedTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      </div>
                       <div class="${styles.tooltipRow} ${styles.totalScore}">
-                        <span class="${styles.tooltipLabel}">Total Impact Score:</span>
-                        <span class="${styles.tooltipValue}">${dataPoint.y.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                        <span class="${styles.tooltipLabel}">New Total Score:</span>
+                        <span class="${styles.tooltipValue}" style="font-weight: bold;">${dataPoint.y.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
                   </div>
