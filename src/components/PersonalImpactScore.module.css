@@ -11,18 +11,22 @@
   --text-primary: #2D2D32;
   --text-secondary: #6D6D78;
   --success-green: #00D4AA;
+  --error-red: #EF4444;
   --gradient-start: #2d8f7b;
   --gradient-end: #5ecfb6;
+  --purple-primary: #8B5CF6;
+  --purple-light: #A78BFA;
+  --purple-bg: rgba(139, 92, 246, 0.1);
 }
 
 /* Main container */
 .mainContainer {
   width: 100%;
   background-color: var(--white);
-  border-radius: 8px;
-  padding: 32px;
+  border-radius: 12px;
+  padding: 40px;
   margin: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   border: 1px solid var(--border-light);
   overflow: hidden;
   position: relative;
@@ -31,18 +35,33 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
-/* View toggle - Enhanced pill design */
+/* Enhanced view toggle with sliding pill */
 .viewToggle {
   position: absolute;
   top: 2rem;
   right: 2rem;
   display: flex;
-  background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   padding: 4px;
   border-radius: 50px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), inset 0 1px 3px rgba(0, 0, 0, 0.04);
   z-index: 10;
   border: 1px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+}
+
+/* Sliding pill indicator */
+.toggleSlider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  border-radius: 46px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.25);
+  z-index: 1;
 }
 
 .toggleButton {
@@ -50,37 +69,35 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  border: 1px solid transparent;
+  border: none;
   background: transparent;
   color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  border-radius: 20px;
+  border-radius: 46px;
   transition: all 0.3s ease;
   outline: none;
   position: relative;
+  z-index: 2;
 }
 
-.toggleButton:hover {
+.toggleButton:hover:not(.active) {
   color: var(--text-primary);
-  background: rgba(45, 143, 123, 0.05);
 }
 
 .toggleButton.active {
-  background: linear-gradient(135deg, rgba(45, 143, 123, 0.1), rgba(94, 207, 182, 0.1));
-  color: var(--primary-color);
-  border: 1px solid var(--primary-light);
-  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.15);
-  transform: scale(1.02);
-}
-
-.toggleButton.active::after {
-  display: none;
+  color: var(--white);
+  font-weight: 700;
 }
 
 .toggleButton svg {
   font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.toggleButton.active svg {
+  transform: scale(1.1);
 }
 
 .toggleButton span {
@@ -93,97 +110,33 @@
   }
 }
 
-/* Content row - circle and header */
-.contentRow {
+/* Content container for centering */
+.contentContainer {
   display: flex;
+  justify-content: center;
   align-items: center;
+  min-height: 320px;
   margin-bottom: 2rem;
-  justify-content: center; /* Added to center content with slight right bias */
-  position: relative;
-  z-index: 1;
 }
 
-/* Clearfix for container */
-.mainContainer::after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-.circleColumn {
-  flex: 0 0 auto;
-  margin-right: 3.5rem;
-  opacity: 0;
-  transition: opacity 0.8s ease-out;
-}
-
-.circleColumn.animate {
-  opacity: 1;
-}
-
-.headerColumn {
-  flex: 1;
+.visualizationColumn {
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-start;
   opacity: 0;
-  transition: opacity 0.8s ease-out 0.2s;
+  transition: opacity 0.8s ease-out, transform 0.3s ease-out;
 }
 
-.headerColumn.animate {
+.visualizationColumn.animate {
   opacity: 1;
 }
 
-.headerWrap {
-  display: flex;
-  flex-direction: column;
+.visualizationColumn.switching {
+  transform: scale(0.95);
+  opacity: 0.8;
 }
 
-/* Enhanced Impact Score Header */
-.impactScoreHeader {
-  font-size: 4.5rem;
-  font-weight: 800;
-  margin: 0;
-  padding: 0;
-  letter-spacing: 1.5px;
-  line-height: 1.1;
-}
-
-.impactWord {
-  display: inline-block;
-  margin-right: 0.5rem;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.scoreWord {
-  display: inline-block;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.headerUnderline {
-  height: 4px;
-  width: 120px;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  border-radius: 2px;
-  margin-top: 10px;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.6s ease-out 0.5s;
-}
-
-.headerColumn.animate .headerUnderline {
-  transform: scaleX(1);
-}
-
-/* Button row */
+/* Button row with hierarchy */
 .buttonRow {
   display: flex;
   justify-content: center;
@@ -192,49 +145,86 @@
   opacity: 0;
   transition: opacity 0.6s ease-out 0.4s;
   margin: 0;
+  align-items: center;
 }
 
 .buttonRow.animate {
   opacity: 1;
 }
 
-/* Button styling */
-.discoverButton {
-  display: inline-block;
-  padding: 14px 34px;
-  border-radius: 4px;
-  font-size: 18px;
+/* Button hierarchy styling */
+.buttonIcon {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+/* Primary button - filled green */
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 14px 32px;
+  border-radius: 6px;
+  font-size: 16px;
   font-weight: 600;
-  text-align: center;
   text-decoration: none;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  border: none;
+  color: var(--white);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.25);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(45, 143, 123, 0.35);
+}
+
+.primaryButton:hover .buttonIcon {
+  transform: scale(1.1);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.25);
+}
+
+/* Secondary button - outlined green */
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 14px 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--white);
   border: 2px solid var(--primary-color);
   color: var(--primary-color);
-  background-color: var(--white);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  min-width: 280px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.discoverButton:hover {
-  background-color: var(--primary-color);
+.secondaryButton:hover {
+  background: var(--primary-color);
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.2);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(45, 143, 123, 0.2);
 }
 
-.discoverButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(49, 151, 149, 0.3);
+.secondaryButton:hover .buttonIcon {
+  transform: rotate(360deg);
 }
 
-.discoverButton:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.secondaryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.2);
 }
 
-/* View Public Profile button styling */
-.viewProfileButton {
+/* Tertiary button - ghost purple */
+.tertiaryButton {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -243,64 +233,31 @@
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-  border: 1px solid #8b5cf6;
-  color: #6366f1;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  margin-left: 16px;
-}
-
-.viewProfileButton:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
-  color: #5b21b6;
-}
-
-.viewProfileButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
-}
-
-/* Profile button styling */
-.profileButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 14px 34px;
-  border-radius: 4px;
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-  border: 2px solid var(--border-light);
-  color: var(--text-primary);
-  background-color: var(--white);
-  transition: all 0.3s ease;
+  background: transparent;
+  border: 1.5px solid var(--purple-primary);
+  color: var(--purple-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  min-width: 280px;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.profileButton:hover {
-  border-color: var(--text-primary);
-  background-color: var(--light-gray);
-  transform: translateY(-1px);
+.tertiaryButton:hover {
+  background: var(--purple-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15);
+  border-color: var(--purple-light);
+  color: var(--purple-primary);
 }
 
-.profileButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(128, 90, 213, 0.3);
+.tertiaryButton:hover .buttonIcon {
+  transform: scale(1.15);
 }
 
-.profileButton:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.tertiaryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
 }
 
-/* Circular progress bar styling */
+/* Enhanced circular progress bar */
 .circularProgressBar {
   position: relative;
   width: 300px;
@@ -321,10 +278,14 @@
 }
 
 .progressCircle {
-  /* Transform is now handled inline in the SVG for better control */
-  transition: stroke-dashoffset 1.2s ease-out;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.progressOverlay {
+  transition: opacity 0.3s ease;
+}
+
+/* Hero score styling */
 .scoreContent {
   position: absolute;
   top: 50%;
@@ -345,182 +306,148 @@
   transform: scale(1.05);
 }
 
-.scoreValue {
-  font-size: 4rem;
-  font-weight: 700;
+.heroScore {
+  font-size: 5rem;
+  font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1;
+  letter-spacing: -2px;
 }
 
-.scoreChange {
+.scoreLabel {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tierBadge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-top: 0.75rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Score change indicators */
+.scoreChangeIndicator {
   position: absolute;
   top: 0;
-  right: -20px;
-  font-size: 1.25rem;
-}
-
-.scoreChangeIcon {
-  color: var(--success-green);
-}
-
-.tierName {
+  right: -25px;
   font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 0.25rem;
 }
 
-.tooltip {
+.positiveChange {
+  color: var(--success-green);
+  animation: bounceUp 0.5s ease;
+}
+
+.negativeChange {
+  color: var(--error-red);
+  animation: bounceDown 0.5s ease;
+}
+
+@keyframes bounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* Enhanced white card tooltips */
+.tierProgressTooltip,
+.scoreChangeTooltip {
   position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  z-index: 10;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
   opacity: 0;
-  transform: translateY(5px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: tooltipFadeSlide 0.2s ease-out forwards;
   pointer-events: none;
-  white-space: nowrap;
+  min-width: 200px;
 }
 
-.circleTooltip {
-  bottom: -40px;
+.tierProgressTooltip {
+  bottom: -90px;
   left: 50%;
-  transform: translateX(-50%) translateY(5px);
+  transform: translateX(-50%);
 }
 
-.scoreTooltip {
-  top: -40px;
+.progressTooltipHeader {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.progressTooltipBar {
+  width: 100%;
+  height: 6px;
+  background: var(--light-gray);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressTooltipFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.progressTooltipText {
+  font-size: 0.875rem;
+  color: var(--success-green);
+  font-weight: 600;
+}
+
+.scoreChangeTooltip {
+  top: -50px;
   left: 50%;
-  transform: translateX(-50%) translateY(-5px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px 20px;
 }
 
-.circularProgressBar:hover .circleTooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.positiveText {
+  color: var(--success-green);
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.scoreValueWrapper:hover + .scoreTooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.negativeText {
+  color: var(--error-red);
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-/* Responsive adjustments */
-@media (max-width: 992px) {
-  .impactScoreHeader {
-    font-size: 4rem;
-  }
-  
-  .circularProgressBar {
-    width: 280px;
-    height: 280px;
-  }
-  
-  .mainContainer {
-    padding: 32px;
-  }
-}
-
-@media (max-width: 768px) {
-  .contentRow {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .circleColumn {
-    margin-right: 0;
-    margin-bottom: 2rem;
-  }
-  
-  .circleColumn.animate {
-    opacity: 1;
-  }
-  
-  .headerColumn {
-    justify-content: center;
-  }
-  
-  .headerColumn.animate {
-    opacity: 1;
-  }
-  
-  .headerWrap {
-    align-items: center;
-  }
-  
-  .impactScoreHeader {
-    font-size: 3.5rem;
-    text-align: center;
-  }
-  
-  .headerUnderline {
-    margin: 10px auto 0;
-    transform-origin: center;
-  }
-  
-  .circularProgressBar {
-    width: 260px;
-    height: 260px;
-  }
-  
-  .scoreValue {
-    font-size: 3.5rem;
-  }
-  
-  .mainContainer {
-    padding: 24px;
-  }
-  
-  .buttonRow {
-    margin-right: 0; /* Reset for mobile */
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .mainContainer {
-    padding: 20px;
-  }
-  
-  .impactScoreHeader {
-    font-size: 2.8rem;
-  }
-  
-  .circularProgressBar {
-    width: 220px;
-    height: 220px;
-  }
-  
-  .scoreValue {
-    font-size: 3rem;
-  }
-  
-  .discoverButton,
-  .profileButton {
-    min-width: 240px;
-    padding: 12px 24px;
-    font-size: 16px;
-  }
-  
-  .viewToggle {
-    top: 1rem;
-    right: 1rem;
-  }
+.changeLabel {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 
 /* Concentric Rings Visualization */
 .concentricRingsContainer {
   position: relative;
-  width: 300px;
-  height: auto;
+  width: 320px;
+  height: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 100px; /* Add space for tooltip below */
-  gap: 1.5rem;
   opacity: 0;
   transform: scale(0.9);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
@@ -542,138 +469,6 @@
 }
 
 .progressRing {
-  transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.ringLabel {
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1.2s;
-}
-
-.ringScore {
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.ringMaxScore {
-  font-size: 14px;
-  font-weight: 400;
-  opacity: 0.7;
-}
-
-.ringName {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1.4s;
-}
-
-.centerScore {
-  font-size: 2.25rem;
-  font-weight: 600;
-  opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1.6s;
-  color: #475569;
-  line-height: 1;
-}
-
-.centerTier {
-  font-size: 1.125rem;
-  font-weight: 500;
-  opacity: 0;
-  animation: fadeInLabel 0.6s ease-out forwards;
-  animation-delay: 1.8s;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-top: 0.25rem;
-}
-
-@keyframes fadeInLabel {
-  to {
-    opacity: 1;
-  }
-}
-
-/* Ring Tooltip */
-.ringTooltip {
-  position: absolute;
-  background: white;
-  border: 1px solid var(--ring-color, #e0e0e0);
-  border-radius: 8px;
-  padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0;
-  animation: tooltipFadeIn 0.2s ease-out forwards;
-  min-width: 120px;
-  white-space: nowrap; /* Prevent text wrapping */
-}
-
-.ringTooltip::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -6px;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 6px 6px 6px;
-  border-color: transparent transparent var(--ring-color, #e0e0e0) transparent;
-}
-
-.ringTooltip::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -5px;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 5px 5px 5px;
-  border-color: transparent transparent white transparent;
-}
-
-.tooltipHeader {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--ring-color, #333);
-  margin-bottom: 4px;
-}
-
-.tooltipScore {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 2px;
-}
-
-.tooltipPercentage {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-weight: 500;
-}
-
-@keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Ring hover effects */
-.progressRing {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -682,101 +477,277 @@
   transition: opacity 0.3s ease;
 }
 
-.percentageTooltip {
-  font-size: 14px;
-  font-weight: 700;
-  opacity: 0;
-  animation: fadeInTooltip 0.3s ease-out forwards;
-  pointer-events: none;
+.opacityTransition {
+  transition: opacity 0.3s ease;
 }
 
-@keyframes fadeInTooltip {
+/* Center text in rings */
+.centerScore {
+  font-size: 3rem;
+  font-weight: 700;
+  opacity: 0;
+  animation: fadeInLabel 0.6s ease-out forwards;
+  animation-delay: 1.6s;
+  line-height: 1;
+}
+
+.centerLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0;
+  animation: fadeInLabel 0.6s ease-out forwards;
+  animation-delay: 1.7s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.centerTier {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0;
+  animation: fadeInLabel 0.6s ease-out forwards;
+  animation-delay: 1.8s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Enhanced white card tooltip for rings */
+.ringTooltipWhite {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 220px;
+  max-width: 280px;
+  z-index: 1000;
+  opacity: 0;
+  animation: tooltipFadeSlide 0.2s ease-out forwards;
+  pointer-events: none;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ringTooltipWhite::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.tooltipHeaderWhite {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ring-color, var(--text-primary));
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tooltipMainScore {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 12px;
+}
+
+.weightedPoints {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pointsLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tooltipProgress {
+  margin-bottom: 8px;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 4px;
+  background: var(--light-gray);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: var(--success-green);
+  font-weight: 600;
+}
+
+.tooltipCalculation {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  border-top: 1px solid var(--border-light);
+  margin-top: 8px;
+}
+
+.tooltipRemaining {
+  font-size: 0.75rem;
+  color: var(--medium-gray);
+  margin-top: 4px;
+}
+
+/* Empty state styling */
+.tooltipEmptyState {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.emptyStateIcon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.emptyStateText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.emptyStateHint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.tooltipWeight {
+  font-size: 0.6875rem;
+  color: var(--medium-gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Animations */
+@keyframes fadeInLabel {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tooltipFadeSlide {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateX(-50%) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
-/* Pulse animation for nearly complete rings */
-@keyframes pulseRing {
-  0%, 100% {
-    opacity: 1;
-    stroke-width: 18;
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .mainContainer {
+    padding: 32px;
   }
-  50% {
-    opacity: 0.8;
-    stroke-width: 22;
+  
+  .heroScore {
+    font-size: 4.5rem;
+  }
+  
+  .circularProgressBar {
+    width: 280px;
+    height: 280px;
   }
 }
 
-.progressRing[data-progress="high"] {
-  animation: pulseRing 2s ease-in-out infinite;
-}
-
-/* Responsive adjustments for rings */
 @media (max-width: 768px) {
-  .concentricRingsContainer {
+  .contentContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .visualizationColumn {
+    margin-bottom: 2rem;
+  }
+  
+  .heroScore {
+    font-size: 4rem;
+  }
+  
+  .circularProgressBar {
     width: 260px;
+    height: 260px;
+  }
+  
+  .buttonRow {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .primaryButton,
+  .secondaryButton,
+  .tertiaryButton {
+    width: 100%;
+    justify-content: center;
   }
   
   .viewToggle {
     top: 1.5rem;
     right: 1.5rem;
   }
-  
-  .ringsLegend {
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  
-  .legendItem {
-    width: auto;
-    padding: 0.25rem 0.5rem;
-  }
-  
-  .legendLabel {
-    font-size: 0.7rem;
-  }
-  
-  .legendScore {
-    font-size: 0.8rem;
-  }
 }
 
 @media (max-width: 480px) {
+  .mainContainer {
+    padding: 20px;
+  }
+  
+  .heroScore {
+    font-size: 3.5rem;
+  }
+  
+  .circularProgressBar,
   .concentricRingsContainer {
     width: 220px;
+    height: 220px;
   }
   
   .centerScore {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
   }
   
-  .centerTier {
-    font-size: 0.875rem;
-  }
-  
-  .ringTooltip {
-    /* Keep the same positioning on mobile */
-    white-space: normal;
-    min-width: 150px;
-    max-width: 200px;
-  }
-  
-  .ringScore {
+  .primaryButton,
+  .secondaryButton,
+  .tertiaryButton {
+    padding: 12px 24px;
     font-size: 14px;
   }
   
-  .ringMaxScore {
-    font-size: 12px;
+  .viewToggle {
+    top: 1rem;
+    right: 1rem;
   }
   
-  .ringName {
-    font-size: 10px;
+  .ringTooltipWhite {
+    min-width: 180px;
+    max-width: 220px;
   }
 }
