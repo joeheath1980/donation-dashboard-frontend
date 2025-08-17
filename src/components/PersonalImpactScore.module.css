@@ -47,7 +47,7 @@
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
   z-index: 20;
   position: relative;
-  width: 180px; /* Fixed width for better control */
+  width: 220px; /* Increased width to show labels properly */
 }
 
 /* Sliding pill indicator - only behind active tab */
@@ -767,7 +767,7 @@
     top: -15px;
     right: 1rem;
     padding: 3px;
-    width: 160px;
+    width: 200px;
   }
   
   .toggleSlider {
