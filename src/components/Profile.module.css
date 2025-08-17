@@ -325,6 +325,36 @@
   color: var(--primary-color);
 }
 
+.pillAmount {
+  margin-left: 4px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.charityPill.withDelete {
+  padding-right: 8px;
+  position: relative;
+}
+
+.pillDeleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-standard);
+  border-radius: 50%;
+}
+
+.pillDeleteButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 /* Buttons */
 .actionButton {
   display: inline-flex;

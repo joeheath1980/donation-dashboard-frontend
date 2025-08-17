@@ -17,6 +17,9 @@
   min-height: 100vh;
   background: var(--light-gray);
   padding-bottom: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .loading {
@@ -277,9 +280,11 @@
 /* Charts Grid */
 .chartsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
   gap: 24px;
   margin-bottom: 32px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chartCard {
@@ -288,6 +293,9 @@
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-light);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chartCard h2 {
