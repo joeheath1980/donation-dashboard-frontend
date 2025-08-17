@@ -27,7 +27,12 @@ import {
   FaProjectDiagram,
   FaChartLine,
   FaBolt,
-  FaUserCircle
+  FaUserCircle,
+  FaLightbulb,
+  FaTags,
+  FaHeart,
+  FaBullseye,
+  FaInfoCircle
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -327,6 +332,103 @@ function Profile() {
         <section className={styles.section}>
           <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
+          
+          {/* Project Matching Explanation */}
+          <div className={styles.matchingExplanation}>
+            <div className={styles.matchingHeader}>
+              <FaLightbulb className={styles.matchingIcon} />
+              <h4>How We Find Projects for You</h4>
+            </div>
+            <div className={styles.matchingContent}>
+              <p>Based on your contributions and interests, we're showing you projects that match:</p>
+              <div className={styles.matchingFactors}>
+                {(() => {
+                  // Extract matching factors from user's data
+                  const factors = [];
+                  const charityTypes = new Set();
+                  const charityNames = new Set();
+                  const causeAreas = new Set();
+                  
+                  // Get unique charity types and names from donations
+                  [...localDonations, ...localOneOffContributions].forEach(item => {
+                    if (item.charityType) charityTypes.add(item.charityType);
+                    if (item.charity) charityNames.add(item.charity);
+                  });
+                  
+                  // Get organizations from volunteer activities
+                  localVolunteerActivities.forEach(activity => {
+                    if (activity.organization) charityNames.add(activity.organization);
+                    if (activity.charityType) charityTypes.add(activity.charityType);
+                  });
+                  
+                  // Get campaign themes
+                  localFundraisingCampaigns.forEach(campaign => {
+                    if (campaign.title && campaign.title.toLowerCase().includes('education')) causeAreas.add('Education');
+                    if (campaign.title && campaign.title.toLowerCase().includes('health')) causeAreas.add('Health');
+                    if (campaign.title && campaign.title.toLowerCase().includes('environment')) causeAreas.add('Environment');
+                    if (campaign.title && campaign.title.toLowerCase().includes('poverty')) causeAreas.add('Poverty Alleviation');
+                  });
+                  
+                  // Add factors based on what we found
+                  if (charityTypes.size > 0) {
+                    factors.push({
+                      icon: <FaTags />,
+                      label: 'Charity Types',
+                      items: Array.from(charityTypes).slice(0, 3)
+                    });
+                  }
+                  
+                  if (charityNames.size > 0) {
+                    factors.push({
+                      icon: <FaHeart />,
+                      label: 'Organizations You Support',
+                      items: Array.from(charityNames).slice(0, 3)
+                    });
+                  }
+                  
+                  if (causeAreas.size > 0) {
+                    factors.push({
+                      icon: <FaBullseye />,
+                      label: 'Cause Areas',
+                      items: Array.from(causeAreas)
+                    });
+                  }
+                  
+                  // If no factors, show a default message
+                  if (factors.length === 0) {
+                    return (
+                      <div className={styles.noFactors}>
+                        <p>Start making contributions to see personalized project recommendations based on your giving patterns and interests.</p>
+                      </div>
+                    );
+                  }
+                  
+                  return factors.map((factor, index) => (
+                    <div key={index} className={styles.matchingFactor}>
+                      <div className={styles.factorHeader}>
+                        {factor.icon}
+                        <span className={styles.factorLabel}>{factor.label}:</span>
+                      </div>
+                      <div className={styles.factorItems}>
+                        {factor.items.map((item, i) => (
+                          <span key={i} className={styles.factorItem}>
+                            {item}
+                            {i < factor.items.length - 1 && ', '}
+                          </span>
+                        ))}
+                        {factor.items.length >= 3 && <span className={styles.moreIndicator}> and more...</span>}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+              <div className={styles.matchingNote}>
+                <FaInfoCircle className={styles.noteIcon} />
+                <span>Projects are ranked by relevance to your giving history and followed charities</span>
+              </div>
+            </div>
+          </div>
+          
           <GlobalGivingProjects />
         </section>
         
