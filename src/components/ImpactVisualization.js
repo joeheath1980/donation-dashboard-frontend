@@ -36,13 +36,14 @@ const COLORS = {
 
 // Old incremental calculation functions removed - now using calculateComplexImpactScore
 
-function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns) {
+function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, actualTotalScore) {
   if (!donations || !oneOffContributions) {
     return [];
   }
 
-  // Get the current total score using the new scoring system
-  const totalScore = calculateComplexImpactScore({
+  // Use the actual total score from context (backend-calculated) if provided
+  // Otherwise fall back to local calculation
+  const totalScore = actualTotalScore !== undefined ? actualTotalScore : calculateComplexImpactScore({
     regularDonations: donations,
     oneOffDonations: oneOffContributions,
     volunteeringActivities: volunteerActivities,
@@ -245,11 +246,20 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     });
   });
 
-  // Ensure the last point matches the current total score
-  if (processedData.length > 0 && processedData[processedData.length - 1].y !== totalScore) {
-    processedData[processedData.length - 1].y = totalScore;
+  // If we have processed data, scale all points proportionally to match the actual total score
+  if (processedData.length > 0) {
+    const lastCalculatedScore = processedData[processedData.length - 1].y;
+    
+    // Only scale if there's a significant difference (more than 1%)
+    if (Math.abs(lastCalculatedScore - totalScore) > totalScore * 0.01) {
+      const scaleFactor = totalScore / lastCalculatedScore;
+      
+      // Scale all points proportionally to maintain the shape of the graph
+      processedData.forEach(point => {
+        point.y = Math.round(point.y * scaleFactor);
+      });
+    }
   }
-
 
   return processedData;
 }
@@ -402,11 +412,11 @@ function ImpactVisualization({ hideTitle = false }) {
       fundraisingCampaigns,
       impactScore
     });
-    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns);
+    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore);
     console.log('Processed data points:', points);
     console.log('Chart Y values:', points.map(p => p.y));
     return points;
-  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod]);
+  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore]);
 
   // Set up intersection observer to detect visibility
   useEffect(() => {
