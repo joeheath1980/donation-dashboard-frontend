@@ -292,21 +292,10 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   const [showScoreTooltip, setShowScoreTooltip] = useState(false);
   const [animateCircle, setAnimateCircle] = useState(false);
   
-  // Fix the percentage calculation - if pointsToNextTier is the points needed to reach next tier
-  // then the progress should be calculated based on current tier requirements
-  // For now, let's use a simple approach where we show progress within current tier
-  const tierThresholds = {
-    'Giver': { min: 0, max: 100 },
-    'Altruist': { min: 100, max: 500 },
-    'Philanthropist': { min: 500, max: 1000 },
-    'Champion': { min: 1000, max: 2500 },
-    'Visionary': { min: 2500, max: 5000 }
-  };
-  
-  const currentTierInfo = tierThresholds[tier] || { min: 0, max: 1000 };
-  const tierRange = currentTierInfo.max - currentTierInfo.min;
-  const progressInTier = score - currentTierInfo.min;
-  const percentage = Math.max(0, Math.min(100, (progressInTier / tierRange) * 100));
+  // Restore original percentage calculation
+  // pointsToNextTier is a percentage value (0-100) representing distance to next tier
+  // So if pointsToNextTier is 30, it means you're 30% away from next tier (70% complete)
+  const percentage = 100 - pointsToNextTier;
   
   const radius = 150;
   const strokeWidth = 22; // Reduced from 30
