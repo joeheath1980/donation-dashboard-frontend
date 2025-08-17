@@ -269,7 +269,6 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
             </>
           ) : (
             <div className={styles.tooltipEmptyState}>
-              <div className={styles.emptyStateIcon}>🎯</div>
               <div className={styles.emptyStateText}>No activity yet</div>
               <div className={styles.emptyStateHint}>
                 {rings[hoveredRing].name === 'Donations' && 'Start with a micro-donation of any amount!'}

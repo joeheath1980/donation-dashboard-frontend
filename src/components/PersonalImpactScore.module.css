@@ -392,7 +392,7 @@
 }
 
 .tierProgressTooltip {
-  bottom: -90px;
+  bottom: -130px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -636,11 +636,6 @@
 .tooltipEmptyState {
   text-align: center;
   padding: 8px 0;
-}
-
-.emptyStateIcon {
-  font-size: 2rem;
-  margin-bottom: 8px;
 }
 
 .emptyStateText {
