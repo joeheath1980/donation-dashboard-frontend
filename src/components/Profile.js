@@ -50,6 +50,8 @@ function Profile() {
     donations: contextDonations, 
     oneOffContributions: contextOneOffContributions,
     setOneOffContributions: contextSetOneOffContributions,
+    volunteerActivities,
+    fundraisingCampaigns,
     followedCharities: contextFollowedCharities,
     removeFollowedCharity,
     impactScore,
