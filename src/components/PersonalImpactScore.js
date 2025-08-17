@@ -66,14 +66,15 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     'Visionary': 4.0
   }[tier] || 1.0;
   
+  // Adjusted ring configuration with tighter spacing
   const rings = [
     { 
       name: 'Donations',
       score: Math.round(weightedDonationScore),
       rawScore: donationScore,
       maxScore: 600 * tierMultiplier,
-      radius: 140,
-      strokeWidth: 12, // Reduced from 16
+      radius: 130, // Reduced from 140
+      strokeWidth: 10, // Reduced from 12
       color: { start: '#4DD0E1', end: '#00ACC1' },
       bgColor: '#E0F7FA',
       weight: '30%'
@@ -83,8 +84,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedVolunteerScore),
       rawScore: volunteerScore,
       maxScore: 400 * tierMultiplier,
-      radius: 115,
-      strokeWidth: 12, // Reduced from 16
+      radius: 105, // Reduced from 115
+      strokeWidth: 10, // Reduced from 12
       color: { start: '#66BB6A', end: '#43A047' },
       bgColor: '#E8F5E9',
       weight: '25%'
@@ -94,8 +95,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedFundraisingScore),
       rawScore: fundraisingScore,
       maxScore: 300 * tierMultiplier,
-      radius: 90,
-      strokeWidth: 12, // Reduced from 16
+      radius: 80, // Reduced from 90
+      strokeWidth: 10, // Reduced from 12
       color: { start: '#AB47BC', end: '#8E24AA' },
       bgColor: '#F3E5F5',
       weight: '20%'
@@ -105,8 +106,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedConsistencyScore),
       rawScore: consistencyScore,
       maxScore: 200 * tierMultiplier,
-      radius: 65,
-      strokeWidth: 12, // Reduced from 16
+      radius: 55, // Reduced from 65
+      strokeWidth: 10, // Reduced from 12
       color: { start: '#FF7043', end: '#F4511E' },
       bgColor: '#FBE9E7',
       weight: '15%'
@@ -116,8 +117,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedEngagementScore),
       rawScore: engagementScore,
       maxScore: 150 * tierMultiplier,
-      radius: 40,
-      strokeWidth: 12, // Reduced from 16
+      radius: 30, // Reduced from 40
+      strokeWidth: 10, // Reduced from 12
       color: { start: '#FFD54F', end: '#FFB300' },
       bgColor: '#FFF8E1',
       weight: '10%'
@@ -213,34 +214,16 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
           );
         })}
         
-        {/* Center content with enhanced typography */}
+        {/* Center content - only the score number */}
         <g>
-          <text
-            x={center}
-            y={center - 10}
-            textAnchor="middle"
-            className={styles.centerScore}
-            fill="#1e293b"
-          >
-            {totalScore}
-          </text>
           <text
             x={center}
             y={center + 8}
             textAnchor="middle"
-            className={styles.centerLabel}
-            fill="#64748b"
+            className={styles.centerScoreSimple}
+            fill="#1e293b"
           >
-            Impact Score
-          </text>
-          <text
-            x={center}
-            y={center + 28}
-            textAnchor="middle"
-            className={styles.centerTier}
-            fill={tierColor.end}
-          >
-            {tier}
+            {totalScore}
           </text>
         </g>
       </svg>
@@ -308,7 +291,23 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   const [showCircleTooltip, setShowCircleTooltip] = useState(false);
   const [showScoreTooltip, setShowScoreTooltip] = useState(false);
   const [animateCircle, setAnimateCircle] = useState(false);
-  const percentage = ((100 - pointsToNextTier) / 100) * 100;
+  
+  // Fix the percentage calculation - if pointsToNextTier is the points needed to reach next tier
+  // then the progress should be calculated based on current tier requirements
+  // For now, let's use a simple approach where we show progress within current tier
+  const tierThresholds = {
+    'Giver': { min: 0, max: 100 },
+    'Altruist': { min: 100, max: 500 },
+    'Philanthropist': { min: 500, max: 1000 },
+    'Champion': { min: 1000, max: 2500 },
+    'Visionary': { min: 2500, max: 5000 }
+  };
+  
+  const currentTierInfo = tierThresholds[tier] || { min: 0, max: 1000 };
+  const tierRange = currentTierInfo.max - currentTierInfo.min;
+  const progressInTier = score - currentTierInfo.min;
+  const percentage = Math.max(0, Math.min(100, (progressInTier / tierRange) * 100));
+  
   const radius = 150;
   const strokeWidth = 22; // Reduced from 30
   const normalizedRadius = radius - strokeWidth / 2;
@@ -501,7 +500,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
           <span>Total</span>
         </button>
         <button
-          className={`${styles.toggleButton} ${viewMode === 'breakdown' ? styles.active : ''}`}
+          className={`${styles.toggleButton} ${styles.toggleButtonRight} ${viewMode === 'breakdown' ? styles.active : ''}`}
           onClick={() => handleViewModeChange('breakdown')}
           title="Breakdown View"
         >
