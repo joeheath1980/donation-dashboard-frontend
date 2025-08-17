@@ -356,13 +356,13 @@ function Profile() {
                   });
                   
                   // Get organizations from volunteer activities
-                  localVolunteerActivities.forEach(activity => {
+                  volunteerActivities.forEach(activity => {
                     if (activity.organization) charityNames.add(activity.organization);
                     if (activity.charityType) charityTypes.add(activity.charityType);
                   });
                   
                   // Get campaign themes
-                  localFundraisingCampaigns.forEach(campaign => {
+                  fundraisingCampaigns.forEach(campaign => {
                     if (campaign.title && campaign.title.toLowerCase().includes('education')) causeAreas.add('Education');
                     if (campaign.title && campaign.title.toLowerCase().includes('health')) causeAreas.add('Health');
                     if (campaign.title && campaign.title.toLowerCase().includes('environment')) causeAreas.add('Environment');
