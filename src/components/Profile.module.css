@@ -632,6 +632,134 @@
   color: var(--text-primary);
 }
 
+/* Project Matching Explanation Styles */
+.matchingExplanation {
+  background: linear-gradient(135deg, #f8fffe 0%, #f0f9f8 100%);
+  border: 1px solid rgba(45, 143, 123, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(45, 143, 123, 0.08);
+}
+
+.matchingHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.matchingHeader h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.matchingIcon {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+.matchingContent {
+  color: var(--text-secondary);
+}
+
+.matchingContent > p {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.matchingFactors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.matchingFactor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.factorHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.factorHeader svg {
+  font-size: 16px;
+  color: var(--primary-color);
+}
+
+.factorLabel {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.factorItems {
+  margin-left: 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.factorItem {
+  background: linear-gradient(135deg, rgba(45, 143, 123, 0.1) 0%, rgba(94, 207, 182, 0.1) 100%);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 2px;
+}
+
+.moreIndicator {
+  color: var(--primary-color);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.noFactors {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.noFactors p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.matchingNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(45, 143, 123, 0.05);
+  border-radius: 6px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--primary-color);
+}
+
+.noteIcon {
+  font-size: 14px;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .profileContainer {
