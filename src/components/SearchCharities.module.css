@@ -4,6 +4,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .searchSection {
@@ -12,6 +14,9 @@
   border-radius: 12px;
   background: linear-gradient(to right bottom, rgba(45, 143, 123, 0.05), rgba(91, 168, 144, 0.1));
   border: 1px solid var(--border-light);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .header {
@@ -34,12 +39,16 @@
 .searchForm {
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .searchControls {
   display: flex;
   gap: 1rem;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .inputGroup {
@@ -51,6 +60,8 @@
   border: 2px solid var(--border-light);
   transition: all 0.3s ease;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .inputGroup:focus-within {
@@ -114,6 +125,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .filterButton:hover {
@@ -599,7 +612,19 @@
   font-size: 1.2em;
 }
 
+/* Responsive Design - prevent overflow on larger screens */
+@media (max-width: 1400px) {
+  .container {
+    max-width: calc(100% - 4rem);
+  }
+}
+
 @media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
   .header {
     font-size: 2rem;
   }
