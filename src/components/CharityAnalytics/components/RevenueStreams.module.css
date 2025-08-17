@@ -1,5 +1,8 @@
 .container {
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .metricsGrid {
@@ -48,10 +51,17 @@
   grid-template-columns: 1fr 1fr;
   gap: 30px;
   margin: 30px 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chart {
   height: 200px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .highlight {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { DynamicWidth, ProgressBar, DynamicGradient } from './DynamicStyleManager';
 import { Link } from 'react-router-dom';
-import { FaArrowUp, FaArrowDown, FaPlus, FaChartPie, FaChartLine } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaPlus, FaChartPie, FaChartLine, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './PersonalImpactScore.module.css';
@@ -401,7 +401,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   );
 };
 
-const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions }) => {
+const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions, username, userId, userEmail }) => {
   const { user } = useAuth();
   const { scoreDetails } = useContext(ImpactContext);
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
@@ -478,6 +478,14 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             <button onClick={onAddContributions} className={styles.discoverButton}>
               <FaPlus /> Add Your Contributions
             </button>
+          )}
+          {(username || userId || userEmail) && (
+            <Link 
+              to={`/profile/${username || userId || userEmail?.split('@')[0]}`} 
+              className={styles.viewProfileButton}
+            >
+              <FaUserCircle /> View Public Profile
+            </Link>
           )}
         </div>
       ) : onBackToDashboard ? (

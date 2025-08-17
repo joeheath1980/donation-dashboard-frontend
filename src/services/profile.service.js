@@ -4,9 +4,10 @@ const api = apiServices.client;
 
 class ProfileService {
   // User Profile Methods
-  async getUserPublicProfile(userId) {
+  async getUserPublicProfile(identifier) {
     try {
-      const response = await api.get(`/api/public/user/${userId}`);
+      // The backend endpoint accepts username, userId, or email
+      const response = await api.get(`/api/public/user/${identifier}`);
       console.log('Profile API response:', response.data);
       
       // Check if the response has the expected structure

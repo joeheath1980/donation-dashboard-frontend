@@ -264,15 +264,6 @@ function Profile() {
   return (
     <div className={styles.profileBackground}>
       <div className={styles.profileContainer}>
-        {/* View Public Profile Button */}
-        {user && user.username && (
-          <div className={styles.profileButtonWrapper}>
-            <Link to={`/profile/${user.username}`} className={styles.viewProfileButton}>
-              <FaUserCircle /> View Public Profile
-            </Link>
-          </div>
-        )}
-        
         <div className={styles.impactScoreWrapper}>
           <PersonalImpactScore
             impactScore={impactScore}
@@ -281,6 +272,9 @@ function Profile() {
             tier={tier}
             pointsToNextTier={pointsToNextTier}
             onAddContributions={handleAddContributions}
+            username={user?.username}
+            userId={user?.userId || user?._id}
+            userEmail={user?.email}
           />
         </div>
         
@@ -418,11 +412,15 @@ function Profile() {
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
                 </h3>
-                <ul className={styles.list}>
+                <div className={styles.charityPills}>
                   {getRecentOneOffDonations().map((donation, index) => (
-                    <li key={index} className={styles.listItem}>{donation.charity}: ${donation.amount}</li>
+                    <div key={index} className={styles.charityPill}>
+                      <FaRegHeart className={styles.pillIcon} />
+                      <span>{donation.charity}</span>
+                      <span className={styles.pillAmount}>${donation.amount}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
                 {!showOneOffContributions && (
                   <button className={`${styles.actionButton} button`} onClick={toggleOneOffContributions}>
                     See All <FaChevronRight className={styles.buttonIcon} />
@@ -434,20 +432,21 @@ function Profile() {
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegHeart className={styles.icon} /> Charities Following
                 </h3>
-                <ul className={styles.list}>
+                <div className={styles.charityPills}>
                   {getDisplayedFollowedCharities().map((charity, index) => (
-                    <li key={charity.ABN || `empty-${index}`} className={styles.listItem}>
+                    <div key={charity.ABN || `empty-${index}`} className={`${styles.charityPill} ${styles.withDelete}`}>
+                      <FaRegHeart className={styles.pillIcon} />
                       <span>{charity.name || 'Unknown Charity'}</span>
                       <button
                         onClick={() => handleUnfollowCharity(charity.ABN)}
-                        className={`${styles.deleteButton} iconButton`}
+                        className={styles.pillDeleteButton}
                         aria-label="Unfollow Charity"
                       >
                         <FaTimes />
                       </button>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
                 {localFollowedCharities.length > 3 && (
                   <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
                     {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
