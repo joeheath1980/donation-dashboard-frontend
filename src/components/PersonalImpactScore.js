@@ -66,15 +66,15 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     'Visionary': 4.0
   }[tier] || 1.0;
   
-  // Adjusted ring configuration with tighter spacing
+  // Adjusted ring configuration with much tighter spacing for more center room
   const rings = [
     { 
       name: 'Donations',
       score: Math.round(weightedDonationScore),
       rawScore: donationScore,
       maxScore: 600 * tierMultiplier,
-      radius: 130, // Reduced from 140
-      strokeWidth: 10, // Reduced from 12
+      radius: 140, // Outer ring stays at edge
+      strokeWidth: 8, // Thinner stroke
       color: { start: '#4DD0E1', end: '#00ACC1' },
       bgColor: '#E0F7FA',
       weight: '30%'
@@ -84,8 +84,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedVolunteerScore),
       rawScore: volunteerScore,
       maxScore: 400 * tierMultiplier,
-      radius: 105, // Reduced from 115
-      strokeWidth: 10, // Reduced from 12
+      radius: 118, // Much tighter spacing
+      strokeWidth: 8,
       color: { start: '#66BB6A', end: '#43A047' },
       bgColor: '#E8F5E9',
       weight: '25%'
@@ -95,8 +95,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedFundraisingScore),
       rawScore: fundraisingScore,
       maxScore: 300 * tierMultiplier,
-      radius: 80, // Reduced from 90
-      strokeWidth: 10, // Reduced from 12
+      radius: 96, // Tighter spacing
+      strokeWidth: 8,
       color: { start: '#AB47BC', end: '#8E24AA' },
       bgColor: '#F3E5F5',
       weight: '20%'
@@ -106,8 +106,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedConsistencyScore),
       rawScore: consistencyScore,
       maxScore: 200 * tierMultiplier,
-      radius: 55, // Reduced from 65
-      strokeWidth: 10, // Reduced from 12
+      radius: 74, // Tighter spacing
+      strokeWidth: 8,
       color: { start: '#FF7043', end: '#F4511E' },
       bgColor: '#FBE9E7',
       weight: '15%'
@@ -117,8 +117,8 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       score: Math.round(weightedEngagementScore),
       rawScore: engagementScore,
       maxScore: 150 * tierMultiplier,
-      radius: 30, // Reduced from 40
-      strokeWidth: 10, // Reduced from 12
+      radius: 52, // Much more room in center now
+      strokeWidth: 8,
       color: { start: '#FFD54F', end: '#FFB300' },
       bgColor: '#FFF8E1',
       weight: '10%'
