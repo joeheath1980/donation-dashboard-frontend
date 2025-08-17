@@ -292,10 +292,24 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   const [showScoreTooltip, setShowScoreTooltip] = useState(false);
   const [animateCircle, setAnimateCircle] = useState(false);
   
-  // Restore original percentage calculation
-  // pointsToNextTier is a percentage value (0-100) representing distance to next tier
-  // So if pointsToNextTier is 30, it means you're 30% away from next tier (70% complete)
-  const percentage = 100 - pointsToNextTier;
+  // Calculate percentage based on tier progression
+  // pointsToNextTier is the absolute number of points needed to reach next tier
+  const tierRanges = {
+    'Giver': { min: 0, max: 300 },
+    'Altruist': { min: 300, max: 1000 },
+    'Philanthropist': { min: 1000, max: 2500 },
+    'Champion': { min: 2500, max: 5000 },
+    'Visionary': { min: 5000, max: 10000 } // Visionary has no upper limit, but we'll use 10000 for display
+  };
+  
+  const currentTierRange = tierRanges[tier] || { min: 0, max: 1000 };
+  const nextTierThreshold = currentTierRange.max;
+  const currentTierThreshold = currentTierRange.min;
+  const tierSpan = nextTierThreshold - currentTierThreshold;
+  
+  // Calculate how far through the current tier we are
+  const pointsInCurrentTier = score - currentTierThreshold;
+  const percentage = tier === 'Visionary' ? 100 : Math.min(100, Math.max(0, (pointsInCurrentTier / tierSpan) * 100));
   
   const radius = 150;
   const strokeWidth = 22; // Reduced from 30
