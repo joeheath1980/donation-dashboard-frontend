@@ -902,48 +902,92 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           </div>
         )}
         <div className={styles.buttonContainer}>
-          {isRegularUser && (
-            <button
-              id="start-search-btn"
-              onClick={async () => {
-                if (!hasGmailAuth) {
-                  const hasAuth = await checkGmailAuth();
-                  if (!hasAuth) {
-                    window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
-                    return;
-                  }
-                }
-                handleSearchEmails();
-              }}
-              disabled={loading || isClearing || checkingAuth}
-              className={`${styles.scrapeButton} button`}
-            >
-              {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail for Donations' : 'Connect Gmail & Search'}
-            </button>
-          )}
-          <button
-            onClick={handleSearchOutlookEmails}
-            disabled={loading || isClearing}
-            className={`${styles.scrapeButton} button`}
-          >
-            {loading ? 'Searching...' : 'Search Outlook for Donations'}
-          </button>
-          <button
-            onClick={() => setShowEmailForwarding(true)}
-            className={`${styles.scrapeButton} button`}
-          >
-            📧 Email Forwarding
-          </button>
-          <button
-            onClick={fetchForwardedEmails}
-            disabled={loadingForwarded}
-            className={`${styles.scrapeButton} button`}
-          >
-            {loadingForwarded ? 'Loading...' : '🔄 Refresh Forwarded'}
-          </button>
-          <Link to="/profile" className={`${styles.toggleButton} button`}>
-            Check Out Your Impact
-          </Link>
+          <div className={styles.emailSearchSection}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Import Your Donations</h3>
+              <p className={styles.sectionSubtitle}>Connect your email to automatically find and import donation receipts</p>
+            </div>
+            
+            <div className={styles.buttonGrid}>
+              {isRegularUser && (
+                <button
+                  id="start-search-btn"
+                  onClick={async () => {
+                    if (!hasGmailAuth) {
+                      const hasAuth = await checkGmailAuth();
+                      if (!hasAuth) {
+                        window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+                        return;
+                      }
+                    }
+                    handleSearchEmails();
+                  }}
+                  disabled={loading || isClearing || checkingAuth}
+                  className={`${styles.emailButton} ${styles.gmail}`}
+                >
+                  <div className={styles.buttonContent}>
+                    <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+                    </svg>
+                    <span className={styles.buttonLabel}>
+                      {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail' : 'Connect Gmail'}
+                    </span>
+                  </div>
+                </button>
+              )}
+              
+              <button
+                onClick={handleSearchOutlookEmails}
+                disabled={loading || isClearing}
+                className={`${styles.emailButton} ${styles.outlook}`}
+              >
+                <div className={styles.buttonContent}>
+                  <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+                  </svg>
+                  <span className={styles.buttonLabel}>
+                    {loading ? 'Searching...' : 'Search Outlook'}
+                  </span>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setShowEmailForwarding(true)}
+                className={styles.emailButton}
+              >
+                <div className={styles.buttonContent}>
+                  <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2L4 5V11.5C4 12.12 4.15 12.7 4.4 13.24L10.5 9.5L14 2ZM20 11L10.5 9.5L4.4 13.24C5.14 14.53 6.41 15.5 8 15.84V18L12 20L16 18V15.84C18.66 15.23 20 13.13 20 11Z" fill="currentColor"/>
+                  </svg>
+                  <span className={styles.buttonLabel}>Email Forwarding</span>
+                </div>
+              </button>
+              
+              <button
+                onClick={fetchForwardedEmails}
+                disabled={loadingForwarded}
+                className={styles.emailButton}
+              >
+                <div className={styles.buttonContent}>
+                  <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z" fill="currentColor"/>
+                  </svg>
+                  <span className={styles.buttonLabel}>
+                    {loadingForwarded ? 'Checking...' : 'Check Forwarded'}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+          
+          <div className={styles.impactLinkSection}>
+            <Link to="/profile" className={styles.viewImpactButton}>
+              View Your Impact Dashboard
+              <svg className={styles.arrowIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          </div>
           {searchHistory.length > 0 && (
             <button
               onClick={handleClearAll}

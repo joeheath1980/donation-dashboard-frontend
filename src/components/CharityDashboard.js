@@ -14,6 +14,9 @@ function CharityDashboard() {
   const [error, setError] = useState(null);
   const { user, getAuthHeaders, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Search and linking states
   const [searchTerm, setSearchTerm] = useState('');
@@ -231,7 +234,44 @@ function CharityDashboard() {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <div className={styles.tabNavigation}>
+        <button 
+          className={`${styles.tabButton} ${activeTab === 'overview' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button 
+          className={`${styles.tabButton} ${activeTab === 'analytics' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          Analytics
+        </button>
+        <button 
+          className={`${styles.tabButton} ${activeTab === 'donors' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('donors')}
+        >
+          Donors
+        </button>
+        <button 
+          className={`${styles.tabButton} ${activeTab === 'campaigns' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('campaigns')}
+        >
+          Campaigns
+        </button>
+        <button 
+          className={`${styles.tabButton} ${activeTab === 'settings' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Settings
+        </button>
+      </div>
+
       <div className={styles.mainContent}>
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <>
         <div className={styles.card}>
         <h2 className={styles.cardTitle}>Welcome, {charityData.charityName}</h2>
         <p className={styles.description}><strong>Email:</strong> {charityData.contactEmail}</p>
@@ -439,6 +479,72 @@ function CharityDashboard() {
           )}
         </div>
       </div>
+          </>
+        )}
+        
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Analytics</h2>
+            <p className={styles.description}>Detailed analytics and insights coming soon.</p>
+            <button 
+              onClick={() => navigate('/charity-analytics')}
+              className={styles.button}
+            >
+              Open Full Analytics
+            </button>
+          </div>
+        )}
+        
+        {/* Donors Tab */}
+        {activeTab === 'donors' && (
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Donor Management</h2>
+            <p className={styles.description}>Manage your donors and relationships.</p>
+            <button 
+              onClick={() => navigate('/charity-donors')}
+              className={styles.button}
+            >
+              Open Donor Management
+            </button>
+          </div>
+        )}
+        
+        {/* Campaigns Tab */}
+        {activeTab === 'campaigns' && (
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Fundraising Campaigns</h2>
+            <p className={styles.description}>Create and manage your fundraising campaigns.</p>
+            <button 
+              onClick={() => navigate('/charity-campaigns')}
+              className={styles.button}
+            >
+              Manage Campaigns
+            </button>
+          </div>
+        )}
+        
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Settings</h2>
+            <p className={styles.description}>Manage your charity account settings.</p>
+            <div className={styles.quickActions}>
+              <button 
+                onClick={() => navigate('/charity-profile-editor')}
+                className={styles.button}
+              >
+                Edit Profile
+              </button>
+              <button 
+                onClick={() => navigate('/charity-settings')}
+                className={styles.button}
+              >
+                Account Settings
+              </button>
+            </div>
+          </div>
+        )}
 
       </div> {/* End of mainContent */}
 

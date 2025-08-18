@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
 import { createLogger } from '../utils/logger';
-import { csrfServiceAPI } from '../services/api.service';
+import apiServices, { csrfServiceAPI } from '../services/api.service';
 import { SecureTokenStorage, UserDataStorage } from '../utils/auth.utils';
 
 const AuthContext = createContext();
@@ -112,7 +112,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       logger.info('Starting login process', { email });
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_LOGIN), { email, password });
+      const api = apiServices.client;
+      const response = await api.post(API_ENDPOINTS.USER_LOGIN, { email, password });
       
       // Handle new token format
       const { accessToken, refreshToken, user: userData, token } = response.data;
@@ -204,7 +205,8 @@ export const AuthProvider = ({ children }) => {
   const businessLogin = async (emailOrContactEmail, password) => {
     try {
       // Support both email and contactEmail fields for compatibility
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_LOGIN), {
+      const api = apiServices.client;
+      const response = await api.post(API_ENDPOINTS.BUSINESS_LOGIN, {
         email: emailOrContactEmail,
         contactEmail: emailOrContactEmail,
         password,
@@ -246,7 +248,8 @@ export const AuthProvider = ({ children }) => {
   // Charity user login
   const charityLogin = async (emailOrContactEmail, password) => {
     try {
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_LOGIN), {
+      const api = apiServices.client;
+      const response = await api.post(API_ENDPOINTS.CHARITY_LOGIN, {
         email: emailOrContactEmail,  // Backend accepts 'email' field
         contactEmail: emailOrContactEmail,  // Also send contactEmail for compatibility
         password,

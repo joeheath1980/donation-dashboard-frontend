@@ -461,3 +461,162 @@
   transition: width 0.5s ease;
 }
 }
+/* Redesigned to match Profile.js style */
+.emailSearchSection {
+  background: white;
+  border-radius: 8px;
+  padding: 48px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e5ea;
+}
+
+.sectionHeader {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d2d32;
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #2d8f7b 0%, #5ecfb6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sectionSubtitle {
+  font-size: 16px;
+  color: #6d6d78;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.buttonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.emailButton {
+  position: relative;
+  padding: 20px;
+  background: white;
+  border: 2px solid #e5e5ea;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.emailButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #2d8f7b;
+}
+
+.emailButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emailButton.gmail {
+  border-color: #ea4335;
+}
+
+.emailButton.gmail:hover:not(:disabled) {
+  border-color: #ea4335;
+  background: #fff5f4;
+}
+
+.emailButton.outlook {
+  border-color: #0078d4;
+}
+
+.emailButton.outlook:hover:not(:disabled) {
+  border-color: #0078d4;
+  background: #f0f7ff;
+}
+
+.buttonContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.emailIcon {
+  width: 32px;
+  height: 32px;
+  color: #2d8f7b;
+  transition: color 0.3s ease;
+}
+
+.emailButton:hover:not(:disabled) .emailIcon {
+  color: #1e6b59;
+}
+
+.buttonLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d2d32;
+  text-align: center;
+}
+
+.impactLinkSection {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.viewImpactButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #2d8f7b 0%, #5ecfb6 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
+}
+
+.viewImpactButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(45, 143, 123, 0.4);
+}
+
+.arrowIcon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.viewImpactButton:hover .arrowIcon {
+  transform: translateX(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .buttonGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .emailSearchSection {
+    padding: 32px 20px;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+  
+  .sectionSubtitle {
+    font-size: 14px;
+  }
+}

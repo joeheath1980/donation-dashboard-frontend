@@ -550,9 +550,9 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             <FaSearch className={styles.buttonIcon} />
             Discover Your Contributions
           </Link>
-          {(username || userId || userEmail) && (
+          {(username || userId || userEmail || user?.username || user?.userId || user?._id) && (
             <Link 
-              to={`/profile/${username || userId || userEmail?.split('@')[0]}`} 
+              to={`/profile/${username || user?.username || userId || user?.userId || user?._id || userEmail?.split('@')[0]}`} 
               className={styles.tertiaryButton}
             >
               <FaUserCircle className={styles.buttonIcon} />

@@ -53,6 +53,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 32px;
   border: 1px solid var(--border-light);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Search Bar */
@@ -79,6 +81,7 @@
   color: var(--text-primary);
   background: var(--white);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .searchInput::placeholder {

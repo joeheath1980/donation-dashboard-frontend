@@ -128,24 +128,30 @@ class CSRFTokenService {
    * @returns {Object} Modified config with CSRF token
    */
   async addTokenToRequest(config) {
+    console.log('CSRF: addTokenToRequest called for', config.url, 'method:', config.method);
+    
     // Skip CSRF for GET, HEAD, OPTIONS requests
     const safeMethods = ['get', 'head', 'options'];
     if (safeMethods.includes(config.method?.toLowerCase())) {
+      console.log('CSRF: Skipping safe method');
       return config;
     }
 
     // Skip if Authorization header with Bearer token exists (JWT auth)
     if (config.headers?.Authorization?.startsWith('Bearer ')) {
       logger.debug('Skipping CSRF for JWT authenticated request');
+      console.log('CSRF: Skipping - has Bearer token');
       return config;
     }
 
     // Get CSRF token
     let token = await this.getToken();
+    console.log('CSRF: Token from getToken:', token ? 'found' : 'not found');
     
     // Fallback to cookie if direct fetch failed
     if (!token) {
       token = this.getTokenFromCookie();
+      console.log('CSRF: Token from cookie:', token ? 'found' : 'not found');
     }
 
     if (token) {
@@ -160,11 +166,17 @@ class CSRFTokenService {
         config.data._csrf = token;
       }
       
+      console.log('CSRF: Added token to request', {
+        header: config.headers['X-CSRF-Token'] ? 'yes' : 'no',
+        body: config.data?._csrf ? 'yes' : 'no'
+      });
+      
       logger.debug('Added CSRF token to request', { 
         method: config.method,
         url: config.url 
       });
     } else {
+      console.log('CSRF: WARNING - No token available!');
       logger.warn('No CSRF token available for request', {
         method: config.method,
         url: config.url

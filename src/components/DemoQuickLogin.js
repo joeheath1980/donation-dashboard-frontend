@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaBriefcase, FaHeart } from 'react-icons/fa';
+import apiServices from '../services/api.service';
 import styles from './DemoQuickLogin.module.css';
 
 const DemoQuickLogin = ({ onCredentialsFill }) => {
+  console.log('DemoQuickLogin component rendered, onCredentialsFill:', typeof onCredentialsFill);
   const [credentials, setCredentials] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('users');
   const navigate = useNavigate();
+  const api = apiServices.client;
 
   useEffect(() => {
     const fetchCredentials = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/credentials`
-        );
+        const response = await api.get('/api/demo/credentials');
         setCredentials(response.data);
       } catch (error) {
         console.error('Error fetching demo credentials:', error);
@@ -25,25 +25,55 @@ const DemoQuickLogin = ({ onCredentialsFill }) => {
     };
 
     fetchCredentials();
-  }, []);
+  }, [api]);
 
   const quickLogin = async (type, category) => {
+    console.log('Quick login clicked - type:', type, 'category:', category);
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/quick-login`,
-        { userType: type, category }
-      );
+      console.log('Making API call to /api/demo/quick-login');
+      const response = await api.post('/api/demo/quick-login', { userType: type, category });
+
+      console.log('Quick login response:', response.data);
+      console.log('Response data type:', typeof response.data);
+      console.log('Response data email:', response.data?.email);
+      console.log('Response data password:', response.data?.password);
 
       if (onCredentialsFill) {
-        // If we're on the login page, just fill the credentials with the correct account type
-        onCredentialsFill(response.data.email, response.data.password, category);
+        // Ensure we extract the correct values
+        const email = response.data?.email;
+        const password = response.data?.password;
+        
+        console.log('Extracted email:', email, 'Type:', typeof email);
+        console.log('Extracted password:', password, 'Type:', typeof password);
+        
+        // Make sure we're passing strings, not objects
+        if (typeof email === 'string' && typeof password === 'string') {
+          console.log('Calling onCredentialsFill with:', { email, password, category });
+          onCredentialsFill(email, password, category);
+        } else {
+          console.error('Invalid response format:', response.data);
+          console.error('Email type:', typeof email, 'Password type:', typeof password);
+          alert('Failed to load demo credentials. Invalid response format.');
+        }
       } else {
         // Otherwise, navigate to login with demo params
+        console.log('No onCredentialsFill, navigating to login page');
         navigate(`/login?demo=${type}&category=${category}`);
       }
     } catch (error) {
       console.error('Error during quick login:', error);
-      alert('Failed to load demo credentials. Please try again.');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Check for CSRF error
+      if (error.response?.status === 403 || error.response?.data?.code === 'CSRF_INVALID') {
+        alert('Security token expired. Please refresh the page and try again.');
+      } else {
+        alert(`Failed to load demo credentials: ${error.message}`);
+      }
     }
   };
 

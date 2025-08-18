@@ -7,7 +7,7 @@ class ProfileService {
   async getUserPublicProfile(identifier) {
     try {
       // The backend endpoint accepts username, userId, or email
-      const response = await api.get(`/api/public/user/${identifier}`);
+      const response = await api.get(`/api/publicProfiles/user/${identifier}`);
       console.log('Profile API response:', response.data);
       
       // Check if the response has the expected structure
@@ -53,7 +53,7 @@ class ProfileService {
   // Business Profile Methods
   async getBusinessPublicProfile(slug) {
     try {
-      const response = await api.get(`/api/public/business/${slug}`);
+      const response = await api.get(`/api/publicProfiles/business/${slug}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -66,7 +66,7 @@ class ProfileService {
   // Charity Profile Methods
   async getCharityPublicProfile(abn) {
     try {
-      const response = await api.get(`/api/public/charity/${abn}`);
+      const response = await api.get(`/api/publicProfiles/charity/${abn}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -84,7 +84,7 @@ class ProfileService {
     }
     
     // Updated to use correct endpoint path
-    const response = await api.get('/api/public/search', {
+    const response = await api.get('/api/publicProfiles/search', {
       params
     });
     return response.data;
@@ -92,7 +92,7 @@ class ProfileService {
 
   // Activity Methods
   async getPublicActivity(profileType, profileId, page = 1) {
-    const response = await api.get(`/api/public/${profileType}/${profileId}/activity`, {
+    const response = await api.get(`/api/publicProfiles/${profileType}/${profileId}/activity`, {
       params: { page, limit: 10 }
     });
     return response.data;

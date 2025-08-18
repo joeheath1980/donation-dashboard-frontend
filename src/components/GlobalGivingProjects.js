@@ -32,6 +32,7 @@ function GlobalGivingProjects() {
   const [error, setError] = useState(null);
   const { getAuthHeaders, user } = useAuth();
   const { formPersonalizedSearchQuery } = useContext(ImpactContext);
+  const sliderRef = useRef(null);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -133,6 +134,20 @@ function GlobalGivingProjects() {
     fetchProjects();
   }, [fetchProjects]);
 
+  // Listen for skip projects event from parent
+  useEffect(() => {
+    const handleSkipProjects = () => {
+      if (sliderRef.current) {
+        sliderRef.current.slickNext();
+      }
+    };
+
+    window.addEventListener('skipProjects', handleSkipProjects);
+    return () => {
+      window.removeEventListener('skipProjects', handleSkipProjects);
+    };
+  }, []);
+
   const handleRetry = () => {
     setLoading(true);
     setError(null);
@@ -208,7 +223,7 @@ function GlobalGivingProjects() {
         </p>
       ) : (
         <div className={styles.carouselWrapper}>
-          <Slider {...settings}>
+          <Slider ref={sliderRef} {...settings}>
             {projects.map((project, index) => (
               <div key={project.id || index} className={styles.carouselItemWrapper}>
                 <div className={styles.carouselItem}>

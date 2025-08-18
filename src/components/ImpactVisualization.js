@@ -36,7 +36,7 @@ const COLORS = {
 
 // Old incremental calculation functions removed - now using calculateComplexImpactScore
 
-function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, actualTotalScore) {
+function processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, actualTotalScore, hideAmounts = false) {
   if (!donations || !oneOffContributions) {
     return [];
   }
@@ -57,7 +57,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       type: 'donation',
       date: new Date(d.date),
       amount: Number(d.amount) || 0,
-      displayAmount: `$${Number(d.amount) || 0}`,
+      displayAmount: hideAmounts ? 'Contribution' : `$${Number(d.amount) || 0}`,
       frequency: d.frequency
     })),
     ...oneOffContributions.map(d => ({
@@ -65,14 +65,14 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       type: 'oneOff',
       date: new Date(d.date),
       amount: Number(d.amount) || 0,
-      displayAmount: `$${Number(d.amount) || 0}`
+      displayAmount: hideAmounts ? 'Contribution' : `$${Number(d.amount) || 0}`
     })),
     ...(volunteerActivities || []).map(v => ({
       ...v,
       type: 'volunteer',
       date: new Date(v.date || v.startDate),
       hours: Number(v.hours) || 0,
-      displayAmount: `${Number(v.hours) || 0} hours`
+      displayAmount: hideAmounts ? 'Volunteer Activity' : `${Number(v.hours) || 0} hours`
     })),
     ...(fundraisingCampaigns || [])
       .filter(campaign => {
@@ -86,7 +86,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         type: 'fundraisingCampaign',
         date: new Date(campaign.completedDate || campaign.endDate || campaign.createdAt || campaign.date),
         amount: Number(campaign.amountRaised) || Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0,
-        displayAmount: `$${Number(campaign.amountRaised) || Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0} raised`,
+        displayAmount: hideAmounts ? 'Campaign' : `$${Number(campaign.amountRaised) || Number(campaign.raisedAmount) || Number(campaign.goalAmount) || 0} raised`,
         charity: campaign.title || campaign.name || 'Fundraising Campaign'
       }))
   ].filter(activity => activity.date && !isNaN(activity.date.getTime()));
@@ -264,7 +264,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   return processedData;
 }
 
-function ImpactVisualization({ hideTitle = false }) {
+function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
   const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore } = useContext(ImpactContext);
   const { token } = useContext(AuthContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
@@ -412,11 +412,11 @@ function ImpactVisualization({ hideTitle = false }) {
       fundraisingCampaigns,
       impactScore
     });
-    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore);
+    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore, hideAmounts);
     console.log('Processed data points:', points);
     console.log('Chart Y values:', points.map(p => p.y));
     return points;
-  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore]);
+  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore, hideAmounts]);
 
   // Set up intersection observer to detect visibility
   useEffect(() => {

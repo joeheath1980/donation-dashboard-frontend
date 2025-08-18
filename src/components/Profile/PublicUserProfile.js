@@ -459,7 +459,7 @@ const PublicUserProfile = () => {
             />
           </div>
           
-          {/* Scrollable Impact Section */}
+          {/* Scrollable Impact Section - Hide amounts on public profile */}
           <ScrollableImpactSection 
             impactScore={actualScore}
             scoreDetails={null}
@@ -467,6 +467,7 @@ const PublicUserProfile = () => {
             pointsToNextTier={pointsToNextTier}
             activeSection={activeImpactSection}
             setActiveSection={setActiveImpactSection}
+            hideAmounts={true}
             totalSections={impactSections.length}
             sectionTitles={impactSections.map(section => section.title)}
           />

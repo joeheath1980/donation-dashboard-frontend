@@ -84,6 +84,7 @@ function Profile() {
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showMatchingDetail, setShowMatchingDetail] = useState(false);
   const [showContributionModal, setShowContributionModal] = useState(false);
+  const [showMatchingExplanation, setShowMatchingExplanation] = useState(false);
   
   // Refs for child components
   const regularDonationsRef = useRef();
@@ -280,7 +281,7 @@ function Profile() {
             pointsToNextTier={pointsToNextTier}
             onAddContributions={handleAddContributions}
             username={user?.username}
-            userId={user?.userId || user?._id}
+            userId={user?._id}
             userEmail={user?.email}
           />
         </div>
@@ -296,52 +297,37 @@ function Profile() {
           sectionTitles={impactSections.map(section => section.title)}
         />
         
-        <section className={`${styles.section} ${showMatchingFeed ? styles.matchingSection : ''}`}>
+        <section className={`${styles.section} ${styles.matchingSection}`}>
           <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           
-          {!showMatchingFeed ? (
-            <div className={styles.matchingOpportunitiesPreview}>
-              <button 
-                className={styles.exploreMatchesButton}
-                onClick={() => setShowMatchingFeed(true)}
-              >
-                <FaBolt className={styles.buttonIcon} />
-                Explore Active Matches
-              </button>
-              <p className={styles.matchesAvailable}>
-                {matchingOpportunities.length > 0 
-                  ? `${matchingOpportunities.length} active matching opportunities available!`
-                  : 'Check for new matching opportunities'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className={styles.matchingFeedContainer}>
-              <button 
-                className={styles.closeMatchingButton}
-                onClick={() => setShowMatchingFeed(false)}
-              >
-                <FaTimes /> Close
-              </button>
-              <MatchOpportunityFeed 
-                onSelectOpportunity={handleSelectOpportunity}
-              />
-            </div>
-          )}
+          {/* Always show matching feed - removed conditional rendering */}
+          <div className={styles.matchingFeedContainer}>
+            <MatchOpportunityFeed 
+              onSelectOpportunity={handleSelectOpportunity}
+              autoShow={true}
+            />
+          </div>
         </section>
 
         <section className={styles.section}>
           <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
           
-          {/* Project Matching Explanation */}
-          <div className={styles.matchingExplanation}>
-            <div className={styles.matchingHeader}>
+          {/* Project Matching Explanation - Collapsible */}
+          <div className={styles.matchingExplanationWrapper}>
+            <button 
+              className={styles.toggleExplanationBtn}
+              onClick={() => setShowMatchingExplanation(!showMatchingExplanation)}
+            >
               <FaLightbulb className={styles.matchingIcon} />
-              <h4>How We Find Projects for You</h4>
-            </div>
-            <div className={styles.matchingContent}>
+              <span>How We Find Projects for You</span>
+              <FaChevronRight className={`${styles.chevron} ${showMatchingExplanation ? styles.chevronOpen : ''}`} />
+            </button>
+            
+            {showMatchingExplanation && (
+              <div className={styles.matchingExplanation}>
+                <div className={styles.matchingContent}>
               <p>Based on your contributions and interests, we're showing you projects that match:</p>
               <div className={styles.matchingFactors}>
                 {(() => {
@@ -427,11 +413,27 @@ function Profile() {
               <div className={styles.matchingNote}>
                 <FaInfoCircle className={styles.noteIcon} />
                 <span>Projects are ranked by relevance to your giving history and followed charities</span>
+                </div>
               </div>
             </div>
+            )}
           </div>
           
-          <GlobalGivingProjects />
+          {/* Add skip button on right side */}
+          <div className={styles.projectsContainer}>
+            <GlobalGivingProjects />
+            <button 
+              className={styles.skipProjectsBtn}
+              onClick={() => {
+                // Trigger next set of projects
+                const event = new CustomEvent('skipProjects');
+                window.dispatchEvent(event);
+              }}
+              title="Skip to next projects"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
         </section>
         
         <section className={`${styles.section} ${styles.impactSection}`}>

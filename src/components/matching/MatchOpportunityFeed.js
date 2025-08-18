@@ -4,6 +4,7 @@ import { matchingAPI } from '../../services/api/matchingAPI';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import axios from 'axios';
 import styles from './MatchOpportunityFeed.module.css';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const requestCache = new Map();
 const REQUEST_CACHE_TTL = 60000; // 1 minute
@@ -504,8 +505,19 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
         </span>
       </div>
 
-      <div className={styles.cardStack}>
-        <div className={styles.card}>
+      <div className={styles.carouselContainer}>
+        {/* Elegant left skip button */}
+        <button 
+          className={styles.carouselNavLeft}
+          onClick={handlePrevious}
+          disabled={currentIndex === 0}
+          aria-label="Previous opportunity"
+        >
+          <FaChevronLeft />
+        </button>
+        
+        <div className={styles.cardStack}>
+          <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={`${styles.priorityBadge} ${priorityBadge.className}`}>
               <span>{priorityBadge.text}</span>
@@ -641,22 +653,6 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
           <div className={styles.cardFooter}>
             <div className={styles.actionButtons}>
               <button 
-                className={styles.skipButton}
-                onClick={handleSkip}
-                disabled={currentIndex >= opportunities.length - 1}
-              >
-                Skip
-              </button>
-              
-              <button 
-                className={styles.previousButton}
-                onClick={handlePrevious}
-                disabled={currentIndex === 0}
-              >
-                Previous
-              </button>
-              
-              <button 
                 className={styles.matchButton}
                 onClick={handleMatchThis}
               >
@@ -664,7 +660,18 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
               </button>
             </div>
           </div>
+          </div>
         </div>
+        
+        {/* Elegant right skip button */}
+        <button 
+          className={styles.carouselNavRight}
+          onClick={handleSkip}
+          disabled={currentIndex >= opportunities.length - 1}
+          aria-label="Next opportunity"
+        >
+          <FaChevronRight />
+        </button>
       </div>
     </div>
   );

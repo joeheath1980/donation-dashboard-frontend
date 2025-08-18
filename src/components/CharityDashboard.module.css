@@ -610,3 +610,60 @@
     width: 100%;
   }
 }
+/* Tab Navigation Styles */
+.tabNavigation {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px;
+  margin: 24px auto;
+  max-width: 1200px;
+  border-bottom: 2px solid #e5e5ea;
+  overflow-x: auto;
+}
+
+.tabButton {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6d6d78;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tabButton:hover {
+  color: #2d8f7b;
+  background: rgba(45, 143, 123, 0.05);
+}
+
+.tabButton.activeTab {
+  color: #2d8f7b;
+  border-bottom-color: #2d8f7b;
+}
+
+/* Responsive tab styles */
+@media (max-width: 768px) {
+  .tabNavigation {
+    padding: 0 16px;
+    gap: 4px;
+  }
+  
+  .tabButton {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabNavigation {
+    padding: 0 12px;
+  }
+  
+  .tabButton {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

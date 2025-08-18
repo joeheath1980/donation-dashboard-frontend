@@ -906,4 +906,82 @@
   .donationCard, .activityCard {
     padding: 16px;
   }
+}/* Additional styles for new features */
+
+/* Toggle explanation button */
+.matchingExplanationWrapper {
+  margin: 24px 0;
+}
+
+.toggleExplanationBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: var(--transition-standard);
+  width: auto;
+}
+
+.toggleExplanationBtn:hover {
+  background: var(--light-gray);
+  border-color: var(--primary-color);
+}
+
+.toggleExplanationBtn .chevron {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.toggleExplanationBtn .chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Projects container with skip button */
+.projectsContainer {
+  position: relative;
+  margin: 24px 0;
+}
+
+.skipProjectsBtn {
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.skipProjectsBtn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(45, 143, 123, 0.3);
+}
+
+.skipProjectsBtn svg {
+  font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+  .skipProjectsBtn {
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+  }
 }

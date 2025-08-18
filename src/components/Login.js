@@ -8,7 +8,7 @@ import { SecureTokenStorage } from '../utils/auth.utils';
 import { useDemoMode } from '../hooks/useDemoMode';
 import DemoQuickLogin from './DemoQuickLogin';
 import RateLimitHandler, { useRateLimitHandler } from './Common/RateLimitHandler';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './Login.module.css';
 import logo from '../assets/logo.png';
 
@@ -81,8 +81,8 @@ function Login() {
 
   const handleDemoAutoFill = async (type, category) => {
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/quick-login`,
+      const api = apiServices.client;
+      const response = await api.post('/api/demo/quick-login', 
         { userType: type, category: category || 'user' }
       );
       
@@ -97,12 +97,25 @@ function Login() {
   };
 
   const handleCredentialsFill = (email, password, accountType) => {
-    setFormData(prev => ({
-      ...prev,
-      email,
-      password,
-      accountType: accountType || prev.accountType
-    }));
+    console.log('handleCredentialsFill called with:', { email, password, accountType });
+    console.log('Email type:', typeof email, 'Password type:', typeof password);
+    
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      console.error('Invalid credentials passed to handleCredentialsFill');
+      console.error('Email:', email, 'Password:', password);
+      return;
+    }
+    
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        email,
+        password,
+        accountType: accountType || prev.accountType
+      };
+      console.log('Setting form data to:', newData);
+      return newData;
+    });
   };
 
   const handleChange = (e) => {
@@ -173,7 +186,8 @@ function Login() {
     setLoading(true);
 
     try {
-      console.log('Starting login with:', { email: formData.email, accountType: formData.accountType });
+      console.log('Starting login with email:', formData.email, 'accountType:', formData.accountType);
+      console.log('FormData at login:', formData);
       let loginResult;
       switch (formData.accountType) {
         case 'business':
