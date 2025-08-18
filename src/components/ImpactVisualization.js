@@ -7,6 +7,7 @@ import { FaChartBar } from 'react-icons/fa';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
 import './ImpactVisualization.css';
+import { sanitizeText } from '../utils/sanitize';
 
 // Global chart instances tracking
 if (!window.__chartInstances) {
@@ -730,23 +731,23 @@ function ImpactVisualization({ hideTitle = false }) {
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Type:</span>
                     <span class="${styles.tooltipValue}">
-                      ${activity.type === 'fundraisingCampaign' ? 'Fundraising Campaign' : 
-                        activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                      ${sanitizeText(activity.type === 'fundraisingCampaign' ? 'Fundraising Campaign' :
+                        activity.type.charAt(0).toUpperCase() + activity.type.slice(1))}
                     </span>
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Contribution:</span>
-                    <span class="${styles.tooltipValue}">${activity.details}</span>
+                    <span class="${styles.tooltipValue}">${sanitizeText(activity.details)}</span>
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Recipient:</span>
-                    <span class="${styles.tooltipValue}">${activity.recipient}</span>
+                    <span class="${styles.tooltipValue}">${sanitizeText(activity.recipient)}</span>
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Points Earned:</span>
                     <span class="${styles.tooltipValue}">
                       +${activity.pointsEarned.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                      ${activity.isDecayed ? `<span style="font-size: 0.85em; opacity: 0.7">(was ${activity.rawPoints})</span>` : ''}
+                      ${activity.isDecayed ? `<span style="font-size: 0.85em; opacity: 0.7">(was ${sanitizeText(activity.rawPoints)})</span>` : ''}
                     </span>
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
@@ -759,7 +760,7 @@ function ImpactVisualization({ hideTitle = false }) {
                 tooltipEl.innerHTML = `
                   <div class="${styles.tooltipContent}">
                     <div class="${styles.tooltipHeader}">
-                      <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${titleLines[0]}</span>
+                      <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${sanitizeText(titleLines[0])}</span>
                       ${activities.length > 1 ? `<span class="${styles.tooltipBadge}">${activities.length} activities</span>` : ''}
                     </div>
                     <div class="${styles.tooltipBody}">
