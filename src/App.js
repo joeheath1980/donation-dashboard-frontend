@@ -10,6 +10,7 @@ import { MatchSelectionProvider } from './contexts/MatchSelectionContext';
 import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
 import { SecureTokenStorage } from './utils/auth.utils';
+import { initializeLocalStorageWrapper } from './utils/localStorageWrapper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { csrfServiceAPI } from './services/api.service';
@@ -101,9 +102,19 @@ const SuspenseWrapper = ({ children }) => (
   </Suspense>
 );
 
-// CSRF Token Initializer
+// CSRF Token & localStorage Wrapper Initializer
 const CSRFInitializer = () => {
   useEffect(() => {
+    // Initialize localStorage wrapper for token migration monitoring
+    initializeLocalStorageWrapper();
+    logger.info('localStorage wrapper initialized for token migration');
+    
+    // Set up token expiry handler
+    SecureTokenStorage.onTokenExpired(() => {
+      logger.warn('Token expired - redirecting to login');
+      window.location.href = '/login';
+    });
+    
     // Initialize CSRF token on app load
     csrfServiceAPI.initializeToken()
       .then(token => {

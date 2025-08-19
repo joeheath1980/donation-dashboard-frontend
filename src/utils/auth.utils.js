@@ -98,23 +98,44 @@ export class SecureTokenStorage {
   }
   
   /**
-   * Get refresh token
+   * Get refresh token with graceful error handling
    * @returns {string|null}
    */
   static getRefreshToken() {
-    if (this.memoryRefreshToken) {
-      return this.memoryRefreshToken;
-    }
-    
-    if (typeof sessionStorage !== 'undefined') {
-      const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-      if (refreshToken) {
-        this.memoryRefreshToken = refreshToken;
-        return refreshToken;
+    try {
+      // Primary: Check memory storage
+      if (this.memoryRefreshToken) {
+        return this.memoryRefreshToken;
       }
+      
+      // Secondary: Check sessionStorage
+      if (typeof sessionStorage !== 'undefined') {
+        const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+        if (refreshToken) {
+          this.memoryRefreshToken = refreshToken;
+          return refreshToken;
+        }
+      }
+      
+      // Tertiary: Check localStorage as fallback (temporary during migration)
+      if (typeof localStorage !== 'undefined') {
+        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+        if (refreshToken) {
+          logger.debug('Refresh token retrieved from localStorage fallback');
+          this.memoryRefreshToken = refreshToken;
+          // Migrate to sessionStorage
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          }
+          return refreshToken;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      logger.error('Failed to retrieve refresh token', { error: error.message });
+      return null;
     }
-    
-    return null;
   }
   
   /**
@@ -146,11 +167,39 @@ export class SecureTokenStorage {
   }
   
   /**
+   * Clear all tokens (alias for removeToken)
+   * Added for wrapper compatibility
+   */
+  static clearToken() {
+    return this.removeToken();
+  }
+  
+  /**
    * Check if token exists
    * @returns {boolean}
    */
   static hasToken() {
     return !!this.getToken();
+  }
+  
+  /**
+   * Handle token expiry gracefully
+   * @param {Function} callback - Function to call on token expiry
+   */
+  static onTokenExpired(callback) {
+    // Store callback for components to handle 401s
+    this._expiryCallback = callback;
+  }
+  
+  /**
+   * Notify about token expiry
+   */
+  static notifyTokenExpired() {
+    logger.warn('Token expired, notifying listeners');
+    if (this._expiryCallback) {
+      this._expiryCallback();
+    }
+    this.removeToken();
   }
   
   /**
