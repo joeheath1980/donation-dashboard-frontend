@@ -562,16 +562,30 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           setSearchHistory(prev => [{ timestamp, source: 'outlook', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
           
-          // Set up SSE connection to get real-time updates
-          const sseUrl = `${API_CONFIG.BASE_URL}/api/outlook/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
-          console.log('[Activity] Connecting to SSE at:', sseUrl);
+          // Use polling instead of SSE to avoid token in URL (security fix)
+          logger.debug('[Activity] Starting secure polling for job:', data.jobId);
           
-          const eventSource = new EventSource(sseUrl);
-          
-          eventSource.onmessage = (event) => {
+          const pollInterval = setInterval(async () => {
             try {
-              const statusData = JSON.parse(event.data);
-              console.log('[Outlook SSE] Event received:', statusData);
+              const statusResponse = await fetch(
+                `${API_CONFIG.BASE_URL}/api/outlook/status/${data.jobId}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              
+              if (!statusResponse.ok) {
+                throw new Error(`Status check failed: ${statusResponse.status}`);
+              }
+              
+              const statusData = await statusResponse.json();
+              logger.debug('[Outlook Polling] Status received:', { 
+                state: statusData.state, 
+                progress: statusData.progress 
+              });
               
               // Update progress if available
               if (statusData.progress !== undefined) {
@@ -580,7 +594,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               
               // Handle completed job
               if (statusData.state === 'completed' && statusData.result) {
-                console.log('[Outlook SSE] Job completed with results:', statusData.result);
+                logger.info('[Outlook Polling] Job completed with results count:', statusData.result?.length || 0);
                 
                 // Add IDs and timestamp to each result
                 const resultsWithIds = Array.isArray(statusData.result)
@@ -606,28 +620,34 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   return updatedHistory;
                 });
                 
-                eventSource.close();
+                clearInterval(pollInterval);
                 setLoading(false);
                 
               } else if (statusData.state === 'failed' || statusData.error) {
-                console.error('[Outlook SSE] Job failed:', statusData.error);
+                logger.error('[Outlook Polling] Job failed:', statusData.error);
                 setError(`Outlook search failed: ${statusData.error || 'Unknown error'}`);
-                eventSource.close();
+                clearInterval(pollInterval);
                 setLoading(false);
               }
-            } catch (parseError) {
-              console.error('[Outlook SSE] Error parsing event data:', parseError, event.data);
-              setError('Error processing server response');
-              eventSource.close();
+            } catch (error) {
+              logger.error('[Outlook Polling] Error:', error);
+              setError('Error checking status. Please try again.');
+              clearInterval(pollInterval);
               setLoading(false);
             }
-          };
+          }, 2000); // Poll every 2 seconds
           
-          eventSource.onerror = (err) => {
-            console.error('[Outlook SSE] Error:', err);
-            setError('Error in real-time connection. Please try again.');
-            eventSource.close();
+          // Store interval ID for cleanup
+          const timeoutId = setTimeout(() => {
+            clearInterval(pollInterval);
+            setError('Outlook search timed out. Please try again.');
             setLoading(false);
+          }, 60000); // 60 second timeout
+          
+          // Cleanup function
+          return () => {
+            clearInterval(pollInterval);
+            clearTimeout(timeoutId);
           };
           
         } else {
