@@ -104,16 +104,25 @@ function BusinessSignup() {
 
           <div className={styles.inputContainer}>
             <label className={`${styles.label} description`} htmlFor="password">Password *</label>
-            <small className={styles.hint}>Minimum 6 characters</small>
+            <div className={styles.passwordRequirements}>
+              <small className={styles.hint}>Password must contain:</small>
+              <ul className={styles.requirementsList}>
+                <li>At least 12 characters</li>
+                <li>One uppercase letter (A-Z)</li>
+                <li>One lowercase letter (a-z)</li>
+                <li>One number (0-9)</li>
+                <li>One special character (@$!%*?&)</li>
+              </ul>
+            </div>
             <input
-              placeholder="Create a secure password"
+              placeholder="Create a secure password (min 12 characters)"
               type="password"
               id="password"
               name="password"
               value={formData.password}
               onChange={handleInputChange}
               required
-              minLength="6"
+              minLength="12"
               className={styles.input}
             />
           </div>

@@ -637,13 +637,23 @@ const CharitySignupFlow = () => {
           <label htmlFor="password">
             <RiLockLine /> Password *
           </label>
+          <div className={styles.passwordRequirements}>
+            <small>Password must contain:</small>
+            <ul>
+              <li>At least 12 characters</li>
+              <li>One uppercase letter (A-Z)</li>
+              <li>One lowercase letter (a-z)</li>
+              <li>One number (0-9)</li>
+              <li>One special character (@$!%*?&)</li>
+            </ul>
+          </div>
           <input
             type="password"
             id="password"
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            placeholder="Min. 8 characters"
+            placeholder="Min. 12 characters"
             className={validation.password ? styles.error : ''}
           />
           {validation.password && (
