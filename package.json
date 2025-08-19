@@ -51,7 +51,12 @@
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:fix": "npm audit fix",
+    "security:check": "npm audit",
+    "security:update": "npm update && npm audit",
+    "security:report": "npm audit --json > security-report.json"
   },
   "eslintConfig": {
     "extends": [

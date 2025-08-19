@@ -68,10 +68,9 @@ class CSRFTokenService {
         status: error.response?.status 
       });
       
-      // Don't throw error to prevent breaking the app
-      // Return null and let requests proceed without CSRF token
-      // The backend will handle missing tokens appropriately
-      return null;
+      // For security, throw error to prevent state-changing requests without CSRF token
+      // Only allow proceeding without token for safe methods (GET, HEAD, OPTIONS)
+      throw new Error(`CSRF token fetch failed: ${error.message}`);
     }
   }
 
@@ -145,13 +144,20 @@ class CSRFTokenService {
     }
 
     // Get CSRF token
-    let token = await this.getToken();
-    logger.debug('CSRF: Token from getToken:', token ? 'found' : 'not found');
-    
-    // Fallback to cookie if direct fetch failed
-    if (!token) {
+    let token;
+    try {
+      token = await this.getToken();
+      logger.debug('CSRF: Token from getToken:', token ? 'found' : 'not found');
+    } catch (error) {
+      // If token fetch fails, try cookie as fallback
+      logger.warn('Primary CSRF token fetch failed, trying cookie fallback');
       token = this.getTokenFromCookie();
-      logger.debug('CSRF: Token from cookie:', token ? 'found' : 'not found');
+      
+      if (!token) {
+        // For state-changing requests, we MUST have a CSRF token
+        logger.error('CSRF: CRITICAL - No token available for state-changing request!');
+        throw new Error('CSRF token required for state-changing requests');
+      }
     }
 
     if (token) {
@@ -176,11 +182,9 @@ class CSRFTokenService {
         url: config.url 
       });
     } else {
-      logger.debug('CSRF: WARNING - No token available!');
-      logger.warn('No CSRF token available for request', {
-        method: config.method,
-        url: config.url
-      });
+      // This should never happen now due to the throw above
+      logger.error('CSRF: CRITICAL - Token validation failed');
+      throw new Error('CSRF token validation failed');
     }
 
     return config;
