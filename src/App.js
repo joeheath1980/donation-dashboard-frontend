@@ -55,7 +55,7 @@ const YourPerks = lazy(() => import('./components/YourPerks'));
 const CharityPartner = lazy(() => import('./components/CharityPartner'));
 const Partners = lazy(() => import('./components/Partners'));
 const SearchCharities = lazy(() => import('./components/SearchCharities'));
-const Activity = lazy(() => import('./components/Activity'));
+const Activity = lazy(() => import('./components/Activity/Activity'));
 const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
