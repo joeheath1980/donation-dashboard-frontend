@@ -258,6 +258,11 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       processedData.forEach(point => {
         point.y = Math.round(point.y * scaleFactor);
       });
+      
+      // Recalculate pointsEarned after scaling to ensure tooltip accuracy
+      processedData.forEach((point, index) => {
+        point.pointsEarned = index > 0 ? point.y - processedData[index - 1].y : point.y;
+      });
     }
   }
 
