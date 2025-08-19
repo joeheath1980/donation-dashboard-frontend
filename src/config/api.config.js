@@ -35,7 +35,7 @@ export const USER_TYPES = {
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth endpoints
-  USER_LOGIN: '/api/users/login',
+  USER_LOGIN: '/api/auth/login',
   USER_REGISTER: '/api/users/register',
   USER_PROFILE: '/api/users/me',
   
