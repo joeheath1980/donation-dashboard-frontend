@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
 import localStyles from './AdminCampaignManagement.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 const AdminCampaignManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -54,7 +55,7 @@ const AdminCampaignManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns`,
+        `${API_CONFIG.BASE_URL}/api/admin/campaigns`,
         { headers: getAuthHeaders() }
       );
       setCampaigns(response.data);
@@ -69,7 +70,7 @@ const AdminCampaignManagement = () => {
   const handleStatusChange = async (campaignId, newStatus) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns/${campaignId}/status`,
+        `${API_CONFIG.BASE_URL}/api/admin/campaigns/${campaignId}/status`,
         { status: newStatus },
         { headers: getAuthHeaders() }
       );
@@ -89,7 +90,7 @@ const AdminCampaignManagement = () => {
     
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/campaigns/${campaignId}`,
+        `${API_CONFIG.BASE_URL}/api/admin/campaigns/${campaignId}`,
         { headers: getAuthHeaders() }
       );
       setCampaigns(campaigns.filter(c => c._id !== campaignId));

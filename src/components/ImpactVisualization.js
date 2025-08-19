@@ -4,6 +4,7 @@ import 'chartjs-adapter-date-fns';
 import { ImpactContext, calculateComplexImpactScore } from '../contexts/ImpactContext';
 import AuthContext from '../contexts/AuthContext';
 import { FaChartBar } from 'react-icons/fa';
+import { sanitizeHTML, sanitizeTooltipData } from '../utils/sanitizer';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
 import './ImpactVisualization.css';
@@ -741,11 +742,11 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Contribution:</span>
-                    <span class="${styles.tooltipValue}">${activity.details}</span>
+                    <span class="${styles.tooltipValue}">${sanitizeTooltipData(activity.details)}</span>
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Recipient:</span>
-                    <span class="${styles.tooltipValue}">${activity.recipient}</span>
+                    <span class="${styles.tooltipValue}">${sanitizeTooltipData(activity.recipient)}</span>
                   </div>
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Points Earned:</span>
@@ -761,10 +762,10 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
                 const previousTotal = currentIndex > 0 ? dataPoints[currentIndex - 1].y : 0;
                 const pointsEarnedTotal = dataPoint.pointsEarned;
                 
-                tooltipEl.innerHTML = `
+                const tooltipHTML = `
                   <div class="${styles.tooltipContent}">
                     <div class="${styles.tooltipHeader}">
-                      <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${titleLines[0]}</span>
+                      <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${sanitizeTooltipData(titleLines[0])}</span>
                       ${activities.length > 1 ? `<span class="${styles.tooltipBadge}">${activities.length} activities</span>` : ''}
                     </div>
                     <div class="${styles.tooltipBody}">
@@ -785,6 +786,9 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
                     </div>
                   </div>
                 `;
+                
+                // Use sanitizeHTML to clean the entire tooltip HTML
+                tooltipEl.innerHTML = sanitizeHTML(tooltipHTML);
               }
 
               const position = context.chart.canvas.getBoundingClientRect();

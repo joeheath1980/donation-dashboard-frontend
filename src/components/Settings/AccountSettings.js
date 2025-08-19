@@ -17,6 +17,7 @@ import {
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './AccountSettings.module.css';
+import { API_CONFIG } from '../../config/api.config';
 
 const AccountSettings = () => {
   const { user, getAuthHeaders, logout } = useAuth();
@@ -66,7 +67,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/notification-settings`,
+        `${API_CONFIG.BASE_URL}/api/users/notification-settings`,
         { headers }
       );
       if (response.data) {
@@ -103,7 +104,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/change-password`,
+        `${API_CONFIG.BASE_URL}/api/users/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -151,7 +152,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/change-email`,
+        `${API_CONFIG.BASE_URL}/api/users/change-email`,
         {
           newEmail: emailData.newEmail,
           password: emailData.password
@@ -186,7 +187,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/notification-settings`,
+        `${API_CONFIG.BASE_URL}/api/users/notification-settings`,
         notifications,
         { headers }
       );
@@ -208,7 +209,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/deactivate`,
+        `${API_CONFIG.BASE_URL}/api/users/deactivate`,
         {},
         { headers }
       );
@@ -235,7 +236,7 @@ const AccountSettings = () => {
     try {
       const headers = getAuthHeaders();
       await axios.delete(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/account`,
+        `${API_CONFIG.BASE_URL}/api/users/account`,
         { headers }
       );
       toast.success('Account deleted successfully');

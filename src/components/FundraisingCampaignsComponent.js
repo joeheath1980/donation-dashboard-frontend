@@ -8,6 +8,7 @@ import './SharedStyles.css';
 import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign, FaBullhorn } from 'react-icons/fa';
+import { API_CONFIG } from '../config/api.config';
 
 const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }, ref) => {
   const {
@@ -141,7 +142,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
     const headers = getAuthHeaders();
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`,
+        `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns`,
         campaignData,
         {
           headers: {
@@ -182,7 +183,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
     }
     const headers = getAuthHeaders();
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns/${campaignId}`, { headers });
+      await axios.delete(`${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaignId}`, { headers });
       if (isAuthenticated) {
         fetchImpactData();
       }
@@ -206,7 +207,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
       };
 
       await axios.patch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns/${campaign._id}`,
+        `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaign._id}`,
         updatedCampaign,
         {
           headers: {
@@ -253,7 +254,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
         const updatedCampaign = { raisedAmount: updatedRaisedAmount };
 
         await axios.patch(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns/${campaign._id}`,
+          `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaign._id}`,
           updatedCampaign,
           {
             headers: {

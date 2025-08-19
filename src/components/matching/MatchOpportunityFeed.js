@@ -5,6 +5,7 @@ import CharitySearch from '../CharitySearch/CharitySearch';
 import axios from 'axios';
 import styles from './MatchOpportunityFeed.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { API_CONFIG } from '../../config/api.config';
 
 const requestCache = new Map();
 const REQUEST_CACHE_TTL = 60000; // 1 minute
@@ -279,7 +280,7 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/batch`,
+        `${API_CONFIG.BASE_URL}/api/charities/batch`,
         { ids: realIds },
         {
           headers: {

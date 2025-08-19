@@ -17,15 +17,17 @@ const apiClient = axios.create({
 // Request interceptor to add auth token and CSRF token
 apiClient.interceptors.request.use(
   async (config) => {
-    console.log('API interceptor: Processing request to', config.url);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API interceptor: Processing request to', config.url);
+    }
     
     // Add JWT token if available
     const token = SecureTokenStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('API interceptor: Added Bearer token');
+      logger.debug('API interceptor: Added Bearer token');
     } else {
-      console.log('API interceptor: No Bearer token available');
+      logger.debug('API interceptor: No Bearer token available');
     }
     
     // Add CSRF token for state-changing requests
@@ -39,7 +41,7 @@ apiClient.interceptors.request.use(
       hasCSRF: !!config.headers['X-CSRF-Token']
     });
     
-    console.log('API interceptor: Final headers', Object.keys(config.headers));
+    logger.debug('API interceptor: Final headers', Object.keys(config.headers));
     
     return config;
   },

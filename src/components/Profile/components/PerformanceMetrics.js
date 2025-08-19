@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import styles from './PerformanceMetrics.module.css';
 import { FaChartLine, FaUsers, FaPercent, FaArrowUp } from 'react-icons/fa';
+import { API_CONFIG } from '../../../config/api.config';
 import { 
   fetchWithFallback, 
   hasValidPerformanceMetrics,
@@ -65,7 +66,7 @@ function PerformanceMetrics({ businessSlug }) {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+      const API_BASE_URL = API_CONFIG.BASE_URL;
       const data = await fetchWithFallback(
         `${API_BASE_URL}/api/public/business/${businessSlug}/performance-metrics`,
         {

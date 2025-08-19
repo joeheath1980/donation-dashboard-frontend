@@ -7,6 +7,7 @@ import './SharedStyles.css';
 import styles from './VolunteerActivities.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaTimes, FaUpload, FaFile, FaHandsHelping } from 'react-icons/fa';
+import { API_CONFIG } from '../config/api.config';
 
 const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   const [activities, setActivities] = useState([]);
@@ -38,7 +39,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   const fetchActivities = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities`, {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -117,7 +118,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
     formData.append('evidence', selectedFile);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities`, formData, {
+      const response = await axios.post(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -139,7 +140,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   const handleDeleteActivity = async (activityId) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities/${activityId}`, {
+      await axios.delete(`${API_CONFIG.BASE_URL}/api/volunteerActivities/${activityId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -327,7 +328,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
                   <p><strong>Description:</strong> {activity.description}</p>
                   {activity.evidence && (
                     <a 
-                      href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities/evidence/${activity.evidence.split('/').pop()}`}
+                      href={`${API_CONFIG.BASE_URL}/api/volunteerActivities/evidence/${activity.evidence.split('/').pop()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.evidenceLink}

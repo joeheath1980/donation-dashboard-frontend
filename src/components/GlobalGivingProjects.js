@@ -6,6 +6,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { API_CONFIG } from '../config/api.config';
 
 // Define the EXTERNAL GlobalGiving API URL.  This is *NOT* your backend.
 const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectservice/all/projects/summary';
@@ -44,7 +45,7 @@ function GlobalGivingProjects() {
       console.log('Search Query:', searchQuery);
 
       // Use process.env.REACT_APP_API_BASE_URL for *YOUR* backend endpoint
-      const endpoint = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/globalgiving/projects/recommended`;
+      const endpoint = `${API_CONFIG.BASE_URL}/api/globalgiving/projects/recommended`;
 
       console.log('API URL:', endpoint);
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './ImpactMetrics.module.css';
+import { API_CONFIG } from '../../../config/api.config';
 import {
   FaHandHoldingHeart,
   FaUsers,
@@ -41,7 +42,7 @@ function ImpactMetrics({ charityId }) {
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/impact-metrics`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics`,
         { headers: getAuthHeaders() }
       );
       setMetrics(response.data);
@@ -64,7 +65,7 @@ function ImpactMetrics({ charityId }) {
     
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/impact-metrics`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics`,
         newMetric,
         { headers: getAuthHeaders() }
       );
@@ -82,7 +83,7 @@ function ImpactMetrics({ charityId }) {
   const handleUpdateMetric = async (id, updatedMetric) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/impact-metrics/${id}`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics/${id}`,
         updatedMetric,
         { headers: getAuthHeaders() }
       );
@@ -99,7 +100,7 @@ function ImpactMetrics({ charityId }) {
     
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/impact-metrics/${id}`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics/${id}`,
         { headers: getAuthHeaders() }
       );
       setMetrics(metrics.filter(m => m.id !== id));

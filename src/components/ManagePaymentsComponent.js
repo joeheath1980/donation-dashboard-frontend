@@ -6,8 +6,9 @@ import { useAuth } from '../contexts/AuthContext';
 import './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
 import { FaCreditCard, FaTrash, FaPlus, FaCheck, FaSpinner } from 'react-icons/fa';
+import { API_CONFIG } from '../config/api.config';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Payment Methods List Component
 const PaymentMethodsList = ({ methods, onRemove, onSetDefault, defaultMethodId, loading }) => {

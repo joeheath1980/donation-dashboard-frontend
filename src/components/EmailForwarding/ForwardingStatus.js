@@ -117,12 +117,28 @@ const ForwardingStatus = ({ refreshTrigger }) => {
 
   const handleApproveDonation = async (emailId) => {
     try {
-      // TODO: Implement approval endpoint
-      alert('Donation approval feature coming soon!');
-      // await apiClient.post(`/api/donations/approve/${emailId}`);
-      // fetchForwardedEmails();
+      setLoading(true);
+      
+      // Call the donation approval endpoint
+      const response = await apiClient.post(`/api/email/approve-donation/${emailId}`);
+      
+      if (response.data.success) {
+        // Refresh the emails list to show updated status
+        await fetchForwardedEmails();
+        
+        // Show success message (could be replaced with a toast notification)
+        logger.info('Donation approved successfully:', response.data);
+      } else {
+        throw new Error(response.data.message || 'Failed to approve donation');
+      }
     } catch (err) {
       logger.error('Failed to approve donation:', err);
+      
+      // Show error to user (could be replaced with a toast notification)
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to approve donation';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -19,6 +19,7 @@ import {
   FaArchive
 } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 const AdminContentManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -38,7 +39,7 @@ const AdminContentManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/content`,
+        `${API_CONFIG.BASE_URL}/api/admin/content`,
         { headers: getAuthHeaders() }
       );
       setContent(response.data);
@@ -53,7 +54,7 @@ const AdminContentManagement = () => {
   const handleStatusChange = async (contentId, newStatus) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/content/${contentId}/status`,
+        `${API_CONFIG.BASE_URL}/api/admin/content/${contentId}/status`,
         { status: newStatus },
         { headers: getAuthHeaders() }
       );
@@ -73,7 +74,7 @@ const AdminContentManagement = () => {
     
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/content/${contentId}`,
+        `${API_CONFIG.BASE_URL}/api/admin/content/${contentId}`,
         { headers: getAuthHeaders() }
       );
       setContent(content.filter(item => item._id !== contentId));

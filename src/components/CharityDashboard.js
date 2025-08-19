@@ -8,6 +8,7 @@ import { FaSearch, FaLink, FaTimes, FaClock, FaCreditCard, FaCheckCircle, FaExcl
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
 import CharityOnboarding from './CharityOnboarding';
+import { API_CONFIG } from '../config/api.config';
 
 function CharityDashboard() {
   const [charityData, setCharityData] = useState(null);
@@ -41,20 +42,20 @@ function CharityDashboard() {
       }
 
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`, {
+        const response = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/me`, {
           headers: getAuthHeaders()
         });
         setCharityData(response.data);
 
         // Fetch linking status
-        const statusResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/linking-status`, {
+        const statusResponse = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/linking-status`, {
           headers: getAuthHeaders()
         });
         setLinkingStatus(statusResponse.data.status);
 
         // If there's a linked ABN, fetch the charity details
         if (statusResponse.data.linkedABN) {
-          const linkedResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`, {
+          const linkedResponse = await axios.get(`${API_CONFIG.BASE_URL}/api/search-charities`, {
             params: { q: statusResponse.data.linkedABN }
           });
           if (linkedResponse.data?.result?.records?.length > 0) {
@@ -84,7 +85,7 @@ function CharityDashboard() {
       }
       
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/stripe/connect/account-status/${id}`,
+        `${API_CONFIG.BASE_URL}/api/stripe/connect/account-status/${id}`,
         { headers: getAuthHeaders() }
       );
       setStripeStatus(response.data);
@@ -108,7 +109,7 @@ function CharityDashboard() {
 
     setIsSearching(true);
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`, {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/search-charities`, {
         params: { q: term }
       });
 
@@ -162,7 +163,7 @@ function CharityDashboard() {
       };
       delete headers['Content-Type']; // Let axios set the correct boundary
 
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/link-request`, formData, {
+      await axios.post(`${API_CONFIG.BASE_URL}/api/charities/link-request`, formData, {
         headers: headers
       });
 

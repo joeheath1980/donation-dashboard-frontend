@@ -17,6 +17,7 @@ import {
   FaHandshake
 } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 const AdminBusinessPartnerManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -53,7 +54,7 @@ const AdminBusinessPartnerManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/business-partners`,
+        `${API_CONFIG.BASE_URL}/api/admin/business-partners`,
         { headers: getAuthHeaders() }
       );
       setPartners(response.data);
@@ -68,7 +69,7 @@ const AdminBusinessPartnerManagement = () => {
   const handleStatusChange = async (partnerId, newStatus) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/business-partners/${partnerId}/status`,
+        `${API_CONFIG.BASE_URL}/api/admin/business-partners/${partnerId}/status`,
         { status: newStatus },
         { headers: getAuthHeaders() }
       );
@@ -88,7 +89,7 @@ const AdminBusinessPartnerManagement = () => {
     
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/business-partners/${partnerId}`,
+        `${API_CONFIG.BASE_URL}/api/admin/business-partners/${partnerId}`,
         { headers: getAuthHeaders() }
       );
       setPartners(partners.filter(p => p._id !== partnerId));

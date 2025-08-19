@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './EnhancedOnboarding.module.css';
+import { API_CONFIG } from '../../config/api.config';
 import {
   RiSearchLine,
   RiUploadCloudLine,
@@ -37,7 +38,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
   const [searchingABN, setSearchingABN] = useState(false);
   const [showABNResults, setShowABNResults] = useState(false);
 
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+  const API_BASE_URL = API_CONFIG.BASE_URL;
 
   // Get the actual business ID from props or localStorage
   const getBusinessId = () => {

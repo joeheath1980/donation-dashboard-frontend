@@ -5,6 +5,7 @@ import styles from './WelcomePage.module.css';
 import './SharedStyles.css';
 import logoSvg from '../assets/logo.png';
 import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.png';
+import { API_CONFIG } from '../config/api.config';
 import { 
   RiBarChartLine, 
   RiLightbulbLine, 
@@ -51,7 +52,7 @@ const WelcomePage = () => {
     const fetchStats = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/platform-stats`
+          `${API_CONFIG.BASE_URL}/api/platform-stats`
         );
         setPlatformStats(response.data);
       } catch (error) {

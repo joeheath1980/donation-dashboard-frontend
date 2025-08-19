@@ -4,6 +4,7 @@ import styles from './SearchCharities.module.css';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import CharityCard from './CharityCard';
 import { mapNormalizedToACNC } from '../utils/charityDataMapper';
+import { API_CONFIG } from '../config/api.config';
 
 const CHARITY_CATEGORIES = [
   'Health Services',
@@ -69,7 +70,7 @@ function SearchCharities() {
 
     try {
       // Use the new enhanced search endpoint
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/search/${encodeURIComponent(query)}`, {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/search/${encodeURIComponent(query)}`, {
         params: { 
           limit: 50,
           offset: 0

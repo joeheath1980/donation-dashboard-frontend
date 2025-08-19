@@ -18,6 +18,7 @@ import DonationItem from './DonationItem';
 import { createPortal } from 'react-dom';
 import { donationService } from '../services/api.service';
 import { createLogger } from '../utils/logger';
+import { API_CONFIG } from '../config/api.config';
 
 const logger = createLogger('DonationsComponent');
 
@@ -286,7 +287,7 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
 
   // Memoize receipt click handler
   const handleReceiptClick = useCallback((receiptUrl) => {
-    const fullUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${receiptUrl}`;
+    const fullUrl = `${API_CONFIG.BASE_URL}${receiptUrl}`;
     window.open(fullUrl, '_blank');
   }, []);
 

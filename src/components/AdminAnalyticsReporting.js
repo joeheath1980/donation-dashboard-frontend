@@ -33,6 +33,7 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import styles from './AdminSharedStyles.module.css';
 import analyticsStyles from './AdminAnalyticsReporting.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 // Register ChartJS components
 ChartJS.register(
@@ -67,18 +68,18 @@ const AdminAnalyticsReporting = () => {
       setLoading(true);
       const [analyticsRes, receiptRes, matchingRes] = await Promise.all([
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/analytics`,
+          `${API_CONFIG.BASE_URL}/api/admin/analytics`,
           { 
             headers: getAuthHeaders(),
             params: { dateRange }
           }
         ),
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/receipt-approval/stats`,
+          `${API_CONFIG.BASE_URL}/api/admin/receipt-approval/stats`,
           { headers: getAuthHeaders() }
         ),
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/matching/stats`,
+          `${API_CONFIG.BASE_URL}/api/admin/matching/stats`,
           { headers: getAuthHeaders() }
         )
       ]);
@@ -97,7 +98,7 @@ const AdminAnalyticsReporting = () => {
   const exportReport = async (format) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/analytics/export`,
+        `${API_CONFIG.BASE_URL}/api/admin/analytics/export`,
         { 
           headers: getAuthHeaders(),
           params: { format, dateRange },

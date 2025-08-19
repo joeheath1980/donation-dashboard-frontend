@@ -6,6 +6,7 @@ import axios from 'axios';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import styles from './MatchingDetailModal.module.css';
+import { API_CONFIG } from '../../config/api.config';
 
 const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
   const [charity, setCharity] = useState(null);
@@ -36,7 +37,7 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${opportunity.charityId}`,
+        `${API_CONFIG.BASE_URL}/api/charities/${opportunity.charityId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

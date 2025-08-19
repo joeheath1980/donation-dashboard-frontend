@@ -9,6 +9,7 @@ import {
   FaStar,
   FaHandHoldingHeart
 } from 'react-icons/fa';
+import { API_CONFIG } from '../../../config/api.config';
 import { 
   fetchWithFallback, 
   getDataQualityBadge,
@@ -28,7 +29,7 @@ function CSRInsights({ businessSlug }) {
   const fetchCSRInsights = async () => {
     setLoading(true);
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+      const API_BASE_URL = API_CONFIG.BASE_URL;
       const data = await fetchWithFallback(
         `${API_BASE_URL}/api/public/business/${businessSlug}/csr-insights`,
         {

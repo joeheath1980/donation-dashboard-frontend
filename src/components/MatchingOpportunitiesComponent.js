@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './MatchingOpportunitiesComponent.module.css';
 import CarouselComponent from './CarouselComponent';
+import { API_CONFIG } from '../config/api.config';
 
 function MatchingOpportunitiesComponent({ userId }) {
   const [opportunities, setOpportunities] = useState([]);
@@ -15,7 +16,7 @@ function MatchingOpportunitiesComponent({ userId }) {
       try {
         console.log('Fetching matching opportunities...');
         console.log('User ID:', userId);
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matching/opportunities`, {
+        const response = await axios.get(`${API_CONFIG.BASE_URL}/api/matching/opportunities`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -41,7 +42,7 @@ function MatchingOpportunitiesComponent({ userId }) {
   const handleMatch = async (opportunityId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matching/opportunities/${opportunityId}/accept`, {}, {
+      await axios.post(`${API_CONFIG.BASE_URL}/api/matching/opportunities/${opportunityId}/accept`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { API_CONFIG } from '../config/api.config';
 
 export const ImpactContext = createContext();
 
@@ -447,7 +448,7 @@ export const ImpactProvider = ({ children }) => {
     const headers = getAuthHeaders();
     try {
       const scoreRes = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/impact-score/calculate`, 
+        `${API_CONFIG.BASE_URL}/api/users/impact-score/calculate`, 
         {}, 
         { headers }
       );
@@ -511,12 +512,12 @@ export const ImpactProvider = ({ children }) => {
         // CRITICAL: Fetch the backend-calculated score with FAIR weights
         scoreRes
       ] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`, { headers }),
-        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`, { headers }),
-        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/volunteerActivities`, { headers }),
-        axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/fundraisingCampaigns`, { headers }),
+        axios.get(`${API_CONFIG.BASE_URL}/api/donations`, { headers }),
+        axios.get(`${API_CONFIG.BASE_URL}/api/contributions/one-off`, { headers }),
+        axios.get(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, { headers }),
+        axios.get(`${API_CONFIG.BASE_URL}/api/fundraisingCampaigns`, { headers }),
         // Fetch the properly calculated score from backend
-        axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/impact-score/calculate`, {}, { headers })
+        axios.post(`${API_CONFIG.BASE_URL}/api/users/impact-score/calculate`, {}, { headers })
       ]);
 
 
@@ -649,7 +650,7 @@ export const ImpactProvider = ({ children }) => {
       let savedDonation = donation;
       if (!alreadySaved) {
         const headers = getAuthHeaders();
-        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`, donation, { headers });
+        const response = await axios.post(`${API_CONFIG.BASE_URL}/api/donations`, donation, { headers });
         if (response.status !== 201) {
           throw new Error('Failed to add donation');
         }
@@ -668,7 +669,7 @@ export const ImpactProvider = ({ children }) => {
       let savedContribution = contribution;
       if (!alreadySaved) {
         const headers = getAuthHeaders();
-        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`, contribution, { headers });
+        const response = await axios.post(`${API_CONFIG.BASE_URL}/api/contributions/one-off`, contribution, { headers });
         if (response.status !== 201) {
           throw new Error('Failed to add contribution');
         }
@@ -685,7 +686,7 @@ export const ImpactProvider = ({ children }) => {
   const onDeleteContribution = useCallback(async (contributionId) => {
     try {
       const headers = getAuthHeaders();
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off/${contributionId}`, { headers });
+      await axios.delete(`${API_CONFIG.BASE_URL}/api/contributions/one-off/${contributionId}`, { headers });
       setOneOffContributions(prevContributions => prevContributions.filter(c => c._id !== contributionId));
     } catch (error) {
       console.error('Error deleting contribution:', error);
@@ -706,7 +707,7 @@ export const ImpactProvider = ({ children }) => {
       console.log('Sending payload:', validCharities);
 
       const promises = validCharities.map(charity =>
-        axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/followed-charities`, charity, { headers })
+        axios.post(`${API_CONFIG.BASE_URL}/api/followed-charities`, charity, { headers })
       );
 
       const responses = await Promise.all(promises);
@@ -742,7 +743,7 @@ export const ImpactProvider = ({ children }) => {
       }
 
       const headers = getAuthHeaders();
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/followed-charities/${charityABN}`, { headers });
+      await axios.delete(`${API_CONFIG.BASE_URL}/api/followed-charities/${charityABN}`, { headers });
 
       setFollowedCharities(prevCharities => {
         const newCharities = prevCharities.filter(c => c.ABN !== charityABN);
@@ -834,7 +835,7 @@ export const ImpactProvider = ({ children }) => {
       const syncFollowedCharities = async () => {
         try {
           const headers = getAuthHeaders();
-          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/followed-charities`, { headers });
+          const response = await axios.get(`${API_CONFIG.BASE_URL}/api/followed-charities`, { headers });
           const dbCharities = response.data;
 
           setFollowedCharities(dbCharities);

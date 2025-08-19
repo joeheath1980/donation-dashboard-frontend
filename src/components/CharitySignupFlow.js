@@ -19,6 +19,7 @@ import {
 import styles from './CharitySignupFlow.module.css';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
+import { API_CONFIG } from '../config/api.config';
 
 const CharitySignupFlow = () => {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ const CharitySignupFlow = () => {
     try {
       // Use the public search-charities endpoint that doesn't require authentication
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/search-charities`,
+        `${API_CONFIG.BASE_URL}/api/search-charities`,
         {
           params: { q: searchTerm }
         }
@@ -441,7 +442,7 @@ const CharitySignupFlow = () => {
       };
       
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/signup`,
+        `${API_CONFIG.BASE_URL}/api/charities/signup`,
         submitData
       );
       
@@ -459,7 +460,7 @@ const CharitySignupFlow = () => {
         // Fetch the charity profile to set in auth context
         try {
           const profileResponse = await axios.get(
-            `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/me`
+            `${API_CONFIG.BASE_URL}/api/charities/me`
           );
           
           // Set user in auth context with charity flag

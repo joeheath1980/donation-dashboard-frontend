@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_CONFIG } from '../config/api.config';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002';
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Helper to construct API URL with proper /api prefix
 const apiUrl = (endpoint) => {

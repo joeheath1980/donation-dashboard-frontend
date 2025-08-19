@@ -21,6 +21,7 @@ import {
 } from 'react-icons/fa';
 import styles from './AdminCharityManagement.module.css';
 import sharedStyles from './AdminSharedStyles.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 const AdminCharityManagement = () => {
   const { getAuthHeaders } = useAuth();
@@ -44,7 +45,7 @@ const AdminCharityManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities`,
+        `${API_CONFIG.BASE_URL}/api/admin/charities`,
         {
           headers: getAuthHeaders(),
           params: { status: filter !== 'all' ? filter : undefined }
@@ -63,7 +64,7 @@ const AdminCharityManagement = () => {
     try {
       setActionLoading(true);
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/approve`,
+        `${API_CONFIG.BASE_URL}/api/admin/charities/${charityId}/approve`,
         {},
         { headers: getAuthHeaders() }
       );
@@ -87,7 +88,7 @@ const AdminCharityManagement = () => {
     try {
       setActionLoading(true);
       await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/admin/charities/${charityId}/reject`,
+        `${API_CONFIG.BASE_URL}/api/admin/charities/${charityId}/reject`,
         { reason: rejectReason },
         { headers: getAuthHeaders() }
       );
@@ -404,7 +405,7 @@ const AdminCharityManagement = () => {
                     <div className={styles.detailRow}>
                       <span className={styles.detailLabel}>Evidence:</span>
                       <a 
-                        href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/uploads/${selectedCharity.evidenceFile}`} 
+                        href={`${API_CONFIG.BASE_URL}/uploads/${selectedCharity.evidenceFile}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className={styles.evidenceLink}

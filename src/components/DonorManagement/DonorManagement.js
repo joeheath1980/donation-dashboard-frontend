@@ -23,6 +23,7 @@ import DonorProfile from './components/DonorProfile';
 import CommunicationLog from './components/CommunicationLog';
 import DonorSegments from './components/DonorSegments';
 import BulkActions from './components/BulkActions';
+import { API_CONFIG } from '../../config/api.config';
 
 function DonorManagement() {
   const { user, getAuthHeaders } = useAuth();
@@ -58,7 +59,7 @@ function DonorManagement() {
       const charityId = user.charityId || user._id;
       
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/donors`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/donors`,
         {
           headers: getAuthHeaders(),
           params: {
@@ -181,7 +182,7 @@ function DonorManagement() {
     try {
       const charityId = user.charityId || user._id;
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/donors/export`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/donors/export`,
         {
           headers: getAuthHeaders(),
           params: { format: 'csv' },

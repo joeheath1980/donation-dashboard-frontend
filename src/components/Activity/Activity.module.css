@@ -472,6 +472,7 @@
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .emailResultItem.committedDonation {
@@ -588,17 +589,24 @@
   right: 0.5rem;
   width: 24px;
   height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
   border: none;
   background: #ef4444;
   color: white;
   border-radius: 50%;
-  font-size: 1.25rem;
-  line-height: 1;
+  font-size: 16px;
+  line-height: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 1;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .deleteButton:hover {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_CONFIG } from '../config/api.config';
 
 export const useDemoMode = () => {
   const [demoMode, setDemoMode] = useState(null);
@@ -9,7 +10,7 @@ export const useDemoMode = () => {
     const fetchDemoStatus = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/status`
+          `${API_CONFIG.BASE_URL}/api/demo/status`
         );
         setDemoMode(response.data);
       } catch (error) {

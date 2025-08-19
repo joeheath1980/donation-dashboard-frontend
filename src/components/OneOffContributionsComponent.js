@@ -23,6 +23,7 @@ import { createPortal } from 'react-dom';
 import { FaQuestionCircle } from 'react-icons/fa';
 import axios from 'axios';
 import DefaultBusinessLogo from './DefaultBusinessLogo';
+import { API_CONFIG } from '../config/api.config';
 
 function formatDate(dateString) {
   let date;
@@ -73,7 +74,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
 
   const fetchContributions = useCallback(async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`, {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/contributions/one-off`, {
         headers: getAuthHeaders()
       });
       setOneOffContributions(response.data);
@@ -117,7 +118,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
-        await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off/${contributionId}`, {
+        await axios.delete(`${API_CONFIG.BASE_URL}/api/contributions/one-off/${contributionId}`, {
           headers: getAuthHeaders()
         });
         setLocalContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
@@ -136,7 +137,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
 
   const handleSave = async (editedContribution) => {
     try {
-      let url = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`;
+      let url = `${API_CONFIG.BASE_URL}/api/contributions/one-off`;
       let method = 'POST';
 
       if (editingContribution && editingContribution._id) {
@@ -263,7 +264,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
       
       // For now, just open the receipt in a new tab
       // In the future, this could be enhanced to download as PDF
-      const receiptUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`;
+      const receiptUrl = `${API_CONFIG.BASE_URL}${contribution.receiptUrl}`;
       window.open(receiptUrl, '_blank');
     } catch (error) {
       console.error('Error downloading receipt:', error);
@@ -296,7 +297,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
       
       contributionsWithReceipts.slice(0, maxToOpen).forEach((contribution, index) => {
         setTimeout(() => {
-          const receiptUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`;
+          const receiptUrl = `${API_CONFIG.BASE_URL}${contribution.receiptUrl}`;
           window.open(receiptUrl, '_blank');
         }, index * 500); // Delay to prevent popup blocking
       });
@@ -559,7 +560,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                         <p>
                           <strong>Receipt:</strong>
                           <a
-                            href={`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}${contribution.receiptUrl}`}
+                            href={`${API_CONFIG.BASE_URL}${contribution.receiptUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="link"

@@ -21,6 +21,7 @@ import DonationChart from './components/DonationChart';
 import DonorDemographics from './components/DonorDemographics';
 import RevenueStreams from './components/RevenueStreams';
 import ImpactMetrics from './components/ImpactMetrics';
+import { API_CONFIG } from '../../config/api.config';
 
 function CharityAnalytics() {
   const { user, getAuthHeaders } = useAuth();
@@ -75,14 +76,14 @@ function CharityAnalytics() {
       // Fetch all analytics data
       const [overview, donations, revenue, donors] = await Promise.all([
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/analytics/overview`,
+          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/overview`,
           { 
             headers: getAuthHeaders(),
             params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
           }
         ),
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/analytics/donations`,
+          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/donations`,
           { 
             headers: getAuthHeaders(),
             params: { 
@@ -93,14 +94,14 @@ function CharityAnalytics() {
           }
         ),
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/analytics/revenue-streams`,
+          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/revenue-streams`,
           { 
             headers: getAuthHeaders(),
             params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
           }
         ),
         axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/analytics/donors`,
+          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/donors`,
           { 
             headers: getAuthHeaders(),
             params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
@@ -193,7 +194,7 @@ function CharityAnalytics() {
     try {
       const charityId = user.charityId || user._id;
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charities/${charityId}/analytics/export`,
+        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/export`,
         {
           headers: getAuthHeaders(),
           params: { format, dateRange },

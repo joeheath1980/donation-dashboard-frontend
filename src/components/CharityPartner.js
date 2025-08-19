@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './CharityPartner.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
+import { API_CONFIG } from '../config/api.config';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002',
+  baseURL: API_CONFIG.BASE_URL,
   withCredentials: true,
   headers: {
     'Accept': 'application/json',

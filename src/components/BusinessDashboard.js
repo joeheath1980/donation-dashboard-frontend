@@ -18,6 +18,7 @@ import BusinessImpactScore from './Profile/components/BusinessImpactScore';
 import CSRInsights from './Profile/components/CSRInsights';
 import PerformanceMetrics from './Profile/components/PerformanceMetrics';
 import LiveActivityFeed from './Profile/components/LiveActivityFeed';
+import { API_CONFIG } from '../config/api.config';
 
 function BusinessDashboard() {
   const { getAuthHeaders, user } = useAuth();
@@ -44,7 +45,7 @@ function BusinessDashboard() {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const apiUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/me`;
+        const apiUrl = `${API_CONFIG.BASE_URL}/api/business/me`;
         console.log('Fetching business data from:', apiUrl);
         
         const response = await axios.get(apiUrl, { headers: getAuthHeaders() });
@@ -84,13 +85,13 @@ function BusinessDashboard() {
       try {
         // Get campaigns from the correct endpoint
         const campaignsRes = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/campaigns`, 
+          `${API_CONFIG.BASE_URL}/api/business/campaigns`, 
           { headers: getAuthHeaders() }
         );
         
         // Get dashboard overview which includes recent matches and stats
         const overviewRes = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/dashboard/overview`, 
+          `${API_CONFIG.BASE_URL}/api/business/dashboard/overview`, 
           { headers: getAuthHeaders() }
         );
 

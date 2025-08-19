@@ -35,6 +35,7 @@ import {
   FaInfoCircle
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_CONFIG } from '../config/api.config';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -130,7 +131,7 @@ function Profile() {
     
     try {
       const headers = getAuthHeaders();
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matching/opportunities`, { headers });
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/matching/opportunities`, { headers });
       setMatchingOpportunities(response.data);
     } catch (err) {
       console.error('Error fetching matching opportunities:', err);
@@ -186,7 +187,7 @@ function Profile() {
   const handleMatch = async (opportunityId) => {
     try {
       const headers = getAuthHeaders();
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/matching/opportunities/${opportunityId}/accept`, {}, { headers });
+      await axios.post(`${API_CONFIG.BASE_URL}/api/matching/opportunities/${opportunityId}/accept`, {}, { headers });
       setMatchingOpportunities(prevOpportunities =>
         prevOpportunities.map(opp =>
           opp._id === opportunityId ? { ...opp, accepted: true } : opp

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FaSearch, FaSpinner, FaCheckCircle, FaBuilding } from 'react-icons/fa';
 import styles from './CharitySearch.module.css';
+import { API_CONFIG } from '../../config/api.config';
 
 const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by charity name, ABN, or category...", required = false }) => {
   const [searchTerm, setSearchTerm] = useState(initialValue || '');
@@ -25,7 +26,7 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
 
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity-search/simple`,
+        `${API_CONFIG.BASE_URL}/api/charity-search/simple`,
         {
           params: { q: term },
           headers: {
@@ -78,7 +79,7 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
     try {
       // Fetch full charity details
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/charity-search/details/${charity.ABN || charity.abn}`,
+        `${API_CONFIG.BASE_URL}/api/charity-search/details/${charity.ABN || charity.abn}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`

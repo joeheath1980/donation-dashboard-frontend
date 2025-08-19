@@ -271,7 +271,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-auth-status`,
+        `${API_CONFIG.BASE_URL}/api/gmail-auth-status`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -306,7 +306,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email/forward-status`,
+        `${API_CONFIG.BASE_URL}/api/email/forward-status`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -407,7 +407,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/gmail-email-search`,
+        `${API_CONFIG.BASE_URL}/api/gmail-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -422,7 +422,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 401 && errorData.action === 'google_auth') {
-          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/google`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
         }
@@ -442,7 +442,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           const pollInterval = setInterval(async () => {
             try {
               const statusResponse = await fetch(
-                `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/email-search-status/${data.jobId}`,
+                `${API_CONFIG.BASE_URL}/api/email-search-status/${data.jobId}`,
                 {
                   headers: {
                     'Authorization': `Bearer ${token}`
@@ -530,7 +530,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/outlook/outlook-email-search`,
+        `${API_CONFIG.BASE_URL}/api/outlook/outlook-email-search`,
         {
           method: 'POST',
           mode: 'cors',
@@ -546,7 +546,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.error === 'Microsoft authentication required' && errorData.action === 'microsoft_auth') {
-          window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/microsoft`;
+          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/microsoft`;
         } else {
           throw new Error(errorData.error || `An error occurred while searching Outlook emails. Status: ${response.status}`);
         }
@@ -563,7 +563,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           wasCleared.current = false;
           
           // Set up SSE connection to get real-time updates
-          const sseUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/outlook/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
+          const sseUrl = `${API_CONFIG.BASE_URL}/api/outlook/status-stream/${data.jobId}?token=${encodeURIComponent(token)}`;
           console.log('[Activity] Connecting to SSE at:', sseUrl);
           
           const eventSource = new EventSource(sseUrl);
@@ -693,8 +693,8 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       };
 
       const endpoint = selectedType === 'regular'
-        ? `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/donations`
-        : `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/contributions/one-off`;
+        ? `${API_CONFIG.BASE_URL}/api/donations`
+        : `${API_CONFIG.BASE_URL}/api/contributions/one-off`;
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -906,6 +906,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Import Your Donations</h3>
               <p className={styles.sectionSubtitle}>Connect your email to automatically find and import donation receipts</p>
+import { API_CONFIG } from '../config/api.config';
             </div>
             
             <div className={styles.buttonGrid}>
@@ -916,7 +917,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                     if (!hasGmailAuth) {
                       const hasAuth = await checkGmailAuth();
                       if (!hasAuth) {
-                        window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/auth/google`;
+                        window.location.href = `${API_CONFIG.BASE_URL}/api/auth/google`;
                         return;
                       }
                     }

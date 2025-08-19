@@ -17,6 +17,7 @@ import {
 import styles from './ProfileEditor.module.css';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import { debounce } from 'lodash';
+import { API_CONFIG } from '../../config/api.config';
 
 const ProfileEditor = () => {
   const { user, getAuthHeaders, setUser } = useAuth();
@@ -95,7 +96,7 @@ const ProfileEditor = () => {
       const headers = getAuthHeaders();
       
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
+        `${API_CONFIG.BASE_URL}/api/users/profile`,
         { headers }
       );
       
@@ -163,7 +164,7 @@ const ProfileEditor = () => {
       try {
         const headers = getAuthHeaders();
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/check-username/${username}`,
+          `${API_CONFIG.BASE_URL}/api/users/check-username/${username}`,
           { headers }
         );
         setUsernameAvailable(response.data.available);
@@ -283,7 +284,7 @@ const ProfileEditor = () => {
       });
       
       const response = await axios.put(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
+        `${API_CONFIG.BASE_URL}/api/users/profile`,
         profile,
         { headers }
       );
@@ -339,7 +340,7 @@ const ProfileEditor = () => {
       console.log('Auth headers:', headers);
       delete headers['Content-Type']; // Let browser set multipart boundary
       
-      const uploadUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/upload/profile-picture`;
+      const uploadUrl = `${API_CONFIG.BASE_URL}/api/upload/profile-picture`;
       console.log('Upload URL:', uploadUrl);
       console.log('Making upload request...');
       
@@ -369,7 +370,7 @@ const ProfileEditor = () => {
           console.log('Saving profile with update:', profileUpdate);
           
           const saveResponse = await axios.put(
-            `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/users/profile`,
+            `${API_CONFIG.BASE_URL}/api/users/profile`,
             profileUpdate,
             { headers: getAuthHeaders() }
           );

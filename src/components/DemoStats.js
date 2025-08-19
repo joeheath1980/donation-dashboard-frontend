@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaUsers, FaBriefcase, FaHeart, FaBullhorn } from 'react-icons/fa';
 import styles from './DemoStats.module.css';
+import { API_CONFIG } from '../config/api.config';
 
 const DemoStats = () => {
   const [stats, setStats] = useState(null);
@@ -11,7 +12,7 @@ const DemoStats = () => {
     const fetchStats = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/demo/quick-stats`
+          `${API_CONFIG.BASE_URL}/api/demo/quick-stats`
         );
         setStats(response.data);
       } catch (error) {

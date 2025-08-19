@@ -5,6 +5,7 @@ import axios from 'axios';
 import businessAPI from '../services/businessAPI';
 import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
 import styles from './BusinessOnboarding.module.css';
+import { API_CONFIG } from '../config/api.config';
 import {
   RiBuildingLine,
   RiBarChartLine,
@@ -596,7 +597,7 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
     try {
       // Use the new Australian charity database endpoint
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3002'}/api/business/onboarding/search-charities`,
+        `${API_CONFIG.BASE_URL}/api/business/onboarding/search-charities`,
         {
           params: {
             query: searchQuery || 'charity', // Default search term
