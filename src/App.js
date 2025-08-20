@@ -31,6 +31,7 @@ import AdminDashboard from './components/AdminDashboard';
 import YourImpact from './components/YourImpact';
 import Profile from './components/Profile';
 
+import lazyWithRetry from './utils/lazyWithRetry';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './components/SharedStyles.css';
@@ -57,7 +58,6 @@ const CharityPartner = lazy(() => import('./components/CharityPartner'));
 const Partners = lazy(() => import('./components/Partners'));
 const SearchCharities = lazy(() => import('./components/SearchCharities'));
 const Activity = lazy(() => import('./components/Activity/Activity'));
-import lazyWithRetry from './utils/lazyWithRetry';
 const OrganizationSignup = lazyWithRetry(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
