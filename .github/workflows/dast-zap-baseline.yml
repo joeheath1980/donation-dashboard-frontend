@@ -1,0 +1,23 @@
+name: DAST (OWASP ZAP Baseline)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target staging URL (e.g., https://staging.do-nation.space)'
+        required: true
+        type: string
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: ${{ inputs.target }}
+          cmd_options: '-r zap-baseline-report.html -a'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: zap-baseline-report.html

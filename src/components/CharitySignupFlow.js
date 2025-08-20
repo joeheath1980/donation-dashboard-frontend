@@ -450,9 +450,13 @@ const CharitySignupFlow = () => {
       
       // Store token if provided
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userType', 'charity');
-        localStorage.setItem('charityId', response.data.charityId);
+        // Use SecureTokenStorage for token (CASA compliance)
+        const { SecureTokenStorage, UserDataStorage } = await import('../utils/auth.utils');
+        SecureTokenStorage.setToken(response.data.token);
+        
+        // Non-sensitive user data can remain in localStorage
+        UserDataStorage.setUserType('charity');
+        UserDataStorage.setCharityId(response.data.charityId);
         
         // Setup axios defaults with token
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;

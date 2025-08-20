@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './TaxReceipts.module.css';
 import { RiDownloadLine, RiArrowLeftLine } from 'react-icons/ri';
 
@@ -26,7 +27,7 @@ const TaxReceipts = () => {
   const fetchReceipts = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts?year=${filters.year}`,
         {
@@ -84,7 +85,7 @@ const TaxReceipts = () => {
 
   const downloadReceipt = async (receiptId) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts/${receiptId}/download`,
         {
@@ -114,7 +115,7 @@ const TaxReceipts = () => {
     if (selectedReceipts.length === 0) return;
     
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts/bulk-download`,
         {

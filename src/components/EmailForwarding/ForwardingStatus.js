@@ -3,6 +3,7 @@ import { apiClient } from '../../services/api.service';
 import { API_ENDPOINTS } from '../../config/api.config';
 import { createLogger } from '../../utils/logger';
 import styles from './ForwardingStatus.module.css';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import '../SharedStyles.css';
 
 const logger = createLogger('ForwardingStatus');
@@ -36,7 +37,7 @@ const ForwardingStatus = ({ refreshTrigger }) => {
       setError('');
       
       // Check if token exists before making request
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) {
         logger.warn('No authentication token found');
         setError('Please log in to view forwarded emails');

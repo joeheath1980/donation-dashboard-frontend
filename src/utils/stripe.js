@@ -8,7 +8,9 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3
 
 // Helper function for API calls
 export const apiCall = async (endpoint, method = 'GET', data = null) => {
-  const token = localStorage.getItem('authToken'); // Adjust based on your auth implementation
+  // Use SecureTokenStorage for CASA compliance
+  const { SecureTokenStorage } = await import('./auth.utils');
+  const token = SecureTokenStorage.getToken();
   
   const config = {
     method,

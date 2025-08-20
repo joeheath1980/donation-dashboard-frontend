@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrophy, FaLock, FaStar, FaFire, FaCoffee, FaBus, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import styles from './AchievementShowcase.module.css';
 
 const AchievementShowcase = ({ userId, compact = false }) => {
@@ -39,7 +40,7 @@ const AchievementShowcase = ({ userId, compact = false }) => {
 
   const fetchAchievements = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       const endpoint = userId 
         ? `/api/achievements/showcase/${userId}`
         : '/api/achievements/progress';

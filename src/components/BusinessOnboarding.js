@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import businessAPI from '../services/businessAPI';
 import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
 import styles from './BusinessOnboarding.module.css';
@@ -124,7 +125,7 @@ const BusinessOnboarding = () => {
     if (!file) return;
 
     // Check if we have a valid token
-    const token = localStorage.getItem('token');
+    const token = SecureTokenStorage.getToken();
     const userType = localStorage.getItem('userType');
     
     if (!token) {
@@ -605,7 +606,7 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
             offset: 0
           },
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${require('../utils/auth.utils').SecureTokenStorage.getToken()}`
           }
         }
       );

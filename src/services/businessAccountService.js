@@ -1,15 +1,10 @@
 import axios from 'axios';
 import { API_CONFIG } from '../config/api.config';
+import { getAuthHeaders } from '../utils/auth.utils';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
+// Use centralized, CASA-compliant auth header builder
 
 export const businessAccountService = {
   // Get all account settings

@@ -15,11 +15,41 @@ export const sanitizeHTML = (dirty) => {
   const config = {
     ALLOWED_TAGS: ['span', 'div', 'i', 'b', 'strong', 'em', 'br', 'hr'],
     ALLOWED_ATTR: ['class', 'style'],
-    ALLOWED_STYLE_PROPS: ['color', 'font-size', 'font-weight', 'opacity'],
     KEEP_CONTENT: true, // Keep text content even if tags are removed
   };
+
+  // Strictly control which inline CSS is allowed in style attribute
+  const ALLOWED_STYLE_PROPS = new Set(['color', 'font-size', 'font-weight', 'opacity']);
   
-  return DOMPurify.sanitize(dirtyString, config);
+  DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+    if (data.attrName === 'style') {
+      const safeRules = [];
+      const rules = String(data.attrValue).split(';');
+      for (const rule of rules) {
+        if (!rule.trim()) continue;
+        const [rawProp, ...rest] = rule.split(':');
+        if (!rawProp || rest.length === 0) continue;
+        const prop = rawProp.trim().toLowerCase();
+        const value = rest.join(':').trim();
+        if (!ALLOWED_STYLE_PROPS.has(prop)) continue;
+        const lowerVal = value.toLowerCase();
+        // Block any javascript, expression, or url() usage
+        if (lowerVal.includes('javascript') || lowerVal.includes('expression') || lowerVal.includes('url(')) continue;
+        safeRules.push(`${prop}: ${value}`);
+      }
+      if (safeRules.length) {
+        data.attrValue = safeRules.join('; ');
+      } else {
+        // Drop style attribute entirely if no safe rules remain
+        data.keepAttr = false;
+      }
+    }
+  });
+  
+  const clean = DOMPurify.sanitize(dirtyString, config);
+  // Remove hooks to avoid side effects for subsequent calls
+  if (DOMPurify.removeAllHooks) DOMPurify.removeAllHooks();
+  return clean;
 };
 
 /**

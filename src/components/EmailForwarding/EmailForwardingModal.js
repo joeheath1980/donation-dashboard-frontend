@@ -21,7 +21,7 @@ const EmailForwardingModal = ({ isOpen, onClose }) => {
         setError('');
       } else {
         // Try to get from localStorage as fallback
-        const token = localStorage.getItem('token');
+    const token = require('../../utils/auth.utils').SecureTokenStorage.getToken();
         const userId = localStorage.getItem('currentUserId');
         
         if (token && userId) {

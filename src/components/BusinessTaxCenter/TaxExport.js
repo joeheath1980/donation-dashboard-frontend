@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './TaxExport.module.css';
 import { RiArrowLeftLine } from 'react-icons/ri';
 
@@ -23,7 +24,7 @@ const TaxExport = () => {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/export`,
         {

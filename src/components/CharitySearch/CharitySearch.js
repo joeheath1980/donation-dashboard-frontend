@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FaSearch, FaSpinner, FaCheckCircle, FaBuilding } from 'react-icons/fa';
 import styles from './CharitySearch.module.css';
 import { API_CONFIG } from '../../config/api.config';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 
 const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by charity name, ABN, or category...", required = false }) => {
   const [searchTerm, setSearchTerm] = useState(initialValue || '');
@@ -30,7 +31,7 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
         {
           params: { q: term },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${SecureTokenStorage.getToken()}`
           }
         }
       );
@@ -82,7 +83,7 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
         `${API_CONFIG.BASE_URL}/api/charity-search/details/${charity.ABN || charity.abn}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${SecureTokenStorage.getToken()}`
           }
         }
       );

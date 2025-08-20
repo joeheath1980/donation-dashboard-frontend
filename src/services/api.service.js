@@ -11,7 +11,10 @@ const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
   headers: SECURITY_HEADERS,
-  withCredentials: true // Enable cookies for CSRF token
+  withCredentials: true, // Enable cookies for CSRF token
+  // Let axios auto-populate CSRF header from cookie
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN'
 });
 
 // Request interceptor to add auth token and CSRF token
@@ -29,6 +32,17 @@ apiClient.interceptors.request.use(
     } else {
       logger.debug('API interceptor: No Bearer token available');
     }
+
+    // CASA/Policy: Ensure signup endpoints are anonymous (no Authorization header)
+    try {
+      const urlStr = `${config.baseURL || ''}${config.url || ''}`;
+      if (/\/api\/(users\/register|business\/auth\/signup|charities\/signup)(\b|\/|\?|#)/.test(urlStr)) {
+        if (config.headers && config.headers.Authorization) {
+          delete config.headers.Authorization;
+          logger.debug('API interceptor: Stripped Authorization for signup endpoint');
+        }
+      }
+    } catch {}
     
     // Add CSRF token for state-changing requests
     config = await csrfService.addTokenToRequest(config);

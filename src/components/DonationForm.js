@@ -392,7 +392,7 @@ function DonationFormWrapper() {
   useEffect(() => {
     const fetchCharity = async () => {
       try {
-        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        const token = require('../utils/auth.utils').SecureTokenStorage.getToken();
         const response = await axios.get(
           `${API_CONFIG.BASE_URL}/api/charities/${charityId}`, 
           {

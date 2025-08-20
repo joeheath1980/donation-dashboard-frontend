@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './MatchingOpportunitiesComponent.module.css';
 import CarouselComponent from './CarouselComponent';
@@ -12,7 +13,7 @@ function MatchingOpportunitiesComponent({ userId }) {
 
   useEffect(() => {
     const fetchOpportunities = async () => {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       try {
         console.log('Fetching matching opportunities...');
         console.log('User ID:', userId);
@@ -41,7 +42,7 @@ function MatchingOpportunitiesComponent({ userId }) {
 
   const handleMatch = async (opportunityId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       await axios.post(`${API_CONFIG.BASE_URL}/api/matching/opportunities/${opportunityId}/accept`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,

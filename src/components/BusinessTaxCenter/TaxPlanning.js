@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './TaxPlanning.module.css';
 import {
   RiGiftLine,
@@ -29,7 +30,7 @@ const TaxPlanning = () => {
   const calculatePlanning = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/planning`,
         {

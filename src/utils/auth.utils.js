@@ -40,16 +40,10 @@ export class SecureTokenStorage {
         }
       }
       
-      // ALSO store in localStorage as backup for persistence
-      // This helps with navigation issues
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-        if (refreshToken) {
-          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-        }
-      }
-      
-      logger.debug('Token stored in memory, sessionStorage, and localStorage');
+      // CASA Compliance: Do NOT persist tokens in localStorage
+      // Legacy localStorage writes have been removed. Components reading from
+      // localStorage should rely on the migration wrapper which sources from memory.
+      logger.debug('Token stored in memory and sessionStorage');
     } catch (error) {
       logger.error('Failed to store token', { error: error.message });
     }
@@ -77,19 +71,7 @@ export class SecureTokenStorage {
         }
       }
       
-      // Tertiary: Check localStorage as backup
-      if (typeof localStorage !== 'undefined') {
-        const localToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
-        if (localToken) {
-          // Restore to memory and sessionStorage
-          this.memoryToken = localToken;
-          if (typeof sessionStorage !== 'undefined') {
-            sessionStorage.setItem(STORAGE_KEYS.TOKEN, localToken);
-          }
-          return localToken;
-        }
-      }
-      
+      // No localStorage fallback to maintain CASA compliance
       return null;
     } catch (error) {
       logger.error('Failed to retrieve token', { error: error.message });
@@ -117,20 +99,7 @@ export class SecureTokenStorage {
         }
       }
       
-      // Tertiary: Check localStorage as fallback (temporary during migration)
-      if (typeof localStorage !== 'undefined') {
-        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-        if (refreshToken) {
-          logger.debug('Refresh token retrieved from localStorage fallback');
-          this.memoryRefreshToken = refreshToken;
-          // Migrate to sessionStorage
-          if (typeof sessionStorage !== 'undefined') {
-            sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-          }
-          return refreshToken;
-        }
-      }
-      
+      // No localStorage fallback to maintain CASA compliance
       return null;
     } catch (error) {
       logger.error('Failed to retrieve refresh token', { error: error.message });

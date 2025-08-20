@@ -52,16 +52,22 @@ class CSRFTokenService {
         timeout: 10000
       });
 
-      if (response.data && response.data.csrfToken) {
-        this.token = response.data.csrfToken;
-        // Token expires in 1 hour, refresh after 50 minutes
-        this.tokenExpiry = new Date(Date.now() + 50 * 60 * 1000);
-        
-        logger.info('CSRF token fetched successfully');
-        return this.token;
+      // Prefer response body token if present
+      if (response.data && (response.data.csrfToken || response.data.token)) {
+        this.token = response.data.csrfToken || response.data.token;
       } else {
-        throw new Error('Invalid CSRF token response');
+        // Fallback to cookie-based token
+        this.token = this.getTokenFromCookie();
       }
+
+      if (!this.token) {
+        throw new Error('Invalid CSRF token response (no token in body or cookie)');
+      }
+
+      // Token expires in 1 hour, refresh after 50 minutes
+      this.tokenExpiry = new Date(Date.now() + 50 * 60 * 1000);
+      logger.info('CSRF token fetched successfully');
+      return this.token;
     } catch (error) {
       logger.error('Failed to fetch CSRF token', { 
         error: error.message,
@@ -110,11 +116,12 @@ class CSRFTokenService {
    * @returns {string|null}
    */
   getTokenFromCookie() {
+    const names = ['XSRF-TOKEN', 'xsrf-token', 'csrf-token', 'CSRF-TOKEN'];
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
-      if (name === 'XSRF-TOKEN') {
-        logger.debug('Found CSRF token in cookie');
+      if (names.includes(name)) {
+        logger.debug('Found CSRF token in cookie', { name });
         return decodeURIComponent(value);
       }
     }
@@ -136,12 +143,8 @@ class CSRFTokenService {
       return config;
     }
 
-    // Skip if Authorization header with Bearer token exists (JWT auth)
-    if (config.headers?.Authorization?.startsWith('Bearer ')) {
-      logger.debug('Skipping CSRF for JWT authenticated request');
-      logger.debug('CSRF: Skipping - has Bearer token');
-      return config;
-    }
+    // CASA: Always add CSRF for state-changing requests, even when JWT is present
+    // Some backends require CSRF alongside JWT for sensitive endpoints
 
     // Get CSRF token
     let token;
@@ -164,6 +167,9 @@ class CSRFTokenService {
       // Add token to headers (primary method)
       config.headers = config.headers || {};
       config.headers['X-CSRF-Token'] = token;
+      // Add common alternate header names for compatibility
+      config.headers['X-XSRF-Token'] = token;
+      config.headers['X-CSRF-TOKEN'] = token;
       
       // Also add to body for form submissions
       if (config.data && typeof config.data === 'object' && 

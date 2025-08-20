@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import { useNavigate } from 'react-router-dom';
 import styles from './TaxSummary.module.css';
 import { RiLightbulbLine, RiArrowLeftLine } from 'react-icons/ri';
@@ -18,7 +19,7 @@ const TaxSummary = () => {
   const fetchTaxSummary = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = SecureTokenStorage.getToken();
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/summary/${selectedYear}`,
         {

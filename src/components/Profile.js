@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import { apiClient } from '../services/api.service';
 import styles from './Profile.module.css';
 import './SharedStyles.css';
 import PersonalImpactScore from './PersonalImpactScore';
@@ -130,8 +130,7 @@ function Profile() {
     setMatchingOpportunitiesError(null);
     
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/matching/opportunities`, { headers });
+      const response = await apiClient.get(`/api/matching/opportunities`);
       setMatchingOpportunities(response.data);
     } catch (err) {
       console.error('Error fetching matching opportunities:', err);
@@ -186,8 +185,7 @@ function Profile() {
 
   const handleMatch = async (opportunityId) => {
     try {
-      const headers = getAuthHeaders();
-      await axios.post(`${API_CONFIG.BASE_URL}/api/matching/opportunities/${opportunityId}/accept`, {}, { headers });
+      await apiClient.post(`/api/matching/opportunities/${opportunityId}/accept`, {});
       setMatchingOpportunities(prevOpportunities =>
         prevOpportunities.map(opp =>
           opp._id === opportunityId ? { ...opp, accepted: true } : opp

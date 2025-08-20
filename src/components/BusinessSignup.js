@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { csrfServiceAPI } from '../services/api.service';
 import styles from './BusinessSignup.module.css';
 import './SharedStyles.css';
 
@@ -42,20 +43,21 @@ function BusinessSignup() {
     setLoading(true);
 
     try {
+      // Ensure CSRF token is initialized before submitting (defensive)
+      try { await csrfServiceAPI.initializeToken(); } catch {}
       await businessSignup(formData);
       setSuccessMessage('Business registered successfully');
       setTimeout(() => {
         navigate('/business-onboarding');
       }, 2000);
     } catch (error) {
-      console.error('Error during signup:', error);
-      if (error.response && error.response.data && error.response.data.message) {
-        setError(error.response.data.message);
-      } else if (error.message) {
-        setError(error.message);
-      } else {
-        setError('Failed to sign up. Please try again.');
-      }
+      console.error('Error during signup:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      const serverMsg = error.response?.data?.error || error.response?.data?.message;
+      setError(serverMsg || error.message || 'Failed to sign up. Please try again.');
     } finally {
       setLoading(false);
     }

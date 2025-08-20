@@ -8,7 +8,7 @@ import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../../utils/logger';
 import { EmailForwardingModal } from '../EmailForwarding';
-import { UserDataStorage } from '../../utils/auth.utils';
+import { UserDataStorage, SecureTokenStorage } from '../../utils/auth.utils';
 import { FaGoogle, FaMicrosoft, FaEnvelope, FaSync, FaLock, FaCheck, FaInfoCircle, FaChevronRight, FaCopy, FaUpload } from 'react-icons/fa';
 import { API_CONFIG } from '../../config/api.config';
 
@@ -285,7 +285,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const checkGmailAuth = useCallback(async () => {
     setCheckingAuth(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) {
         setHasGmailAuth(false);
         return false;
@@ -322,7 +322,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
   const fetchForwardingEmail = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) return;
 
       const response = await fetch(
@@ -349,7 +349,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     trackEvent('refresh_forwarded_clicked');
     
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) {
         console.warn('No token for forwarded emails');
         return;
@@ -465,7 +465,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     trackEvent('connect_gmail_clicked');
     
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchEmails', { hasToken: !!token });
       
       if (!token) {
@@ -595,7 +595,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     trackEvent('connect_outlook_clicked');
     
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchOutlookEmails', { hasToken: !!token });
       
       if (!token) {
@@ -781,7 +781,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleCommit', { hasToken: !!token });
       if (!token) {
         throw new Error('No authentication token found');

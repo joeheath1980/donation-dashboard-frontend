@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_CONFIG } from '../config/api.config';
+import { getAuthHeaders } from '../utils/auth.utils';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
@@ -12,18 +13,7 @@ const apiUrl = (endpoint) => {
   return `${baseUrl}${endpoint}`;
 };
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  const userType = localStorage.getItem('userType');
-  
-  // For business endpoints, we might need a business-specific token
-  const authToken = userType === 'business' ? token : token;
-  
-  return {
-    'Authorization': `Bearer ${authToken}`,
-    'Content-Type': 'application/json'
-  };
-};
+// Use centralized, CASA-compliant auth header builder
 
 export const businessAPI = {
   // Onboarding endpoints

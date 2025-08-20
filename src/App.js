@@ -9,7 +9,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext';
 import { MatchSelectionProvider } from './contexts/MatchSelectionContext';
 import { USER_TYPES, STORAGE_KEYS } from './config/api.config';
 import { createLogger } from './utils/logger';
-import { SecureTokenStorage } from './utils/auth.utils';
+import { SecureTokenStorage, UserDataStorage } from './utils/auth.utils';
 import { initializeLocalStorageWrapper } from './utils/localStorageWrapper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -57,7 +57,8 @@ const CharityPartner = lazy(() => import('./components/CharityPartner'));
 const Partners = lazy(() => import('./components/Partners'));
 const SearchCharities = lazy(() => import('./components/SearchCharities'));
 const Activity = lazy(() => import('./components/Activity/Activity'));
-const OrganizationSignup = lazy(() => import('./components/OrganizationSignup'));
+import lazyWithRetry from './utils/lazyWithRetry';
+const OrganizationSignup = lazyWithRetry(() => import('./components/OrganizationSignup'));
 const BusinessSignup = lazy(() => import('./components/BusinessSignup'));
 const CharitySignupFlow = lazy(() => import('./components/CharitySignupFlow'));
 const CharityProfileEditor = lazy(() => import('./components/CharityProfileEditor/CharityProfileEditor'));
@@ -139,11 +140,9 @@ const ProtectedRoute = ({ children, allowedUserTypes }) => {
   const location = useLocation();
   
   React.useEffect(() => {
-    // Check for token in both sessionStorage and localStorage
-    const token = SecureTokenStorage.getToken() || 
-                 sessionStorage.getItem(STORAGE_KEYS.TOKEN) || 
-                 localStorage.getItem(STORAGE_KEYS.TOKEN);
-    const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+    // Check for token using SecureTokenStorage only (CASA compliance)
+    const token = SecureTokenStorage.getToken();
+    const userType = UserDataStorage.getUserType();
     
     console.log('ProtectedRoute initialization:', { 
       hasToken: !!token,
@@ -173,10 +172,8 @@ const ProtectedRoute = ({ children, allowedUserTypes }) => {
   }
   
   // Check for authentication after loading
-  const token = SecureTokenStorage.getToken() || 
-               sessionStorage.getItem(STORAGE_KEYS.TOKEN) || 
-               localStorage.getItem(STORAGE_KEYS.TOKEN);
-  const userType = localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+  const token = SecureTokenStorage.getToken();
+  const userType = UserDataStorage.getUserType();
   
   // Must have either token or user to be authenticated
   if (!token && !user) {

@@ -8,7 +8,7 @@ import { format, isValid, parseISO, differenceInDays } from 'date-fns';
 import debounce from 'lodash/debounce';
 import { createLogger } from '../utils/logger';
 import { EmailForwardingModal } from './EmailForwarding';
-import { UserDataStorage } from '../utils/auth.utils';
+import { UserDataStorage, SecureTokenStorage } from '../utils/auth.utils';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -264,7 +264,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const checkGmailAuth = useCallback(async () => {
     setCheckingAuth(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) {
         setHasGmailAuth(false);
         return false;
@@ -299,7 +299,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const fetchForwardedEmails = useCallback(async () => {
     setLoadingForwarded(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       if (!token) {
         console.warn('No token for forwarded emails');
         return;
@@ -399,7 +399,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchEmails', { hasToken: !!token });
       
       if (!token) {
@@ -522,7 +522,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchOutlookEmails', { hasToken: !!token });
       
       if (!token) {
@@ -701,7 +701,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleCommit', { hasToken: !!token });
       if (!token) {
         throw new Error('No authentication token found');

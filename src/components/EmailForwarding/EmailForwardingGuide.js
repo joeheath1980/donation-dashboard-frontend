@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './EmailForwardingGuide.module.css';
 
 const EmailForwardingGuide = () => {
@@ -24,7 +25,7 @@ const EmailForwardingGuide = () => {
       
       // Get forwarding email address
       const emailResponse = await axios.get(`${API_URL}/api/email/forward-address`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${SecureTokenStorage.getToken()}` }
       });
       // Use the forwardToEmail instead of the old donor-specific email
       setForwardingEmail(emailResponse.data.forwardToEmail || emailResponse.data.email);

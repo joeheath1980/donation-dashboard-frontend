@@ -1,0 +1,26 @@
+name: SAST (Semgrep)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install Semgrep
+        run: pip install semgrep
+      - name: Run Semgrep (ose rules)
+        run: semgrep ci --config p/owasp-top-ten --config p/react --error || true
+      - name: Save Semgrep SARIF
+        run: semgrep ci --config p/owasp-top-ten --config p/react --sarif --output semgrep.sarif || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep.sarif

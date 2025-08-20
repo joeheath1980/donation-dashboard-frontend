@@ -223,13 +223,12 @@ npm run analyze       # Bundle size analysis
 npm run coverage      # Test coverage report
 ```
 
-## 🔒 Security
+## 🔒 Security & CASA
 
 ### Content Security Policy (CSP)
-- **100% Compliant** - No inline styles or scripts
-- All styles migrated to CSS modules
-- Dynamic styles use CSS custom properties
-- Automated migration tools available
+- Hardened CSP (no `unsafe-inline` or `unsafe-eval`), strict `frame-ancestors`, `object-src 'none'`.
+- Styles via CSS Modules and CSS variables; no inline styles/scripts.
+- See `nginx-secure.conf` and `docs/casa/csp-validation.md` for staging validation.
 
 ### CSRF Protection
 - Automatic token fetching on app load
@@ -239,11 +238,10 @@ npm run coverage      # Test coverage report
 - Multiple submission methods (header, body, cookie)
 
 ### Authentication & Authorization
-- JWT-based authentication
-- Secure token storage (httpOnly cookies in production)
-- Automatic token refresh
-- Role-based access control (User, Business, Charity, Admin)
-- OAuth 2.0 integration (Google, Microsoft)
+- JWT-based authentication; tokens stored in memory + sessionStorage (no localStorage persistence).
+- Automatic token refresh; centralized axios interceptors.
+- Role-based access control (User, Business, Charity, Admin).
+- OAuth 2.0 integration (Google, Microsoft).
 
 ### Input Validation
 - Client-side validation for all forms
@@ -251,6 +249,17 @@ npm run coverage      # Test coverage report
 - Email format validation
 - XSS prevention through React's default escaping
 - SQL injection prevention (parameterized queries in backend)
+
+### CASA (Google Cloud Application Security Assessment)
+- CASA documentation lives in `docs/casa`:
+  - `docs/casa/README.md` – summary & scope
+  - `docs/casa/controls-matrix.md` – CASA ↔ ASVS ↔ implementation
+  - `docs/casa/evidence-checklist.md` – LOV artifacts
+  - `docs/casa/csp-validation.md` – CSP validation guide
+- CI security:
+  - NPM Audit: `.github/workflows/security-audit.yml`
+  - SAST (Semgrep): `.github/workflows/sast-semgrep.yml`
+  - DAST (ZAP Baseline): `.github/workflows/dast-zap-baseline.yml` (manual trigger with staging URL)
 
 ## 🔌 API Integration
 

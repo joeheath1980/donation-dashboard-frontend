@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './EnhancedOnboarding.module.css';
 import { API_CONFIG } from '../../config/api.config';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import {
   RiSearchLine,
   RiUploadCloudLine,
@@ -55,10 +56,10 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
 
   // Get auth token
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = SecureTokenStorage.getToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': token ? `Bearer ${token}` : ''
     };
   };
 

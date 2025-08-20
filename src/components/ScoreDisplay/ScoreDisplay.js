@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa';
 import { AnimatePresence, motion } from 'framer-motion';
 import io from 'socket.io-client';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './ScoreDisplay.module.css';
 import { apiClient } from '../../services/api.service';
 import CelebrationModal from './CelebrationModal';
@@ -63,11 +64,15 @@ const ScoreDisplay = () => {
   };
 
   const setupWebSocket = () => {
-    const socketUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3002';
-    socketRef.current = io(socketUrl, {
+    const wsUrl = process.env.REACT_APP_WEBSOCKET_URL || process.env.REACT_APP_API_URL || 'http://localhost:3002';
+    socketRef.current = io(wsUrl, {
       auth: {
-        token: localStorage.getItem('token')
-      }
+        token: SecureTokenStorage.getToken()
+      },
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socketRef.current.on('connect', () => {

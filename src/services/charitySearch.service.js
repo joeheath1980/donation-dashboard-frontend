@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('CharitySearchService');
@@ -6,7 +7,7 @@ const logger = createLogger('CharitySearchService');
 class CharitySearchService {
   constructor() {
     this.baseURL = process.env.REACT_APP_API_BASE_URL || '';
-    this.token = localStorage.getItem('token');
+    this.token = SecureTokenStorage.getToken();
   }
 
   setAuthToken(token) {

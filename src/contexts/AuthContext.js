@@ -150,7 +150,8 @@ export const AuthProvider = ({ children }) => {
         return userData;
       } else {
         logger.info('Fetching user profile after login');
-        const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+        const api2 = apiServices.client;
+        const userResponse = await api2.get(API_ENDPOINTS.USER_PROFILE);
         UserDataStorage.setUserId(userResponse.data._id || userResponse.data.id);
         setUser({ ...userResponse.data, isBusiness: false, isCharity: false });
         logger.info('User state set from profile fetch', { userId: userResponse.data._id || userResponse.data.id });
@@ -166,7 +167,8 @@ export const AuthProvider = ({ children }) => {
   const userSignup = async (name, email, password) => {
     try {
       logger.debug('Attempting to register user', { name, email });
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.USER_REGISTER), { name, email, password });
+      const api = apiServices.client;
+      const response = await api.post(API_ENDPOINTS.USER_REGISTER, { name, email, password });
       logger.debug('Registration successful');
 
       if (response.data.token) {
@@ -175,7 +177,7 @@ export const AuthProvider = ({ children }) => {
         logger.debug('Token stored securely');
         setupAxiosDefaults(response.data.token);
 
-        const validatedUser = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+        const validatedUser = await api.get(API_ENDPOINTS.USER_PROFILE);
         UserDataStorage.setUserId(validatedUser.data._id || validatedUser.data.id);
         setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
         return validatedUser.data;
@@ -185,7 +187,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       logger.error('User signup error', { 
         status: error.response?.status,
-        message: error.message 
+        message: error.message,
+        data: error.response?.data
       });
       if (error.response) {
         if (error.response.status === 400 && error.response.data.error === 'User already exists') {
@@ -216,7 +219,7 @@ export const AuthProvider = ({ children }) => {
       UserDataStorage.setUserType(USER_TYPES.BUSINESS);
       UserDataStorage.setBusinessId(businessId);
       setupAxiosDefaults(token);
-      const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
+      const businessResponse = await api.get(API_ENDPOINTS.BUSINESS_PROFILE);
       setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
       return businessResponse.data;
     } catch (error) {
@@ -228,19 +231,35 @@ export const AuthProvider = ({ children }) => {
   // Business user signup
   const businessSignup = async (signupData) => {
     try {
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.BUSINESS_SIGNUP), signupData);
+      const api = apiServices.client;
+      let response;
+      try {
+        response = await api.post(API_ENDPOINTS.BUSINESS_SIGNUP, signupData);
+      } catch (err) {
+        // Optional fallback: try alternate path if endpoint not found
+        if (err.response?.status === 404) {
+          logger.warn('Primary business signup path not found, trying /api/businesses/signup');
+          response = await api.post('/api/businesses/signup', signupData);
+        } else {
+          throw err;
+        }
+      }
       if (response.status === 201 || response.status === 200) {
         const { token, businessId } = response.data;
         SecureTokenStorage.setToken(token);
         UserDataStorage.setUserType(USER_TYPES.BUSINESS);
         UserDataStorage.setBusinessId(businessId);
         setupAxiosDefaults(token);
-        const businessResponse = await axios.get(getApiUrl(API_ENDPOINTS.BUSINESS_PROFILE));
+        const businessResponse = await api.get(API_ENDPOINTS.BUSINESS_PROFILE);
         setUser({ ...businessResponse.data, isBusiness: true, isCharity: false });
         return businessResponse.data;
       }
     } catch (error) {
-      logger.error('Business signup error', { message: error.message });
+      logger.error('Business signup error', { 
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data
+      });
       throw error;
     }
   };
@@ -261,7 +280,7 @@ export const AuthProvider = ({ children }) => {
         UserDataStorage.setCharityId(charity._id || charity.id || charity.charityId);
       }
       setupAxiosDefaults(token);
-      const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
+      const charityResponse = await api.get(API_ENDPOINTS.CHARITY_PROFILE);
       setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
       return charityResponse.data;
     } catch (error) {
@@ -273,18 +292,23 @@ export const AuthProvider = ({ children }) => {
   // Charity user signup
   const charitySignup = async (signupData) => {
     try {
-      const response = await axios.post(getApiUrl(API_ENDPOINTS.CHARITY_SIGNUP), signupData);
+      const api = apiServices.client;
+      const response = await api.post(API_ENDPOINTS.CHARITY_SIGNUP, signupData);
       if (response.status === 201 || response.status === 200) {
         const { token } = response.data;
         SecureTokenStorage.setToken(token);
         UserDataStorage.setUserType(USER_TYPES.CHARITY);
         setupAxiosDefaults(token);
-        const charityResponse = await axios.get(getApiUrl(API_ENDPOINTS.CHARITY_PROFILE));
+        const charityResponse = await api.get(API_ENDPOINTS.CHARITY_PROFILE);
         setUser({ ...charityResponse.data, isBusiness: false, isCharity: true });
         return charityResponse.data;
       }
     } catch (error) {
-      logger.error('Charity signup error', { message: error.message });
+      logger.error('Charity signup error', { 
+        status: error.response?.status,
+        message: error.message,
+        data: error.response?.data
+      });
       throw error;
     }
   };
@@ -299,7 +323,8 @@ export const AuthProvider = ({ children }) => {
       setupAxiosDefaults(token);
 
       logger.debug('Social login: Fetching user data from API');
-      const userResponse = await axios.get(getApiUrl(API_ENDPOINTS.USER_PROFILE));
+      const api = apiServices.client;
+      const userResponse = await api.get(API_ENDPOINTS.USER_PROFILE);
       logger.debug('Social login: User data received');
 
       // Store user ID securely

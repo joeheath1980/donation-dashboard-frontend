@@ -3,6 +3,7 @@ import { useMatchSelection } from '../../contexts/MatchSelectionContext';
 import { matchingAPI } from '../../services/api/matchingAPI';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import axios from 'axios';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 import styles from './MatchOpportunityFeed.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { API_CONFIG } from '../../config/api.config';
@@ -284,7 +285,7 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
         { ids: realIds },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${SecureTokenStorage.getToken()}`,
             'Content-Type': 'application/json'
           },
           signal: abortControllerRef.current.signal

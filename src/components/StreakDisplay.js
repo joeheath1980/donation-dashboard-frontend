@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaFire, FaShieldAlt, FaTrophy, FaCalendarAlt, FaSnowflake } from 'react-icons/fa';
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import styles from './StreakDisplay.module.css';
 
 const StreakDisplay = ({ compact = false }) => {
@@ -14,7 +15,7 @@ const StreakDisplay = ({ compact = false }) => {
 
   const fetchStreakData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/daily-actions/streak`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -30,7 +31,7 @@ const StreakDisplay = ({ compact = false }) => {
 
   const toggleWeekendMode = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = SecureTokenStorage.getToken();
       await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/daily-actions/streak/toggle-weekend-mode`,
         {},

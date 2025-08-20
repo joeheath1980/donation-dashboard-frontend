@@ -1,6 +1,7 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
+import { SecureTokenStorage } from '../utils/auth.utils';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import CharitySearch from './CharitySearch/CharitySearch';
 import './SharedStyles.css';
@@ -37,7 +38,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   }, [userId]);
 
   const fetchActivities = async () => {
-    const token = localStorage.getItem('token');
+    const token = SecureTokenStorage.getToken();
     try {
       const response = await axios.get(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, {
         headers: {
@@ -107,7 +108,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = SecureTokenStorage.getToken();
     const formData = new FormData();
     formData.append('organization', newActivity.organization);
     formData.append('organizationABN', newActivity.organizationABN);
@@ -138,7 +139,7 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   };
 
   const handleDeleteActivity = async (activityId) => {
-    const token = localStorage.getItem('token');
+    const token = SecureTokenStorage.getToken();
     try {
       await axios.delete(`${API_CONFIG.BASE_URL}/api/volunteerActivities/${activityId}`, {
         headers: {
