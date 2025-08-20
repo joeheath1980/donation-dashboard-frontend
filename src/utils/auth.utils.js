@@ -107,12 +107,38 @@ export class SecureTokenStorage {
     }
   }
   
+  // Recursion guard to prevent infinite loops
+  static isRemoving = false;
+  static removeAttempts = 0;
+  static lastRemoveTime = 0;
+  
   /**
    * Remove authentication tokens
    * Clears both memory and sessionStorage
    */
   static removeToken() {
     try {
+      // Prevent infinite recursion
+      if (this.isRemoving) {
+        logger.warn('removeToken already in progress, skipping');
+        return;
+      }
+      
+      // Rate limit: max 3 attempts per second
+      const now = Date.now();
+      if (now - this.lastRemoveTime < 1000) {
+        this.removeAttempts++;
+        if (this.removeAttempts > 3) {
+          logger.error('Too many removeToken attempts, circuit breaker activated');
+          return;
+        }
+      } else {
+        this.removeAttempts = 0;
+      }
+      this.lastRemoveTime = now;
+      
+      this.isRemoving = true;
+      
       // Clear memory
       this.memoryToken = null;
       this.memoryRefreshToken = null;
@@ -132,6 +158,8 @@ export class SecureTokenStorage {
       logger.debug('Tokens removed successfully');
     } catch (error) {
       logger.error('Failed to remove tokens', { error: error.message });
+    } finally {
+      this.isRemoving = false;
     }
   }
   
@@ -392,3 +420,42 @@ const authUtils = {
 };
 
 export default authUtils;
+
+/**
+ * Normalize tokens taken from URL params or storage.
+ * - Trims whitespace and wrapping quotes
+ * - Decodes percent-encoding once if applicable
+ * - Removes ALL whitespace characters (including within token)
+ */
+export const normalizeToken = (token) => {
+  if (!token) return token;
+  let s = String(token).trim();
+  
+  // Remove accidental wrapping quotes/backticks
+  s = s.replace(/^(["'`])+|(["'`])+$/g, '');
+  
+  // Decode once if looks percent-encoded
+  try {
+    if (/%[0-9A-Fa-f]{2}/.test(s)) {
+      const dec = decodeURIComponent(s);
+      if (dec && dec.split('.').length === 3) {
+        s = dec;
+      }
+    }
+  } catch {}
+  
+  // Remove ALL whitespace characters (spaces, tabs, newlines, etc.)
+  // This includes spaces that might appear within the token
+  s = s.replace(/\s+/g, '');
+  
+  // Additional safety: remove any non-visible Unicode characters
+  s = s.replace(/[\u0000-\u001F\u007F-\u009F\u00A0\u2000-\u200F\u2028-\u202F\u205F-\u206F\uFEFF]/g, '');
+  
+  // Validate it looks like a JWT (three base64url segments)
+  const parts = s.split('.');
+  if (parts.length !== 3) {
+    console.warn('normalizeToken: Token does not have 3 parts', { parts: parts.length, preview: s.substring(0, 50) });
+  }
+  
+  return s;
+};

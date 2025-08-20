@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import { createLogger } from '../utils/logger';
+import { normalizeToken } from '../utils/auth.utils';
 
 const logger = createLogger('GoogleAuthCallback');
 
@@ -18,10 +19,10 @@ const GoogleAuthCallback = () => {
         // Extract parameters from the URL
         const params = new URLSearchParams(location.search);
         const status = params.get('status');
-        const token = params.get('token');
+        const rawToken = params.get('token');
         const message = params.get('message');
 
-        logger.debug('Parameters extracted from URL', { status, hasToken: !!token });
+        logger.debug('Parameters extracted from URL', { status, hasToken: !!rawToken });
 
         if (status === 'error') {
           logger.error('OAuth error from backend', { message });
@@ -29,7 +30,23 @@ const GoogleAuthCallback = () => {
           return;
         }
 
-        if (status === 'success' && token) {
+        if (status === 'success' && rawToken) {
+          logger.debug('Raw token from URL', { 
+            length: rawToken?.length, 
+            preview: rawToken?.slice(0, 50) + '...',
+            hasSpace: rawToken?.includes(' '),
+            hasTab: rawToken?.includes('\t'),
+            hasNewline: rawToken?.includes('\n')
+          });
+          
+          const token = normalizeToken(rawToken);
+          
+          logger.debug('Normalized OAuth token', { 
+            length: token?.length, 
+            preview: token?.slice(0, 50) + '...',
+            fullToken: token // Log full token for debugging
+          });
+          
           // Decode the token to get user info
           const decodedToken = jwtDecode(token);
           logger.debug('Token decoded', { 

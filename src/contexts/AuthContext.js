@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_ENDPOINTS, STORAGE_KEYS, USER_TYPES, getApiUrl } from '../config/api.config';
 import { createLogger } from '../utils/logger';
 import apiServices, { csrfServiceAPI } from '../services/api.service';
-import { SecureTokenStorage, UserDataStorage } from '../utils/auth.utils';
+import { SecureTokenStorage, UserDataStorage, normalizeToken } from '../utils/auth.utils';
 
 const AuthContext = createContext();
 const logger = createLogger('AuthContext');
@@ -19,18 +19,43 @@ const setupAxiosDefaults = (token) => {
   }
 };
 
+// Track if we're already handling a 401 to prevent loops
+let isHandling401 = false;
+let failedRequests = [];
+
 // Add axios interceptor for token refresh
 axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     
+    // Log what we're getting
+    if (error.response?.status === 401) {
+      logger.debug('401 Response received', {
+        url: originalRequest.url,
+        hasAuth: !!originalRequest.headers.Authorization,
+        authPreview: originalRequest.headers.Authorization?.substring(0, 50),
+        retry: originalRequest._retry
+      });
+    }
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      
+      // Prevent multiple simultaneous 401 handlers
+      if (isHandling401) {
+        // Queue this request to retry after current handler completes
+        return new Promise((resolve, reject) => {
+          failedRequests.push({ resolve, reject, originalRequest });
+        });
+      }
+      
+      isHandling401 = true;
       
       try {
         const refreshToken = SecureTokenStorage.getRefreshToken();
         if (refreshToken) {
+          logger.debug('Attempting token refresh');
           const response = await axios.post(getApiUrl('/auth/refresh-token'), {
             refreshToken
           });
@@ -39,15 +64,34 @@ axios.interceptors.response.use(
           SecureTokenStorage.setToken(accessToken);
           setupAxiosDefaults(accessToken);
           
+          // Retry all queued requests with new token
+          const requests = [...failedRequests];
+          failedRequests = [];
+          
+          requests.forEach(({ resolve, originalRequest }) => {
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            resolve(axios(originalRequest));
+          });
+          
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return axios(originalRequest);
         }
       } catch (refreshError) {
         logger.error('Token refresh failed', refreshError);
-        // Clear auth and redirect to login
-        SecureTokenStorage.clearAll();
-        UserDataStorage.clearAll();
-        window.location.href = '/login';
+        
+        // Clear queued requests
+        failedRequests.forEach(({ reject }) => reject(refreshError));
+        failedRequests = [];
+        
+        // Only redirect if not already redirecting
+        if (window.location.pathname !== '/login') {
+          // Clear auth and redirect to login
+          SecureTokenStorage.clearAll();
+          UserDataStorage.clearAll();
+          window.location.href = '/login';
+        }
+      } finally {
+        isHandling401 = false;
       }
     }
     
@@ -316,11 +360,30 @@ export const AuthProvider = ({ children }) => {
   // Social login
   const socialLogin = async (token) => {
     try {
-      logger.debug('Social login: Starting');
-      SecureTokenStorage.setToken(token);
+      logger.debug('Social login: Starting with raw token', { 
+        length: token?.length,
+        hasSpace: token?.includes(' '),
+        preview: token?.slice(0, 50) + '...'
+      });
+      
+      const clean = normalizeToken(token);
+      
+      logger.debug('Social login: normalized token', { 
+        length: clean?.length, 
+        preview: clean?.slice(0, 50) + '...',
+        tokenParts: clean?.split('.').map(p => p.substring(0, 10) + '...'),
+        fullToken: clean // For debugging
+      });
+      
+      SecureTokenStorage.setToken(clean);
       UserDataStorage.setUserType(USER_TYPES.USER);
       logger.debug('Social login: Token and userType stored securely');
-      setupAxiosDefaults(token);
+      setupAxiosDefaults(clean);
+      
+      // Log what was actually set in axios
+      logger.debug('Social login: Authorization header set', {
+        header: axios.defaults.headers.common['Authorization']?.substring(0, 60) + '...'
+      });
 
       logger.debug('Social login: Fetching user data from API');
       const api = apiServices.client;
