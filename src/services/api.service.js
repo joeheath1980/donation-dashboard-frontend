@@ -28,7 +28,11 @@ apiClient.interceptors.request.use(
     const token = SecureTokenStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      logger.debug('API interceptor: Added Bearer token');
+      logger.debug('API interceptor: Added Bearer token', {
+        tokenLength: token.length,
+        tokenPreview: token.substring(0, 50) + '...',
+        fullHeader: config.headers.Authorization.substring(0, 60) + '...'
+      });
     } else {
       logger.debug('API interceptor: No Bearer token available');
     }
@@ -86,10 +90,10 @@ apiClient.interceptors.response.use(
       
       // Handle 401 Unauthorized
       if (response.status === 401) {
-        logger.info('Unauthorized - clearing auth data');
-        SecureTokenStorage.removeToken();
-        csrfService.clearToken(); // Clear CSRF token on logout
-        // Don't redirect here - let components handle it
+        // Don't clear tokens here - let AuthContext interceptor handle token refresh
+        // This was causing the circuit breaker to trigger
+        logger.info('Unauthorized - will be handled by AuthContext interceptor');
+        // Only log, don't clear tokens or redirect
       }
       
       // Handle CSRF token errors (403 with CSRF message)
