@@ -227,22 +227,41 @@ export const AuthProvider = ({ children }) => {
     try {
       logger.debug('Attempting to register user', { name, email });
       const api = apiServices.client;
+
+      // Ensure CSRF token is initialized prior to registration (CASA requirement)
+      try {
+        await csrfServiceAPI.initializeToken();
+      } catch (e) {
+        logger.warn('CSRF init failed before signup, proceeding with interceptor assist', { error: e.message });
+      }
+
       const response = await api.post(API_ENDPOINTS.USER_REGISTER, { name, email, password });
       logger.debug('Registration successful');
 
-      if (response.data.token) {
-        SecureTokenStorage.setToken(response.data.token);
-        UserDataStorage.setUserType(USER_TYPES.USER);
-        logger.debug('Token stored securely');
-        setupAxiosDefaults(response.data.token);
+      // Prefer accessToken (new API), fallback to token (legacy). Capture refreshToken if provided
+      const { accessToken, token, refreshToken } = response.data || {};
+      const authToken = accessToken || token;
 
-        const validatedUser = await api.get(API_ENDPOINTS.USER_PROFILE);
-        UserDataStorage.setUserId(validatedUser.data._id || validatedUser.data.id);
-        setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
-        return validatedUser.data;
-      } else {
+      if (!authToken) {
         throw new Error('Registration successful, but no token received.');
       }
+
+      // Store tokens (memory + session) and set global axios Authorization default
+      SecureTokenStorage.setToken(authToken, refreshToken || null);
+      UserDataStorage.setUserType(USER_TYPES.USER);
+      setupAxiosDefaults(authToken);
+
+      // Temporary: also persist for routing checks and legacy paths
+      try {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, authToken);
+        localStorage.setItem(STORAGE_KEYS.USER_TYPE, USER_TYPES.USER);
+      } catch {}
+
+      // Fetch and set user profile
+      const validatedUser = await api.get(API_ENDPOINTS.USER_PROFILE);
+      UserDataStorage.setUserId(validatedUser.data._id || validatedUser.data.id);
+      setUser({ ...validatedUser.data, isBusiness: false, isCharity: false });
+      return validatedUser.data;
     } catch (error) {
       logger.error('User signup error', { 
         status: error.response?.status,
