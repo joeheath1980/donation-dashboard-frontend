@@ -53,7 +53,7 @@ const PasswordStrengthIndicator = ({ password, requirements, strength }) => {
       <div className={styles.requirements}>
         <div className={`${styles.requirement} ${requirements.length ? styles.met : ''}`}>
           <span className={styles.icon}>{requirements.length ? '✓' : '×'}</span>
-          At least 8 characters
+          At least 12 characters
         </div>
         <div className={`${styles.requirement} ${requirements.uppercase ? styles.met : ''}`}>
           <span className={styles.icon}>{requirements.uppercase ? '✓' : '×'}</span>

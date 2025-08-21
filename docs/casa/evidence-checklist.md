@@ -8,11 +8,13 @@ CASA Evidence Checklist (Frontend)
   - Token storage design: memory + sessionStorage only; no localStorage persistence
   - Token refresh path and expiry handling
   - Logout/clear-all behavior
+  - OAuth code exchange: Request/response logs for `/api/auth/exchange-code`; confirmation that tokens do not appear in URL or browser history
 
 - CSRF Protections
   - CSRF token retrieval, caching, and header/body injection rules
   - Safe methods bypass; error-retry handling
   - Cookie flags on CSRF token (Secure/HttpOnly/SameSite=Lax or Strict) – server evidence
+  - Network captures showing `X-CSRF-Token` on POST/PUT/DELETE across refactored endpoints
 
 - XSS Controls
   - Forbidden sinks: absence of dangerouslySetInnerHTML; any innerHTML guarded by sanitizer
@@ -25,6 +27,7 @@ CASA Evidence Checklist (Frontend)
 
 - Transport Security
   - HSTS header; HTTPS-only production; secure WebSocket endpoints
+  - OAuth redirects and callback origins validated (no mixed content)
 
 - Logging & Secrets
   - Logger scrubbing controls; production verbosity limits
@@ -35,4 +38,4 @@ CASA Evidence Checklist (Frontend)
   - SAST/DAST scans – report sample
   - Code review gates and change control
   - Incident response plan (token revocation/rotation)
-
+  - CI guard evidence: `.github/workflows/forbidden-axios.yml` run output (passing) and sample failure screenshot

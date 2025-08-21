@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaSearch, 
@@ -20,7 +20,7 @@ import styles from './AdminSharedStyles.module.css';
 import { API_CONFIG } from '../config/api.config';
 
 const AdminBusinessPartnerManagement = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,10 +53,8 @@ const AdminBusinessPartnerManagement = () => {
   const fetchPartners = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/admin/business-partners`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/admin/business-partners');
       setPartners(response.data);
     } catch (err) {
       console.error('Error fetching partners:', err);
@@ -68,11 +66,8 @@ const AdminBusinessPartnerManagement = () => {
 
   const handleStatusChange = async (partnerId, newStatus) => {
     try {
-      await axios.put(
-        `${API_CONFIG.BASE_URL}/api/admin/business-partners/${partnerId}/status`,
-        { status: newStatus },
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.put(`/api/admin/business-partners/${partnerId}/status`, { status: newStatus });
       setPartners(partners.map(partner => 
         partner._id === partnerId ? { ...partner, status: newStatus } : partner
       ));
@@ -88,10 +83,8 @@ const AdminBusinessPartnerManagement = () => {
     if (!window.confirm('Are you sure you want to remove this business partner?')) return;
     
     try {
-      await axios.delete(
-        `${API_CONFIG.BASE_URL}/api/admin/business-partners/${partnerId}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.delete(`/api/admin/business-partners/${partnerId}`);
       setPartners(partners.filter(p => p._id !== partnerId));
       setMessage({ type: 'success', text: 'Partner removed successfully' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);

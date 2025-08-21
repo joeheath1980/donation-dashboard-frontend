@@ -146,6 +146,19 @@ class CSRFTokenService {
     // CASA: Always add CSRF for state-changing requests, even when JWT is present
     // Some backends require CSRF alongside JWT for sensitive endpoints
 
+    // Allowlist endpoints that must be CSRF-exempt (e.g., OAuth code exchange)
+    try {
+      const fullUrl = `${config.baseURL || ''}${config.url || ''}`;
+      if (/\/api\/auth\/exchange-code(\b|\/|\?|#)/.test(fullUrl)) {
+        logger.debug('CSRF: Skipping for exchange-code endpoint');
+        return config;
+      }
+      if (/\/api\/users\/change-email\/verify(\b|\/|\?|#)/.test(fullUrl)) {
+        logger.debug('CSRF: Skipping for change-email verify endpoint');
+        return config;
+      }
+    } catch {}
+
     // Get CSRF token
     let token;
     try {

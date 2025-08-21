@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaSun, FaSearch, FaShareAlt, FaVoteYea, FaBookOpen, FaCheck, FaLock, FaFire } from 'react-icons/fa';
-import axios from 'axios';
-import { SecureTokenStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
 import styles from './DailyActions.module.css';
 
 const DailyActions = ({ onPointsEarned }) => {
@@ -59,11 +58,8 @@ const DailyActions = ({ onPointsEarned }) => {
 
   const fetchTodayActions = async () => {
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/daily-actions/today`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/daily-actions/today');
       
       setTodayActions(response.data.actions);
       setStreak(response.data.streak.current);
@@ -80,12 +76,8 @@ const DailyActions = ({ onPointsEarned }) => {
     setAnimatingAction(action.id);
     
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}${action.endpoint}`,
-        action.id === 'shareProgress' ? { platform: 'twitter' } : {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const api = apiServices.client;
+      const response = await api.post(action.endpoint, action.id === 'shareProgress' ? { platform: 'twitter' } : {});
 
       // Update local state
       setTodayActions(prev => ({

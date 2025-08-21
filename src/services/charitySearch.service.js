@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from './api.service';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import { createLogger } from '../utils/logger';
 
@@ -16,12 +16,7 @@ class CharitySearchService {
 
   async searchCharities(query, limit = 10) {
     try {
-      const response = await axios.get(`${this.baseURL}/api/charity-search/simple`, {
-        params: { q: query, limit },
-        headers: {
-          'Authorization': `Bearer ${this.token}`
-        }
-      });
+      const response = await apiClient.get(`/api/charity-search/simple`, { params: { q: query, limit } });
       return response.data;
     } catch (error) {
       logger.error('Error searching charities', { error: error.message });
@@ -31,11 +26,7 @@ class CharitySearchService {
 
   async getCharityDetails(abn) {
     try {
-      const response = await axios.get(`${this.baseURL}/api/charity-search/details/${abn}`, {
-        headers: {
-          'Authorization': `Bearer ${this.token}`
-        }
-      });
+      const response = await apiClient.get(`/api/charity-search/details/${abn}`);
       return response.data;
     } catch (error) {
       logger.error('Error getting charity details', { error: error.message });

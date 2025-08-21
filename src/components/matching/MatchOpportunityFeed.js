@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useMatchSelection } from '../../contexts/MatchSelectionContext';
 import { matchingAPI } from '../../services/api/matchingAPI';
 import CharitySearch from '../CharitySearch/CharitySearch';
-import axios from 'axios';
-import { SecureTokenStorage } from '../../utils/auth.utils';
+// Uses matchingAPI for core fetches; no direct axios here
 import styles from './MatchOpportunityFeed.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { API_CONFIG } from '../../config/api.config';
@@ -280,17 +279,10 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await axios.post(
-        `${API_CONFIG.BASE_URL}/api/charities/batch`,
-        { ids: realIds },
-        {
-          headers: {
-            'Authorization': `Bearer ${SecureTokenStorage.getToken()}`,
-            'Content-Type': 'application/json'
-          },
-          signal: abortControllerRef.current.signal
-        }
-      );
+      const { apiClient } = await import('../../services/api.service');
+      const response = await apiClient.post('/api/charities/batch', { ids: realIds }, {
+        signal: abortControllerRef.current.signal
+      });
 
       const fetchedMap = response.data;
       console.log(`[Batch] Received ${Object.keys(fetchedMap).length} charities`);

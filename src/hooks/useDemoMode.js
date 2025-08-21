@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { API_CONFIG } from '../config/api.config';
 
 export const useDemoMode = () => {
@@ -9,9 +9,8 @@ export const useDemoMode = () => {
   useEffect(() => {
     const fetchDemoStatus = async () => {
       try {
-        const response = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/demo/status`
-        );
+        const api = apiServices.client;
+        const response = await api.get(`/api/demo/status`);
         setDemoMode(response.data);
       } catch (error) {
         console.error('Error fetching demo mode status:', error);

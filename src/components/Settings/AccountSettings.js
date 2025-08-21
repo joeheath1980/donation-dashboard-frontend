@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../../services/api.service';
+import oauthService from '../../services/oauthService';
 import {
   FaLock,
   FaEnvelope,
@@ -12,21 +13,34 @@ import {
   FaTimes,
   FaBell,
   FaExclamationTriangle,
-  FaSave
+  FaSave,
+  FaGoogle,
+  FaMicrosoft,
+  FaLink,
+  FaUnlink
 } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './AccountSettings.module.css';
-import { API_CONFIG } from '../../config/api.config';
 
 const AccountSettings = () => {
-  const { user, getAuthHeaders, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   
   // State for different sections
   const [activeSection, setActiveSection] = useState('password');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  // OAuth connection state
+  const [oauthConnections, setOauthConnections] = useState({
+    google: { connected: false },
+    microsoft: { connected: false }
+  });
+  const [disconnecting, setDisconnecting] = useState({
+    google: false,
+    microsoft: false
+  });
   
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -61,20 +75,79 @@ const AccountSettings = () => {
   
   useEffect(() => {
     fetchNotificationSettings();
+    fetchOAuthConnections();
   }, []);
   
   const fetchNotificationSettings = async () => {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/users/notification-settings`,
-        { headers }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/users/notification-settings');
       if (response.data) {
         setNotifications(response.data);
       }
     } catch (error) {
       console.error('Error fetching notification settings:', error);
+    }
+  };
+  
+  const fetchOAuthConnections = async () => {
+    try {
+      const status = await oauthService.getConnectionStatus();
+      setOauthConnections(status);
+    } catch (error) {
+      console.error('Error fetching OAuth connections:', error);
+    }
+  };
+  
+  const handleDisconnectGoogle = async () => {
+    if (!window.confirm('Are you sure you want to disconnect your Google account? This will stop email forwarding from Gmail.')) {
+      return;
+    }
+    
+    try {
+      setDisconnecting(prev => ({ ...prev, google: true }));
+      await oauthService.disconnectGoogle();
+      setOauthConnections(prev => ({
+        ...prev,
+        google: { connected: false }
+      }));
+      toast.success('Google account disconnected successfully');
+      
+      // Show re-auth prompt if needed
+      if (window.location.pathname.includes('email')) {
+        toast.info('Please reconnect your Google account to continue using email forwarding');
+      }
+    } catch (error) {
+      toast.error('Failed to disconnect Google account');
+      console.error('Error disconnecting Google:', error);
+    } finally {
+      setDisconnecting(prev => ({ ...prev, google: false }));
+    }
+  };
+  
+  const handleDisconnectMicrosoft = async () => {
+    if (!window.confirm('Are you sure you want to disconnect your Microsoft account? This will stop email forwarding from Outlook.')) {
+      return;
+    }
+    
+    try {
+      setDisconnecting(prev => ({ ...prev, microsoft: true }));
+      await oauthService.disconnectMicrosoft();
+      setOauthConnections(prev => ({
+        ...prev,
+        microsoft: { connected: false }
+      }));
+      toast.success('Microsoft account disconnected successfully');
+      
+      // Show re-auth prompt if needed
+      if (window.location.pathname.includes('email')) {
+        toast.info('Please reconnect your Microsoft account to continue using email forwarding');
+      }
+    } catch (error) {
+      toast.error('Failed to disconnect Microsoft account');
+      console.error('Error disconnecting Microsoft:', error);
+    } finally {
+      setDisconnecting(prev => ({ ...prev, microsoft: false }));
     }
   };
   
@@ -89,7 +162,7 @@ const AccountSettings = () => {
     if (!passwordData.newPassword) {
       errors.newPassword = 'New password is required';
     } else if (passwordData.newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters';
+      errors.newPassword = 'Password must be at least 12 characters';
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
@@ -102,15 +175,11 @@ const AccountSettings = () => {
     
     setSaving(true);
     try {
-      const headers = getAuthHeaders();
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/users/change-password`,
-        {
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        },
-        { headers }
-      );
+      const api = apiServices.client;
+      await api.post('/api/users/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
       
       toast.success('Password changed successfully!');
       setPasswordData({
@@ -150,15 +219,11 @@ const AccountSettings = () => {
     
     setSaving(true);
     try {
-      const headers = getAuthHeaders();
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/users/change-email`,
-        {
-          newEmail: emailData.newEmail,
-          password: emailData.password
-        },
-        { headers }
-      );
+      const api = apiServices.client;
+      await api.post('/api/users/change-email', {
+        newEmail: emailData.newEmail,
+        password: emailData.password
+      });
       
       toast.success('Email change request sent! Please check your new email for verification.');
       setEmailData({
@@ -185,12 +250,8 @@ const AccountSettings = () => {
   const saveNotificationSettings = async () => {
     setSaving(true);
     try {
-      const headers = getAuthHeaders();
-      await axios.put(
-        `${API_CONFIG.BASE_URL}/api/users/notification-settings`,
-        notifications,
-        { headers }
-      );
+      const api = apiServices.client;
+      await api.put('/api/users/notification-settings', notifications);
       toast.success('Notification settings saved!');
     } catch (error) {
       toast.error('Failed to save notification settings');
@@ -207,12 +268,8 @@ const AccountSettings = () => {
     
     setSaving(true);
     try {
-      const headers = getAuthHeaders();
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/users/deactivate`,
-        {},
-        { headers }
-      );
+      const api = apiServices.client;
+      await api.post('/api/users/deactivate', {});
       toast.success('Account deactivated. You can reactivate by logging in again.');
       setTimeout(() => {
         logout();
@@ -234,11 +291,8 @@ const AccountSettings = () => {
     
     setSaving(true);
     try {
-      const headers = getAuthHeaders();
-      await axios.delete(
-        `${API_CONFIG.BASE_URL}/api/users/account`,
-        { headers }
-      );
+      const api = apiServices.client;
+      await api.delete('/api/users/account');
       toast.success('Account deleted successfully');
       setTimeout(() => {
         logout();
@@ -256,6 +310,7 @@ const AccountSettings = () => {
     { id: 'password', label: 'Change Password', icon: FaLock },
     { id: 'email', label: 'Change Email', icon: FaEnvelope },
     { id: 'notifications', label: 'Email Notifications', icon: FaBell },
+    { id: 'connections', label: 'Connected Accounts', icon: FaLink },
     { id: 'account', label: 'Account Management', icon: FaUser }
   ];
   
@@ -313,7 +368,7 @@ const AccountSettings = () => {
                   {passwordErrors.newPassword && (
                     <span className={styles.errorMessage}>{passwordErrors.newPassword}</span>
                   )}
-                  <small className={styles.hint}>Minimum 8 characters</small>
+                  <small className={styles.hint}>Minimum 12 characters</small>
                 </div>
                 
                 <div className={styles.formGroup}>
@@ -488,6 +543,91 @@ const AccountSettings = () => {
               >
                 <FaSave /> {saving ? 'Saving...' : 'Save Notification Settings'}
               </button>
+            </section>
+          )}
+          
+          {activeSection === 'connections' && (
+            <section className={styles.section}>
+              <h2><FaLink /> Connected Accounts</h2>
+              <p className={styles.sectionDescription}>
+                Manage your connected OAuth accounts for email forwarding and authentication.
+              </p>
+              
+              <div className={styles.connectionsList}>
+                <div className={styles.connectionItem}>
+                  <div className={styles.connectionInfo}>
+                    <FaGoogle className={styles.providerIcon} />
+                    <div>
+                      <h3>Google Account</h3>
+                      <p>
+                        {oauthConnections.google?.connected 
+                          ? `Connected: ${oauthConnections.google.email || 'Gmail account'}` 
+                          : 'Not connected'}
+                      </p>
+                      <small>Used for Gmail forwarding and Google sign-in</small>
+                    </div>
+                  </div>
+                  <div className={styles.connectionActions}>
+                    {oauthConnections.google?.connected ? (
+                      <button
+                        className={styles.disconnectButton}
+                        onClick={handleDisconnectGoogle}
+                        disabled={disconnecting.google}
+                      >
+                        <FaUnlink /> {disconnecting.google ? 'Disconnecting...' : 'Disconnect'}
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.connectButton}
+                        onClick={() => window.location.href = '/auth/google'}
+                      >
+                        <FaLink /> Connect Google
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={styles.connectionItem}>
+                  <div className={styles.connectionInfo}>
+                    <FaMicrosoft className={styles.providerIcon} />
+                    <div>
+                      <h3>Microsoft Account</h3>
+                      <p>
+                        {oauthConnections.microsoft?.connected 
+                          ? `Connected: ${oauthConnections.microsoft.email || 'Outlook account'}` 
+                          : 'Not connected'}
+                      </p>
+                      <small>Used for Outlook forwarding and Microsoft sign-in</small>
+                    </div>
+                  </div>
+                  <div className={styles.connectionActions}>
+                    {oauthConnections.microsoft?.connected ? (
+                      <button
+                        className={styles.disconnectButton}
+                        onClick={handleDisconnectMicrosoft}
+                        disabled={disconnecting.microsoft}
+                      >
+                        <FaUnlink /> {disconnecting.microsoft ? 'Disconnecting...' : 'Disconnect'}
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.connectButton}
+                        onClick={() => window.location.href = '/auth/microsoft'}
+                      >
+                        <FaLink /> Connect Microsoft
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className={styles.connectionNote}>
+                <FaExclamationTriangle />
+                <p>
+                  Disconnecting an account will stop email forwarding from that provider. 
+                  You can reconnect at any time to resume the service.
+                </p>
+              </div>
             </section>
           )}
           

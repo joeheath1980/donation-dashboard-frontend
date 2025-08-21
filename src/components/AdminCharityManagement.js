@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaSearch, 
@@ -24,7 +24,7 @@ import sharedStyles from './AdminSharedStyles.module.css';
 import { API_CONFIG } from '../config/api.config';
 
 const AdminCharityManagement = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const navigate = useNavigate();
   
   const [charities, setCharities] = useState([]);
@@ -44,13 +44,8 @@ const AdminCharityManagement = () => {
   const fetchCharities = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/admin/charities`,
-        {
-          headers: getAuthHeaders(),
-          params: { status: filter !== 'all' ? filter : undefined }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/admin/charities', { params: { status: filter !== 'all' ? filter : undefined } });
       setCharities(response.data);
     } catch (error) {
       console.error('Error fetching charities:', error);
@@ -63,11 +58,8 @@ const AdminCharityManagement = () => {
   const approveCharity = async (charityId) => {
     try {
       setActionLoading(true);
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/admin/charities/${charityId}/approve`,
-        {},
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.post(`/api/admin/charities/${charityId}/approve`, {});
       setMessage({ type: 'success', text: 'Charity approved successfully!' });
       fetchCharities();
       setShowDetails(false);
@@ -87,11 +79,8 @@ const AdminCharityManagement = () => {
 
     try {
       setActionLoading(true);
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/admin/charities/${charityId}/reject`,
-        { reason: rejectReason },
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.post(`/api/admin/charities/${charityId}/reject`, { reason: rejectReason });
       setMessage({ type: 'success', text: 'Charity rejected' });
       fetchCharities();
       setShowDetails(false);

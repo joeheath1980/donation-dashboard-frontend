@@ -12,6 +12,15 @@ export class SecureTokenStorage {
   // Memory storage for tokens (protects against XSS)
   static memoryToken = null;
   static memoryRefreshToken = null;
+  static get useSessionStorage() {
+    try {
+      // Default true for current behavior; can be disabled via env flag
+      const v = process.env.REACT_APP_ENABLE_SESSION_STORAGE_TOKENS;
+      return v === undefined ? true : String(v).toLowerCase() === 'true';
+    } catch {
+      return true;
+    }
+  }
   
   /**
    * Store authentication token
@@ -32,8 +41,8 @@ export class SecureTokenStorage {
         this.memoryRefreshToken = refreshToken;
       }
       
-      // Store in sessionStorage for tab persistence
-      if (typeof sessionStorage !== 'undefined') {
+      // Store in sessionStorage for tab persistence (feature-flagged)
+      if (this.useSessionStorage && typeof sessionStorage !== 'undefined') {
         sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
         if (refreshToken) {
           sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
@@ -62,7 +71,7 @@ export class SecureTokenStorage {
       }
       
       // Secondary: Check sessionStorage (for page refreshes within same session)
-      if (typeof sessionStorage !== 'undefined') {
+      if (this.useSessionStorage && typeof sessionStorage !== 'undefined') {
         const sessionToken = sessionStorage.getItem(STORAGE_KEYS.TOKEN);
         if (sessionToken) {
           // Restore to memory
@@ -91,7 +100,7 @@ export class SecureTokenStorage {
       }
       
       // Secondary: Check sessionStorage
-      if (typeof sessionStorage !== 'undefined') {
+      if (this.useSessionStorage && typeof sessionStorage !== 'undefined') {
         const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
         if (refreshToken) {
           this.memoryRefreshToken = refreshToken;

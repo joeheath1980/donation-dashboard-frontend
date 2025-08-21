@@ -3,10 +3,12 @@ Controls Matrix (CASA ↔ OWASP ASVS ↔ Implementation)
 - AuthN/Session (ASVS V2/V3):
   - Memory + sessionStorage tokens; no localStorage persistence (src/utils/auth.utils.js)
   - Refresh/expiry handling (src/contexts/AuthContext.js, SessionManager)
+  - OAuth code exchange implemented; URL tokens removed (src/components/*Callback.js)
 
 - CSRF (ASVS V4):
   - CSRF service adds token to state-changing requests; retries on 403 (src/services/csrf.service.js)
   - Cookie-based token with withCredentials
+  - All state-changing requests centralized via apiClient; CI guard prevents direct axios
 
 - XSS (ASVS V5):
   - DOMPurify sanitizer with strict style allowlist (src/utils/sanitizer.js)
@@ -23,4 +25,4 @@ Controls Matrix (CASA ↔ OWASP ASVS ↔ Implementation)
 - Logging/Secrets (ASVS V7/V9):
   - Redaction and reduced production logs (src/utils/logger.js)
   - No secrets in source; env-driven config
-
+  - Token/Authorization logging removed from callbacks and interceptors

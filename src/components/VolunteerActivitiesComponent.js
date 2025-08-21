@@ -1,7 +1,6 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
-import axios from 'axios';
-import { SecureTokenStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import CharitySearch from './CharitySearch/CharitySearch';
 import './SharedStyles.css';
@@ -38,13 +37,9 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   }, [userId]);
 
   const fetchActivities = async () => {
-    const token = SecureTokenStorage.getToken();
     try {
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const api = apiServices.client;
+      const response = await api.get('/api/volunteerActivities');
       setActivities(response.data);
     } catch (error) {
       console.error('Error fetching volunteer activities:', error);
@@ -108,7 +103,6 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
       return;
     }
 
-    const token = SecureTokenStorage.getToken();
     const formData = new FormData();
     formData.append('organization', newActivity.organization);
     formData.append('organizationABN', newActivity.organizationABN);
@@ -119,11 +113,9 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
     formData.append('evidence', selectedFile);
 
     try {
-      const response = await axios.post(`${API_CONFIG.BASE_URL}/api/volunteerActivities`, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        },
+      const api = apiServices.client;
+      const response = await api.post('/api/volunteerActivities', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       setActivities([...activities, response.data]);
       setNewActivity({ organization: '', organizationABN: '', hours: '', date: '', description: '', charityType: '' });
@@ -139,13 +131,9 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
   };
 
   const handleDeleteActivity = async (activityId) => {
-    const token = SecureTokenStorage.getToken();
     try {
-      await axios.delete(`${API_CONFIG.BASE_URL}/api/volunteerActivities/${activityId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const api = apiServices.client;
+      await api.delete(`/api/volunteerActivities/${activityId}`);
       setActivities(activities.filter(activity => activity._id !== activityId));
     } catch (error) {
       console.error('Error deleting volunteer activity:', error);

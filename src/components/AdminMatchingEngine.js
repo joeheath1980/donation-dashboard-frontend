@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './AdminMatchingEngine.module.css';
 import sharedStyles from './AdminSharedStyles.module.css';
@@ -37,7 +37,7 @@ const AdminMatchingEngine = () => {
     isActive: true
   });
 
-  const apiUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+  const apiUrl = process.env.REACT_APP_API_BASE_URL || '';
 
   useEffect(() => {
     fetchMatchingData();
@@ -46,16 +46,11 @@ const AdminMatchingEngine = () => {
   const fetchMatchingData = async () => {
     try {
       setLoading(true);
+      const api = apiServices.client;
       const [rulesRes, statsRes, activeRes] = await Promise.all([
-        axios.get(`${apiUrl}/api/admin/matching/rules`, {
-          headers: { 'x-auth-token': user.token }
-        }),
-        axios.get(`${apiUrl}/api/admin/matching/stats`, {
-          headers: { 'x-auth-token': user.token }
-        }),
-        axios.get(`${apiUrl}/api/admin/matching/active`, {
-          headers: { 'x-auth-token': user.token }
-        })
+        api.get(`${apiUrl}/api/admin/matching/rules`),
+        api.get(`${apiUrl}/api/admin/matching/stats`),
+        api.get(`${apiUrl}/api/admin/matching/active`)
       ]);
       
       setMatchingRules(rulesRes.data || []);
@@ -75,13 +70,8 @@ const AdminMatchingEngine = () => {
 
   const handleCreateRule = async () => {
     try {
-      await axios.post(
-        `${apiUrl}/api/admin/matching/rules`,
-        newRule,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.post(`${apiUrl}/api/admin/matching/rules`, newRule);
       alert('Matching rule created successfully');
       setShowRuleModal(false);
       resetRuleForm();
@@ -94,13 +84,8 @@ const AdminMatchingEngine = () => {
 
   const handleUpdateRule = async () => {
     try {
-      await axios.put(
-        `${apiUrl}/api/admin/matching/rules/${selectedRule._id}`,
-        newRule,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.put(`${apiUrl}/api/admin/matching/rules/${selectedRule._id}` , newRule);
       alert('Matching rule updated successfully');
       setShowRuleModal(false);
       resetRuleForm();
@@ -113,13 +98,8 @@ const AdminMatchingEngine = () => {
 
   const handleToggleRule = async (ruleId, isActive) => {
     try {
-      await axios.patch(
-        `${apiUrl}/api/admin/matching/rules/${ruleId}/toggle`,
-        { isActive },
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.patch(`${apiUrl}/api/admin/matching/rules/${ruleId}/toggle`, { isActive });
       fetchMatchingData();
     } catch (error) {
       console.error('Error toggling rule:', error);
@@ -129,13 +109,8 @@ const AdminMatchingEngine = () => {
 
   const handleUpdateMultipliers = async () => {
     try {
-      await axios.post(
-        `${apiUrl}/api/admin/matching/multipliers`,
-        tierMultipliers,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.post(`${apiUrl}/api/admin/matching/multipliers`, tierMultipliers);
       alert('Tier multipliers updated successfully');
       setShowConfigModal(false);
     } catch (error) {

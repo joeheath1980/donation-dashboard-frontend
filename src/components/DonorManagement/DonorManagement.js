@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../../services/api.service';
 import styles from './DonorManagement.module.css';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -26,7 +26,7 @@ import BulkActions from './components/BulkActions';
 import { API_CONFIG } from '../../config/api.config';
 
 function DonorManagement() {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [donors, setDonors] = useState([]);
@@ -58,20 +58,10 @@ function DonorManagement() {
       setLoading(true);
       const charityId = user.charityId || user._id;
       
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/donors`,
-        {
-          headers: getAuthHeaders(),
-          params: {
-            page: currentPage,
-            limit: 20,
-            search: searchTerm,
-            sort: sortBy,
-            order: sortOrder,
-            filter: filterBy
-          }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/${charityId}/donors`, {
+        params: { page: currentPage, limit: 20, search: searchTerm, sort: sortBy, order: sortOrder, filter: filterBy }
+      });
       
       setDonors(response.data.donors || getDemoDonors());
       setTotalPages(response.data.pages || 1);
@@ -181,14 +171,8 @@ function DonorManagement() {
   const handleExport = async () => {
     try {
       const charityId = user.charityId || user._id;
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/donors/export`,
-        {
-          headers: getAuthHeaders(),
-          params: { format: 'csv' },
-          responseType: 'blob'
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/${charityId}/donors/export`, { params: { format: 'csv' }, responseType: 'blob' });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

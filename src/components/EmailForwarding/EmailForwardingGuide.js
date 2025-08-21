@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { SecureTokenStorage } from '../../utils/auth.utils';
+import apiServices from '../../services/api.service';
 import styles from './EmailForwardingGuide.module.css';
 
 const EmailForwardingGuide = () => {
@@ -24,15 +23,14 @@ const EmailForwardingGuide = () => {
       setLoading(true);
       
       // Get forwarding email address
-      const emailResponse = await axios.get(`${API_URL}/api/email/forward-address`, {
-        headers: { Authorization: `Bearer ${SecureTokenStorage.getToken()}` }
-      });
+      const api = apiServices.client;
+      const emailResponse = await api.get(`/api/email/forward-address`);
       // Use the forwardToEmail instead of the old donor-specific email
       setForwardingEmail(emailResponse.data.forwardToEmail || emailResponse.data.email);
       setUserInstructions(emailResponse.data.instructions);
 
       // Get search templates
-      const templatesResponse = await axios.get(`${API_URL}/api/email/search-templates`);
+      const templatesResponse = await api.get(`/api/email/search-templates`);
       setSearchTemplates(templatesResponse.data);
       
       setLoading(false);

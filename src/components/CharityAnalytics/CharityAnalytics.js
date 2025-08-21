@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../../services/api.service';
 import styles from './CharityAnalytics.module.css';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -24,7 +24,7 @@ import ImpactMetrics from './components/ImpactMetrics';
 import { API_CONFIG } from '../../config/api.config';
 
 function CharityAnalytics() {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
@@ -74,39 +74,12 @@ function CharityAnalytics() {
       }
 
       // Fetch all analytics data
+      const api = apiServices.client;
       const [overview, donations, revenue, donors] = await Promise.all([
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/overview`,
-          { 
-            headers: getAuthHeaders(),
-            params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
-          }
-        ),
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/donations`,
-          { 
-            headers: getAuthHeaders(),
-            params: { 
-              startDate: startDate.toISOString(), 
-              endDate: endDate.toISOString(),
-              groupBy: dateRange === 'year' ? 'month' : dateRange === 'month' ? 'week' : 'day'
-            }
-          }
-        ),
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/revenue-streams`,
-          { 
-            headers: getAuthHeaders(),
-            params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
-          }
-        ),
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/donors`,
-          { 
-            headers: getAuthHeaders(),
-            params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() }
-          }
-        )
+        api.get(`/api/charities/${charityId}/analytics/overview`, { params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() } }),
+        api.get(`/api/charities/${charityId}/analytics/donations`, { params: { startDate: startDate.toISOString(), endDate: endDate.toISOString(), groupBy: dateRange === 'year' ? 'month' : dateRange === 'month' ? 'week' : 'day' } }),
+        api.get(`/api/charities/${charityId}/analytics/revenue-streams`, { params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() } }),
+        api.get(`/api/charities/${charityId}/analytics/donors`, { params: { startDate: startDate.toISOString(), endDate: endDate.toISOString() } })
       ]);
 
       setAnalyticsData({
@@ -193,14 +166,8 @@ function CharityAnalytics() {
   const handleExport = async (format) => {
     try {
       const charityId = user.charityId || user._id;
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/analytics/export`,
-        {
-          headers: getAuthHeaders(),
-          params: { format, dateRange },
-          responseType: 'blob'
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/${charityId}/analytics/export`, { params: { format, dateRange }, responseType: 'blob' });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

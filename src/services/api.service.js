@@ -28,11 +28,7 @@ apiClient.interceptors.request.use(
     const token = SecureTokenStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      logger.debug('API interceptor: Added Bearer token', {
-        tokenLength: token.length,
-        tokenPreview: token.substring(0, 50) + '...',
-        fullHeader: config.headers.Authorization.substring(0, 60) + '...'
-      });
+      logger.debug('API interceptor: Added Bearer token');
     } else {
       logger.debug('API interceptor: No Bearer token available');
     }
@@ -59,7 +55,7 @@ apiClient.interceptors.request.use(
       hasCSRF: !!config.headers['X-CSRF-Token']
     });
     
-    logger.debug('API interceptor: Final headers', Object.keys(config.headers));
+    logger.debug('API interceptor: Final headers (names only)', Object.keys(config.headers));
     
     return config;
   },

@@ -32,7 +32,7 @@ export const validatePassword = (password) => {
   }
   
   const requirements = {
-    length: password.length >= 8,
+    length: password.length >= 12,
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
@@ -40,7 +40,7 @@ export const validatePassword = (password) => {
   };
   
   if (!requirements.length) {
-    errors.push('at least 8 characters');
+    errors.push('at least 12 characters');
   } else {
     strength++;
   }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import businessAPI from '../services/businessAPI';
 import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
@@ -597,19 +597,10 @@ const PrimaryCharitiesStep = ({ formData, onChange }) => {
     setLoading(true);
     try {
       // Use the new Australian charity database endpoint
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/business/onboarding/search-charities`,
-        {
-          params: {
-            query: searchQuery || 'charity', // Default search term
-            limit: 50,
-            offset: 0
-          },
-          headers: {
-            'Authorization': `Bearer ${require('../utils/auth.utils').SecureTokenStorage.getToken()}`
-          }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/business/onboarding/search-charities', {
+        params: { query: searchQuery || 'charity', limit: 50, offset: 0 }
+      });
       setCharities(response.data.charities || []);
     } catch (error) {
       console.error('Failed to fetch charities:', error);

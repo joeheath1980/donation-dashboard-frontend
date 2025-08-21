@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../../../services/api.service';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './ImpactMetrics.module.css';
 import { API_CONFIG } from '../../../config/api.config';
@@ -19,7 +19,7 @@ import {
 } from 'react-icons/fa';
 
 function ImpactMetrics({ charityId }) {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -41,10 +41,8 @@ function ImpactMetrics({ charityId }) {
 
   const fetchMetrics = async () => {
     try {
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/${charityId}/impact-metrics`);
       setMetrics(response.data);
     } catch (error) {
       console.error('Error fetching metrics:', error);
@@ -64,11 +62,8 @@ function ImpactMetrics({ charityId }) {
     if (!newMetric.label || !newMetric.value) return;
     
     try {
-      const response = await axios.post(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics`,
-        newMetric,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.post(`/api/charities/${charityId}/impact-metrics`, newMetric);
       setMetrics([...metrics, response.data]);
       setNewMetric({ label: '', value: '', unit: '', icon: 'FaHeart' });
     } catch (error) {
@@ -82,11 +77,8 @@ function ImpactMetrics({ charityId }) {
 
   const handleUpdateMetric = async (id, updatedMetric) => {
     try {
-      await axios.put(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics/${id}`,
-        updatedMetric,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.put(`/api/charities/${charityId}/impact-metrics/${id}`, updatedMetric);
       setMetrics(metrics.map(m => m.id === id ? { ...m, ...updatedMetric } : m));
     } catch (error) {
       console.error('Error updating metric:', error);
@@ -99,10 +91,8 @@ function ImpactMetrics({ charityId }) {
     if (!window.confirm('Are you sure you want to delete this metric?')) return;
     
     try {
-      await axios.delete(
-        `${API_CONFIG.BASE_URL}/api/charities/${charityId}/impact-metrics/${id}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.delete(`/api/charities/${charityId}/impact-metrics/${id}`);
       setMetrics(metrics.filter(m => m.id !== id));
     } catch (error) {
       console.error('Error deleting metric:', error);

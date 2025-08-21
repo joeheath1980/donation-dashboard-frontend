@@ -7,7 +7,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 import { stripePromise, apiCall } from '../utils/stripe';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import businessAPI from '../services/businessAPI';
 import './DonationForm.css';
 import { API_CONFIG } from '../config/api.config';
@@ -392,15 +392,8 @@ function DonationFormWrapper() {
   useEffect(() => {
     const fetchCharity = async () => {
       try {
-        const token = require('../utils/auth.utils').SecureTokenStorage.getToken();
-        const response = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/charities/${charityId}`, 
-          {
-            headers: {
-              'Authorization': token ? `Bearer ${token}` : ''
-            }
-          }
-        );
+        const api = apiServices.client;
+        const response = await api.get(`/api/charities/${charityId}`);
         // Use normalizedCharity if available, fallback to charity or raw data
         setCharity(response.data.normalizedCharity || response.data.charity || response.data);
       } catch (err) {

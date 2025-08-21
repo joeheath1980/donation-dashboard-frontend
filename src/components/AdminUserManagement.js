@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { FaSearch, FaUser, FaEnvelope, FaShieldAlt, FaCheckCircle, FaTimesCircle, FaSpinner, FaStar, FaTrophy, FaEdit } from 'react-icons/fa';
 import { API_ENDPOINTS, getApiUrl } from '../config/api.config';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,7 +7,7 @@ import styles from './AdminSharedStyles.module.css';
 import userStyles from './AdminUserManagement.module.css';
 
 const AdminUserManagement = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,9 +26,8 @@ const AdminUserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS), {
-          headers: getAuthHeaders()
-        });
+        const api = apiServices.client;
+        const response = await api.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS));
         setUsers(response.data);
         setLoading(false);
       } catch (err) {
@@ -38,13 +37,12 @@ const AdminUserManagement = () => {
     };
 
     fetchUsers();
-  }, [getAuthHeaders]);
+  }, []);
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await axios.put(`${getApiUrl('/api/admin/users')}/${userId}/role`, { role: newRole }, {
-        headers: getAuthHeaders()
-      });
+      const api = apiServices.client;
+      await api.put(`${getApiUrl('/api/admin/users')}/${userId}/role`, { role: newRole });
       setUsers(users.map(user => 
         user._id === userId ? { ...user, role: newRole } : user
       ));
@@ -55,9 +53,8 @@ const AdminUserManagement = () => {
 
   const handleStatusChange = async (userId, newStatus) => {
     try {
-      await axios.put(`${getApiUrl('/api/admin/users')}/${userId}/status`, { status: newStatus }, {
-        headers: getAuthHeaders()
-      });
+      const api = apiServices.client;
+      await api.put(`${getApiUrl('/api/admin/users')}/${userId}/status`, { status: newStatus });
       setUsers(users.map(user => 
         user._id === userId ? { ...user, status: newStatus } : user
       ));
@@ -70,17 +67,14 @@ const AdminUserManagement = () => {
     if (!selectedUser) return;
     
     try {
-      await axios.put(`${getApiUrl('/api/admin/users')}/${selectedUser._id}/impact-score`, {
+      const api = apiServices.client;
+      await api.put(`${getApiUrl('/api/admin/users')}/${selectedUser._id}/impact-score`, {
         adjustments: scoreAdjustment,
         tierOverride: tierOverride || null
-      }, {
-        headers: getAuthHeaders()
       });
       
       // Refresh user data
-      const response = await axios.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS), {
-        headers: getAuthHeaders()
-      });
+      const response = await api.get(getApiUrl(API_ENDPOINTS.ADMIN_USERS));
       setUsers(response.data);
       
       setMessage({ type: 'success', text: 'Impact score updated successfully' });

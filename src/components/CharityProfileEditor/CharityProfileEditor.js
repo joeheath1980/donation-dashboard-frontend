@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './CharityProfileEditor.module.css';
 import {

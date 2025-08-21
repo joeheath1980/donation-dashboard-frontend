@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './WelcomePage.module.css';
 import './SharedStyles.css';
 import logoSvg from '../assets/logo.png';
@@ -51,9 +51,8 @@ const WelcomePage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/platform-stats`
-        );
+        const api = apiServices.client;
+        const response = await api.get(`/api/platform-stats`);
         setPlatformStats(response.data);
       } catch (error) {
         console.error('Error fetching platform stats:', error);

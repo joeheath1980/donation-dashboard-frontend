@@ -4,7 +4,7 @@ import styles from './GlobalGivingProjects.module.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { API_CONFIG } from '../config/api.config';
 
@@ -45,7 +45,7 @@ function GlobalGivingProjects() {
       console.log('Search Query:', searchQuery);
 
       // Use process.env.REACT_APP_API_BASE_URL for *YOUR* backend endpoint
-      const endpoint = `${API_CONFIG.BASE_URL}/api/globalgiving/projects/recommended`;
+      const endpoint = `/api/globalgiving/projects/recommended`;
 
       console.log('API URL:', endpoint);
 
@@ -53,14 +53,7 @@ function GlobalGivingProjects() {
       const params = user && searchQuery ? { searchQuery } : undefined;
 
       // Get auth headers (for your backend)
-      const headers = user ? {
-        ...getAuthHeaders(),
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      } : {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+      const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
 
       console.log('Request Config:', {
         params: params,
@@ -75,7 +68,8 @@ function GlobalGivingProjects() {
       };
 
       // Make request to *YOUR* backend
-      const response = await axios.get(endpoint, config);
+      const api = apiServices.client;
+      const response = await api.get(endpoint, config);
       console.log('API Response:', response.data);
 
       if (Array.isArray(response.data)) {

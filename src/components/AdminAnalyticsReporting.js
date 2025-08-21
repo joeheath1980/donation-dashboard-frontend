@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaChartLine, 
@@ -50,7 +50,7 @@ ChartJS.register(
 );
 
 const AdminAnalyticsReporting = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -66,22 +66,11 @@ const AdminAnalyticsReporting = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
+      const api = apiServices.client;
       const [analyticsRes, receiptRes, matchingRes] = await Promise.all([
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/admin/analytics`,
-          { 
-            headers: getAuthHeaders(),
-            params: { dateRange }
-          }
-        ),
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/admin/receipt-approval/stats`,
-          { headers: getAuthHeaders() }
-        ),
-        axios.get(
-          `${API_CONFIG.BASE_URL}/api/admin/matching/stats`,
-          { headers: getAuthHeaders() }
-        )
+        api.get(`/api/admin/analytics`, { params: { dateRange } }),
+        api.get(`/api/admin/receipt-approval/stats`),
+        api.get(`/api/admin/matching/stats`)
       ]);
       
       setAnalytics(analyticsRes.data);
@@ -97,14 +86,8 @@ const AdminAnalyticsReporting = () => {
 
   const exportReport = async (format) => {
     try {
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/admin/analytics/export`,
-        { 
-          headers: getAuthHeaders(),
-          params: { format, dateRange },
-          responseType: 'blob'
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/admin/analytics/export`, { params: { format, dateRange }, responseType: 'blob' });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

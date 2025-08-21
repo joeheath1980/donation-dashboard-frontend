@@ -5,7 +5,7 @@ import apiServices from '../services/api.service';
 import styles from './DemoQuickLogin.module.css';
 
 const DemoQuickLogin = ({ onCredentialsFill }) => {
-  console.log('DemoQuickLogin component rendered, onCredentialsFill:', typeof onCredentialsFill);
+  // debug: component mounted (no sensitive data)
   const [credentials, setCredentials] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('users');
@@ -28,36 +28,32 @@ const DemoQuickLogin = ({ onCredentialsFill }) => {
   }, [api]);
 
   const quickLogin = async (type, category) => {
-    console.log('Quick login clicked - type:', type, 'category:', category);
+    // debug: quick login clicked (no sensitive data)
     try {
-      console.log('Making API call to /api/demo/quick-login');
+      // debug: calling demo quick-login API
       const response = await api.post('/api/demo/quick-login', { userType: type, category });
 
-      console.log('Quick login response:', response.data);
-      console.log('Response data type:', typeof response.data);
-      console.log('Response data email:', response.data?.email);
-      console.log('Response data password:', response.data?.password);
+      // do not log demo credentials
 
       if (onCredentialsFill) {
         // Ensure we extract the correct values
         const email = response.data?.email;
         const password = response.data?.password;
         
-        console.log('Extracted email:', email, 'Type:', typeof email);
-        console.log('Extracted password:', password, 'Type:', typeof password);
+        // do not log extracted credentials
         
         // Make sure we're passing strings, not objects
         if (typeof email === 'string' && typeof password === 'string') {
-          console.log('Calling onCredentialsFill with:', { email, password, category });
+          // pass credentials to parent without logging
           onCredentialsFill(email, password, category);
         } else {
           console.error('Invalid response format:', response.data);
-          console.error('Email type:', typeof email, 'Password type:', typeof password);
+          // avoid logging sensitive values or types
           alert('Failed to load demo credentials. Invalid response format.');
         }
       } else {
         // Otherwise, navigate to login with demo params
-        console.log('No onCredentialsFill, navigating to login page');
+        // navigating to login page for demo flow
         navigate(`/login?demo=${type}&category=${category}`);
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../../services/api.service';
 import {
   FaUser,
   FaMapMarkerAlt,
@@ -20,7 +20,7 @@ import { debounce } from 'lodash';
 import { API_CONFIG } from '../../config/api.config';
 
 const ProfileEditor = () => {
-  const { user, getAuthHeaders, setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
@@ -93,12 +93,8 @@ const ProfileEditor = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const headers = getAuthHeaders();
-      
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/users/profile`,
-        { headers }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/users/profile');
       
       // Handle both wrapped and unwrapped API responses
       const userData = response.data.user || response.data;
@@ -162,10 +158,9 @@ const ProfileEditor = () => {
       
       setCheckingUsername(true);
       try {
-        const headers = getAuthHeaders();
-        const response = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/users/check-username/${username}`,
-          { headers }
+        const api = apiServices.client;
+        const response = await api.get(
+          `/api/users/check-username/${username}`
         );
         setUsernameAvailable(response.data.available);
       } catch (error) {
@@ -275,7 +270,6 @@ const ProfileEditor = () => {
     
     try {
       setSaving(true);
-      const headers = getAuthHeaders();
       
       // Log what we're sending to debug
       console.log('Saving profile with data:', {
@@ -283,11 +277,8 @@ const ProfileEditor = () => {
         profilePictureUrl: profile.profilePictureUrl
       });
       
-      const response = await axios.put(
-        `${API_CONFIG.BASE_URL}/api/users/profile`,
-        profile,
-        { headers }
-      );
+      const api = apiServices.client;
+      const response = await api.put('/api/users/profile', profile);
       
       // Update auth context with new user data
       if (response.data.user) {
@@ -336,19 +327,13 @@ const ProfileEditor = () => {
       const formData = new FormData();
       formData.append('profilePicture', file);
       
-      const headers = getAuthHeaders();
-      console.log('Auth headers:', headers);
-      delete headers['Content-Type']; // Let browser set multipart boundary
+      const api = apiServices.client;
+      // Let browser set multipart boundary
       
-      const uploadUrl = `${API_CONFIG.BASE_URL}/api/upload/profile-picture`;
-      console.log('Upload URL:', uploadUrl);
+      const uploadUrl = '/api/upload/profile-picture';
       console.log('Making upload request...');
       
-      const uploadResponse = await axios.post(
-        uploadUrl,
-        formData,
-        { headers }
-      );
+      const uploadResponse = await api.post(uploadUrl, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       
       if (uploadResponse.data.success) {
         console.log('Upload response:', uploadResponse.data);
@@ -369,11 +354,7 @@ const ProfileEditor = () => {
           
           console.log('Saving profile with update:', profileUpdate);
           
-          const saveResponse = await axios.put(
-            `${API_CONFIG.BASE_URL}/api/users/profile`,
-            profileUpdate,
-            { headers: getAuthHeaders() }
-          );
+          const saveResponse = await api.put('/api/users/profile', profileUpdate);
           
           console.log('Profile save response:', saveResponse.data);
           

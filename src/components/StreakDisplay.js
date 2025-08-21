@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaFire, FaShieldAlt, FaTrophy, FaCalendarAlt, FaSnowflake } from 'react-icons/fa';
-import axios from 'axios';
-import { SecureTokenStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
 import styles from './StreakDisplay.module.css';
 
 const StreakDisplay = ({ compact = false }) => {
@@ -15,11 +14,8 @@ const StreakDisplay = ({ compact = false }) => {
 
   const fetchStreakData = async () => {
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/daily-actions/streak`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/daily-actions/streak');
       
       setStreakData(response.data);
       setLoading(false);
@@ -31,12 +27,8 @@ const StreakDisplay = ({ compact = false }) => {
 
   const toggleWeekendMode = async () => {
     try {
-      const token = SecureTokenStorage.getToken();
-      await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/daily-actions/streak/toggle-weekend-mode`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const api = apiServices.client;
+      await api.post('/api/daily-actions/streak/toggle-weekend-mode', {});
       
       // Refresh streak data
       fetchStreakData();

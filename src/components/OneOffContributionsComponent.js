@@ -21,7 +21,7 @@ import {
 import InstantTooltip from './InstantTooltip';
 import { createPortal } from 'react-dom';
 import { FaQuestionCircle } from 'react-icons/fa';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import DefaultBusinessLogo from './DefaultBusinessLogo';
 import { API_CONFIG } from '../config/api.config';
 
@@ -43,7 +43,7 @@ function formatDate(dateString) {
 }
 
 const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const [oneOffContributions, setOneOffContributions] = useState([]);
   const [localContributions, setLocalContributions] = useState([]);
   const [editingContribution, setEditingContribution] = useState(null);
@@ -74,15 +74,14 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
 
   const fetchContributions = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/contributions/one-off`, {
-        headers: getAuthHeaders()
-      });
+      const api = apiServices.client;
+      const response = await api.get('/api/contributions/one-off');
       setOneOffContributions(response.data);
     } catch (err) {
       console.error('Error fetching one-off contributions:', err);
       setError('Failed to load one-off contributions. Please try again later.');
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -118,9 +117,8 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
   const handleDelete = async (contributionId) => {
     if (window.confirm('Are you sure you want to delete this contribution?')) {
       try {
-        await axios.delete(`${API_CONFIG.BASE_URL}/api/contributions/one-off/${contributionId}`, {
-          headers: getAuthHeaders()
-        });
+        const api = apiServices.client;
+        await api.delete(`/api/contributions/one-off/${contributionId}`);
         setLocalContributions(prevContributions => prevContributions.filter(contribution => contribution._id !== contributionId));
         await fetchContributions();
       } catch (error) {
@@ -137,7 +135,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
 
   const handleSave = async (editedContribution) => {
     try {
-      let url = `${API_CONFIG.BASE_URL}/api/contributions/one-off`;
+      let url = `/api/contributions/one-off`;
       let method = 'POST';
 
       if (editingContribution && editingContribution._id) {
@@ -156,15 +154,8 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
         }
       }
 
-      const response = await axios({
-        method: method,
-        url: url,
-        data: formData,
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const api = apiServices.client;
+      const response = await api.request({ method, url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } });
 
       const updatedContribution = response.data;
 

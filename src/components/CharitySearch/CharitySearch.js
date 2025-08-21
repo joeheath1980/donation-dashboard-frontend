@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiServices from '../../services/api.service';
 import { FaSearch, FaSpinner, FaCheckCircle, FaBuilding } from 'react-icons/fa';
 import styles from './CharitySearch.module.css';
 import { API_CONFIG } from '../../config/api.config';
@@ -26,15 +26,8 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
     setError(null);
 
     try {
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charity-search/simple`,
-        {
-          params: { q: term },
-          headers: {
-            Authorization: `Bearer ${SecureTokenStorage.getToken()}`
-          }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/charity-search/simple', { params: { q: term } });
       
       setSearchResults(response.data.charities || []);
       setShowDropdown(true);
@@ -79,14 +72,8 @@ const CharitySearch = ({ onCharitySelect, initialValue, placeholder = "Search by
   const handleSelectCharity = async (charity) => {
     try {
       // Fetch full charity details
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charity-search/details/${charity.ABN || charity.abn}`,
-        {
-          headers: {
-            Authorization: `Bearer ${SecureTokenStorage.getToken()}`
-          }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charity-search/details/${charity.ABN || charity.abn}`);
       
       const fullCharityData = response.data;
       // Ensure we have an _id for navigation

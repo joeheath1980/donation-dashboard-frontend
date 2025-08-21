@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './BusinessDashboard.module.css';
 import {
   RiAddLine,
@@ -21,7 +21,7 @@ import LiveActivityFeed from './Profile/components/LiveActivityFeed';
 import { API_CONFIG } from '../config/api.config';
 
 function BusinessDashboard() {
-  const { getAuthHeaders, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [businessData, setBusinessData] = useState({
@@ -45,10 +45,8 @@ function BusinessDashboard() {
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
-        const apiUrl = `${API_CONFIG.BASE_URL}/api/business/me`;
-        console.log('Fetching business data from:', apiUrl);
-        
-        const response = await axios.get(apiUrl, { headers: getAuthHeaders() });
+        const api = apiServices.client;
+        const response = await api.get('/api/business/me');
         
         console.log('Business data received:', {
           hasOnboardingCompleted: 'onboardingCompleted' in response.data,
@@ -76,7 +74,7 @@ function BusinessDashboard() {
     };
 
     fetchBusinessData();
-  }, [getAuthHeaders, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -84,16 +82,11 @@ function BusinessDashboard() {
 
       try {
         // Get campaigns from the correct endpoint
-        const campaignsRes = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/business/campaigns`, 
-          { headers: getAuthHeaders() }
-        );
+        const api = apiServices.client;
+        const campaignsRes = await api.get('/api/business/campaigns');
         
         // Get dashboard overview which includes recent matches and stats
-        const overviewRes = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/business/dashboard/overview`, 
-          { headers: getAuthHeaders() }
-        );
+        const overviewRes = await api.get('/api/business/dashboard/overview');
 
         console.log('Campaigns response:', campaignsRes.data);
         // Handle both array and object response formats
@@ -227,7 +220,7 @@ function BusinessDashboard() {
     };
 
     fetchDashboardData();
-  }, [businessData.onboardingCompleted, getAuthHeaders]);
+  }, [businessData.onboardingCompleted]);
 
   const calculateBudgetPercentage = () => {
     if (businessData.annualGivingBudget === 0) return 0;

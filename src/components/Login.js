@@ -62,14 +62,8 @@ function Login() {
       setError(decodeURIComponent(errorMessage));
     }
 
-    const token = params.get('token');
-    if (token) {
-      console.log('Token found in URL, handling social login callback');
-      handleSocialLoginCallback(token);
-    } else {
-      // Make sure socialLoginInProgress is false if there's no token
-      setSocialLoginInProgress(false);
-    }
+    // Legacy token-in-URL flow removed in favor of code exchange
+    setSocialLoginInProgress(false);
 
     // Handle demo mode auto-fill
     const demoType = searchParams.get('demo');
@@ -97,8 +91,7 @@ function Login() {
   };
 
   const handleCredentialsFill = (email, password, accountType) => {
-    console.log('handleCredentialsFill called with:', { email, password, accountType });
-    console.log('Email type:', typeof email, 'Password type:', typeof password);
+    // receive demo credentials (do not log)
     
     if (typeof email !== 'string' || typeof password !== 'string') {
       console.error('Invalid credentials passed to handleCredentialsFill');
@@ -113,7 +106,7 @@ function Login() {
         password,
         accountType: accountType || prev.accountType
       };
-      console.log('Setting form data to:', newData);
+      // do not log form data containing password
       return newData;
     });
   };
@@ -155,8 +148,7 @@ function Login() {
     return fieldError === '';
   };
 
-  // Debug logging
-  console.log('Login component state:', { loading, socialLoginInProgress, formData });
+  // Debug state omitted to avoid logging sensitive data
 
   const handleSubmit = async (e) => {
     console.log('handleSubmit called!');
@@ -186,14 +178,13 @@ function Login() {
     setLoading(true);
 
     try {
-      console.log('Starting login with email:', formData.email, 'accountType:', formData.accountType);
-      console.log('FormData at login:', formData);
+      // begin login
       let loginResult;
       switch (formData.accountType) {
         case 'business':
           loginResult = await businessLogin(formData.email, formData.password);
           // For business logins, set the currentUserId using either _id or businessId
-          console.log('Business login successful:', loginResult);
+          // business login successful
           logger.debug('Business login successful');
           localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.businessId);
           // Small delay to ensure state updates complete
@@ -204,7 +195,7 @@ function Login() {
         case 'charity':
           loginResult = await charityLogin(formData.email, formData.password);
           // For charity logins, set the currentUserId using either _id or id
-          console.log('Charity login successful:', loginResult);
+          // charity login successful
           logger.debug('Charity login successful');
           localStorage.setItem(STORAGE_KEYS.USER_ID, loginResult._id || loginResult.id);
           // Small delay to ensure state updates complete
@@ -213,10 +204,10 @@ function Login() {
           }, 100);
           break;
         default:
-          console.log('Calling login function...');
+          // calling user login
           loginResult = await login(formData.email, formData.password);
           // For regular user logins, set the currentUserId using either _id or id
-          console.log('User login successful:', loginResult);
+          // user login successful
           logger.debug('User login successful', { loginResult });
           const userId = loginResult._id || loginResult.id;
           if (userId) {
@@ -228,14 +219,13 @@ function Login() {
           
           // Verify token was stored
           const storedToken = SecureTokenStorage.getToken();
-          console.log('Token stored after login:', !!storedToken);
           
           const targetPath = loginResult?.isAdmin ? '/admin' : '/dashboard';
-          console.log('Navigating to:', targetPath);
+          // navigating to target path
           
           // Increased delay to ensure all state updates complete
           setTimeout(() => {
-            console.log('Executing navigation to:', targetPath);
+            // execute navigation
             navigate(targetPath, { replace: true });
           }, 500); // Increased to 500ms
       }

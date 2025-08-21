@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { FaUsers, FaBriefcase, FaHeart, FaBullhorn } from 'react-icons/fa';
 import styles from './DemoStats.module.css';
 import { API_CONFIG } from '../config/api.config';
@@ -11,9 +11,8 @@ const DemoStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(
-          `${API_CONFIG.BASE_URL}/api/demo/quick-stats`
-        );
+        const api = apiServices.client;
+        const response = await api.get(`/api/demo/quick-stats`);
         setStats(response.data);
       } catch (error) {
         console.error('Error fetching demo stats:', error);

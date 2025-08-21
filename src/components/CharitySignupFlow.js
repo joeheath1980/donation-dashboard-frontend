@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { CHARITY_CATEGORIES, formatABN } from '../constants/charityCategories';
 import { 
   RiUserLine, 
@@ -19,7 +19,6 @@ import {
 import styles from './CharitySignupFlow.module.css';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
-import { API_CONFIG } from '../config/api.config';
 
 const CharitySignupFlow = () => {
   const navigate = useNavigate();
@@ -181,12 +180,8 @@ const CharitySignupFlow = () => {
     setSearchingCharity(true);
     try {
       // Use the public search-charities endpoint that doesn't require authentication
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/search-charities`,
-        {
-          params: { q: searchTerm }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/search-charities', { params: { q: searchTerm } });
       
       if (response.data?.result?.records) {
         // Map ACNC records to our format
@@ -237,7 +232,8 @@ const CharitySignupFlow = () => {
     setSearchingAddress(true);
     try {
       // Using OpenStreetMap Nominatim for free address search
-      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      const api = apiServices.client;
+      const response = await api.get('https://nominatim.openstreetmap.org/search', {
         params: {
           q: searchTerm + ', Australia',
           format: 'json',
@@ -334,7 +330,7 @@ const CharitySignupFlow = () => {
         if (!formData.password) {
           errors.password = 'Password is required';
         } else if (formData.password.length < 8) {
-          errors.password = 'Password must be at least 8 characters';
+          errors.password = 'Password must be at least 12 characters';
         }
         if (formData.password !== formData.confirmPassword) {
           errors.confirmPassword = 'Passwords do not match';
@@ -441,10 +437,8 @@ const CharitySignupFlow = () => {
         registrationNumber: formData.registrationNumber
       };
       
-      const response = await axios.post(
-        `${API_CONFIG.BASE_URL}/api/charities/signup`,
-        submitData
-      );
+      const api = apiServices.client;
+      const response = await api.post('/api/charities/signup', submitData);
       
       setSuccess(true);
       
@@ -458,14 +452,10 @@ const CharitySignupFlow = () => {
         UserDataStorage.setUserType('charity');
         UserDataStorage.setCharityId(response.data.charityId);
         
-        // Setup axios defaults with token
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-        
         // Fetch the charity profile to set in auth context
         try {
-          const profileResponse = await axios.get(
-            `${API_CONFIG.BASE_URL}/api/charities/me`
-          );
+          const api2 = apiServices.client;
+          const profileResponse = await api2.get('/api/charities/me');
           
           // Set user in auth context with charity flag
           setUser({ ...profileResponse.data, isBusiness: false, isCharity: true });

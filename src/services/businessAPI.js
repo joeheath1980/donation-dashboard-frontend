@@ -1,17 +1,7 @@
-import axios from 'axios';
-import { API_CONFIG } from '../config/api.config';
-import { getAuthHeaders } from '../utils/auth.utils';
+import { apiClient } from './api.service';
 
-const API_BASE_URL = API_CONFIG.BASE_URL;
-
-// Helper to construct API URL with proper /api prefix
-const apiUrl = (endpoint) => {
-  // If API_BASE_URL already ends with /api, don't add it again
-  const baseUrl = API_BASE_URL.endsWith('/api') 
-    ? API_BASE_URL 
-    : `${API_BASE_URL}/api`;
-  return `${baseUrl}${endpoint}`;
-};
+// Helper to normalize endpoint paths for apiClient
+const apiUrl = (endpoint) => `/api${endpoint}`;
 
 // Use centralized, CASA-compliant auth header builder
 
@@ -19,22 +9,16 @@ export const businessAPI = {
   // Onboarding endpoints
   onboarding: {
     updateProfile: (data) => 
-      axios.post(apiUrl('/business/onboarding/profile'), data, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/onboarding/profile'), data),
     
     uploadCSRReport: async (file) => {
       const formData = new FormData();
       formData.append('report', file);  // Fixed: Changed from 'csrReport' to 'report'
       
-      const headers = getAuthHeaders();
-      delete headers['Content-Type']; // Remove Content-Type to let browser set it for multipart/form-data
-      
       try {
         const uploadUrl = apiUrl('/business/onboarding/upload-csr-report');
-        
-        const response = await axios.post(uploadUrl, formData, {
-          headers
+        const response = await apiClient.post(uploadUrl, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response;
       } catch (error) {
@@ -43,8 +27,7 @@ export const businessAPI = {
           status: error.response?.status,
           statusText: error.response?.statusText,
           data: error.response?.data,
-          message: error.message,
-          token: headers.Authorization ? 'Token present' : 'No token'
+          message: error.message
         };
         
         console.error('CSR Upload Error Details:', errorDetails);
@@ -53,223 +36,138 @@ export const businessAPI = {
     },
     
     selectPrimaryCharities: (charities) => 
-      axios.post(apiUrl('/business/onboarding/primary-charities'), { primaryCharities: charities }, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/onboarding/primary-charities'), { primaryCharities: charities }),
     
     // Note: suggestCharities is no longer needed - suggestions come from primary-charities response
     suggestCharities: (primaryCharities) => 
-      axios.post(apiUrl('/business/onboarding/primary-charities'), { primaryCharities }, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/onboarding/primary-charities'), { primaryCharities }),
     
     setCharityPortfolio: (portfolio) => 
-      axios.post(apiUrl('/business/onboarding/charity-portfolio'), { portfolio }, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/onboarding/charity-portfolio'), { portfolio }),
     
     setTargetingConfig: (config) => 
-      axios.post(apiUrl('/business/onboarding/targeting'), config, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/onboarding/targeting'), config),
     
     // The complete endpoint is now called 'targeting'
     complete: (allData) => 
-      axios.post(apiUrl('/business/onboarding/targeting'), allData, { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.post(apiUrl('/business/onboarding/targeting'), allData)
   },
 
   // Campaign endpoints
   campaigns: {
     create: (data) => 
-      axios.post(apiUrl('/business/campaigns/create'), data, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/campaigns/create'), data),
     
     list: (params = {}) => 
-      axios.get(apiUrl('/business/campaigns'), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl('/business/campaigns'), { params }),
     
     get: (id) => 
-      axios.get(apiUrl(`/business/campaigns/${id}`), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl(`/business/campaigns/${id}`)),
     
     update: (id, data) => 
-      axios.put(apiUrl(`/business/campaigns/${id}`), data, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.put(apiUrl(`/business/campaigns/${id}`), data),
     
     pause: (id) => 
-      axios.post(apiUrl(`/business/campaigns/${id}/pause`), {}, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl(`/business/campaigns/${id}/pause`), {}),
     
     resume: (id) => 
-      axios.post(apiUrl(`/business/campaigns/${id}/resume`), {}, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl(`/business/campaigns/${id}/resume`), {}),
     
     end: (id) => 
-      axios.post(apiUrl(`/business/campaigns/${id}/end`), {}, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl(`/business/campaigns/${id}/end`), {}),
     
     delete: (id) => 
-      axios.delete(apiUrl(`/business/campaigns/${id}`), { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.delete(apiUrl(`/business/campaigns/${id}`))
   },
 
   // Analytics endpoints
   analytics: {
     overview: (params = {}) => 
-      axios.get(apiUrl('/business/analytics/overview'), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl('/business/analytics/overview'), { params }),
     
     getCampaignAnalytics: (campaignId, params = {}) => 
-      axios.get(apiUrl(`/business/analytics/campaigns/${campaignId}`), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl(`/business/analytics/campaigns/${campaignId}`), { params }),
     
     demographics: (params = {}) => 
-      axios.get(apiUrl('/business/analytics/demographics'), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl('/business/analytics/demographics'), { params }),
     
     charities: (params = {}) => 
-      axios.get(apiUrl('/business/analytics/charities'), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl('/business/analytics/charities'), { params }),
     
     export: (format, params = {}) => 
-      axios.get(apiUrl(`/business/analytics/export/${format}`), { 
-        headers: getAuthHeaders(),
-        params,
-        responseType: format === 'csv' ? 'blob' : 'json'
-      }),
+      apiClient.get(apiUrl(`/business/analytics/export/${format}`), { params, responseType: format === 'csv' ? 'blob' : 'json' }),
     
     exportCampaignData: (campaignId, format) => 
-      axios.get(apiUrl(`/business/campaigns/${campaignId}/export`), { 
-        headers: getAuthHeaders(),
-        params: { format },
-        responseType: 'blob'
-      }),
+      apiClient.get(apiUrl(`/business/campaigns/${campaignId}/export`), { params: { format }, responseType: 'blob' }),
     
     scheduleReport: (campaignId, schedule) => 
-      axios.post(apiUrl(`/business/campaigns/${campaignId}/reports`), schedule, { 
-        headers: getAuthHeaders()
-      })
+      apiClient.post(apiUrl(`/business/campaigns/${campaignId}/reports`), schedule)
   },
 
   // Matching endpoints
   matching: {
     previewMatches: (donationData) => 
-      axios.post(apiUrl('/donations/preview-matches'), donationData, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/donations/preview-matches'), donationData),
     
     getRecentMatches: (limit = 10) => 
-      axios.get(apiUrl('/business/matches/recent'), { 
-        headers: getAuthHeaders(),
-        params: { limit } 
-      }),
+      apiClient.get(apiUrl('/business/matches/recent'), { params: { limit } }),
     
     getMatchDetails: (matchId) => 
-      axios.get(apiUrl(`/business/matches/${matchId}`), { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.get(apiUrl(`/business/matches/${matchId}`))
   },
 
   // Portfolio management
   portfolio: {
     get: () => 
-      axios.get(apiUrl('/business/portfolio'), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl('/business/portfolio')),
     
     addCharity: (charityId, config) => 
-      axios.post(apiUrl('/business/portfolio/add'), { charityId, config }, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.post(apiUrl('/business/portfolio/add'), { charityId, config }),
     
     removeCharity: (charityId) => 
-      axios.delete(apiUrl(`/business/portfolio/remove/${charityId}`), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.delete(apiUrl(`/business/portfolio/remove/${charityId}`)),
     
     updateCharity: (charityId, config) => 
-      axios.put(apiUrl(`/business/portfolio/update/${charityId}`), config, { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.put(apiUrl(`/business/portfolio/update/${charityId}`), config)
   },
 
   // Business profile
   profile: {
     get: () => 
-      axios.get(apiUrl('/business/me'), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl('/business/me')),
     
     update: (data) => 
-      axios.put(apiUrl('/business/profile'), data, { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.put(apiUrl('/business/profile'), data),
     
     updateBilling: (data) => 
-      axios.put(apiUrl('/business/billing'), data, { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.put(apiUrl('/business/billing'), data)
   },
 
   // Stats and dashboard data
   stats: {
     get: () => 
-      axios.get(apiUrl('/business/stats'), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl('/business/stats')),
     
     getBudgetUtilization: () => 
-      axios.get(apiUrl('/business/stats/budget'), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl('/business/stats/budget')),
     
     getCategoryBreakdown: () => 
-      axios.get(apiUrl('/business/stats/categories'), { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.get(apiUrl('/business/stats/categories'))
   },
 
   // Charity discovery
   charities: {
     search: (params) => 
-      axios.get(apiUrl('/charities/search'), { 
-        headers: getAuthHeaders(),
-        params 
-      }),
+      apiClient.get(apiUrl('/charities/search'), { params }),
     
     getSimilar: (charityId) => 
-      axios.get(apiUrl(`/charities/${charityId}/similar`), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl(`/charities/${charityId}/similar`)),
     
     getByCategory: (category) => 
-      axios.get(apiUrl(`/charities/category/${category}`), { 
-        headers: getAuthHeaders() 
-      }),
+      apiClient.get(apiUrl(`/charities/category/${category}`)),
     
     getTrending: () => 
-      axios.get(apiUrl('/charities/trending'), { 
-        headers: getAuthHeaders() 
-      })
+      apiClient.get(apiUrl('/charities/trending'))
   }
 };
 

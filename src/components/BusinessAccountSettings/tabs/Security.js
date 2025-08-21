@@ -27,7 +27,7 @@ function Security({ email, onUpdate }) {
     if (!passwordForm.newPassword) {
       newErrors.newPassword = 'New password is required';
     } else if (passwordForm.newPassword.length < 8) {
-      newErrors.newPassword = 'Password must be at least 8 characters';
+      newErrors.newPassword = 'Password must be at least 12 characters';
     }
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {

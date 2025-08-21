@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { SecureTokenStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
 import { ImpactContext } from '../contexts/ImpactContext';
 import styles from './MatchingOpportunitiesComponent.module.css';
 import CarouselComponent from './CarouselComponent';
-import { API_CONFIG } from '../config/api.config';
 
 function MatchingOpportunitiesComponent({ userId }) {
   const [opportunities, setOpportunities] = useState([]);
@@ -13,15 +11,9 @@ function MatchingOpportunitiesComponent({ userId }) {
 
   useEffect(() => {
     const fetchOpportunities = async () => {
-      const token = SecureTokenStorage.getToken();
       try {
-        console.log('Fetching matching opportunities...');
-        console.log('User ID:', userId);
-        const response = await axios.get(`${API_CONFIG.BASE_URL}/api/matching/opportunities`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const api = apiServices.client;
+        const response = await api.get('/api/matching/opportunities');
 
         console.log('Fetched opportunities:', response.data);
         setOpportunities(response.data);
@@ -42,12 +34,8 @@ function MatchingOpportunitiesComponent({ userId }) {
 
   const handleMatch = async (opportunityId) => {
     try {
-      const token = SecureTokenStorage.getToken();
-      await axios.post(`${API_CONFIG.BASE_URL}/api/matching/opportunities/${opportunityId}/accept`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const api = apiServices.client;
+      await api.post(`/api/matching/opportunities/${opportunityId}/accept`, {});
       setOpportunities(prevOpportunities =>
         prevOpportunities.map(opp =>
           opp._id === opportunityId ? { ...opp, accepted: true } : opp

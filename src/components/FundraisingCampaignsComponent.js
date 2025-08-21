@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { CHARITY_CATEGORIES, formatABN, validateABN, ABN_HELPER_TEXT } from '../constants/charityCategories';
 import CharitySearch from './CharitySearch/CharitySearch';
@@ -141,16 +141,8 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
 
     const headers = getAuthHeaders();
     try {
-      await axios.post(
-        `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns`,
-        campaignData,
-        {
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const api = apiServices.client;
+      await api.post('/api/fundraisingCampaigns', campaignData);
       setNewCampaign({
         title: '',
         description: '',
@@ -183,7 +175,8 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
     }
     const headers = getAuthHeaders();
     try {
-      await axios.delete(`${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaignId}`, { headers });
+      const api = apiServices.client;
+      await api.delete(`/api/fundraisingCampaigns/${campaignId}`);
       if (isAuthenticated) {
         fetchImpactData();
       }
@@ -206,16 +199,8 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
         completedDate: new Date().toISOString()
       };
 
-      await axios.patch(
-        `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaign._id}`,
-        updatedCampaign,
-        {
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const api = apiServices.client;
+      await api.patch(`/api/fundraisingCampaigns/${campaign._id}`, updatedCampaign);
 
       // Add to impact score but don't delete the campaign
       const completedCampaign = {
@@ -253,16 +238,8 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
       try {
         const updatedCampaign = { raisedAmount: updatedRaisedAmount };
 
-        await axios.patch(
-          `${API_CONFIG.BASE_URL}/api/fundraisingCampaigns/${campaign._id}`,
-          updatedCampaign,
-          {
-            headers: {
-              ...headers,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        const api = apiServices.client;
+        await api.patch(`/api/fundraisingCampaigns/${campaign._id}`, updatedCampaign);
         setUpdatingCampaign(null);
         setTempRaisedAmounts((prev) => {
           const updated = { ...prev };

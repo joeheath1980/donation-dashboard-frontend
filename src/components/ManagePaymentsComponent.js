@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { stripePromise } from '../utils/stripe';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import './SharedStyles.css';
 import styles from './PaymentStyles.module.css';
@@ -76,7 +76,7 @@ const PaymentMethodsList = ({ methods, onRemove, onSetDefault, defaultMethodId, 
 const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
@@ -85,11 +85,8 @@ const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
     // Create a SetupIntent when component mounts
     const createSetupIntent = async () => {
       try {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/stripe/create-setup-intent`,
-          {},
-          { headers: getAuthHeaders() }
-        );
+        const api = apiServices.client;
+        const response = await api.post('/api/stripe/create-setup-intent', {});
         setClientSecret(response.data.clientSecret);
       } catch (err) {
         console.error('Error creating setup intent:', err);
@@ -98,7 +95,7 @@ const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
     };
 
     createSetupIntent();
-  }, [getAuthHeaders]);
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -178,7 +175,7 @@ const AddPaymentMethodForm = ({ onSuccess, onCancel }) => {
 
 // Main Component
 const ManagePaymentsComponent = () => {
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [defaultMethodId, setDefaultMethodId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -193,10 +190,8 @@ const ManagePaymentsComponent = () => {
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_BASE_URL}/api/stripe/payment-methods`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/stripe/payment-methods');
       
       setPaymentMethods(response.data.paymentMethods || []);
       setDefaultMethodId(response.data.defaultMethodId);
@@ -214,10 +209,8 @@ const ManagePaymentsComponent = () => {
     }
 
     try {
-      await axios.delete(
-        `${API_BASE_URL}/api/stripe/payment-methods/${methodId}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.delete(`/api/stripe/payment-methods/${methodId}`);
       
       // Refresh the list
       setRefreshKey(prev => prev + 1);
@@ -229,11 +222,8 @@ const ManagePaymentsComponent = () => {
 
   const handleSetDefault = async (methodId) => {
     try {
-      await axios.post(
-        `${API_BASE_URL}/api/stripe/payment-methods/${methodId}/set-default`,
-        {},
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.post(`/api/stripe/payment-methods/${methodId}/set-default`, {});
       
       setDefaultMethodId(methodId);
     } catch (err) {

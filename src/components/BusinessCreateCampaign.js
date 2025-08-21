@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import businessAPI from '../services/businessAPI';
 import styles from './BusinessCreateCampaign.module.css';
@@ -18,7 +17,7 @@ import {
 
 function BusinessCreateCampaign() {
   const navigate = useNavigate();
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   
   const [currentSection, setCurrentSection] = useState('basic');
   const [loading, setLoading] = useState(false);

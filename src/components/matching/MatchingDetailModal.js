@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaHeart, FaBuilding, FaHandHoldingHeart, FaClock, FaInfoCircle } from 'react-icons/fa';
-import axios from 'axios';
-import { SecureTokenStorage } from '../../utils/auth.utils';
+import apiServices from '../../services/api.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import CharitySearch from '../CharitySearch/CharitySearch';
 import styles from './MatchingDetailModal.module.css';
@@ -36,13 +35,8 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
 
   const fetchCharityDetails = async () => {
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/charities/${opportunity.charityId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/${opportunity.charityId}`);
       setCharity(response.data);
     } catch (error) {
       console.error('Failed to fetch charity details:', error);

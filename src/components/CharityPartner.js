@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './CharityPartner.module.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { API_CONFIG } from '../config/api.config';
 
-// Create an axios instance with default config
-const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+// Use centralized api client
 
 function CharityPartner() {
   const { abn } = useParams();
@@ -32,6 +24,7 @@ function CharityPartner() {
 
     try {
       console.log(`[CharityPartner] Fetching charity details for ABN: ${abn}`);
+      const api = apiServices.client;
       const response = await api.get(`/api/charities/${abn}`);
 
       console.log('[CharityPartner] API Response:', response.data);

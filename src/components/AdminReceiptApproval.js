@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './AdminReceiptApproval.module.css';
 import sharedStyles from './AdminSharedStyles.module.css';
@@ -37,12 +37,8 @@ const AdminReceiptApproval = () => {
   const fetchPendingApprovals = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${apiUrl}/api/admin/receipt-approval/pending?page=${page}&limit=20&sortBy=${sortBy}`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/admin/receipt-approval/pending`, { params: { page, limit: 20, sortBy } });
       setPendingApprovals(response.data.approvals);
       setTotalPages(response.data.pages);
     } catch (error) {
@@ -54,12 +50,8 @@ const AdminReceiptApproval = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/api/admin/receipt-approval/stats`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/admin/receipt-approval/stats`);
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -68,12 +60,8 @@ const AdminReceiptApproval = () => {
 
   const fetchApprovalDetails = async (jobId) => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/api/admin/receipt-approval/pending/${jobId}`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/admin/receipt-approval/pending/${jobId}`);
       setSelectedApproval(response.data);
       setShowDetailModal(true);
     } catch (error) {
@@ -90,15 +78,9 @@ const AdminReceiptApproval = () => {
         adjustments.amount = parseFloat(amountAdjustment);
       }
 
-      await axios.post(
-        `${apiUrl}/api/admin/receipt-approval/approve/${selectedApproval.id}`,
-        {
-          charityId: charityOverride || selectedApproval.validation?.matchedCharity?._id,
-          adjustments
-        },
-        {
-          headers: { 'x-auth-token': user.token }
-        }
+      const api = apiServices.client;
+      await api.post(`/api/admin/receipt-approval/approve/${selectedApproval.id}`,
+        { charityId: charityOverride || selectedApproval.validation?.matchedCharity?._id, adjustments }
       );
 
       alert('Receipt approved successfully');
@@ -119,16 +101,8 @@ const AdminReceiptApproval = () => {
     }
 
     try {
-      await axios.post(
-        `${apiUrl}/api/admin/receipt-approval/reject/${selectedApproval.id}`,
-        {
-          reason: rejectionReason,
-          notifyUser: true
-        },
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.post(`/api/admin/receipt-approval/reject/${selectedApproval.id}`, { reason: rejectionReason, notifyUser: true });
 
       alert('Receipt rejected');
       setShowDetailModal(false);

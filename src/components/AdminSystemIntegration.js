@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaServer, 
@@ -46,7 +46,7 @@ const AdminSystemIntegration = () => {
   const [selectedService, setSelectedService] = useState('');
   const [newApiKey, setNewApiKey] = useState('');
 
-  const apiUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+  const apiUrl = process.env.REACT_APP_API_BASE_URL || '';
 
   useEffect(() => {
     checkAllServices();
@@ -91,13 +91,8 @@ const AdminSystemIntegration = () => {
 
   const checkService = async (serviceName, endpoint) => {
     try {
-      const response = await axios.get(
-        `${apiUrl}${endpoint}`,
-        {
-          headers: { 'x-auth-token': user.token },
-          timeout: 10000
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`${apiUrl}${endpoint}`, { timeout: 10000 });
       
       setServices(prev => ({
         ...prev,
@@ -123,12 +118,8 @@ const AdminSystemIntegration = () => {
 
   const fetchEmailStats = async () => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/api/admin/integrations/email-stats`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`${apiUrl}/api/admin/integrations/email-stats`);
       setEmailStats(response.data);
     } catch (error) {
       console.error('Error fetching email stats:', error);
@@ -137,12 +128,8 @@ const AdminSystemIntegration = () => {
 
   const fetchWebSocketStats = async () => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/api/admin/integrations/websocket-stats`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`${apiUrl}/api/admin/integrations/websocket-stats`);
       setWsConnections(response.data);
     } catch (error) {
       console.error('Error fetching WebSocket stats:', error);
@@ -151,12 +138,8 @@ const AdminSystemIntegration = () => {
 
   const fetchApiKeyStatus = async () => {
     try {
-      const response = await axios.get(
-        `${apiUrl}/api/admin/integrations/api-keys`,
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`${apiUrl}/api/admin/integrations/api-keys`);
       setApiKeys(response.data);
     } catch (error) {
       console.error('Error fetching API key status:', error);
@@ -165,13 +148,8 @@ const AdminSystemIntegration = () => {
 
   const handleUpdateApiKey = async () => {
     try {
-      await axios.post(
-        `${apiUrl}/api/admin/integrations/api-keys/${selectedService}`,
-        { apiKey: newApiKey },
-        {
-          headers: { 'x-auth-token': user.token }
-        }
-      );
+      const api = apiServices.client;
+      await api.post(`${apiUrl}/api/admin/integrations/api-keys/${selectedService}`, { apiKey: newApiKey });
       alert(`${selectedService} API key updated successfully`);
       setShowApiKeyModal(false);
       setNewApiKey('');

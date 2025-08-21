@@ -3,14 +3,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import { createLogger } from '../utils/logger';
-import { normalizeToken } from '../utils/auth.utils';
+import { normalizeToken, SecureTokenStorage, UserDataStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
+import { API_ENDPOINTS, USER_TYPES } from '../config/api.config';
 
 const logger = createLogger('GoogleAuthCallback');
 
 const GoogleAuthCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { socialLogin } = useAuth();
+  const { socialLogin, setUser } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -19,10 +21,10 @@ const GoogleAuthCallback = () => {
         // Extract parameters from the URL
         const params = new URLSearchParams(location.search);
         const status = params.get('status');
-        const rawToken = params.get('token');
+        const code = params.get('code');
         const message = params.get('message');
 
-        logger.debug('Parameters extracted from URL', { status, hasToken: !!rawToken });
+        logger.debug('Parameters extracted from URL', { status, hasCode: !!code });
 
         if (status === 'error') {
           logger.error('OAuth error from backend', { message });
@@ -30,49 +32,88 @@ const GoogleAuthCallback = () => {
           return;
         }
 
-        if (status === 'success' && rawToken) {
-          logger.debug('Raw token from URL', { 
-            length: rawToken?.length, 
-            preview: rawToken?.slice(0, 50) + '...',
-            hasSpace: rawToken?.includes(' '),
-            hasTab: rawToken?.includes('\t'),
-            hasNewline: rawToken?.includes('\n')
-          });
-          
-          const token = normalizeToken(rawToken);
-          
-          logger.debug('Normalized OAuth token', { 
-            length: token?.length, 
-            preview: token?.slice(0, 50) + '...',
-            fullToken: token // Log full token for debugging
-          });
-          
-          // Decode the token to get user info
-          const decodedToken = jwtDecode(token);
-          logger.debug('Token decoded', { 
-            userId: decodedToken.userId,
-            email: decodedToken.email,
-            isNewUser: decodedToken.isNewUser 
-          });
+        const cookieMode = String(process.env.REACT_APP_AUTH_COOKIE_MODE).toLowerCase() === 'true';
 
-          logger.debug('Calling socialLogin');
-          // Call the socialLogin function with the token
-          await socialLogin(token);
-          logger.debug('socialLogin successful');
-
-          // Redirect based on isNewUser flag (default to dashboard if not present)
-          const isNewUser = decodedToken.isNewUser || false;
-          if (isNewUser) {
-            logger.debug('Navigating to Activity page for new user');
-            navigate('/activity');
-          } else {
-            logger.debug('Navigating to dashboard for existing user');
-            navigate('/dashboard');
+        // New OAuth Code Exchange flow
+        if (status === 'success' && code) {
+          try {
+            const api = apiServices.client;
+            const { data } = await api.post('/api/auth/exchange-code', { code });
+            const { 
+              accessToken, 
+              refreshToken, 
+              user: userData,
+              accessTokenExpiresIn,
+              refreshTokenExpiresIn 
+            } = data || {};
+            if (!accessToken) throw new Error('No access token received from exchange');
+            SecureTokenStorage.setToken(accessToken, refreshToken || null);
+            
+            // Schedule proactive refresh if TTL provided
+            if (accessTokenExpiresIn && window.scheduleTokenRefresh) {
+              window.scheduleTokenRefresh(accessTokenExpiresIn);
+            }
+            // Infer role and set user type
+            const role = userData?.role || USER_TYPES.USER;
+            if (role === USER_TYPES.BUSINESS) {
+              UserDataStorage.setUserType(USER_TYPES.BUSINESS);
+            } else if (role === USER_TYPES.CHARITY) {
+              UserDataStorage.setUserType(USER_TYPES.CHARITY);
+            } else if (role === USER_TYPES.ADMIN) {
+              UserDataStorage.setUserType(USER_TYPES.ADMIN);
+            } else {
+              UserDataStorage.setUserType(USER_TYPES.USER);
+            }
+            if (userData?._id || userData?.id) {
+              UserDataStorage.setUserId(userData._id || userData.id);
+            }
+            setUser({ ...userData, isBusiness: role === USER_TYPES.BUSINESS, isCharity: role === USER_TYPES.CHARITY });
+            const isNewUser = !!userData?.isNewUser;
+            navigate(isNewUser ? '/activity' : '/dashboard');
+            return;
+          } catch (e) {
+            logger.error('Code exchange failed', { message: e.message, status: e.response?.status });
+            navigate('/login?error=Authentication%20failed');
+            return;
           }
-        } else {
-          logger.error('No token found in the URL');
-          navigate('/login?error=No%20authentication%20token%20received');
         }
+
+        if (status === 'success' && cookieMode) {
+          // Cookie-based session: hydrate user from API (no token in URL)
+          try {
+            const api = apiServices.client;
+            const userResponse = await api.get(API_ENDPOINTS.USER_PROFILE);
+            const userData = userResponse.data;
+            // Default to regular user unless role indicates otherwise
+            const role = userData.role || 'user';
+            if (role === USER_TYPES.BUSINESS) {
+              UserDataStorage.setUserType(USER_TYPES.BUSINESS);
+            } else if (role === USER_TYPES.CHARITY) {
+              UserDataStorage.setUserType(USER_TYPES.CHARITY);
+            } else if (role === USER_TYPES.ADMIN) {
+              UserDataStorage.setUserType(USER_TYPES.ADMIN);
+            } else {
+              UserDataStorage.setUserType(USER_TYPES.USER);
+            }
+            // Store user id for downstream components
+            if (userData._id || userData.id) {
+              UserDataStorage.setUserId(userData._id || userData.id);
+            }
+            // Set context user and navigate
+            // Note: token remains unset in memory; API auth relies on HttpOnly cookies
+            // CSRF headers are still applied by interceptors for state-changing requests
+            setUser({ ...userData, isBusiness: role === USER_TYPES.BUSINESS, isCharity: role === USER_TYPES.CHARITY });
+            navigate('/dashboard');
+            return;
+          } catch (e) {
+            logger.error('Cookie-mode hydration failed', { message: e.message, status: e.response?.status });
+            navigate('/login?error=Authentication%20failed');
+            return;
+          }
+        }
+
+        logger.error('OAuth callback missing code or status');
+        navigate('/login?error=Authentication%20failed');
       } catch (error) {
         logger.error('Error handling Google authentication callback', { message: error.message });
         navigate(`/login?error=${encodeURIComponent(error.message || 'Authentication failed')}`);

@@ -82,6 +82,7 @@ const DonorManagement = lazy(() => import('./components/DonorManagement/DonorMan
 const DonationForm = lazy(() => import('./components/DonationForm'));
 const CharityOnboarding = lazy(() => import('./components/CharityOnboarding'));
 const DonationSuccess = lazy(() => import('./components/DonationSuccess'));
+const VerifyEmailChange = lazy(() => import('./components/VerifyEmailChange'));
 
 // Public profile components
 const PublicUserProfile = lazy(() => import('./components/Profile/PublicUserProfile'));
@@ -144,9 +145,9 @@ const ProtectedRoute = ({ children, allowedUserTypes }) => {
     const token = SecureTokenStorage.getToken();
     const userType = UserDataStorage.getUserType();
     
+    // ProtectedRoute initialization (no token values logged)
     console.log('ProtectedRoute initialization:', { 
       hasToken: !!token,
-      tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
       hasUser: !!user,
       loading,
       userType,
@@ -295,6 +296,7 @@ function App() {
                 
                 {/* Auth Callback routes */}
                 <Route path="/auth-callback" element={<SuspenseWrapper><AuthCallback /></SuspenseWrapper>} />
+                <Route path="/verify-email-change" element={<SuspenseWrapper><VerifyEmailChange /></SuspenseWrapper>} />
                 <Route path="/auth/google/callback" element={<SuspenseWrapper><GoogleAuthCallback /></SuspenseWrapper>} />
                 <Route path="/microsoft-callback" element={<SuspenseWrapper><MicrosoftAuthCallback /></SuspenseWrapper>} />
                 

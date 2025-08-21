@@ -14,6 +14,8 @@ We take the security of our users and partners seriously. This document summariz
 - CSP: Hardened policy (no `unsafe-inline` or `unsafe-eval`), strict `frame-ancestors`, and limited third‑party origins (see `nginx-secure.conf`).
 - WebSockets: Authenticated using Bearer token from secure storage; websocket-only transport with reconnection/backoff.
 - Logging: Sensitive data redacted and production logs minimized (see `src/utils/logger.js`).
+ - OAuth: URL tokens removed. Frontend uses short‑lived code exchange via `/api/auth/exchange-code`. See `docs/casa/oauth-cookie-migration.md`.
+ - Request Centralization: All state‑changing requests go through a centralized apiClient which adds Authorization and CSRF automatically. CI forbids direct axios usage outside approved files.
 
 ## CASA (Google Cloud Application Security Assessment)
 - CASA docs live in `docs/casa`. See:
@@ -21,6 +23,8 @@ We take the security of our users and partners seriously. This document summariz
   - `docs/casa/controls-matrix.md` – CASA ↔ ASVS ↔ implementation
   - `docs/casa/evidence-checklist.md` – artifacts for the LOV
   - `docs/casa/csp-validation.md` – CSP validation plan
+  - `docs/casa/oauth-cookie-migration.md` – plan to remove tokens from URL and use cookies/code exchange
+  - `docs/casa/final-self-assessment.md` – finalized mapping and statuses
 
 ## Build & CI Security
 - NPM Audit: `.github/workflows/security-audit.yml`
@@ -29,4 +33,3 @@ We take the security of our users and partners seriously. This document summariz
 
 ## Responsible Disclosure
 We do not pursue legal action against researchers who report security vulnerabilities responsibly.
-

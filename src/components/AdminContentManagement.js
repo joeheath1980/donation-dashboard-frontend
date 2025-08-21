@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaSearch, 
@@ -22,7 +22,7 @@ import styles from './AdminSharedStyles.module.css';
 import { API_CONFIG } from '../config/api.config';
 
 const AdminContentManagement = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,10 +38,8 @@ const AdminContentManagement = () => {
   const fetchContent = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/admin/content`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/admin/content');
       setContent(response.data);
     } catch (err) {
       console.error('Error fetching content:', err);
@@ -53,11 +51,8 @@ const AdminContentManagement = () => {
 
   const handleStatusChange = async (contentId, newStatus) => {
     try {
-      await axios.put(
-        `${API_CONFIG.BASE_URL}/api/admin/content/${contentId}/status`,
-        { status: newStatus },
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.put(`/api/admin/content/${contentId}/status`, { status: newStatus });
       setContent(content.map(item => 
         item._id === contentId ? { ...item, status: newStatus } : item
       ));
@@ -73,10 +68,8 @@ const AdminContentManagement = () => {
     if (!window.confirm('Are you sure you want to delete this content?')) return;
     
     try {
-      await axios.delete(
-        `${API_CONFIG.BASE_URL}/api/admin/content/${contentId}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.delete(`/api/admin/content/${contentId}`);
       setContent(content.filter(item => item._id !== contentId));
       setMessage({ type: 'success', text: 'Content deleted successfully' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);

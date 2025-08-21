@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './SearchCharities.module.css';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import CharityCard from './CharityCard';
@@ -70,12 +70,8 @@ function SearchCharities() {
 
     try {
       // Use the new enhanced search endpoint
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/search/${encodeURIComponent(query)}`, {
-        params: { 
-          limit: 50,
-          offset: 0
-        }
-      });
+      const api = apiServices.client;
+      const response = await api.get(`/api/charities/search/${encodeURIComponent(query)}`, { params: { limit: 50, offset: 0 } });
 
       if (response.data.charities && response.data.charities.records) {
         // Use the mapper to handle backend normalized data

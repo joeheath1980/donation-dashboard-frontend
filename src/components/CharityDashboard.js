@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import styles from './CharityDashboard.module.css';
 import './SharedStyles.css';
 import { ImpactContext } from '../contexts/ImpactContext';
@@ -42,22 +42,17 @@ function CharityDashboard() {
       }
 
       try {
-        const response = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/me`, {
-          headers: getAuthHeaders()
-        });
+        const api = apiServices.client;
+        const response = await api.get('/api/charities/me');
         setCharityData(response.data);
 
         // Fetch linking status
-        const statusResponse = await axios.get(`${API_CONFIG.BASE_URL}/api/charities/linking-status`, {
-          headers: getAuthHeaders()
-        });
+        const statusResponse = await api.get('/api/charities/linking-status');
         setLinkingStatus(statusResponse.data.status);
 
         // If there's a linked ABN, fetch the charity details
         if (statusResponse.data.linkedABN) {
-          const linkedResponse = await axios.get(`${API_CONFIG.BASE_URL}/api/search-charities`, {
-            params: { q: statusResponse.data.linkedABN }
-          });
+          const linkedResponse = await api.get('/api/search-charities', { params: { q: statusResponse.data.linkedABN } });
           if (linkedResponse.data?.result?.records?.length > 0) {
             setLinkedCharity(linkedResponse.data.result.records[0]);
           }
@@ -84,10 +79,8 @@ function CharityDashboard() {
         return;
       }
       
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/stripe/connect/account-status/${id}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/stripe/connect/account-status/${id}`);
       setStripeStatus(response.data);
     } catch (err) {
       console.error('Error fetching Stripe status:', err);
@@ -109,9 +102,8 @@ function CharityDashboard() {
 
     setIsSearching(true);
     try {
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/search-charities`, {
-        params: { q: term }
-      });
+      const api = apiServices.client;
+      const response = await api.get('/api/search-charities', { params: { q: term } });
 
       if (response.data?.result?.records) {
         setSearchResults(response.data.result.records);
@@ -157,15 +149,8 @@ function CharityDashboard() {
     formData.append('linkingRequestDate', new Date().toISOString());
 
     try {
-      const headers = {
-        ...getAuthHeaders(),
-        'Content-Type': 'multipart/form-data',
-      };
-      delete headers['Content-Type']; // Let axios set the correct boundary
-
-      await axios.post(`${API_CONFIG.BASE_URL}/api/charities/link-request`, formData, {
-        headers: headers
-      });
+      const api = apiServices.client;
+      await api.post('/api/charities/link-request', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
       setLinkingStatus('pending');
       setLinkedCharity(selectedCharity);

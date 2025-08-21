@@ -102,6 +102,7 @@ axios.interceptors.response.use(
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshTimeout, setRefreshTimeout] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -159,8 +160,15 @@ export const AuthProvider = ({ children }) => {
       const api = apiServices.client;
       const response = await api.post(API_ENDPOINTS.USER_LOGIN, { email, password });
       
-      // Handle new token format
-      const { accessToken, refreshToken, user: userData, token } = response.data;
+      // Handle new token format with TTL
+      const { 
+        accessToken, 
+        refreshToken, 
+        user: userData, 
+        token,
+        accessTokenExpiresIn,
+        refreshTokenExpiresIn 
+      } = response.data;
       
       // Use accessToken if available, fallback to token for backward compatibility
       const authToken = accessToken || token;
@@ -168,10 +176,17 @@ export const AuthProvider = ({ children }) => {
       logger.info('Login response received', { 
         hasToken: !!authToken, 
         hasUserData: !!userData,
-        userDataId: userData?._id || userData?.id 
+        userDataId: userData?._id || userData?.id,
+        accessTokenExpiresIn,
+        refreshTokenExpiresIn
       });
       
       SecureTokenStorage.setToken(authToken, refreshToken);
+      
+      // Schedule proactive refresh if TTL provided
+      if (accessTokenExpiresIn) {
+        scheduleTokenRefresh(accessTokenExpiresIn);
+      }
       
       // Check if user is admin
       if (userData && (userData.isAdmin || userData.role === USER_TYPES.ADMIN)) {
@@ -360,30 +375,17 @@ export const AuthProvider = ({ children }) => {
   // Social login
   const socialLogin = async (token) => {
     try {
-      logger.debug('Social login: Starting with raw token', { 
-        length: token?.length,
-        hasSpace: token?.includes(' '),
-        preview: token?.slice(0, 50) + '...'
-      });
-      
+      logger.debug('Social login: Starting with raw token (length only)', { length: token?.length });
       const clean = normalizeToken(token);
-      
-      logger.debug('Social login: normalized token', { 
-        length: clean?.length, 
-        preview: clean?.slice(0, 50) + '...',
-        tokenParts: clean?.split('.').map(p => p.substring(0, 10) + '...'),
-        fullToken: clean // For debugging
-      });
+      logger.debug('Social login: normalized token (length only)', { length: clean?.length });
       
       SecureTokenStorage.setToken(clean);
       UserDataStorage.setUserType(USER_TYPES.USER);
       logger.debug('Social login: Token and userType stored securely');
       setupAxiosDefaults(clean);
       
-      // Log what was actually set in axios
-      logger.debug('Social login: Authorization header set', {
-        header: axios.defaults.headers.common['Authorization']?.substring(0, 60) + '...'
-      });
+      // Authorization header set (value not logged)
+      logger.debug('Social login: Authorization header set');
 
       logger.debug('Social login: Fetching user data from API');
       const api = apiServices.client;
@@ -410,9 +412,62 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Schedule proactive token refresh before expiry
+  const scheduleTokenRefresh = (expiresIn) => {
+    // Clear any existing timeout
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+    }
+    
+    // Schedule refresh 60 seconds before expiry
+    const refreshBuffer = 60; // seconds
+    const refreshIn = Math.max((expiresIn - refreshBuffer) * 1000, 0); // milliseconds
+    
+    if (refreshIn > 0) {
+      logger.info('Scheduling token refresh', { 
+        expiresIn, 
+        refreshIn: refreshIn / 1000,
+        refreshAt: new Date(Date.now() + refreshIn).toISOString()
+      });
+      
+      const timeout = setTimeout(async () => {
+        try {
+          const refreshToken = SecureTokenStorage.getRefreshToken();
+          if (refreshToken) {
+            logger.info('Proactive token refresh triggered');
+            const api = apiServices.client;
+            const response = await api.post('/api/auth/refresh-token', { refreshToken });
+            
+            const { accessToken, refreshToken: newRefreshToken, accessTokenExpiresIn } = response.data;
+            SecureTokenStorage.setToken(accessToken, newRefreshToken || refreshToken);
+            setupAxiosDefaults(accessToken);
+            
+            // Schedule next refresh if TTL provided
+            if (accessTokenExpiresIn) {
+              scheduleTokenRefresh(accessTokenExpiresIn);
+            }
+            
+            logger.info('Proactive token refresh successful');
+          }
+        } catch (error) {
+          logger.error('Proactive token refresh failed', { error: error.message });
+          // The 401 interceptor will handle this
+        }
+      }, refreshIn);
+      
+      setRefreshTimeout(timeout);
+    }
+  };
+
   // Enhanced clearUserData function
   const clearUserData = () => {
     logger.debug('Clearing all user data from localStorage');
+    
+    // Clear any scheduled refresh
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+      setRefreshTimeout(null);
+    }
     
     // Get current user ID for targeted cleaning
     const currentUserId = UserDataStorage.getUserId();
@@ -476,6 +531,14 @@ export const AuthProvider = ({ children }) => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
+  // Make scheduleTokenRefresh available globally for OAuth callbacks
+  useEffect(() => {
+    window.scheduleTokenRefresh = scheduleTokenRefresh;
+    return () => {
+      delete window.scheduleTokenRefresh;
+    };
+  }, [refreshTimeout]);
+
   const value = {
     user,
     setUser,
@@ -490,6 +553,7 @@ export const AuthProvider = ({ children }) => {
     clearUserData,
     loading,
     getAuthHeaders,
+    scheduleTokenRefresh,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

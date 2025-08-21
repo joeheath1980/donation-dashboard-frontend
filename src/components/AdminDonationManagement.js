@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { FaSearch, FaDollarSign, FaCalendarAlt, FaHeart, FaCheckCircle, FaTimesCircle, FaClock, FaSpinner, FaChartLine, FaExchangeAlt, FaGift } from 'react-icons/fa';
 import styles from './AdminSharedStyles.module.css';
 import donationStyles from './AdminDonationManagement.module.css';
@@ -26,7 +26,8 @@ const AdminDonationManagement = () => {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await axios.get('/api/admin/donations');
+        const api = apiServices.client;
+        const response = await api.get('/api/admin/donations');
         setDonations(response.data);
         setLoading(false);
       } catch (err) {
@@ -59,7 +60,8 @@ const AdminDonationManagement = () => {
 
   const handleStatusChange = async (donationId, newStatus) => {
     try {
-      await axios.put(`/api/admin/donations/${donationId}/status`, { status: newStatus });
+      const api = apiServices.client;
+      await api.put(`/api/admin/donations/${donationId}/status`, { status: newStatus });
       setDonations(donations.map(donation => 
         donation._id === donationId ? { ...donation, status: newStatus } : donation
       ));

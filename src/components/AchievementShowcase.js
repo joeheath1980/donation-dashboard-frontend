@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrophy, FaLock, FaStar, FaFire, FaCoffee, FaBus, FaHeart } from 'react-icons/fa';
-import axios from 'axios';
-import { SecureTokenStorage } from '../utils/auth.utils';
+import apiServices from '../services/api.service';
 import styles from './AchievementShowcase.module.css';
 
 const AchievementShowcase = ({ userId, compact = false }) => {
@@ -40,15 +39,12 @@ const AchievementShowcase = ({ userId, compact = false }) => {
 
   const fetchAchievements = async () => {
     try {
-      const token = SecureTokenStorage.getToken();
       const endpoint = userId 
         ? `/api/achievements/showcase/${userId}`
         : '/api/achievements/progress';
         
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}${endpoint}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const api = apiServices.client;
+      const response = await api.get(endpoint);
       
       if (userId) {
         // Showcase mode - only earned achievements

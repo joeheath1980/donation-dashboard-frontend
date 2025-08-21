@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiServices from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FaSearch, 
@@ -21,7 +21,7 @@ import localStyles from './AdminCampaignManagement.module.css';
 import { API_CONFIG } from '../config/api.config';
 
 const AdminCampaignManagement = () => {
-  const { getAuthHeaders } = useAuth();
+  const { } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,10 +54,8 @@ const AdminCampaignManagement = () => {
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/admin/campaigns`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get('/api/admin/campaigns');
       setCampaigns(response.data);
     } catch (err) {
       console.error('Error fetching campaigns:', err);
@@ -69,11 +67,8 @@ const AdminCampaignManagement = () => {
 
   const handleStatusChange = async (campaignId, newStatus) => {
     try {
-      await axios.put(
-        `${API_CONFIG.BASE_URL}/api/admin/campaigns/${campaignId}/status`,
-        { status: newStatus },
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.put(`/api/admin/campaigns/${campaignId}/status`, { status: newStatus });
       setCampaigns(campaigns.map(campaign => 
         campaign._id === campaignId ? { ...campaign, status: newStatus } : campaign
       ));
@@ -89,10 +84,8 @@ const AdminCampaignManagement = () => {
     if (!window.confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await axios.delete(
-        `${API_CONFIG.BASE_URL}/api/admin/campaigns/${campaignId}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      await api.delete(`/api/admin/campaigns/${campaignId}`);
       setCampaigns(campaigns.filter(c => c._id !== campaignId));
       setMessage({ type: 'success', text: 'Campaign deleted successfully' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
