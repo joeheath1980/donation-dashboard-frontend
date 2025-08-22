@@ -55,7 +55,21 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         if (businessId) { setEffectiveBusinessId(businessId); return; }
         const res = await apiServices.client.get('/api/business/me');
         const id = res?.data?._id || res?.data?.id || null;
-        if (!cancelled) setEffectiveBusinessId(id);
+        const businessData = res?.data;
+        if (!cancelled) {
+          setEffectiveBusinessId(id);
+          // If no initial company data was provided, use the fetched data
+          if (!initialCompanyData.companyName && businessData) {
+            setFormData(prev => ({
+              companyName: businessData.companyName || prev.companyName || '',
+              website: businessData.website || prev.website || '',
+              industry: businessData.industry || prev.industry || '',
+              country: businessData.country || prev.country || 'Australia',
+              additionalContext: businessData.additionalContext || prev.additionalContext || '',
+              abn: businessData.abn || prev.abn || ''
+            }));
+          }
+        }
       } catch {
         // fall back to localStorage as last resort
         try {
@@ -66,7 +80,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     };
     resolveBusinessId();
     return () => { cancelled = true; };
-  }, [businessId]);
+  }, [businessId, initialCompanyData.companyName]);
 
   // Get auth token
   const getAuthHeaders = () => {
@@ -117,8 +131,9 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
 
   const fetchProgress = async () => {
     try {
+      // Don't include business ID in URL - let backend use authenticated user's business
       const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
+        `${API_BASE_URL}/api/business/enhanced-onboarding/progress`,
         { headers: getAuthHeaders() }
       );
       if (response.status === 403) {
@@ -626,14 +641,27 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
   const handleAIResearch = async (e) => {
     e.preventDefault();
     setError(null);
+    
+    // Validate required fields
+    if (!formData.companyName) {
+      setError('Company name is required for AI research');
+      return;
+    }
+    
     setLoading(true);
     setStep('loading');
     
     console.log('Starting AI research with form data:', formData);
     
     try {
+      // Ensure all fields have values (even if empty strings)
       const requestBody = {
-        ...formData
+        companyName: formData.companyName || '',
+        website: formData.website || '',
+        industry: formData.industry || '',
+        country: formData.country || 'Australia',
+        additionalContext: formData.additionalContext || '',
+        abn: formData.abn || ''
       };
       
       let csrf = null;
