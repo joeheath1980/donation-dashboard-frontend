@@ -636,9 +636,30 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         const clone = JSON.parse(JSON.stringify(input || {}));
         const asArray = (v) => Array.isArray(v) ? v : [];
         const isObjectId = (s) => typeof s === 'string' && /^[a-f\d]{24}$/i.test(s);
+        const toArray = (v) => {
+          if (Array.isArray(v)) return v;
+          if (typeof v === 'string') {
+            const s = v.trim();
+            // Try to parse JSON; if single-quoted, coerce quotes
+            const tryParse = (text) => { try { return JSON.parse(text); } catch { return null; } };
+            let parsed = tryParse(s);
+            if (!parsed && s.startsWith('[') && s.endsWith(']')) {
+              const coerced = s
+                .replace(/\r?\n/g, ' ')
+                .replace(/\s+/g, ' ')
+                .replace(/'/g, '"');
+              parsed = tryParse(coerced);
+            }
+            return Array.isArray(parsed) ? parsed : [];
+          }
+          return [];
+        };
 
         const portfolio = clone.charityPortfolio || clone.csrActivities?.charityPortfolio || {};
-        const rawAcceptable = asArray(portfolio.acceptableCharities);
+        // acceptableCharities may come as array, stringified array, or objects
+        const rawAcceptable = asArray(portfolio.acceptableCharities).length
+          ? asArray(portfolio.acceptableCharities)
+          : toArray(portfolio.acceptableCharities);
         let acceptableIds = [];
         let acceptableRaw = null;
         if (rawAcceptable.length) {
@@ -651,10 +672,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         }
         if (!clone.charityPortfolio) clone.charityPortfolio = {};
         clone.charityPortfolio.acceptableCharities = acceptableIds;
+        // Remove potentially conflicting nested copy to avoid backend reading string version
+        if (clone.csrActivities && clone.csrActivities.charityPortfolio) {
+          delete clone.csrActivities.charityPortfolio.acceptableCharities;
+        }
 
         ['primaryCharities', 'partnerCharities', 'acceptableCharities'].forEach((key) => {
           if (clone[key]) {
-            const arr = asArray(clone[key]);
+            const arr = asArray(clone[key]).length ? asArray(clone[key]) : toArray(clone[key]);
             const ids = arr
               .map((c) => (c && (c._id || c.id || c.charityId)))
               .filter((id) => isObjectId(String(id)))
