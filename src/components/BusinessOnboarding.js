@@ -29,9 +29,23 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
   const [lastAt, setLastAt] = useState(0);
   const [info, setInfo] = useState('');
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const containerRef = useRef(null);
   const API_BASE_URL = API_CONFIG.BASE_URL;
 
   useEffect(() => { setQuery(value || ''); }, [value]);
+
+  // Handle clicks outside the component to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setShow(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Normalize company name for broader match
   const normalizeName = (term) => {
@@ -119,7 +133,7 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
   const subStyle = { fontSize: 12, color: '#6b7280' };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <input
         ref={inputRef}
         type="text"
@@ -137,27 +151,28 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
         ) : (
           <button
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => fetchResults(query)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              fetchResults(query);
+            }}
             style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: 6, background: '#f9fafb' }}
           >
             Search
           </button>
         )}
       </div>
-      {loading && (
-        <div style={{ position: 'absolute', top: '50%', right: 10, transform: 'translateY(-50%)', fontSize: 12, color: '#6b7280' }}>Searching…</div>
-      )}
       {show && results.length > 0 && (
-        <div style={dropdownStyle} tabIndex={-1} onMouseDown={(e) => e.preventDefault()}>
+        <div ref={dropdownRef} style={dropdownStyle}>
           <div style={headerStyle}>Select your business from the Australian Business Register</div>
           {results.map((r, idx) => (
             <div key={`${r.abn || idx}-${idx}`} style={itemStyle}
-                 onMouseDown={(e) => e.preventDefault()}
-                 onClick={() => {
+                 onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
                    onSelect && onSelect(r.businessName || r.tradingName, r.abn);
                    setShow(false);
-                   inputRef.current && inputRef.current.focus();
+                   setQuery(r.businessName || r.tradingName);
                  }}
                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
