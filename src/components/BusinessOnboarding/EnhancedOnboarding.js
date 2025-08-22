@@ -630,6 +630,44 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     });
     
     try {
+      // Normalize AI research payload to avoid schema validation errors
+      const raw = editedData || researchData || {};
+      const sanitizeForConfirm = (input) => {
+        const clone = JSON.parse(JSON.stringify(input || {}));
+        const asArray = (v) => Array.isArray(v) ? v : [];
+        const isObjectId = (s) => typeof s === 'string' && /^[a-f\d]{24}$/i.test(s);
+
+        const portfolio = clone.charityPortfolio || clone.csrActivities?.charityPortfolio || {};
+        const rawAcceptable = asArray(portfolio.acceptableCharities);
+        let acceptableIds = [];
+        let acceptableRaw = null;
+        if (rawAcceptable.length) {
+          const mapped = rawAcceptable
+            .map((c) => (c && (c._id || c.id || c.charityId || c.charityABN || c.abn || c.ABN)))
+            .filter(Boolean)
+            .map((v) => String(v));
+          acceptableIds = mapped.filter(isObjectId);
+          if (acceptableIds.length !== rawAcceptable.length) acceptableRaw = rawAcceptable;
+        }
+        if (!clone.charityPortfolio) clone.charityPortfolio = {};
+        clone.charityPortfolio.acceptableCharities = acceptableIds;
+
+        ['primaryCharities', 'partnerCharities', 'acceptableCharities'].forEach((key) => {
+          if (clone[key]) {
+            const arr = asArray(clone[key]);
+            const ids = arr
+              .map((c) => (c && (c._id || c.id || c.charityId)))
+              .filter((id) => isObjectId(String(id)))
+              .map(String);
+            clone[key] = ids;
+          }
+        });
+
+        return { cleaned: clone, meta: { acceptableRaw } };
+      };
+
+      const { cleaned, meta } = sanitizeForConfirm(raw);
+
       let csrf = null;
       try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
       const response = await fetch(
@@ -639,9 +677,9 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify({
             businessId: effectiveBusinessId,
-            confirmedData: editedData || researchData,
+            confirmedData: cleaned,
             corrections: {},
-            additionalData: {}
+            additionalData: { acceptableCharitiesRaw: meta.acceptableRaw || undefined }
           })
         }
       );
