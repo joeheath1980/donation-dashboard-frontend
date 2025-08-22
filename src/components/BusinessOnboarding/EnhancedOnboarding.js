@@ -130,10 +130,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
   }, [rateLimitSeconds]);
 
   const fetchProgress = async () => {
+    if (!effectiveBusinessId) {
+      console.warn('No business ID available for progress fetch');
+      return;
+    }
     try {
-      // Don't include business ID in URL - let backend use authenticated user's business
+      // Include business ID in URL path as per backend requirements
       const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/progress`,
+        `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
         { headers: getAuthHeaders() }
       );
       if (response.status === 403) {
@@ -654,7 +658,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     console.log('Starting AI research with form data:', formData);
     
     try {
-      // Ensure all fields have values (even if empty strings)
+      // AI research body format per backend requirements (no businessId)
       const requestBody = {
         companyName: formData.companyName || '',
         website: formData.website || '',
@@ -664,8 +668,13 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         abn: formData.abn || ''
       };
       
+      // Get CSRF token for POST request
       let csrf = null;
-      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
+      try { 
+        csrf = await csrfServiceAPI.initializeToken(); 
+      } catch (e) {
+        console.warn('Failed to get CSRF token:', e);
+      }
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/ai-research`,
         {
