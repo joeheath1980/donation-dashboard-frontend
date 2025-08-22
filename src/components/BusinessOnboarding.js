@@ -27,10 +27,27 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [lastAt, setLastAt] = useState(0);
+  const [info, setInfo] = useState('');
   const inputRef = useRef(null);
   const API_BASE_URL = API_CONFIG.BASE_URL;
 
   useEffect(() => { setQuery(value || ''); }, [value]);
+
+  // Normalize company name for broader match
+  const normalizeName = (term) => {
+    if (!term) return '';
+    let t = String(term).toLowerCase();
+    t = t.replace(/[.,'"()]/g, ' ');
+    const stop = ['pty', 'ltd', 'limited', 'holdings', 'group', 'the', 'australia', 'australian'];
+    const parts = t.split(/\s+/).filter(Boolean).filter(w => !stop.includes(w));
+    return parts.join(' ');
+  };
+
+  // Try to parse ABN from the input (11 digits)
+  const extractABN = (term) => {
+    const digits = (term || '').replace(/\D/g, '');
+    return digits.length === 11 ? digits : null;
+  };
 
   const fetchResults = async (term) => {
     if (!term || term.length < 2) { setResults([]); setShow(false); return; }
@@ -40,13 +57,49 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
     if (since < minInterval) await new Promise(r => setTimeout(r, minInterval - since));
     setLoading(true);
     try {
-      const { data } = await apiClient.get(`/api/business/enhanced-onboarding/abn-search`, {
-        params: { name: term }
-      });
-      setResults(data?.results || []);
-      setShow(true);
+      setInfo('');
+      let found = [];
+      // 1) Primary search with original term
+      const r1 = await apiClient.get(`/api/business/enhanced-onboarding/abn-search`, { params: { name: term } });
+      found = r1?.data?.results || [];
+
+      // 2) If none, try normalized name (remove suffixes/punct)
+      if ((!found || found.length === 0)) {
+        const norm = normalizeName(term);
+        if (norm && norm !== term.toLowerCase()) {
+          const r2 = await apiClient.get(`/api/business/enhanced-onboarding/abn-search`, { params: { name: norm } });
+          found = r2?.data?.results || [];
+          if (found.length > 0) setInfo('Showing matches for a simplified name');
+        }
+      }
+
+      // 3) If still none and looks like ABN, query details directly and synthesize a result
+      if ((!found || found.length === 0)) {
+        const abn = extractABN(term);
+        if (abn) {
+          try {
+            const d = await apiClient.get(`/api/business/enhanced-onboarding/abn-details/${encodeURIComponent(abn)}`);
+            if (d?.data?.mappedData) {
+              const m = d.data.mappedData;
+              found = [{
+                businessName: m.name || 'ABN match',
+                abn: m.abn || abn,
+                state: m.address?.state,
+                postcode: m.address?.postcode
+              }];
+            }
+          } catch {}
+        }
+      }
+
+      setResults(found || []);
+      setShow((found || []).length > 0);
+      if (!found || found.length === 0) {
+        setInfo('No results. Try a shorter name, or enter the 11‑digit ABN.');
+      }
     } catch {
       setResults([]); setShow(false);
+      setInfo('Search failed. Please try again.');
     }
     finally { setLoading(false); setLastAt(Date.now()); }
   };
@@ -78,6 +131,20 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
         aria-label="Company Name"
         onFocus={() => { if (results.length) setShow(true); }}
       />
+      <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 6 }}>
+        {loading ? (
+          <span style={{ fontSize: 12, color: '#6b7280' }}>Searching…</span>
+        ) : (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => fetchResults(query)}
+            style={{ fontSize: 12, padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: 6, background: '#f9fafb' }}
+          >
+            Search
+          </button>
+        )}
+      </div>
       {loading && (
         <div style={{ position: 'absolute', top: '50%', right: 10, transform: 'translateY(-50%)', fontSize: 12, color: '#6b7280' }}>Searching…</div>
       )}
@@ -100,6 +167,9 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
             </div>
           ))}
         </div>
+      )}
+      {!show && info && (
+        <div style={{ marginTop: 6, fontSize: 12, color: '#6b7280' }}>{info}</div>
       )}
       {selectedAbn && (
         <div style={{ marginTop: 6, fontSize: 12, color: '#059669' }}>
