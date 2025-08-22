@@ -37,6 +37,10 @@ export const businessAPI = {
     
     selectPrimaryCharities: (charities) => 
       apiClient.post(apiUrl('/business/onboarding/primary-charities'), { primaryCharities: charities }),
+
+    // Resolve charities/portfolio entries (e.g., ABN or objects) to canonical ObjectIds
+    resolveCharities: (payload) =>
+      apiClient.post(apiUrl('/business/onboarding/resolve-charities'), payload),
     
     // Note: suggestCharities is no longer needed - suggestions come from primary-charities response
     suggestCharities: (primaryCharities) => 

@@ -7,6 +7,7 @@ import Security from './tabs/Security';
 import Notifications from './tabs/Notifications';
 import BillingPayments from './tabs/BillingPayments';
 import styles from './BusinessAccountSettings.module.css';
+import CSRDownloadButton from '../CSRDownloadButton';
 import { toast } from 'react-toastify';
 import {
   RiBuildingLine,
@@ -99,8 +100,13 @@ function BusinessAccountSettings() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Account Settings</h1>
-        <p className={styles.subtitle}>Manage your business account and preferences</p>
+        <div>
+          <h1>Account Settings</h1>
+          <p className={styles.subtitle}>Manage your business account and preferences</p>
+        </div>
+        <div>
+          <CSRDownloadButton className="business-btn business-btn-secondary" label="Download CSR Report" />
+        </div>
       </div>
 
       <div className={styles.content}>

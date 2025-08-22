@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiServices, { apiClient } from '../services/api.service';
+import { parseRetryAfter } from '../utils/onboarding.helpers';
+import { mapValidationErrors } from '../utils/onboarding.helpers';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import businessAPI from '../services/businessAPI';
 import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
@@ -257,6 +259,13 @@ const BusinessOnboarding = () => {
       try {
         setLoading(true);
         const response = await businessAPI.onboarding.selectPrimaryCharities(formData.primaryCharities);
+        // Silently resolve charities to canonical ObjectIds after saving primary charities
+        try {
+          await businessAPI.onboarding.resolveCharities({ primaryCharities: formData.primaryCharities });
+        } catch (e) {
+          // Silent error; keep UX uninterrupted
+          console.warn('resolve-charities failed (non-fatal):', e?.response?.status || e?.message);
+        }
         
         // Save suggestions to formData
         setFormData(prev => ({
@@ -267,7 +276,9 @@ const BusinessOnboarding = () => {
         setCurrentStep(currentStep + 1);
       } catch (error) {
         console.error('Failed to submit primary charities:', error);
-        setError('Failed to save primary charities. Please try again.');
+        const details = error?.response?.data?.details || error?.response?.data?.errors;
+        const friendly = mapValidationErrors(details) || error?.response?.data?.message;
+        setError(friendly || 'Failed to save primary charities. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -357,9 +368,25 @@ const BusinessOnboarding = () => {
         givingScore: response.data.givingScore
       }));
     } catch (err) {
-      setError('Failed to upload CSR report. Please try again.');
+      // Rate limit handling for CSR upload
+      if (err?.isRateLimit || err?.response?.status === 429) {
+        const retryHeader = err?.response?.headers?.['retry-after'] || err?.retryAfter;
+        const seconds = parseRetryAfter(retryHeader) || (Number.isFinite(err?.retryAfter) ? err.retryAfter : null);
+        if (seconds && seconds > 0) {
+          setError(`Too many uploads. Try again in ${seconds} seconds.`);
+        } else {
+          const msg = String(err?.response?.data?.message || '').toLowerCase();
+          if (msg.includes('daily') || msg.includes('10/day') || msg.includes('limit')) {
+            setError('Daily limit reached. Please try again tomorrow.');
+          } else {
+            setError('Too many uploads. Please wait and try again.');
+          }
+        }
+      } else {
+        setError('Failed to upload CSR report. Please try again.');
+      }
       console.error('CSR upload error:', err);
-      console.error('Error response:', err.response?.data);
+      console.error('Error response:', err?.response?.data);
     } finally {
       setLoading(false);
       setUploadProgress(0);
@@ -379,7 +406,9 @@ const BusinessOnboarding = () => {
 
       navigate('/business-dashboard');
     } catch (err) {
-      setError('Failed to complete onboarding. Please try again.');
+      const details = err?.response?.data?.details || err?.response?.data?.errors;
+      const friendly = mapValidationErrors(details) || err?.response?.data?.message;
+      setError(friendly || 'Failed to complete onboarding. Please try again.');
       console.error('Onboarding error:', err);
     } finally {
       setLoading(false);
@@ -519,7 +548,7 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           onSelect={(name, abn) => {
             onChange('companyName', name);
             onChange('abn', abn);
-            fetchAbnDetails(abn);
+            // ABN details fetching could be added here if needed
           }}
           onChangeText={(v) => onChange('companyName', v)}
         />

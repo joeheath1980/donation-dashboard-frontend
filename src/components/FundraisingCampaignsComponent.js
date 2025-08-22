@@ -9,6 +9,7 @@ import styles from './FundraisingCampaigns.module.css';
 import modalStyles from './ModalStyles.module.css';
 import { FaPlus, FaTrash, FaEdit, FaCheck, FaTimes, FaLink, FaCalendar, FaDollarSign, FaBullhorn } from 'react-icons/fa';
 import { API_CONFIG } from '../config/api.config';
+import VerificationGate from './VerificationGate';
 
 const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }, ref) => {
   const {
@@ -431,9 +432,11 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
           <h2 className={styles.header}>
             <FaBullhorn className={styles.icon} /> Fundraising Campaigns
           </h2>
-          <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
-            <FaPlus /> Create Campaign
-          </button>
+          <VerificationGate>
+            <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
+              <FaPlus /> Create Campaign
+            </button>
+          </VerificationGate>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

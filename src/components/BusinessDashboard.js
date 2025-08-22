@@ -10,7 +10,8 @@ import {
   RiUserLine,
   RiLightbulbLine,
   RiFocusLine,
-  RiLineChartLine
+  RiLineChartLine,
+  RiFileLine
 } from 'react-icons/ri';
 
 // Import enhanced components from Profile
@@ -19,6 +20,8 @@ import CSRInsights from './Profile/components/CSRInsights';
 import PerformanceMetrics from './Profile/components/PerformanceMetrics';
 import LiveActivityFeed from './Profile/components/LiveActivityFeed';
 import { API_CONFIG } from '../config/api.config';
+import VerificationGate from './VerificationGate';
+import CSRDownloadButton from './CSRDownloadButton';
 
 function BusinessDashboard() {
   const { user } = useAuth();
@@ -269,6 +272,14 @@ function BusinessDashboard() {
 
   return (
     <div className={styles.dashboardContainer}>
+      {businessData?.csrProfile?.verificationStatus !== 'verified' && (
+        <div className={styles.helpMessage} style={{
+          padding: '10px 12px', background: '#fff4e5', border: '1px solid #ffd8a8', borderRadius: 8,
+          marginBottom: 12, color: '#92400e'
+        }}>
+          Pending verification: Some actions are disabled until your business is verified.
+        </div>
+      )}
       {showSetupBanner && (
         <div className={styles.helpMessage} style={{
           padding: '12px 16px', background: '#fff9e6', border: '1px solid #ffd466', borderRadius: 10, marginBottom: 18,
@@ -350,9 +361,11 @@ function BusinessDashboard() {
           {campaigns.length === 0 ? (
             <div className={styles.emptyCampaigns}>
               <p>No active campaigns</p>
-              <Link to="/create-business-campaign" className={styles.createButton}>
-                Create Your First Campaign
-              </Link>
+              <VerificationGate>
+                <Link to="/create-business-campaign" className={styles.createButton}>
+                  Create Your First Campaign
+                </Link>
+              </VerificationGate>
             </div>
           ) : (
             <div className={styles.campaignsList}>
@@ -408,10 +421,17 @@ function BusinessDashboard() {
           <h2>Quick Actions</h2>
           
           <div className={styles.actionButtons}>
-            <Link to="/create-business-campaign" className={styles.actionButton}>
-              <div className={styles.actionIcon}><RiAddLine /></div>
-              <span>Create Campaign</span>
-            </Link>
+            <VerificationGate>
+              <Link to="/create-business-campaign" className={styles.actionButton}>
+                <div className={styles.actionIcon}><RiAddLine /></div>
+                <span>Create Campaign</span>
+              </Link>
+            </VerificationGate>
+
+            <CSRDownloadButton className={styles.actionButton}>
+              <div className={styles.actionIcon}><RiFileLine /></div>
+              <span>Download CSR Report</span>
+            </CSRDownloadButton>
             
             <Link to="/business-dashboard/account-settings" className={styles.actionButton}>
               <div className={styles.actionIcon}><RiSettings4Line /></div>

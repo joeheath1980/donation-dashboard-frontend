@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import styles from './EnhancedOnboarding.module.css';
 import { API_CONFIG } from '../../config/api.config';
 import apiServices, { csrfServiceAPI } from '../../services/api.service';
+import businessAPI from '../../services/businessAPI';
+import { parseRetryAfter, mapValidationErrors } from '../../utils/onboarding.helpers';
+import CSRDownloadButton from '../CSRDownloadButton';
 import { SecureTokenStorage } from '../../utils/auth.utils';
 import {
   RiSearchLine,
@@ -27,6 +30,9 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
   const [researchData, setResearchData] = useState(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [rateLimitSeconds, setRateLimitSeconds] = useState(0);
+  const [isKillSwitched, setIsKillSwitched] = useState(false);
+  const [resolvedOnce, setResolvedOnce] = useState(false);
   const [formData, setFormData] = useState({
     companyName: initialCompanyData.companyName || '',
     website: initialCompanyData.website || '',
@@ -40,18 +46,27 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
 
   const API_BASE_URL = API_CONFIG.BASE_URL;
 
-  // Get the actual business ID from props or localStorage
-  const getBusinessId = () => {
-    if (businessId) return businessId;
-    // Fallback to localStorage
-    const storedBusinessId = localStorage.getItem('businessId');
-    if (storedBusinessId) return storedBusinessId;
-    // If still no ID, log warning
-    console.warn('No business ID found');
-    return null;
-  };
-
-  const effectiveBusinessId = getBusinessId();
+  // Get the actual business ID from the authenticated profile as source of truth
+  const [effectiveBusinessId, setEffectiveBusinessId] = useState(businessId || null);
+  useEffect(() => {
+    let cancelled = false;
+    const resolveBusinessId = async () => {
+      try {
+        if (businessId) { setEffectiveBusinessId(businessId); return; }
+        const res = await apiServices.client.get('/api/business/me');
+        const id = res?.data?._id || res?.data?.id || null;
+        if (!cancelled) setEffectiveBusinessId(id);
+      } catch {
+        // fall back to localStorage as last resort
+        try {
+          const stored = localStorage.getItem('businessId');
+          if (!cancelled) setEffectiveBusinessId(stored || null);
+        } catch {}
+      }
+    };
+    resolveBusinessId();
+    return () => { cancelled = true; };
+  }, [businessId]);
 
   // Get auth token
   const getAuthHeaders = () => {
@@ -69,12 +84,47 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     }
   }, [effectiveBusinessId]);
 
+  // Silently resolve charities/portfolio to ObjectIds during the review step
+  useEffect(() => {
+    const shouldResolve = step === 'review-research' && researchData && !resolvedOnce;
+    if (!shouldResolve) return;
+    (async () => {
+      try {
+        const portfolio = researchData?.charityPortfolio || researchData?.csrActivities?.charityPortfolio;
+        const payload = {};
+        if (portfolio) payload.charityPortfolio = portfolio;
+        if (Array.isArray(researchData?.primaryCharities)) payload.primaryCharities = researchData.primaryCharities;
+        if (Array.isArray(researchData?.partnerCharities)) payload.partnerCharities = researchData.partnerCharities;
+        if (Object.keys(payload).length > 0) {
+          await businessAPI.onboarding.resolveCharities(payload);
+        }
+      } catch (e) {
+        console.warn('resolve-charities during review failed (non-fatal):', e?.response?.status || e?.message);
+      } finally {
+        setResolvedOnce(true);
+      }
+    })();
+  }, [step, researchData, resolvedOnce]);
+
+  // Countdown for 429 Retry-After
+  useEffect(() => {
+    if (!rateLimitSeconds || rateLimitSeconds <= 0) return;
+    const t = setInterval(() => {
+      setRateLimitSeconds((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [rateLimitSeconds]);
+
   const fetchProgress = async () => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
         { headers: getAuthHeaders() }
       );
+      if (response.status === 403) {
+        console.warn('Progress access forbidden (business mismatch)');
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         setProgress(data.overall || 0);
@@ -462,6 +512,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
               >
                 <RiEditLine /> Edit Information
               </button>
+              <CSRDownloadButton className={styles.secondaryButton} label="Download CSR Report" />
               <button
                 type="button"
                 className={styles.primaryButton}
@@ -529,11 +580,25 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           method: 'POST',
           headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify({ 
-            businessId: effectiveBusinessId, 
             preference: method 
           })
         }
       );
+
+      if (response.status === 503) {
+        setIsKillSwitched(true);
+        alert('Enhanced onboarding is temporarily unavailable. Switching to standard onboarding.');
+        navigate('/business-onboarding');
+        return;
+      }
+
+      if (response.status === 429) {
+        const retry = response.headers.get('Retry-After');
+        const seconds = parseRetryAfter(retry);
+        setRateLimitSeconds(seconds || 30);
+        setError(`Rate limited. Try again in ${seconds || 30} seconds.`);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Failed to set preference');
@@ -568,8 +633,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     
     try {
       const requestBody = {
-        ...formData,
-        businessId: effectiveBusinessId
+        ...formData
       };
       
       let csrf = null;
@@ -582,6 +646,22 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           body: JSON.stringify(requestBody)
         }
       );
+
+      if (response.status === 503) {
+        setIsKillSwitched(true);
+        alert('Enhanced onboarding is temporarily unavailable. Switching to standard onboarding.');
+        navigate('/business-onboarding');
+        return;
+      }
+
+      if (response.status === 429) {
+        const retry = response.headers.get('Retry-After');
+        const seconds = parseRetryAfter(retry);
+        setRateLimitSeconds(seconds || 30);
+        setStep('ai-research-form');
+        setError(`Rate limited. Try again in ${seconds || 30} seconds.`);
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -701,7 +781,6 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           method: 'POST',
           headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify({
-            businessId: effectiveBusinessId,
             confirmedData: cleaned,
             corrections: {},
             additionalData: { acceptableCharitiesRaw: meta.acceptableRaw || undefined }
@@ -709,9 +788,25 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         }
       );
 
+      if (response.status === 503) {
+        setIsKillSwitched(true);
+        alert('Enhanced onboarding is temporarily unavailable. Switching to standard onboarding.');
+        navigate('/business-onboarding');
+        return;
+      }
+
+      if (response.status === 429) {
+        const retry = response.headers.get('Retry-After');
+        const seconds = parseRetryAfter(retry);
+        setRateLimitSeconds(seconds || 30);
+        setError(`Rate limited. Try again in ${seconds || 30} seconds.`);
+        return;
+      }
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || 'Failed to save research data');
+        const mapped = mapValidationErrors(errorData?.errors || errorData?.details);
+        throw new Error(mapped || errorData.details || 'Failed to save research data');
       }
 
       const data = await response.json();
@@ -798,6 +893,11 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
 
       {/* Step Content */}
       <div className={styles.stepContent}>
+        {rateLimitSeconds > 0 && (
+          <div className={styles.helpMessage} style={{ padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 12 }}>
+            Try again in {rateLimitSeconds} seconds.
+          </div>
+        )}
         {loading && step === 'loading' && <LoadingState />}
         {!loading && step === 'choose-method' && <MethodSelection />}
         {!loading && step === 'ai-research-form' && <AIResearchForm />}

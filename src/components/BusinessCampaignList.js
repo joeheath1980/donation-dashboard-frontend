@@ -20,6 +20,7 @@ import {
   RiArrowLeftLine,
   RiArrowRightLine
 } from 'react-icons/ri';
+import VerificationGate from './VerificationGate';
 
 function BusinessCampaignList() {
   const navigate = useNavigate();
@@ -339,9 +340,11 @@ function BusinessCampaignList() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Campaign Management</h1>
-        <Link to="/create-business-campaign" className={styles.createButton}>
-          <RiAddLine /> Create New Campaign
-        </Link>
+        <VerificationGate>
+          <Link to="/create-business-campaign" className={styles.createButton}>
+            <RiAddLine /> Create New Campaign
+          </Link>
+        </VerificationGate>
       </div>
 
       {/* Filters Section */}
