@@ -247,6 +247,14 @@ const BusinessOnboarding = () => {
     suggestedCharities: []
   });
 
+  // Allow deep-linking directly into enhanced onboarding from dashboard/banner
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('enhanced') === '1') {
+      setUseEnhancedOnboarding(true);
+    }
+  }, [location.search]);
+
   const steps = [
     { id: 1, title: 'Business Profile', icon: <RiBuildingLine /> },
     { id: 2, title: 'CSR Report', icon: <RiBarChartLine /> },
@@ -1389,10 +1397,3 @@ const CharityPortfolioStep = ({ formData, onChange }) => {
 }; */
 
 export default BusinessOnboarding;
-  // Allow deep-linking directly into enhanced onboarding from dashboard/banner
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('enhanced') === '1') {
-      setUseEnhancedOnboarding(true);
-    }
-  }, [location.search]);
