@@ -38,6 +38,9 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
   const [abnSearchResults, setAbnSearchResults] = useState([]);
   const [searchingABN, setSearchingABN] = useState(false);
   const [showABNResults, setShowABNResults] = useState(false);
+  // Simple client-side throttle for ABN search to protect API keys
+  const [lastAbnQueryAt, setLastAbnQueryAt] = useState(0);
+  const ABN_MIN_INTERVAL_MS = 1000; // 1s between requests
 
   const API_BASE_URL = API_CONFIG.BASE_URL;
 
@@ -93,6 +96,14 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       return;
     }
 
+    // Throttle: ensure minimum interval between calls
+    const now = Date.now();
+    const since = now - lastAbnQueryAt;
+    if (since < ABN_MIN_INTERVAL_MS) {
+      const wait = ABN_MIN_INTERVAL_MS - since;
+      await new Promise(r => setTimeout(r, wait));
+    }
+
     setSearchingABN(true);
     try {
       const response = await fetch(
@@ -108,6 +119,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       console.error('Error searching ABN:', error);
     } finally {
       setSearchingABN(false);
+      setLastAbnQueryAt(Date.now());
     }
   };
 
@@ -409,7 +421,14 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
   // Step 3: Review Research Results
   const ReviewResearch = () => {
     const data = editedData || researchData;
-    
+
+    // Helper to safely format totals in millions
+    const formatMillions = (value) => {
+      const n = typeof value === 'number' ? value : Number(value || 0);
+      if (!isFinite(n) || n <= 0) return '0.0';
+      return (n / 1_000_000).toFixed(1);
+    };
+
     return (
       <div className={styles.reviewResearch}>
         <div className={styles.header}>
@@ -419,6 +438,14 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
 
         {data && (
           <>
+            {/* Show a hint if dataQuality is low to encourage manual entry */}
+            {typeof data?.dataQuality?.score === 'number' && data.dataQuality.score < 50 && (
+              <div className={styles.helpMessage} style={{ 
+                padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 16
+              }}>
+                <RiAlertLine /> Our AI has low confidence in the detected figures. You can still save now and update your annual budget manually later in Account Settings.
+              </div>
+            )}
             {/* Data Quality Score */}
             <div className={styles.dataQuality}>
               <div className={styles.qualityScore}>
@@ -466,7 +493,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
                 <div className={styles.bigNumber}>
                   <span className={styles.currency}>$</span>
                   <span className={styles.amount}>
-                    {(data.csrActivities?.totalContributions / 1000000).toFixed(1)}M
+                    {`${formatMillions(data?.csrActivities?.totalContributions)}M`}
                   </span>
                   <span className={styles.period}>Annual Giving ({data.csrActivities?.year || 'Latest'})</span>
                 </div>
@@ -812,13 +839,28 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       
       console.log('Research confirmed successfully:', {
         completionPercentage: data.completionPercentage,
-        nextStep: data.nextStep
+        nextStep: data.nextStep,
+        message: data.message,
+        annualBudget: data.annualBudget
       });
       
-      // Show success message with budget amount
-      const budgetAmount = researchData?.csrActivities?.totalContributions;
-      if (budgetAmount) {
-        alert(`✅ AI Research confirmed! Annual Giving Budget set to $${(budgetAmount / 1000000).toFixed(1)}M`);
+      // Determine the saved budget amount from response or local data
+      const savedBudget = (typeof data.annualBudget === 'number' ? data.annualBudget : null);
+      const fallbackBudget = researchData?.csrActivities?.totalContributions || 0;
+      const effectiveBudget = savedBudget ?? fallbackBudget ?? 0;
+      
+      if (effectiveBudget > 0) {
+        alert(`✅ AI Research confirmed! Annual Giving Budget set to $${(effectiveBudget / 1000000).toFixed(1)}M`);
+      } else {
+        const msg = data?.message && typeof data.message === 'string'
+          ? data.message
+          : 'Saved with no numeric amounts detected. You can enter your annual budget manually later.';
+        const goToSettings = window.confirm(`${msg}\n\nWould you like to open Account Settings to set your annual budget now?`);
+        if (goToSettings) {
+          navigate('/business-dashboard/account-settings');
+          setLoading(false);
+          return;
+        }
       }
       
       setProgress(data.completionPercentage || 75);
