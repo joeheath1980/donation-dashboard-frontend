@@ -1,0 +1,249 @@
+# OpenAPI skeleton for onboarding and related flows
+openapi: 3.0.3
+info:
+  title: Donation Dashboard – Onboarding APIs
+  version: 0.1.0
+  description: |
+    Skeleton spec covering business authentication, classic onboarding,
+    enhanced onboarding, CSR report retrieval, and matching/payment settings.
+    All protected endpoints require bearerAuth.
+servers:
+  - url: /api
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiMessage:
+      type: object
+      properties:
+        message:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+    CSRResearchData:
+      type: object
+      properties:
+        companyProfile:
+          type: object
+        csrActivities:
+          type: object
+          properties:
+            totalContributions:
+              type: number
+        charities:
+          type: array
+          items:
+            type: object
+    CSRConfirmRequest:
+      type: object
+      properties:
+        confirmedData:
+          $ref: '#/components/schemas/CSRResearchData'
+        corrections:
+          type: object
+        additionalData:
+          type: object
+    CSRReportUrlResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+paths:
+  /business/auth/login:
+    post:
+      summary: Business login
+      tags: [Business Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contactEmail:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+        '401':
+          description: Unauthorized
+  /business/me:
+    get:
+      summary: Current business profile
+      tags: [Business]
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id: { type: string }
+                  csrProfile:
+                    type: object
+                    properties:
+                      verificationStatus:
+                        type: string
+                        enum: [pending, verified, rejected]
+  /business/onboarding/profile:
+    post:
+      summary: Classic onboarding – update business profile
+      tags: [Classic Onboarding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { description: Updated }
+        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+  /business/enhanced-onboarding/data-preference:
+    post:
+      summary: Set enhanced onboarding data preference
+      tags: [Enhanced Onboarding]
+      description: |
+        Requires Authorization. `preference` can be `ai-research`, `upload-document`, or `manual-entry`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preference:
+                  type: string
+                  enum: [ai-research, upload-document, manual-entry]
+      responses:
+        '200': { description: Preference saved }
+        '429': { description: Rate limited. Honor Retry-After. }
+        '503': { description: Enhanced onboarding disabled (kill switch) }
+  /business/enhanced-onboarding/ai-research:
+    post:
+      summary: Trigger AI research for CSR data
+      tags: [Enhanced Onboarding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                companyName: { type: string }
+                website: { type: string }
+                industry: { type: string }
+                country: { type: string }
+      responses:
+        '200':
+          description: Research data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  researchData: { $ref: '#/components/schemas/CSRResearchData' }
+        '429': { description: Rate limited. Honor Retry-After. }
+        '503': { description: Enhanced onboarding disabled (kill switch) }
+  /business/enhanced-onboarding/confirm-research:
+    post:
+      summary: Confirm AI research results and save CSR profile
+      tags: [Enhanced Onboarding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CSRConfirmRequest'
+      responses:
+        '200': { description: Saved }
+        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+        '429': { description: Rate limited. Honor Retry-After. }
+        '503': { description: Enhanced onboarding disabled (kill switch) }
+  /business/enhanced-onboarding/progress/{businessId}:
+    get:
+      summary: Get enhanced onboarding progress
+      tags: [Enhanced Onboarding]
+      parameters:
+        - in: path
+          name: businessId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overall: { type: number, example: 50 }
+        '403': { description: Forbidden – path businessId must match authenticated business }
+  /business/onboarding/csr-report/url:
+    get:
+      summary: Get a signed URL for the CSR report (S3)
+      tags: [CSR Report]
+      responses:
+        '200':
+          description: Signed URL
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CSRReportUrlResponse' }
+        '404': { description: Not found }
+  /business/onboarding/csr-report/download:
+    get:
+      summary: Download CSR report directly (local storage)
+      tags: [CSR Report]
+      responses:
+        '200':
+          description: PDF or other document
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404': { description: Not found }
+  /business/matching/settings:
+    get:
+      summary: Get matching settings (verification-gated UI)
+      tags: [Matching]
+      responses:
+        '200': { description: Settings JSON }
+        '403': { description: Forbidden for unverified businesses depending on policy }
+  /payments/methods:
+    get:
+      summary: List payment methods (verification-gated UI)
+      tags: [Payments]
+      responses:
+        '200': { description: Methods JSON }
+        '403': { description: Forbidden for unverified businesses depending on policy }
+
