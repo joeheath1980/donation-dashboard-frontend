@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import apiServices from '../services/api.service';
+import apiServices, { apiClient } from '../services/api.service';
 import { SecureTokenStorage } from '../utils/auth.utils';
 import businessAPI from '../services/businessAPI';
 import EnhancedOnboarding from './BusinessOnboarding/EnhancedOnboarding';
@@ -40,22 +40,14 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
     if (since < minInterval) await new Promise(r => setTimeout(r, minInterval - since));
     setLoading(true);
     try {
-      const token = SecureTokenStorage.getToken();
-      const res = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(term)}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          credentials: 'include'
-        }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.results || []);
-        setShow(true);
-      } else {
-        setResults([]); setShow(false);
-      }
-    } catch { setResults([]); setShow(false); }
+      const { data } = await apiClient.get(`/api/business/enhanced-onboarding/abn-search`, {
+        params: { name: term }
+      });
+      setResults(data?.results || []);
+      setShow(true);
+    } catch {
+      setResults([]); setShow(false);
+    }
     finally { setLoading(false); setLastAt(Date.now()); }
   };
 
@@ -212,6 +204,31 @@ const BusinessOnboarding = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Enrich company data from ABN details when available
+  const fetchAbnDetails = async (abn) => {
+    if (!abn) return;
+    try {
+      const { data } = await apiClient.get(`/api/business/enhanced-onboarding/abn-details/${encodeURIComponent(abn)}`);
+      if (data?.mappedData) {
+        setFormData(prev => ({
+          ...prev,
+          companyName: data.mappedData.name || prev.companyName,
+          website: data.mappedData.website || prev.website,
+          address: {
+            ...prev.address,
+            street: data.mappedData.address?.street || prev.address.street,
+            city: data.mappedData.address?.city || prev.address.city,
+            state: data.mappedData.address?.state || prev.address.state,
+            zipCode: data.mappedData.address?.postcode || prev.address.zipCode,
+            country: data.mappedData.address?.country || prev.address.country || prev.country || 'Australia'
+          }
+        }));
+      }
+    } catch (e) {
+      // Silent fail; ABN details might not be available
+    }
   };
 
   const handleAddressChange = (addressType, field, value) => {
@@ -417,6 +434,7 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           onSelect={(name, abn) => {
             onChange('companyName', name);
             onChange('abn', abn);
+            fetchAbnDetails(abn);
           }}
           onChangeText={(v) => onChange('companyName', v)}
         />
