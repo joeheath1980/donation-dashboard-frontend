@@ -21,7 +21,7 @@ import {
 } from 'react-icons/ri';
 
 // Lightweight ABN search input (moved from EnhancedOnboarding)
-const ABNSearchInput = ({ value, onChangeText, onSelect }) => {
+const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
   const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState([]);
   const [show, setShow] = useState(false);
@@ -40,7 +40,14 @@ const ABNSearchInput = ({ value, onChangeText, onSelect }) => {
     if (since < minInterval) await new Promise(r => setTimeout(r, minInterval - since));
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(term)}`);
+      const token = SecureTokenStorage.getToken();
+      const res = await fetch(
+        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(term)}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          credentials: 'include'
+        }
+      );
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);
@@ -57,6 +64,15 @@ const ABNSearchInput = ({ value, onChangeText, onSelect }) => {
     return () => clearTimeout(t);
   }, [query]);
 
+  const dropdownStyle = {
+    position: 'absolute', zIndex: 1000, background: '#fff', border: '1px solid #e5e7eb',
+    borderRadius: 8, marginTop: 4, width: '100%', maxHeight: 240, overflowY: 'auto',
+    boxShadow: '0 8px 18px rgba(0,0,0,0.08)', padding: '6px 0'
+  };
+  const headerStyle = { padding: '6px 12px', fontSize: 12, color: '#6b7280' };
+  const itemStyle = { padding: '10px 12px', cursor: 'pointer' };
+  const subStyle = { fontSize: 12, color: '#6b7280' };
+
   return (
     <div style={{ position: 'relative' }}>
       <input
@@ -70,18 +86,32 @@ const ABNSearchInput = ({ value, onChangeText, onSelect }) => {
         aria-label="Company Name"
         onFocus={() => { if (results.length) setShow(true); }}
       />
-      {loading && <div className={styles.searchingIndicator}>Searching...</div>}
+      {loading && (
+        <div style={{ position: 'absolute', top: '50%', right: 10, transform: 'translateY(-50%)', fontSize: 12, color: '#6b7280' }}>Searching…</div>
+      )}
       {show && results.length > 0 && (
-        <div className={styles.abnSearchResults} tabIndex={-1} onMouseDown={(e) => e.preventDefault()}>
-          <div className={styles.resultsHeader}>Select your business from the Australian Business Register:</div>
+        <div style={dropdownStyle} tabIndex={-1} onMouseDown={(e) => e.preventDefault()}>
+          <div style={headerStyle}>Select your business from the Australian Business Register</div>
           {results.map((r, idx) => (
-            <div key={`${r.abn}-${idx}`} className={styles.abnResult}
+            <div key={`${r.abn || idx}-${idx}`} style={itemStyle}
                  onMouseDown={(e) => e.preventDefault()}
-                 onClick={() => { onSelect && onSelect(r.businessName || r.tradingName, r.abn); setShow(false); inputRef.current && inputRef.current.focus(); }}>
-              <div className={styles.businessName}>{r.businessName || r.tradingName}</div>
-              <div className={styles.businessDetails}>ABN: {r.abn} • {r.state} {r.postcode}</div>
+                 onClick={() => {
+                   onSelect && onSelect(r.businessName || r.tradingName, r.abn);
+                   setShow(false);
+                   inputRef.current && inputRef.current.focus();
+                 }}
+                 onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
+                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div style={{ fontWeight: 600 }}>{r.businessName || r.tradingName}</div>
+              <div style={subStyle}>ABN: {r.abn || '—'} • {r.state || ''} {r.postcode || ''}</div>
             </div>
           ))}
+        </div>
+      )}
+      {selectedAbn && (
+        <div style={{ marginTop: 6, fontSize: 12, color: '#059669' }}>
+          Selected: {value || 'Company'} (ABN: {selectedAbn})
         </div>
       )}
     </div>
@@ -383,6 +413,7 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         <label>Company Name</label>
         <ABNSearchInput 
           value={formData.companyName}
+          selectedAbn={formData.abn}
           onSelect={(name, abn) => {
             onChange('companyName', name);
             onChange('abn', abn);
