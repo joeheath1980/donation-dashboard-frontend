@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './EnhancedOnboarding.module.css';
 import { API_CONFIG } from '../../config/api.config';
+import apiServices, { csrfServiceAPI } from '../../services/api.service';
 import { SecureTokenStorage } from '../../utils/auth.utils';
 import {
   RiSearchLine,
@@ -518,11 +519,15 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     setLoading(true);
     
     try {
+      // Ensure CSRF token for state-changing request
+      let csrf = null;
+      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
+
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/data-preference`,
         {
           method: 'POST',
-          headers: getAuthHeaders(),
+          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify({ 
             businessId: effectiveBusinessId, 
             preference: method 
@@ -567,11 +572,13 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         businessId: effectiveBusinessId
       };
       
+      let csrf = null;
+      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/ai-research`,
         {
           method: 'POST',
-          headers: getAuthHeaders(),
+          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify(requestBody)
         }
       );
@@ -623,11 +630,13 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     });
     
     try {
+      let csrf = null;
+      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/confirm-research`,
         {
           method: 'POST',
-          headers: getAuthHeaders(),
+          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
           body: JSON.stringify({
             businessId: effectiveBusinessId,
             confirmedData: editedData || researchData,
