@@ -12,8 +12,7 @@ function BusinessSignup() {
     companyName: '',
     contactEmail: '',
     password: '',
-    description: '',
-    preferredCauses: [],
+    confirmPassword: '',
   });
 
   const [error, setError] = useState(null);
@@ -31,10 +30,7 @@ function BusinessSignup() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleMultiSelect = (e) => {
-    const values = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData({ ...formData, preferredCauses: values });
-  };
+  // Removed preferred causes; collected later in onboarding
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +41,17 @@ function BusinessSignup() {
     try {
       // Ensure CSRF token is initialized before submitting (defensive)
       try { await csrfServiceAPI.initializeToken(); } catch {}
-      await businessSignup(formData);
+      if ((formData.password || '').trim() !== (formData.confirmPassword || '').trim()) {
+        setError('Passwords do not match.');
+        setLoading(false);
+        return;
+      }
+      const payload = {
+        companyName: formData.companyName,
+        contactEmail: formData.contactEmail,
+        password: formData.password
+      };
+      await businessSignup(payload);
       setSuccessMessage('Business registered successfully');
       setTimeout(() => {
         navigate('/business-onboarding');
@@ -130,39 +136,18 @@ function BusinessSignup() {
           </div>
 
           <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="description">Tell us about your company *</label>
-            <small className={styles.hint}>Brief description of your business and charitable goals</small>
-            <textarea
-              placeholder="e.g., We're a tech company focused on sustainable solutions..."
-              id="description"
-              name="description"
-              value={formData.description}
+            <label className={`${styles.label} description`} htmlFor="confirmPassword">Confirm Password *</label>
+            <input
+              placeholder="Re-enter your password"
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleInputChange}
               required
-              className={styles.textarea}
+              minLength="12"
+              className={styles.input}
             />
-          </div>
-
-          <div className={styles.inputContainer}>
-            <label className={`${styles.label} description`} htmlFor="preferredCauses">Preferred Charitable Causes *</label>
-            <small className={styles.hint}>Hold Ctrl/Cmd to select multiple causes</small>
-            <select
-              multiple
-              id="preferredCauses"
-              name="preferredCauses"
-              value={formData.preferredCauses}
-              onChange={handleMultiSelect}
-              required
-              className={styles.select}
-            >
-              <option value="education">Education</option>
-              <option value="health">Health</option>
-              <option value="environment">Environment</option>
-              <option value="social-justice">Social Justice</option>
-              <option value="humanitarian">Humanitarian</option>
-              <option value="animal-welfare">Animal Welfare</option>
-              <option value="arts-culture">Arts and Culture</option>
-            </select>
           </div>
 
           <button 

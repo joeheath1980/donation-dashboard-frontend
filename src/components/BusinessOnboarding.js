@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiServices, { apiClient } from '../services/api.service';
 import { parseRetryAfter } from '../utils/onboarding.helpers';
@@ -199,6 +199,7 @@ const ABNSearchInput = ({ value, selectedAbn, onChangeText, onSelect }) => {
 
 const BusinessOnboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { getAuthHeaders, user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -618,18 +619,6 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
       </div>
 
       <div className={styles.formGroup}>
-        <label>Additional Context (Optional)</label>
-        <textarea
-          id="additionalContext"
-          name="additionalContext"
-          value={formData.additionalContext}
-          onChange={(e) => onChange('additionalContext', e.target.value)}
-          placeholder="Any specific information about your CSR activities, charity partnerships, or focus areas..."
-          rows={3}
-          className={styles.textarea}
-        />
-      </div>
-      <div className={styles.formGroup}>
         <label>Company Description</label>
         <textarea
           id="companyDescription"
@@ -706,116 +695,6 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
         </div>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Billing Email</label>
-        <input
-          type="email"
-          id="billingEmail"
-          name="billingEmail"
-          value={formData.billingEmail}
-          onChange={(e) => onChange('billingEmail', e.target.value)}
-          placeholder="billing@company.com"
-          className={styles.input}
-        />
-      </div>
-
-      <div className={styles.addressSection}>
-        <h3>Billing Address</h3>
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            id="sameAsCompanyAddress"
-            name="sameAsCompanyAddress"
-            onChange={(e) => {
-              if (e.target.checked) {
-                onChange('billingAddress', formData.address);
-              }
-            }}
-          />
-          Same as company address
-        </label>
-        <div className={styles.addressGrid}>
-          <input
-            type="text"
-            id="billingStreet"
-            name="billingStreet"
-            placeholder="Street Address"
-            value={formData.billingAddress.street}
-            onChange={(e) => onAddressChange('billingAddress', 'street', e.target.value)}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            id="billingCity"
-            name="billingCity"
-            placeholder="City"
-            value={formData.billingAddress.city}
-            onChange={(e) => onAddressChange('billingAddress', 'city', e.target.value)}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            id="billingState"
-            name="billingState"
-            placeholder="State/Province"
-            value={formData.billingAddress.state}
-            onChange={(e) => onAddressChange('billingAddress', 'state', e.target.value)}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            id="billingZipCode"
-            name="billingZipCode"
-            placeholder="ZIP/Postal Code"
-            value={formData.billingAddress.zipCode}
-            onChange={(e) => onAddressChange('billingAddress', 'zipCode', e.target.value)}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            id="billingCountry"
-            name="billingCountry"
-            placeholder="Country"
-            value={formData.billingAddress.country}
-            onChange={(e) => onAddressChange('billingAddress', 'country', e.target.value)}
-            className={styles.input}
-          />
-        </div>
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Annual Giving Budget</label>
-        <div className={styles.budgetInput}>
-          <span className={styles.currencySymbol}>$</span>
-          <input
-            type="number"
-            id="annualGivingBudget"
-            name="annualGivingBudget"
-            value={formData.annualGivingBudget}
-            onChange={(e) => onChange('annualGivingBudget', parseInt(e.target.value) || 0)}
-            min="0"
-            step="1000"
-            className={styles.input}
-          />
-        </div>
-        <input
-          type="range"
-          id="annualGivingBudgetSlider"
-          name="annualGivingBudgetSlider"
-          value={formData.annualGivingBudget}
-          onChange={(e) => onChange('annualGivingBudget', parseInt(e.target.value))}
-          min="0"
-          max="1000000"
-          step="1000"
-          className={styles.slider}
-          aria-label="Annual Giving Budget Slider"
-        />
-        <div className={styles.sliderLabels}>
-          <span>$0</span>
-          <span>$500K</span>
-          <span>$1M</span>
-        </div>
-      </div>
     </div>
   );
 };
@@ -1510,3 +1389,10 @@ const CharityPortfolioStep = ({ formData, onChange }) => {
 }; */
 
 export default BusinessOnboarding;
+  // Allow deep-linking directly into enhanced onboarding from dashboard/banner
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('enhanced') === '1') {
+      setUseEnhancedOnboarding(true);
+    }
+  }, [location.search]);

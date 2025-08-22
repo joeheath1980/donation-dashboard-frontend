@@ -295,7 +295,7 @@ function BusinessDashboard() {
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               className={styles.createButton}
-              onClick={() => navigate('/business-onboarding')}
+              onClick={() => navigate('/business-onboarding?enhanced=1')}
             >
               Complete Now
             </button>

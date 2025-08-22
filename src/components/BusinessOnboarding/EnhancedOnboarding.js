@@ -825,16 +825,6 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       
       if (effectiveBudget > 0) {
         alert(`✅ AI Research confirmed! Annual Giving Budget set to $${(effectiveBudget / 1000000).toFixed(1)}M`);
-      } else {
-        const msg = data?.message && typeof data.message === 'string'
-          ? data.message
-          : 'Saved with no numeric amounts detected. You can enter your annual budget manually later.';
-        const goToSettings = window.confirm(`${msg}\n\nWould you like to open Account Settings to set your annual budget now?`);
-        if (goToSettings) {
-          navigate('/business-dashboard/account-settings');
-          setLoading(false);
-          return;
-        }
       }
       
       setProgress(data.completionPercentage || 75);
@@ -846,8 +836,8 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       if (onComplete) {
         onComplete(data);
       } else {
-        // Navigate back to main onboarding flow
-        navigate('/business/onboarding');
+        // Return to dashboard post-confirm without sending user to settings
+        navigate('/business-dashboard');
       }
     } catch (error) {
       console.error('Error confirming research:', error);
