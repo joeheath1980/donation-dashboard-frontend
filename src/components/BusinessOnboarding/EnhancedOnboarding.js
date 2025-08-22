@@ -19,20 +19,20 @@ import {
   RiSparklingLine
 } from 'react-icons/ri';
 
-const EnhancedOnboarding = ({ businessId, onComplete, onSkip }) => {
+const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData = {}, defaultStep = 'choose-method' }) => {
   const navigate = useNavigate();
-  const [step, setStep] = useState('choose-method');
+  const [step, setStep] = useState(defaultStep || 'choose-method');
   const [loading, setLoading] = useState(false);
   const [researchData, setResearchData] = useState(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    companyName: '',
-    website: '',
-    industry: '',
-    country: 'Australia',
-    additionalContext: '',
-    abn: ''
+    companyName: initialCompanyData.companyName || '',
+    website: initialCompanyData.website || '',
+    industry: initialCompanyData.industry || '',
+    country: initialCompanyData.country || 'Australia',
+    additionalContext: initialCompanyData.additionalContext || '',
+    abn: initialCompanyData.abn || ''
   });
   const [editedData, setEditedData] = useState(null);
   // ABN lookup now handled earlier in Business Profile step
@@ -175,144 +175,53 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip }) => {
         >
           ← Back
         </button>
-        <h2>Company Details for AI Research</h2>
-        <p>Provide some basic information to help AI research your CSR activities</p>
+        <h2>Confirm Company Details</h2>
+        <p>We’ll use these to run AI Research. Edit earlier in Business Profile if needed.</p>
       </div>
 
-      <form onSubmit={handleAIResearch} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label>
-            <RiBuilding2Line />
-            Company Name *
-          </label>
-          <div>
-            <input
-              type="text"
-              id="companyName"
-              name="companyName"
-              value={formData.companyName}
-              onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-              placeholder="e.g., Coles Supermarkets"
-              required
-              autoComplete="off"
-              aria-label="Company Name"
-            />
-          </div>
-          <small>
-            {formData.country === 'Australia' 
-              ? "We'll automatically find your ABN and business details" 
-              : "Enter your company's official name"}
-          </small>
-        </div>
-
-        {/* ABN selection occurs earlier during Business Profile step */}
-
-        <div className={styles.formGroup}>
-          <label>
-            <RiGlobalLine />
-            Company Website
-          </label>
-          <input
-            type="url"
-            id="website"
-            name="website"
-            value={formData.website}
-            onChange={(e) => setFormData({...formData, website: e.target.value})}
-            placeholder="https://www.example.com"
-            aria-label="Company Website"
-          />
-          <small>Helps AI find accurate information</small>
-        </div>
-
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Industry</label>
-            <select
-              id="industry"
-              name="industry"
-              value={formData.industry}
-              onChange={(e) => setFormData({...formData, industry: e.target.value})}
-              aria-label="Industry"
-            >
-              <option value="">Select Industry</option>
-              <option value="Retail">Retail</option>
-              <option value="Technology">Technology</option>
-              <option value="Finance">Finance & Banking</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Manufacturing">Manufacturing</option>
-              <option value="Construction">Construction</option>
-              <option value="Energy">Energy & Utilities</option>
-              <option value="Telecommunications">Telecommunications</option>
-              <option value="Transportation">Transportation</option>
-              <option value="Hospitality">Hospitality & Tourism</option>
-              <option value="Education">Education</option>
-              <option value="Professional Services">Professional Services</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Country</label>
-            <select
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={(e) => setFormData({...formData, country: e.target.value})}
-              aria-label="Country"
-            >
-              <option value="Australia">Australia</option>
-              <option value="New Zealand">New Zealand</option>
-              <option value="United States">United States</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Canada">Canada</option>
-              <option value="Other">Other</option>
-            </select>
+      <div className={styles.section}>
+        <div className={styles.dataGrid}>
+          <div className={styles.dataItem}><label>Company Name</label><div className={styles.value}>{formData.companyName || '—'}</div></div>
+          {formData.abn && (<div className={styles.dataItem}><label>ABN</label><div className={styles.value}>{formData.abn}</div></div>)}
+          <div className={styles.dataItem}><label>Website</label><div className={styles.value}>{formData.website || '—'}</div></div>
+          <div className={styles.dataItem}><label>Industry</label><div className={styles.value}>{formData.industry || '—'}</div></div>
+          <div className={styles.dataItem}><label>Country</label><div className={styles.value}>{formData.country || '—'}</div></div>
+          <div className={styles.dataItem} style={{ gridColumn: '1 / -1' }}>
+            <label>Additional Context</label>
+            <div className={styles.value}>{formData.additionalContext || '—'}</div>
           </div>
         </div>
+      </div>
 
-        <div className={styles.formGroup}>
-          <label>Additional Context (Optional)</label>
-          <textarea
-            id="additionalContext"
-            name="additionalContext"
-            value={formData.additionalContext}
-            onChange={(e) => setFormData({...formData, additionalContext: e.target.value})}
-            placeholder="Any specific information about your CSR activities, charity partnerships, or focus areas..."
-            rows={4}
-            aria-label="Additional Context"
-          />
-          <small>Help AI understand your specific CSR focus</small>
+      {error && (
+        <div className={styles.error}>
+          <RiAlertLine /> {error}
         </div>
+      )}
 
-        {error && (
-          <div className={styles.error}>
-            <RiAlertLine /> {error}
-          </div>
-        )}
-
-        <div className={styles.formActions}>
-          <button
-            type="button"
-            className={styles.secondaryButton}
-            onClick={() => setStep('choose-method')}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className={styles.primaryButton}
-            disabled={loading || !formData.companyName}
-          >
-            {loading ? (
-              <>Researching... This may take 10-15 seconds</>
-            ) : (
-              <>
-                <RiSearchLine /> Start AI Research
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+      <div className={styles.formActions}>
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={() => navigate('/business-onboarding')}
+        >
+          Edit Company Details
+        </button>
+        <button
+          type="button"
+          className={styles.primaryButton}
+          disabled={loading || !formData.companyName}
+          onClick={handleAIResearch}
+        >
+          {loading ? (
+            <>Researching... This may take 10-15 seconds</>
+          ) : (
+            <>
+              <RiSearchLine /> Start AI Research
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 

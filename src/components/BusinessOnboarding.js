@@ -101,6 +101,9 @@ const BusinessOnboarding = () => {
     companyName: '',
     abn: '',
     website: '',
+    industry: '',
+    country: 'Australia',
+    additionalContext: '',
     // Step 1: Business Profile
     companyDescription: '',
     phoneNumber: '',
@@ -292,6 +295,15 @@ const BusinessOnboarding = () => {
     return (
       <EnhancedOnboarding 
         businessId={user?._id || user?.id || localStorage.getItem('businessId')}
+        initialCompanyData={{
+          companyName: formData.companyName,
+          abn: formData.abn,
+          website: formData.website,
+          industry: formData.industry,
+          country: formData.country,
+          additionalContext: formData.additionalContext
+        }}
+        defaultStep={'ai-research-form'}
         onComplete={handleEnhancedComplete}
         onSkip={() => { setUseEnhancedOnboarding(false); navigate('/business-dashboard'); }}
       />
@@ -392,6 +404,66 @@ const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
           onChange={(e) => onChange('website', e.target.value)}
           placeholder="https://www.example.com"
           className={styles.input}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <div className={styles.formGroup}>
+          <label>Industry</label>
+          <select
+            id="industry"
+            name="industry"
+            value={formData.industry}
+            onChange={(e) => onChange('industry', e.target.value)}
+            className={styles.input}
+            aria-label="Industry"
+          >
+            <option value="">Select Industry</option>
+            <option value="Retail">Retail</option>
+            <option value="Technology">Technology</option>
+            <option value="Finance">Finance & Banking</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Construction">Construction</option>
+            <option value="Energy">Energy & Utilities</option>
+            <option value="Telecommunications">Telecommunications</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Hospitality">Hospitality & Tourism</option>
+            <option value="Education">Education</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Country</label>
+          <select
+            id="country"
+            name="country"
+            value={formData.country}
+            onChange={(e) => onChange('country', e.target.value)}
+            className={styles.input}
+            aria-label="Country"
+          >
+            <option value="Australia">Australia</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="United States">United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Canada">Canada</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label>Additional Context (Optional)</label>
+        <textarea
+          id="additionalContext"
+          name="additionalContext"
+          value={formData.additionalContext}
+          onChange={(e) => onChange('additionalContext', e.target.value)}
+          placeholder="Any specific information about your CSR activities, charity partnerships, or focus areas..."
+          rows={3}
+          className={styles.textarea}
         />
       </div>
       <div className={styles.formGroup}>

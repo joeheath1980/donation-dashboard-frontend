@@ -41,6 +41,7 @@ function BusinessDashboard() {
   const [recentMatches, setRecentMatches] = useState([]);
   const [categoryBreakdown, setCategoryBreakdown] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [showSetupBanner, setShowSetupBanner] = useState(false);
 
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -55,10 +56,20 @@ function BusinessDashboard() {
           verificationStatus: response.data.csrProfile?.verificationStatus
         });
         
-        setBusinessData({
+        const normalized = {
           ...response.data,
           annualGivingBudget: response.data.csrProfile?.annualGivingBudget || response.data.annualGivingBudget || 0
-        });
+        };
+        setBusinessData(normalized);
+
+        // Evaluate whether to show onboarding completion banner (with snooze support)
+        try {
+          const snoozeUntil = parseInt(localStorage.getItem('onboardingBannerSnoozeUntil') || '0', 10);
+          const snoozed = Number.isFinite(snoozeUntil) && Date.now() < snoozeUntil;
+          setShowSetupBanner(!normalized.onboardingCompleted && !snoozed);
+        } catch {
+          setShowSetupBanner(!normalized.onboardingCompleted);
+        }
         
         // Do not auto-redirect; show a banner to complete onboarding instead
       } catch (err) {
@@ -258,17 +269,37 @@ function BusinessDashboard() {
 
   return (
     <div className={styles.dashboardContainer}>
-      {!businessData.onboardingCompleted && (
+      {showSetupBanner && (
         <div className={styles.helpMessage} style={{
-          padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 16,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+          padding: '12px 16px', background: '#fff9e6', border: '1px solid #ffd466', borderRadius: 10, marginBottom: 18,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
         }}>
-          <div>
-            <strong>Finish your setup:</strong> Complete your CSR/AI stage to unlock insights and set your annual budget.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 18, lineHeight: 1 }}><RiLightbulbLine /></div>
+            <div>
+              <div style={{ fontWeight: 600 }}>Finish your setup</div>
+              <div style={{ fontSize: 13, color: '#6b6b6b' }}>Complete your CSR/AI stage to unlock insights and set your annual budget.</div>
+            </div>
           </div>
-          <button className={styles.createButton} onClick={() => navigate('/business-onboarding')}>
-            Complete Now
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className={styles.createButton}
+              onClick={() => navigate('/business-onboarding')}
+            >
+              Complete Now
+            </button>
+            <button
+              className={styles.viewAllLink}
+              onClick={() => {
+                // Snooze for 24 hours
+                const until = Date.now() + 24 * 60 * 60 * 1000;
+                try { localStorage.setItem('onboardingBannerSnoozeUntil', String(until)); } catch {}
+                setShowSetupBanner(false);
+              }}
+            >
+              Remind Me Later
+            </button>
+          </div>
         </div>
       )}
       <div className={styles.dashboardHeader}>
