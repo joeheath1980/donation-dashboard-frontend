@@ -82,9 +82,10 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     return () => { cancelled = true; };
   }, [businessId, initialCompanyData.companyName]);
 
-  // Get auth token
+  // Get auth headers with business JWT token
+  // Note: Business users authenticate via /api/business/auth/login which returns a business JWT
   const getAuthHeaders = () => {
-    const token = SecureTokenStorage.getToken();
+    const token = SecureTokenStorage.getToken(); // This is the business JWT token
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : ''
@@ -135,7 +136,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       return;
     }
     try {
-      // Include business ID in URL path as per backend requirements
+      // Include business ID in URL path (must match the one in the JWT token)
       const response = await fetch(
         `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
         { headers: getAuthHeaders() }
@@ -658,14 +659,12 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     console.log('Starting AI research with form data:', formData);
     
     try {
-      // AI research body format per backend requirements (no businessId)
+      // AI research body format per backend requirements (exact format)
       const requestBody = {
         companyName: formData.companyName || '',
         website: formData.website || '',
         industry: formData.industry || '',
-        country: formData.country || 'Australia',
-        additionalContext: formData.additionalContext || '',
-        abn: formData.abn || ''
+        country: formData.country || 'Australia'
       };
       
       // Get CSRF token for POST request
