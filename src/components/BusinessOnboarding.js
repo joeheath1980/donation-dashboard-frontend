@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiServices from '../services/api.service';
@@ -20,6 +20,74 @@ import {
   RiSparklingLine
 } from 'react-icons/ri';
 
+// Lightweight ABN search input (moved from EnhancedOnboarding)
+const ABNSearchInput = ({ value, onChangeText, onSelect }) => {
+  const [query, setQuery] = useState(value || '');
+  const [results, setResults] = useState([]);
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [lastAt, setLastAt] = useState(0);
+  const inputRef = useRef(null);
+  const API_BASE_URL = API_CONFIG.BASE_URL;
+
+  useEffect(() => { setQuery(value || ''); }, [value]);
+
+  const fetchResults = async (term) => {
+    if (!term || term.length < 2) { setResults([]); setShow(false); return; }
+    const now = Date.now();
+    const since = now - lastAt;
+    const minInterval = 800;
+    if (since < minInterval) await new Promise(r => setTimeout(r, minInterval - since));
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(term)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data.results || []);
+        setShow(true);
+      } else {
+        setResults([]); setShow(false);
+      }
+    } catch { setResults([]); setShow(false); }
+    finally { setLoading(false); setLastAt(Date.now()); }
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => fetchResults(query), 500);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        ref={inputRef}
+        type="text"
+        value={query}
+        onChange={(e) => { setQuery(e.target.value); onChangeText && onChangeText(e.target.value); }}
+        placeholder="Start typing to search Australian businesses..."
+        autoComplete="off"
+        className={styles.input}
+        aria-label="Company Name"
+        onFocus={() => { if (results.length) setShow(true); }}
+      />
+      {loading && <div className={styles.searchingIndicator}>Searching...</div>}
+      {show && results.length > 0 && (
+        <div className={styles.abnSearchResults} tabIndex={-1} onMouseDown={(e) => e.preventDefault()}>
+          <div className={styles.resultsHeader}>Select your business from the Australian Business Register:</div>
+          {results.map((r, idx) => (
+            <div key={`${r.abn}-${idx}`} className={styles.abnResult}
+                 onMouseDown={(e) => e.preventDefault()}
+                 onClick={() => { onSelect && onSelect(r.businessName || r.tradingName, r.abn); setShow(false); inputRef.current && inputRef.current.focus(); }}>
+              <div className={styles.businessName}>{r.businessName || r.tradingName}</div>
+              <div className={styles.businessDetails}>ABN: {r.abn} • {r.state} {r.postcode}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const BusinessOnboarding = () => {
   const navigate = useNavigate();
   const { getAuthHeaders, user } = useAuth();
@@ -30,6 +98,9 @@ const BusinessOnboarding = () => {
   const [useEnhancedOnboarding, setUseEnhancedOnboarding] = useState(false);
 
   const [formData, setFormData] = useState({
+    companyName: '',
+    abn: '',
+    website: '',
     // Step 1: Business Profile
     companyDescription: '',
     phoneNumber: '',
@@ -222,6 +293,7 @@ const BusinessOnboarding = () => {
       <EnhancedOnboarding 
         businessId={user?._id || user?.id || localStorage.getItem('businessId')}
         onComplete={handleEnhancedComplete}
+        onSkip={() => { setUseEnhancedOnboarding(false); navigate('/business-dashboard'); }}
       />
     );
   }
@@ -295,6 +367,33 @@ const BusinessOnboarding = () => {
 const BusinessProfileStep = ({ formData, onChange, onAddressChange }) => {
   return (
     <div className={styles.stepContent}>
+      <div className={styles.formGroup}>
+        <label>Company Name</label>
+        <ABNSearchInput 
+          value={formData.companyName}
+          onSelect={(name, abn) => {
+            onChange('companyName', name);
+            onChange('abn', abn);
+          }}
+          onChangeText={(v) => onChange('companyName', v)}
+        />
+        {formData.abn && (
+          <small>ABN selected: {formData.abn}</small>
+        )}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label>Company Website</label>
+        <input
+          type="url"
+          id="website"
+          name="website"
+          value={formData.website}
+          onChange={(e) => onChange('website', e.target.value)}
+          placeholder="https://www.example.com"
+          className={styles.input}
+        />
+      </div>
       <div className={styles.formGroup}>
         <label>Company Description</label>
         <textarea
@@ -500,6 +599,17 @@ const CSRReportStep = ({ formData, onFileUpload, uploadProgress, loading, onUseE
             onClick={onUseEnhanced}
           >
             Try Enhanced Setup
+          </button>
+          <button 
+            className={styles.secondaryButton}
+            onClick={(e) => {
+              e.preventDefault();
+              // Allow skipping CSR/AI for now
+              window.location.href = '/business-dashboard';
+            }}
+            style={{ marginLeft: 12 }}
+          >
+            Skip For Now
           </button>
         </div>
         <div className={styles.dividerOr}>

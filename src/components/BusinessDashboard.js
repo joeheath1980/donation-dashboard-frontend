@@ -60,11 +60,7 @@ function BusinessDashboard() {
           annualGivingBudget: response.data.csrProfile?.annualGivingBudget || response.data.annualGivingBudget || 0
         });
         
-        // Check if business has completed onboarding
-        if (!response.data.onboardingCompleted) {
-          console.log('Redirecting to onboarding - onboardingCompleted is false');
-          navigate('/business-onboarding');
-        }
+        // Do not auto-redirect; show a banner to complete onboarding instead
       } catch (err) {
         console.error('Error fetching business data:', err);
         setError('Failed to load business data. Please try again later.');
@@ -262,6 +258,19 @@ function BusinessDashboard() {
 
   return (
     <div className={styles.dashboardContainer}>
+      {!businessData.onboardingCompleted && (
+        <div className={styles.helpMessage} style={{
+          padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 16,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+        }}>
+          <div>
+            <strong>Finish your setup:</strong> Complete your CSR/AI stage to unlock insights and set your annual budget.
+          </div>
+          <button className={styles.createButton} onClick={() => navigate('/business-onboarding')}>
+            Complete Now
+          </button>
+        </div>
+      )}
       <div className={styles.dashboardHeader}>
         <h1>Welcome back, {businessData.name}!</h1>
         <p className={styles.subtitle}>Your giving dashboard</p>

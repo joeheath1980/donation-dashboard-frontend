@@ -19,7 +19,7 @@ import {
   RiSparklingLine
 } from 'react-icons/ri';
 
-const EnhancedOnboarding = ({ businessId, onComplete }) => {
+const EnhancedOnboarding = ({ businessId, onComplete, onSkip }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState('choose-method');
   const [loading, setLoading] = useState(false);
@@ -35,12 +35,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
     abn: ''
   });
   const [editedData, setEditedData] = useState(null);
-  const [abnSearchResults, setAbnSearchResults] = useState([]);
-  const [searchingABN, setSearchingABN] = useState(false);
-  const [showABNResults, setShowABNResults] = useState(false);
-  // Simple client-side throttle for ABN search to protect API keys
-  const [lastAbnQueryAt, setLastAbnQueryAt] = useState(0);
-  const ABN_MIN_INTERVAL_MS = 1000; // 1s between requests
+  // ABN lookup now handled earlier in Business Profile step
 
   const API_BASE_URL = API_CONFIG.BASE_URL;
 
@@ -89,82 +84,11 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
   };
 
   // Search for Australian businesses by name
-  const searchBusinessByName = async (searchTerm) => {
-    if (searchTerm.length < 2) {
-      setAbnSearchResults([]);
-      setShowABNResults(false);
-      return;
-    }
+  // (ABN search removed from AI step)
 
-    // Throttle: ensure minimum interval between calls
-    const now = Date.now();
-    const since = now - lastAbnQueryAt;
-    if (since < ABN_MIN_INTERVAL_MS) {
-      const wait = ABN_MIN_INTERVAL_MS - since;
-      await new Promise(r => setTimeout(r, wait));
-    }
+  // (ABN select removed from AI step)
 
-    setSearchingABN(true);
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-search?name=${encodeURIComponent(searchTerm)}`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        setAbnSearchResults(data.results || []);
-        setShowABNResults(true);
-      }
-    } catch (error) {
-      console.error('Error searching ABN:', error);
-    } finally {
-      setSearchingABN(false);
-      setLastAbnQueryAt(Date.now());
-    }
-  };
-
-  // Select a business from ABN search results
-  const selectBusiness = async (business) => {
-    setFormData({
-      ...formData,
-      companyName: business.businessName || business.tradingName,
-      abn: business.abn
-    });
-    setShowABNResults(false);
-    
-    // Fetch full details
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/abn-details/${encodeURIComponent(business.abn)}`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Auto-fill additional fields if available
-        if (data.mappedData) {
-          setFormData(prev => ({
-            ...prev,
-            companyName: data.mappedData.name || prev.companyName,
-            abn: data.mappedData.abn || prev.abn,
-            // You can map more fields as needed
-          }));
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching ABN details:', error);
-    }
-  };
-
-  // Debounced search for Australian businesses
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (formData.companyName && formData.country === 'Australia') {
-        searchBusinessByName(formData.companyName);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [formData.companyName, formData.country]);
+  // (Removed ABN search debounce in AI step)
 
   // Step 1: Method Selection
   const MethodSelection = () => (
@@ -172,6 +96,18 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
       <div className={styles.header}>
         <h2>How would you like to set up your CSR profile?</h2>
         <p>Choose the method that works best for you. You can always add more data later.</p>
+        <div>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={() => {
+              if (onSkip) return onSkip();
+              navigate('/business-dashboard');
+            }}
+          >
+            Skip For Now
+          </button>
+        </div>
       </div>
 
       <div className={styles.methodCards}>
@@ -249,42 +185,18 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
             <RiBuilding2Line />
             Company Name *
           </label>
-          <div className={styles.abnSearchWrapper}>
+          <div>
             <input
               type="text"
               id="companyName"
               name="companyName"
               value={formData.companyName}
               onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-              placeholder={formData.country === 'Australia' ? "Start typing to search Australian businesses..." : "e.g., Coles Supermarkets"}
+              placeholder="e.g., Coles Supermarkets"
               required
               autoComplete="off"
               aria-label="Company Name"
             />
-            {formData.country === 'Australia' && searchingABN && (
-              <div className={styles.searchingIndicator}>Searching...</div>
-            )}
-            {formData.country === 'Australia' && showABNResults && abnSearchResults.length > 0 && (
-              <div className={styles.abnSearchResults}>
-                <div className={styles.resultsHeader}>
-                  Select your business from the Australian Business Register:
-                </div>
-                {abnSearchResults.map((business, index) => (
-                  <div
-                    key={index}
-                    className={styles.abnResult}
-                    onClick={() => selectBusiness(business)}
-                  >
-                    <div className={styles.businessName}>
-                      {business.businessName || business.tradingName}
-                    </div>
-                    <div className={styles.businessDetails}>
-                      ABN: {business.abn} • {business.state} {business.postcode}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <small>
             {formData.country === 'Australia' 
@@ -293,21 +205,7 @@ const EnhancedOnboarding = ({ businessId, onComplete }) => {
           </small>
         </div>
 
-        {formData.abn && (
-          <div className={styles.formGroup}>
-            <label>ABN (Australian Business Number)</label>
-            <input
-              type="text"
-              id="abn"
-              name="abn"
-              value={formData.abn}
-              readOnly
-              className={styles.readOnlyField}
-              aria-label="ABN (Australian Business Number)"
-            />
-            <small>Automatically retrieved from the Australian Business Register</small>
-          </div>
-        )}
+        {/* ABN selection occurs earlier during Business Profile step */}
 
         <div className={styles.formGroup}>
           <label>
