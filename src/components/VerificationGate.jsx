@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiServices from '../services/api.service';
+import { useAuth } from '../contexts/AuthContext';
+import { USER_TYPES, STORAGE_KEYS } from '../config/api.config';
 
 // Simple wrapper to gate child actions until business verification is complete
 // Props:
@@ -9,9 +11,27 @@ import apiServices from '../services/api.service';
 // - inlineDisable: if true, wraps children in a disabled-looking span when pending
 export default function VerificationGate({ children, fallback = null, showBanner = true, inlineDisable = true }) {
   const [status, setStatus] = useState('loading'); // 'loading' | 'verified' | 'pending' | 'unknown'
+  const { user } = useAuth();
+
+  // Determine if the current session is a business account
+  const userType = (() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.USER_TYPE);
+    } catch {
+      return null;
+    }
+  })();
+  const isBusiness = user?.isBusiness || userType === USER_TYPES.BUSINESS;
 
   useEffect(() => {
     let cancelled = false;
+
+    // Only fetch business verification status for business accounts
+    if (!isBusiness) {
+      setStatus('verified'); // Bypass gating for non-business users
+      return () => { cancelled = true; };
+    }
+
     const fetchStatus = async () => {
       try {
         const res = await apiServices.client.get('/api/business/me');
@@ -23,7 +43,7 @@ export default function VerificationGate({ children, fallback = null, showBanner
     };
     fetchStatus();
     return () => { cancelled = true; };
-  }, []);
+  }, [isBusiness]);
 
   if (status === 'loading') return null;
   const isVerified = status === 'verified';
@@ -46,10 +66,9 @@ export default function VerificationGate({ children, fallback = null, showBanner
           padding: '8px 10px', background: '#fff4e5', border: '1px solid #ffd8a8', borderRadius: 8,
           color: '#92400e', fontSize: 13
         }}>
-          Pending verification: Your account is being reviewed. You can browse but cannot create campaigns yet.
+          Pending verification: Your business account is being reviewed. You can browse but cannot create campaigns yet.
         </div>
       )}
     </div>
   );
 }
-
