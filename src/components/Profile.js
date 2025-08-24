@@ -329,7 +329,7 @@ function Profile() {
             as="h2"
           />
           <div className={styles.projectsHeader}>
-            <Link to="/search-charities" className="btn btn-ghost">See all projects</Link>
+            <Link to="/search-charities" className="btn-link tealUnderlineGlow">See all projects</Link>
           </div>
           
           {/* Project Matching Explanation - Collapsible */}
@@ -441,14 +441,15 @@ function Profile() {
           <div className={styles.projectsContainer}>
             <GlobalGivingProjects />
             <button 
-              className={styles.skipProjectsBtn}
+              type="button"
+              aria-label="Skip to next projects"
+              className={`${styles.skipProjectsBtn} iconButton`}
               onClick={() => {
                 // Trigger next set of projects
                 const event = new CustomEvent('skipProjects');
                 window.dispatchEvent(event);
               }}
-              title="Skip to next projects"
-            >
+              title="Skip to next projects">
               <FaChevronRight />
             </button>
           </div>
@@ -533,7 +534,7 @@ function Profile() {
                   ))}
                 </div>
                 {!showRegularContributions && (
-                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleRegularContributions}>
+                  <button type="button" className={`btn-link tealUnderlineGlow`} onClick={toggleRegularContributions}>
                     See All <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
@@ -553,7 +554,7 @@ function Profile() {
                   ))}
                 </div>
                 {!showOneOffContributions && (
-                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleOneOffContributions}>
+                  <button type="button" className={`btn-link tealUnderlineGlow`} onClick={toggleOneOffContributions}>
                     See All <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
@@ -579,11 +580,11 @@ function Profile() {
                   ))}
                 </div>
                 {localFollowedCharities.length > 3 && (
-                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleFollowedCharities}>
+                  <button type="button" className={`btn-link tealUnderlineGlow`} onClick={toggleFollowedCharities}>
                     {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
-                <Link to="/search-charities" className={`${styles.followNewButton} button ${styles.fullWidth}`}>
+                <Link to="/search-charities" className={`${styles.followNewButton} btn btn-primary ${styles.fullWidth}`}>
                   <FaPlus /> Follow New Charity
                 </Link>
               </div>

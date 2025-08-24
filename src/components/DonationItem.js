@@ -105,15 +105,9 @@ const DonationItem = React.memo(({
           <p>
             <strong>Receipt:</strong>
             <button
+              type="button"
               onClick={() => onReceiptClick(donation.receiptUrl)}
-              className="link"
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                padding: 0, 
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
+              className="btn-link tealUnderlineGlow"
             >
               View Receipt
             </button>
@@ -122,15 +116,16 @@ const DonationItem = React.memo(({
       </div>
       <div className="cardActions">
         <InstantTooltip text="Edit donation">
-          <button onClick={() => onEdit(donation)} className={`${styles.iconButton} btn btn-ghost`} aria-label="Edit Donation">
+          <button type="button" onClick={() => onEdit(donation)} className={`iconButton`} aria-label="Edit Donation">
             <FaEdit />
           </button>
         </InstantTooltip>
         {donation.receiptUrl && onReceiptDownload && (
           <InstantTooltip text="Download receipt">
             <button
+              type="button"
               onClick={() => onReceiptDownload(donation)}
-              className={`${styles.iconButton} btn btn-outline`}
+              className={`iconButton`}
               aria-label="Download Receipt"
             >
               <FaDownload />
@@ -139,8 +134,9 @@ const DonationItem = React.memo(({
         )}
         <InstantTooltip text="Delete donation">
           <button
+            type="button"
             onClick={() => onDelete(donation._id)}
-            className={`${styles.iconButton} btn btn-ghost`}
+            className={`iconButton`}
             aria-label="Delete Donation"
           >
             <FaTrash />

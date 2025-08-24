@@ -554,17 +554,18 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                             href={`${API_CONFIG.BASE_URL}${contribution.receiptUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link"
+                            className="btn-link tealUnderlineGlow"
                           >
                             View Receipt
                           </a>
+                          {' '}
                           <button 
+                            type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               handleReceiptDownload(contribution);
                             }}
-                            className={oneOffStyles.receiptDownloadButton}
-                            className="ml-10 p-2px-8px font-size-12"
+                            className="btn-link tealUnderlineGlow"
                           >
                             <FaDownload /> Download
                           </button>
@@ -573,14 +574,15 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                     </div>
                     <div className="cardActions">
                       <InstantTooltip text="Edit contribution">
-                        <button onClick={() => handleEditOrValidate(contribution)} className={`iconButton ${oneOffStyles.tealIcon}`} aria-label="Edit Contribution">
+                        <button type="button" onClick={() => handleEditOrValidate(contribution)} className={`iconButton`} aria-label="Edit Contribution">
                           <FaEdit />
                         </button>
                       </InstantTooltip>
                       <InstantTooltip text="Delete contribution">
                         <button
+                          type="button"
                           onClick={() => handleDelete(contribution._id)}
-                          className={`iconButton ${oneOffStyles.tealIcon}`}
+                          className={`iconButton`}
                           aria-label="Delete Contribution"
                         >
                           <FaTrash />
@@ -613,7 +615,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
         </div>
         <div className="flexBetween">
           {!displayAll && filteredContributions.length > 5 && (
-            <button onClick={() => {}} className="button secondary tealUnderlineGlow">
+            <button type="button" onClick={() => {}} className="btn-link tealUnderlineGlow">
               See All ({filteredContributions.length})
             </button>
           )}

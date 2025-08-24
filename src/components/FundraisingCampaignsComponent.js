@@ -474,8 +474,9 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
                       <span>${campaign.raisedAmount || 0}</span>
                     )}
                     <button
+                      type="button"
                       onClick={() => handleUpdateAmount(campaign)}
-                      className={styles.editButton}
+                      className={`${styles.editButton} iconButton`}
                       aria-label={updatingCampaign === campaign._id ? "Save Amount" : "Update Amount"}
                     >
                       {updatingCampaign === campaign._id ? <FaCheck /> : <FaEdit />}
@@ -494,7 +495,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
                       href={campaign.campaignUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.campaignLink}
+                      className="btn-link tealUnderlineGlow"
                     >
                       <FaLink /> View Campaign Page
                     </a>
@@ -527,14 +528,15 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
                           href={campaign.campaignUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={styles.campaignLink}
+                          className="btn-link tealUnderlineGlow"
                         >
                           <FaLink /> View Campaign Page
                         </a>
                       )}
                       <button
+                        type="button"
                         onClick={() => handleDeleteCampaign(campaign._id)}
-                        className={styles.iconButton}
+                        className={`iconButton`}
                         aria-label="Delete Campaign"
                       >
                         <FaTrash />

@@ -5,6 +5,7 @@ import { validateEmail, validatePassword, validateName } from '../utils/validati
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { FaGoogle, FaMicrosoft, FaEye, FaEyeSlash, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import styles from './SignUp.module.css';
+import { API_CONFIG } from '../config/api.config';
 import logo from '../assets/logodark.png';
 
 const SignUp = () => {
@@ -156,7 +157,15 @@ const SignUp = () => {
   };
 
   const handleSocialSignup = (provider) => {
-    console.log(`Signup with ${provider}`);
+    if (loading) return;
+    setError('');
+    // Store intended redirect after OAuth completes (optional)
+    try {
+      sessionStorage.setItem('signupRedirectUrl', '/dashboard');
+    } catch {}
+    const normalized = String(provider || '').toLowerCase();
+    // Redirect to backend OAuth endpoint (CASA-safe: full navigation)
+    window.location.href = `${API_CONFIG.BASE_URL}/api/auth/${normalized}`;
   };
 
   const togglePasswordVisibility = () => {

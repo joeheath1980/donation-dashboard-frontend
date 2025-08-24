@@ -579,7 +579,7 @@ const AccountSettings = () => {
                     ) : (
                       <button
                         className={styles.connectButton}
-                        onClick={() => window.location.href = '/auth/google'}
+                        onClick={() => { window.location.href = `${API_CONFIG.BASE_URL}/api/auth/google`; }}
                       >
                         <FaLink /> Connect Google
                       </button>
@@ -612,7 +612,7 @@ const AccountSettings = () => {
                     ) : (
                       <button
                         className={styles.connectButton}
-                        onClick={() => window.location.href = '/auth/microsoft'}
+                        onClick={() => { window.location.href = `${API_CONFIG.BASE_URL}/api/auth/microsoft`; }}
                       >
                         <FaLink /> Connect Microsoft
                       </button>

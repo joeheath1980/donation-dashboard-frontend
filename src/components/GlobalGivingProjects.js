@@ -13,17 +13,23 @@ const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectse
 
 const PrevArrow = ({ className, style, onClick }) => (
   <div
-    className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
-    className="style-spread-base"
+    className={`${className} ${styles.slickArrow} ${styles.slickPrev} iconButton`}
+    role="button"
+    tabIndex={0}
+    aria-label="Previous"
     onClick={onClick}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
   />
 );
 
 const NextArrow = ({ className, style, onClick }) => (
   <div
-    className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
-    className="style-spread-base"
+    className={`${className} ${styles.slickArrow} ${styles.slickNext} iconButton`}
+    role="button"
+    tabIndex={0}
+    aria-label="Next"
     onClick={onClick}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
   />
 );
 

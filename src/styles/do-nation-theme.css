@@ -184,6 +184,29 @@ h3 { font-size: 18px; font-weight: 650; }
 }
 .btn-ghost:hover { background: rgba(0,0,0,.04); }
 
+/* Link-style buttons (flat) */
+.btn-link {
+  background: transparent;
+  border: 0;
+  padding: 0 2px;
+  color: var(--teal-600);
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn-link:focus-visible { outline: none; box-shadow: var(--ring-focus); border-radius: 6px; }
+
+/* Icon-only buttons */
+.iconButton {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 999px;
+  border: 1px solid transparent; background: transparent; color: var(--teal-600);
+  cursor: pointer; transition: background var(--speed-fast) var(--ease-out), transform var(--speed-fast) var(--ease-out);
+}
+.iconButton:hover { background: rgba(0,0,0,.05); }
+.iconButton:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.iconButton:active { transform: translateY(1px); }
+
 /* Badges / Chips */
 .badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -279,4 +302,3 @@ h3 { font-size: 18px; font-weight: 650; }
 [data-theme="dark"] .tabs { background: #202226; }
 [data-theme="dark"] .progress { background: #2a2d31; }
 [data-theme="dark"] .carousel-dots button { background: #2a2d31; }
-

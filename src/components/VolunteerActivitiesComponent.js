@@ -145,8 +145,9 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
     <div className={modalStyles.modalOverlay}>
       <div className={modalStyles.modalContent}>
         <button
+          type="button"
           onClick={() => setIsAddActivityModalOpen(false)}
-          className={modalStyles.closeButton}
+          className={`${modalStyles.closeButton} iconButton`}
           aria-label="Close modal"
         >
           <FaTimes />

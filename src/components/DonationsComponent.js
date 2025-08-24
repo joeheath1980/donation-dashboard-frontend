@@ -467,7 +467,7 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
         
         <div className="flexBetween">
           {!displayAll && filteredDonations.length > 5 && (
-            <button onClick={() => {}} className="button secondary tealUnderlineGlow">
+            <button type="button" onClick={() => {}} className="btn-link tealUnderlineGlow">
               See All ({filteredDonations.length})
             </button>
           )}

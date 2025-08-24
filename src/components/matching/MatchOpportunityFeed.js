@@ -502,7 +502,8 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
       <div className={styles.carouselContainer}>
         {/* Elegant left skip button */}
         <button 
-          className={styles.carouselNavLeft}
+          type="button"
+          className={`${styles.carouselNavLeft} iconButton`}
           onClick={handlePrevious}
           disabled={currentIndex === 0}
           aria-label="Previous opportunity"
@@ -559,7 +560,8 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
                   <div className={styles.selectedCharityNotice}>
                     <p>✓ Selected: {charityCache[selections[currentOpp.id]] || selections[currentOpp.id]}</p>
                     <button 
-                      className={styles.changeButton}
+                      type="button"
+                      className="btn-link tealUnderlineGlow"
                       onClick={() => {
                         updateSelection(currentOpp.id, null);
                         setShowCharitySearch(true);
@@ -570,7 +572,8 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
                   </div>
                 ) : (
                   <button 
-                    className={styles.selectCharityButton}
+                    type="button"
+                    className="btn btn-primary"
                     onClick={() => setShowCharitySearch(true)}
                   >
                     Select a Charity
@@ -647,7 +650,8 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
           <div className={styles.cardFooter}>
             <div className={styles.actionButtons}>
               <button 
-                className={styles.matchButton}
+                type="button"
+                className={`${styles.matchButton} btn btn-primary`}
                 onClick={handleMatchThis}
               >
                 Match This! 🎯
@@ -659,7 +663,8 @@ function MatchOpportunityFeed({ opportunities: rawOpportunities, onSelectOpportu
         
         {/* Elegant right skip button */}
         <button 
-          className={styles.carouselNavRight}
+          type="button"
+          className={`${styles.carouselNavRight} iconButton`}
           onClick={handleSkip}
           disabled={currentIndex >= opportunities.length - 1}
           aria-label="Next opportunity"
