@@ -41,7 +41,7 @@ const DonationItem = React.memo(({
   const hasMatches = donation.matches && donation.matches.length > 0;
 
   return (
-    <div className={`${styles.donationCard} ${hasMatches ? styles.matchedDonation : ''}`}>
+    <div className={`${styles.donationCard} ${hasMatches ? styles.matchedDonation : ''} rimSlate`}>
       <div className="cardHeader">
         <h3 className="cardTitle">
           {donation.charity}

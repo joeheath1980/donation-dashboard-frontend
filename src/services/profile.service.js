@@ -1,4 +1,5 @@
 import apiServices from './api.service';
+import { API_ENDPOINTS } from '../config/api.config';
 
 const api = apiServices.client;
 
@@ -6,17 +7,43 @@ class ProfileService {
   // User Profile Methods
   async getUserPublicProfile(identifier) {
     try {
-      // The backend endpoint accepts username, userId, or email
-      const response = await api.get(`/api/publicProfiles/user/${identifier}`);
+      // Resolve special identifier "me" to the current user's username when possible
+      let resolvedId = identifier;
+      if (identifier === 'me') {
+        try {
+          const meRes = await api.get(API_ENDPOINTS.USER_PROFILE);
+          const me = meRes.data || {};
+          resolvedId = me.username || me._id || me.id || 'me';
+        } catch (e) {
+          // If we can't resolve "me" (likely unauthenticated), propagate a clear error
+          if (e?.response?.status === 401) {
+            throw new Error('Not authenticated. Please log in to view your profile.');
+          }
+          // Otherwise continue with provided identifier which may still work server-side
+        }
+      }
+
+      // Try canonical path first; backend should accept username or ID
+      let response;
+      try {
+        response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_USER}/${resolvedId}`);
+      } catch (primaryErr) {
+        // Fallback to alternate documented path if primary is not found
+        if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 400) {
+          response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_USER_LEGACY}/${resolvedId}`);
+        } else {
+          throw primaryErr;
+        }
+      }
       console.log('Profile API response:', response.data);
       
       // Check if the response has the expected structure
-      if (!response.data || !response.data.success) {
+      if (!response.data) {
         console.error('Invalid API response structure:', response.data);
         throw new Error('Invalid response from server');
       }
-      
-      // Extract the profile data from the response
+
+      // Extract the profile data from the response (support multiple shapes)
       if (response.data.profile) {
         console.log('Profile data structure:', {
           hasUser: !!response.data.profile.user,
@@ -27,6 +54,12 @@ class ProfileService {
         });
         console.log('Returning profile data:', response.data.profile);
         return response.data.profile;
+      } else if (response.data.success && response.data.data) {
+        // Some APIs return { success, data }
+        return response.data.data;
+      } else if (response.data.user) {
+        // Some APIs return the profile object directly
+        return response.data;
       }
       
       console.error('No profile data in response:', response.data);
@@ -53,7 +86,16 @@ class ProfileService {
   // Business Profile Methods
   async getBusinessPublicProfile(slug) {
     try {
-      const response = await api.get(`/api/publicProfiles/business/${slug}`);
+      let response;
+      try {
+        response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_BUSINESS}/${slug}`);
+      } catch (primaryErr) {
+        if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 400) {
+          response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_BUSINESS_LEGACY}/${slug}`);
+        } else {
+          throw primaryErr;
+        }
+      }
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -66,7 +108,16 @@ class ProfileService {
   // Charity Profile Methods
   async getCharityPublicProfile(abn) {
     try {
-      const response = await api.get(`/api/publicProfiles/charity/${abn}`);
+      let response;
+      try {
+        response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_CHARITY}/${abn}`);
+      } catch (primaryErr) {
+        if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 400) {
+          response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_CHARITY_LEGACY}/${abn}`);
+        } else {
+          throw primaryErr;
+        }
+      }
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -84,18 +135,35 @@ class ProfileService {
     }
     
     // Updated to use correct endpoint path
-    const response = await api.get('/api/publicProfiles/search', {
-      params
-    });
+    let response;
+    try {
+      response = await api.get(API_ENDPOINTS.PUBLIC_PROFILE_SEARCH, { params });
+    } catch (primaryErr) {
+      if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 400) {
+        response = await api.get(API_ENDPOINTS.PUBLIC_PROFILE_SEARCH_LEGACY, { params });
+      } else {
+        throw primaryErr;
+      }
+    }
     return response.data;
   }
 
   // Activity Methods
   async getPublicActivity(profileType, profileId, page = 1) {
-    const response = await api.get(`/api/publicProfiles/${profileType}/${profileId}/activity`, {
-      params: { page, limit: 10 }
-    });
-    return response.data;
+    try {
+      const response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_ACTIVITY_ROOT}/${profileType}/${profileId}/activity`, {
+        params: { page, limit: 10 }
+      });
+      return response.data;
+    } catch (primaryErr) {
+      if (primaryErr?.response?.status === 404 || primaryErr?.response?.status === 400) {
+        const response = await api.get(`${API_ENDPOINTS.PUBLIC_PROFILE_ACTIVITY_LEGACY_ROOT}/${profileType}/${profileId}/activity`, {
+          params: { page, limit: 10 }
+        });
+        return response.data;
+      }
+      throw primaryErr;
+    }
   }
 
   // Generate shareable profile URL
@@ -103,6 +171,7 @@ class ProfileService {
     const baseUrl = process.env.REACT_APP_PUBLIC_URL || 'https://do-nation.space';
     switch (type) {
       case 'user':
+        // Identifier should be a username for public profiles
         return `${baseUrl}/profile/${identifier}`;
       case 'business':
         return `${baseUrl}/business/${identifier}`;
@@ -134,9 +203,9 @@ class ProfileService {
           title: `${profileData.displayName || 'User'} - Do-Nation Giving Profile`,
           description: `${profileData.displayName || 'User'} is a ${profileData.tier || 'Bronze'} tier donor supporting ${profileData.stats?.charitiesSupported || 0} charities on Do-Nation.`,
           image: profileData.avatar || defaultImage,
-          url: this.generateProfileUrl('user', profileData._id || profileData.id),
+          url: this.generateProfileUrl('user', profileData.username || profileData._id || profileData.id),
           type: 'profile',
-          'og:profile:username': profileData._id || profileData.id
+          'og:profile:username': profileData.username || profileData._id || profileData.id
         };
       
       case 'business':

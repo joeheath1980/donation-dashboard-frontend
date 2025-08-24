@@ -5,7 +5,7 @@ import styles from './CharityDashboard.module.css';
 import './SharedStyles.css';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { FaSearch, FaLink, FaTimes, FaClock, FaCreditCard, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import logo from '../assets/logo.png';
+import logo from '../assets/logodark.png';
 import { useAuth } from '../contexts/AuthContext';
 import CharityOnboarding from './CharityOnboarding';
 import { API_CONFIG } from '../config/api.config';

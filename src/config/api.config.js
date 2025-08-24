@@ -98,6 +98,18 @@ export const API_ENDPOINTS = {
   // Other endpoints
   MATCHING_OPPORTUNITIES: '/api/matching/opportunities',
   GLOBALGIVING_PROJECTS: '/api/globalgiving/projects/recommended',
+
+  // Public profile endpoints (prefer canonical, keep legacy for fallback)
+  PUBLIC_PROFILE_USER: '/api/public/profile',
+  PUBLIC_PROFILE_USER_LEGACY: '/api/publicProfiles/user',
+  PUBLIC_PROFILE_BUSINESS: '/api/public/profile/business',
+  PUBLIC_PROFILE_BUSINESS_LEGACY: '/api/publicProfiles/business',
+  PUBLIC_PROFILE_CHARITY: '/api/public/profile/charity',
+  PUBLIC_PROFILE_CHARITY_LEGACY: '/api/publicProfiles/charity',
+  PUBLIC_PROFILE_SEARCH: '/api/public/profile/search',
+  PUBLIC_PROFILE_SEARCH_LEGACY: '/api/publicProfiles/search',
+  PUBLIC_PROFILE_ACTIVITY_ROOT: '/api/public/profile',
+  PUBLIC_PROFILE_ACTIVITY_LEGACY_ROOT: '/api/publicProfiles',
   
   // Email forwarding endpoints
   EMAIL_FORWARD_STATUS: '/api/email/forward-status',

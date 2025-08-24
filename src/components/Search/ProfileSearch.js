@@ -145,7 +145,8 @@ const ProfileSearch = () => {
         navigate(`/business/${identifier}`);
         break;
       case 'charity':
-        navigate(`/charity/${identifier}`);
+        // Use public charity profile route
+        navigate(`/charity/profile/${identifier}`);
         break;
     }
   };

@@ -221,7 +221,7 @@ function GlobalGivingProjects() {
           <Slider ref={sliderRef} {...settings}>
             {projects.map((project, index) => (
               <div key={project.id || index} className={styles.carouselItemWrapper}>
-                <div className={styles.carouselItem}>
+                <div className={`${styles.carouselItem} rimSlate`}>
                   <div className={styles.itemContent}>
                     <h3 className={styles.itemTitle}>{project.title}</h3>
                     {project.category && (

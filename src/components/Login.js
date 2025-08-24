@@ -10,7 +10,7 @@ import DemoQuickLogin from './DemoQuickLogin';
 import RateLimitHandler, { useRateLimitHandler } from './Common/RateLimitHandler';
 import apiServices from '../services/api.service';
 import styles from './Login.module.css';
-import logo from '../assets/logo.png';
+import logo from '../assets/logodark.png';
 
 const logger = createLogger('Login');
 

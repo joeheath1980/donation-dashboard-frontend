@@ -17,7 +17,7 @@ import {
   RiSearchLine
 } from 'react-icons/ri';
 import styles from './CharitySignupFlow.module.css';
-import logo from '../assets/logo.png';
+import logo from '../assets/logodark.png';
 import { useAuth } from '../contexts/AuthContext';
 
 const CharitySignupFlow = () => {

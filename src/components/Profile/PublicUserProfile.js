@@ -59,7 +59,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 const PublicUserProfile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const { 
     impactScore: contextImpactScore,
     lastYearImpactScore,
@@ -74,10 +74,15 @@ const PublicUserProfile = () => {
   const [activeImpactSection, setActiveImpactSection] = useState(0);
   const [showAllFollowedCharities, setShowAllFollowedCharities] = useState(false);
   
+  // Debug helpers (dev-only)
+  const __DEV__ = process.env.NODE_ENV === 'development';
+  const devLog = (...args) => { if (__DEV__) console.log(...args); };
+  const devWarn = (...args) => { if (__DEV__) console.warn(...args); };
+
   // Debug context on mount
   useEffect(() => {
-    console.log('=== CONTEXT DEBUG ON MOUNT === v2', new Date().toISOString());
-    console.log('ImpactContext values:', {
+    devLog('=== CONTEXT DEBUG ON MOUNT === v2', new Date().toISOString());
+    devLog('ImpactContext values:', {
       contextImpactScore,
       lastYearImpactScore,
       contextTier,
@@ -98,27 +103,44 @@ const PublicUserProfile = () => {
   }, []);
 
   useEffect(() => {
-    if (mounted) {
-      console.log('=== EFFECT TRIGGERED === v2');
-      console.log('Mounted:', mounted);
-      console.log('Username:', username);
-      // Temporary alert to confirm new version
-      console.warn('🚀 NEW VERSION DEPLOYED - PublicUserProfile v2');
-      fetchProfile();
+    if (!mounted) return;
+    devLog('=== EFFECT TRIGGERED === v2');
+    devLog('Mounted:', mounted);
+    devLog('Username:', username);
+    devLog('Auth loading:', authLoading);
+    // Temporary alert to confirm new version
+    devWarn('🚀 NEW VERSION DEPLOYED - PublicUserProfile v2');
+
+    // Handle /profile/me specially: wait for auth to resolve
+    if (username === 'me') {
+      if (authLoading) {
+        // Wait for auth context to resolve before taking action
+        return;
+      }
+      if (currentUser?.username) {
+        navigate(`/profile/${currentUser.username}`, { replace: true });
+        return;
+      }
+      // Not authenticated or no username available
+      setError('You need to be logged in to view your public profile.');
+      setLoading(false);
+      return;
     }
-  }, [username, mounted]);
+
+    // Normal fetch path for explicit usernames
+    fetchProfile();
+  }, [username, mounted, currentUser, authLoading, navigate]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      console.log('=== PUBLIC PROFILE DEBUG === v2', new Date().toISOString());
-      console.log('1. Fetching profile for username:', username);
-      console.log('2. Current user from auth:', currentUser);
-      console.log('3. Current user ID:', currentUser?._id);
-      console.log('4. Type of userId param:', typeof userId);
-      console.log('5. Type of currentUser._id:', typeof currentUser?._id);
-      console.log('6. Are they equal?', currentUser?.username === username);
-      console.log('7. Context values:', {
+      devLog('=== PUBLIC PROFILE DEBUG === v2', new Date().toISOString());
+      devLog('1. Fetching profile for username:', username);
+      devLog('2. Current user from auth:', currentUser);
+      devLog('3. Current user ID:', currentUser?._id);
+      devLog('4. Type of currentUser._id:', typeof currentUser?._id);
+      devLog('6. Are they equal?', currentUser?.username === username);
+      devLog('7. Context values:', {
         contextImpactScore,
         contextTier,
         contextPointsToNextTier,
@@ -126,8 +148,8 @@ const PublicUserProfile = () => {
       });
       
       const data = await profileService.getUserPublicProfile(username);
-      console.log('8. Profile data received:', data);
-      console.log('9. Full profile details:', {
+      devLog('8. Profile data received:', data);
+      devLog('9. Full profile details:', {
         user: data?.user,
         stats: data?.stats,
         privacy: data?.privacy,
@@ -192,12 +214,12 @@ const PublicUserProfile = () => {
   const { user, stats, recentActivity, charityPortfolio } = profile;
   
   // Debug: Check all available score and tier fields
-  console.log('=== API DATA STRUCTURE === v2', new Date().toISOString());
-  console.log('Charity Portfolio:', charityPortfolio);
-  console.log('Profile object:', profile);
-  console.log('User object:', user);
-  console.log('Stats object:', stats);
-  console.log('All score fields:', {
+  devLog('=== API DATA STRUCTURE === v2', new Date().toISOString());
+  devLog('Charity Portfolio:', charityPortfolio);
+  devLog('Profile object:', profile);
+  devLog('User object:', user);
+  devLog('Stats object:', stats);
+  devLog('All score fields:', {
     'profile.impactScore': profile?.impactScore,
     'profile.actualImpactScore': profile?.actualImpactScore,
     'profile.tier': profile?.tier,
@@ -211,12 +233,12 @@ const PublicUserProfile = () => {
   });
   
   // Check if viewing own profile
-  console.log('=== PROFILE COMPARISON DEBUG === v2', new Date().toISOString());
-  console.log('currentUser:', currentUser);
-  console.log('currentUser._id:', currentUser?._id);
-  console.log('username from params:', username);
-  console.log('Type of currentUser._id:', typeof currentUser?._id);
-  console.log('Type of username:', typeof username);
+  devLog('=== PROFILE COMPARISON DEBUG === v2', new Date().toISOString());
+  devLog('currentUser:', currentUser);
+  devLog('currentUser._id:', currentUser?._id);
+  devLog('username from params:', username);
+  devLog('Type of currentUser._id:', typeof currentUser?._id);
+  devLog('Type of username:', typeof username);
   
   // Try multiple ways to check if it's own profile
   const isOwnProfile = currentUser && (
@@ -225,7 +247,7 @@ const PublicUserProfile = () => {
     currentUser.id === username
   );
   
-  console.log('isOwnProfile result:', isOwnProfile);
+  devLog('isOwnProfile result:', isOwnProfile);
   
   // Use context data for own profile, otherwise use API data
   let actualScore = 0;
@@ -233,10 +255,10 @@ const PublicUserProfile = () => {
   let scoreChange = 0;
   let pointsToNextTier = 0;
   
-  console.log('=== SCORE CALCULATION DEBUG ===');
-  console.log('Context Impact Score defined?', contextImpactScore !== undefined);
-  console.log('Context Impact Score value:', contextImpactScore);
-  console.log('Should use context?', isOwnProfile && contextImpactScore !== undefined);
+  devLog('=== SCORE CALCULATION DEBUG ===');
+  devLog('Context Impact Score defined?', contextImpactScore !== undefined);
+  devLog('Context Impact Score value:', contextImpactScore);
+  devLog('Should use context?', isOwnProfile && contextImpactScore !== undefined);
   
   if (isOwnProfile && contextImpactScore !== undefined) {
     // Use the authoritative data from ImpactContext for own profile
@@ -244,7 +266,7 @@ const PublicUserProfile = () => {
     actualTier = contextTier;
     pointsToNextTier = contextPointsToNextTier;
     scoreChange = contextImpactScore - lastYearImpactScore;
-    console.log('USING CONTEXT DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
+    devLog('USING CONTEXT DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
   } else {
     // Fallback to API provided values for other profiles
     actualScore = profile?.impactScore || profile?.actualImpactScore || 
@@ -261,15 +283,15 @@ const PublicUserProfile = () => {
     else if (actualScore < 90) pointsToNextTier = 90 - actualScore;
     else pointsToNextTier = 0;
     
-    console.log('USING API DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
-    console.log('Reason:', isOwnProfile ? 'Context score undefined' : 'Not own profile');
+    devLog('USING API DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
+    devLog('Reason:', isOwnProfile ? 'Context score undefined' : 'Not own profile');
   }
   
-  console.log('=== FINAL VALUES === v2', new Date().toISOString());
-  console.log('Final score:', actualScore);
-  console.log('Final tier:', actualTier);
-  console.log('Final pointsToNextTier:', pointsToNextTier);
-  console.log('Final scoreChange:', scoreChange);
+  devLog('=== FINAL VALUES === v2', new Date().toISOString());
+  devLog('Final score:', actualScore);
+  devLog('Final tier:', actualTier);
+  devLog('Final pointsToNextTier:', pointsToNextTier);
+  devLog('Final scoreChange:', scoreChange);
   
   const safeUser = {
     displayName: user?.displayName || 'Anonymous User',
@@ -440,8 +462,8 @@ const PublicUserProfile = () => {
 
           {/* Impact Score Section */}
           <div className={styles.impactScoreWrapper}>
-            {console.log('=== RENDERING PersonalImpactScore === v2', new Date().toISOString())}
-            {console.log('Props being passed:', {
+            {devLog('=== RENDERING PersonalImpactScore === v2', new Date().toISOString())}
+            {devLog('Props being passed:', {
               impactScore: actualScore,
               scoreChange,
               tier: actualTier,

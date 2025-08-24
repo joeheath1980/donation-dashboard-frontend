@@ -560,7 +560,8 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             <FaSearch className={styles.buttonIcon} />
             Discover Your Contributions
           </Link>
-          {(username || user?.username) && (
+          {/* View Public Profile: only enable when we have a username */}
+          { (username || user?.username) ? (
             <Link 
               to={`/profile/${username || user?.username}`} 
               className={`${styles.tertiaryButton} btn btn-ghost`}
@@ -568,6 +569,15 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
               <FaUserCircle className={styles.buttonIcon} />
               View Public Profile
             </Link>
+          ) : (
+            <button 
+              className={`${styles.tertiaryButton} btn btn-ghost`} 
+              title="Sign in to view your public profile"
+              disabled
+            >
+              <FaUserCircle className={styles.buttonIcon} />
+              View Public Profile
+            </button>
           )}
         </div>
       ) : onBackToDashboard ? (

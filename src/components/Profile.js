@@ -297,7 +297,7 @@ function Profile() {
           useDarkNav={false}
         />
         
-        <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand}`}>
+        <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand} rimSlate`}>
           <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           
@@ -310,7 +310,7 @@ function Profile() {
           </div>
         </section>
 
-        <section className={`${styles.section} ${styles.projectsBand}`}>
+        <section className={`${styles.section} ${styles.projectsBand} rimSlate`}>
           <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
           <div className={styles.projectsHeader}>
@@ -498,7 +498,7 @@ function Profile() {
           
           <div className={styles.impactContent}>
             <div className={styles.donationsGrid}>
-              <div className={`${styles.donationCard} card`}>
+              <div className={`${styles.donationCard} card rimSlate`}>
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegHandshake className={styles.icon} /> Regular Donations
                 </h3>
@@ -517,7 +517,7 @@ function Profile() {
                 )}
               </div>
               
-              <div className={`${styles.donationCard} card`}>
+              <div className={`${styles.donationCard} card rimSlate`}>
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegCalendarAlt className={styles.icon} /> Recent One-off Donations
                 </h3>
@@ -537,7 +537,7 @@ function Profile() {
                 )}
               </div>
               
-              <div className={`${styles.donationCard} card`}>
+              <div className={`${styles.donationCard} card rimSlate`}>
                 <h3 className={`${styles.cardTitle} cardTitle`}>
                   <FaRegHeart className={styles.icon} /> Charities Following
                 </h3>
@@ -593,10 +593,10 @@ function Profile() {
             )}
 
             <div className={styles.activitiesGrid}>
-              <div className={`${styles.activityCard} card`}>
+              <div className={`${styles.activityCard} card rimSlate`}>
                 <VolunteerActivitiesComponent ref={volunteerActivitiesRef} />
               </div>
-              <div className={`${styles.activityCard} card`}>
+              <div className={`${styles.activityCard} card rimSlate`}>
                 <FundraisingCampaignsComponent onCompleteCampaign={handleCompleteCampaign} ref={fundraisingCampaignsRef} />
               </div>
             </div>

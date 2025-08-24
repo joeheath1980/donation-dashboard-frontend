@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './OrganizationSignup.module.css';
 import { FaHandHoldingHeart, FaBuilding, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
-import logo from '../assets/logo.png';
+import logo from '../assets/logodark.png';
 
 function OrganizationSignup() {
   return (

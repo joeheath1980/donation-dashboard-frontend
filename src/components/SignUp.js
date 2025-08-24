@@ -5,7 +5,7 @@ import { validateEmail, validatePassword, validateName } from '../utils/validati
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { FaGoogle, FaMicrosoft, FaEye, FaEyeSlash, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import styles from './SignUp.module.css';
-import logo from '../assets/logo.png';
+import logo from '../assets/logodark.png';
 
 const SignUp = () => {
   const navigate = useNavigate();

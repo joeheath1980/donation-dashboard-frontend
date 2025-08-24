@@ -490,7 +490,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                 const hasMatches = contribution.matches && contribution.matches.length > 0;
                 
                 return (
-                  <div key={contribution._id} className={`${oneOffStyles.oneOffCard} ${hasMatches ? oneOffStyles.matchedContribution : ''}`}>
+                  <div key={contribution._id} className={`${oneOffStyles.oneOffCard} ${hasMatches ? oneOffStyles.matchedContribution : ''} rimSlate`}>
                     <div className="cardHeader">
                       <h3 className="cardTitle">
                         {contribution.charity}
