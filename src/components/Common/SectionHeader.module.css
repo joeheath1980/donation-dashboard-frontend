@@ -6,7 +6,7 @@
 
 /* Full-bleed band that matches the navbar and hugs container corners */
 .trimBand {
-  background: var(--charcoal-500, #313133);
+  background: linear-gradient(180deg, #0f172a 0%, #1f2937 100%); /* match navbar luxury slate gradient */
   color: #fff;
   /* Assume parent has padding; negate common section paddings */
   margin: -48px -32px 20px -32px;
