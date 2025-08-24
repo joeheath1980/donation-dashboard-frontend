@@ -252,7 +252,7 @@
 
 /* Header Band that matches navbar styling */
 .headerBand {
-  background: var(--charcoal-500, #313133); /* match navbar */
+  background: linear-gradient(180deg, #0f172a 0%, #1f2937 100%); /* match navbar gradient */
   color: #fff;
   /* Full-bleed to section edges, sitting as a thick trim at the top */
   margin: -48px -32px 20px -32px; /* negate .section padding */
