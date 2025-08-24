@@ -343,13 +343,13 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
           <div className={oneOffStyles.headerActions}>
             <button 
               onClick={() => setShowFilters(!showFilters)} 
-              className={`${oneOffStyles.filterButton} ${hasActiveFilters ? oneOffStyles.active : ''}`}
+              className={`${oneOffStyles.filterButton} ${hasActiveFilters ? oneOffStyles.active : ''} btn btn-ghost`}
             >
               <FaFilter /> Filter {hasActiveFilters && `(${Object.values(filters).filter(v => v && v !== 'all').length})`}
             </button>
             <button 
               onClick={handleBulkDownload} 
-              className={oneOffStyles.downloadButton}
+              className={`${oneOffStyles.downloadButton} btn btn-outline`}
               disabled={downloadingReceipts || filteredContributions.filter(c => c.receiptUrl).length === 0}
               title={filteredContributions.filter(c => c.receiptUrl).length === 0 ? "Available once you have at least one donation with a receipt" : "Download all available receipts"}
             >
@@ -468,7 +468,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
             </div>
 
             {hasActiveFilters && (
-              <button onClick={clearFilters} className={oneOffStyles.clearFiltersButton}>
+              <button onClick={clearFilters} className={`${oneOffStyles.clearFiltersButton} btn btn-outline`}>
                 <FaTimes /> Clear Filters
               </button>
             )}
@@ -592,7 +592,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
               })}
             </>
           ) : (
-            <div className={oneOffStyles.emptyState}>
+            <div className={`${oneOffStyles.emptyState} empty`}>
               {hasActiveFilters ? (
                 <p>No contributions match your filters.</p>
               ) : (
@@ -601,7 +601,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
                   <p className={oneOffStyles.emptyStateSubtext}>Explore causes to make your first impact.</p>
                   <button 
                     onClick={() => window.location.href = '/search-charities'} 
-                    className={oneOffStyles.findCauseButton}
+                    className={`${oneOffStyles.findCauseButton} btn btn-primary`}
                   >
                     Find a Cause
                   </button>
@@ -613,7 +613,7 @@ const OneOffContributionsComponent = forwardRef(({ displayAll }, ref) => {
         </div>
         <div className="flexBetween">
           {!displayAll && filteredContributions.length > 5 && (
-            <button onClick={() => {}} className="button secondary">
+            <button onClick={() => {}} className="button secondary tealUnderlineGlow">
               See All ({filteredContributions.length})
             </button>
           )}

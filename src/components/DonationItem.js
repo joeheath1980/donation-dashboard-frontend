@@ -122,7 +122,7 @@ const DonationItem = React.memo(({
       </div>
       <div className="cardActions">
         <InstantTooltip text="Edit donation">
-          <button onClick={() => onEdit(donation)} className={styles.iconButton} aria-label="Edit Donation">
+          <button onClick={() => onEdit(donation)} className={`${styles.iconButton} btn btn-ghost`} aria-label="Edit Donation">
             <FaEdit />
           </button>
         </InstantTooltip>
@@ -130,7 +130,7 @@ const DonationItem = React.memo(({
           <InstantTooltip text="Download receipt">
             <button
               onClick={() => onReceiptDownload(donation)}
-              className={styles.iconButton}
+              className={`${styles.iconButton} btn btn-outline`}
               aria-label="Download Receipt"
             >
               <FaDownload />
@@ -140,7 +140,7 @@ const DonationItem = React.memo(({
         <InstantTooltip text="Delete donation">
           <button
             onClick={() => onDelete(donation._id)}
-            className={styles.iconButton}
+            className={`${styles.iconButton} btn btn-ghost`}
             aria-label="Delete Donation"
           >
             <FaTrash />

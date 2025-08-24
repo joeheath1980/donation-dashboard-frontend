@@ -41,7 +41,7 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
       <h3 className="sectionTitle">
         <FaRegHeart className="titleIcon" /> Charities Following
       </h3>
-      <Link to="/search-charities" className="button primary fullWidth">
+      <Link to="/search-charities" className="button primary fullWidth btn btn-outline">
         <FaPlus /> Follow New Charity
       </Link>
       <div className="charitiesList">
@@ -66,14 +66,14 @@ const FollowedCharitiesComponent = ({ displayAll }) => {
             );
           })
         ) : (
-          <p className="emptyMessage">Not following any charities yet.</p>
+          <p className="emptyMessage empty">Not following any charities yet.</p>
         )}
       </div>
       {(contextError || localError) && (
         <p className="errorMessage">{contextError || localError}</p>
       )}
       {!displayAll && followedCharities.length > 3 && (
-        <Link to="/followed-charities" className="button secondary">
+        <Link to="/followed-charities" className="button secondary btn btn-ghost tealUnderlineGlow">
           See All <FaChevronRight />
         </Link>
       )}

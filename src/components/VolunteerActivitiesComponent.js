@@ -278,6 +278,10 @@ const VolunteerActivitiesComponent = forwardRef(({ userId }, ref) => {
               Add Activity
             </button>
           </div>
+          <div className={modalStyles.formActions}>
+            <button type="button" onClick={() => setIsAddActivityModalOpen(false)} className={`btn btn-ghost ${modalStyles.button}`}>Cancel</button>
+            <button type="submit" className={`btn btn-primary ${modalStyles.button}`}><FaUpload /> Submit</button>
+          </div>
         </form>
       </div>
     </div>

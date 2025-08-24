@@ -178,7 +178,7 @@ function GlobalGivingProjects() {
     return (
       <div className={styles.error}>
         <p>{error}</p>
-        <button onClick={handleRetry} className={styles.retryButton}>Retry</button>
+        <button onClick={handleRetry} className={`${styles.retryButton} btn btn-outline`}>Retry</button>
       </div>
     );
   }
@@ -224,20 +224,33 @@ function GlobalGivingProjects() {
                 <div className={styles.carouselItem}>
                   <div className={styles.itemContent}>
                     <h3 className={styles.itemTitle}>{project.title}</h3>
+                    {project.category && (
+                      <div className={styles.categoryWrap}>
+                        <span className="badge teal">{project.category}</span>
+                      </div>
+                    )}
                     <p className={styles.projectSummary}>
                       {formatSummary(project.summary)}
                     </p>
                     <div className={styles.projectDetails}>
-                      <p className={styles.projectGoalLabel}>Fundraising Goal</p>
-                      <p className={styles.projectGoal}>
-                        {formatAmount(project.goal)}
+                      <p className={styles.projectGoalLabel}>
+                        <span className="badge teal">Fundraising Goal</span>
                       </p>
+                      <p className={styles.projectGoal}>{formatAmount(project.goal)}</p>
+                      {(() => {
+                        const percent =
+                          project.percentFunded ??
+                          (project.raised && project.goal ? Math.min(Math.round((project.raised / project.goal) * 100), 100) : null);
+                        return percent != null ? (
+                          <div className={styles.goalMeta}>{percent}% funded</div>
+                        ) : null;
+                      })()}
                     </div>
                   </div>
                   <div className={styles.buttonWrapper}>
                     <a
                       href={project.projectLink}
-                      className={styles.learnMoreButton}
+                      className={`${styles.learnMoreButton} btn btn-primary`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

@@ -311,13 +311,13 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
           <div className={styles.headerActions}>
             <button 
               onClick={() => setShowFilters(!showFilters)} 
-              className={`${styles.filterButton} ${hasActiveFilters ? styles.active : ''}`}
+              className={`${styles.filterButton} ${hasActiveFilters ? styles.active : ''} btn btn-ghost`}
             >
               <FaFilter /> Filter {hasActiveFilters && `(${Object.values(filters).filter(v => v && v !== 'all').length})`}
             </button>
             <button 
               onClick={handleBulkDownload} 
-              className={styles.downloadButton}
+              className={`${styles.downloadButton} btn btn-outline`}
               disabled={downloadingReceipts || filteredDonations.length === 0}
             >
               <FaFileDownload /> {downloadingReceipts ? 'Downloading...' : 'Download Receipts'}
@@ -430,7 +430,7 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
             </div>
 
             {hasActiveFilters && (
-              <button onClick={clearFilters} className={styles.clearFiltersButton}>
+              <button onClick={clearFilters} className={`${styles.clearFiltersButton} btn btn-outline`}>
                 <FaTimes /> Clear Filters
               </button>
             )}
@@ -467,7 +467,7 @@ const DonationsComponent = forwardRef(({ displayAll }, ref) => {
         
         <div className="flexBetween">
           {!displayAll && filteredDonations.length > 5 && (
-            <button onClick={() => {}} className="button secondary">
+            <button onClick={() => {}} className="button secondary tealUnderlineGlow">
               See All ({filteredDonations.length})
             </button>
           )}

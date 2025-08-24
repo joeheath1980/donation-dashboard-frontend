@@ -28,9 +28,15 @@
 }
 
 .logo {
-  height: 70px;
+  height: 90px;
   width: auto;
   object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .logo {
+    height: 64px;
+  }
 }
 
 .hamburger {
@@ -39,7 +45,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #4CAF50;
+  color: #f3f3f4; /* Contrast on dark charcoal nav */
 }
 
 .navLinks {
@@ -98,6 +104,23 @@
   margin: 0 auto;
   width: 100%;
 }
+
+.footer {
+  margin-top: auto;
+  background: linear-gradient(180deg, #0f172a 0%, #1f2937 100%);
+  color: #e5e7eb;
+  padding: 14px 24px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #4ab49e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover { color: #71cbb6; }
 
 @media (max-width: 768px) {
   .navbarContent {

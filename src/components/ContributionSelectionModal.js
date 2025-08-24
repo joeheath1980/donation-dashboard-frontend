@@ -47,7 +47,7 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
       <div className={`${modalStyles.modalContent} ${styles.selectionModal}`} onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClose}
-          className={modalStyles.closeButton}
+          className={`${modalStyles.closeButton} btn btn-ghost`}
           aria-label="Close modal"
         >
           <FaTimes />
@@ -60,7 +60,7 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
           {contributionTypes.map((type) => (
             <button
               key={type.id}
-              className={styles.optionCard}
+              className={`${styles.optionCard} btn btn-outline`}
               onClick={() => handleSelect(type.id)}
               data-hover-color={type.color }
             >

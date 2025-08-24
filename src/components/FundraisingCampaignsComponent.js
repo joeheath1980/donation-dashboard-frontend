@@ -433,7 +433,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
             <FaBullhorn className={styles.icon} /> Fundraising Campaigns
           </h2>
           <VerificationGate>
-            <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
+            <button onClick={() => setIsCreateModalOpen(true)} className={`${styles.createButton} btn btn-primary`}>
               <FaPlus /> Create Campaign
             </button>
           </VerificationGate>
@@ -499,7 +499,7 @@ const FundraisingCampaignsComponent = forwardRef(({ userId, onCompleteCampaign }
                       <FaLink /> View Campaign Page
                     </a>
                   )}
-                  <button onClick={() => handleCompleteCampaign(campaign)} className={styles.tealButton}>
+                  <button onClick={() => handleCompleteCampaign(campaign)} className={`${styles.tealButton} btn btn-primary`}>
                     Mark as Completed
                   </button>
                 </div>

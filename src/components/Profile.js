@@ -294,9 +294,10 @@ function Profile() {
           setActiveSection={setActiveImpactSection}
           totalSections={impactSections.length}
           sectionTitles={impactSections.map(section => section.title)}
+          useDarkNav={false}
         />
         
-        <section className={`${styles.section} ${styles.matchingSection}`}>
+        <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand}`}>
           <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
           <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
           
@@ -309,14 +310,17 @@ function Profile() {
           </div>
         </section>
 
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.projectsBand}`}>
           <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
           <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
+          <div className={styles.projectsHeader}>
+            <Link to="/search-charities" className="btn btn-ghost">See all projects</Link>
+          </div>
           
           {/* Project Matching Explanation - Collapsible */}
           <div className={styles.matchingExplanationWrapper}>
             <button 
-              className={styles.toggleExplanationBtn}
+              className={`${styles.toggleExplanationBtn} btn btn-ghost`}
               onClick={() => setShowMatchingExplanation(!showMatchingExplanation)}
             >
               <FaLightbulb className={styles.matchingIcon} />
@@ -435,7 +439,7 @@ function Profile() {
           </div>
         </section>
         
-        <section className={`${styles.section} ${styles.impactSection}`}>
+        <section className={`${styles.section} ${styles.impactSection} card`}>
           <SectionTitle icon={FaChartLine} title="Your Impact" />
           <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
           
@@ -507,7 +511,7 @@ function Profile() {
                   ))}
                 </div>
                 {!showRegularContributions && (
-                  <button className={`${styles.actionButton} button`} onClick={toggleRegularContributions}>
+                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleRegularContributions}>
                     See All <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
@@ -527,7 +531,7 @@ function Profile() {
                   ))}
                 </div>
                 {!showOneOffContributions && (
-                  <button className={`${styles.actionButton} button`} onClick={toggleOneOffContributions}>
+                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleOneOffContributions}>
                     See All <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}
@@ -553,7 +557,7 @@ function Profile() {
                   ))}
                 </div>
                 {localFollowedCharities.length > 3 && (
-                  <button className={`${styles.actionButton} button`} onClick={toggleFollowedCharities}>
+                  <button className={`${styles.actionButton} button tealUnderlineGlow`} onClick={toggleFollowedCharities}>
                     {showAllFollowedCharities ? "Hide" : "See All"} <FaChevronRight className={styles.buttonIcon} />
                   </button>
                 )}

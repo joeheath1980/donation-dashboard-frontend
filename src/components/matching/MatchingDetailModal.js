@@ -113,7 +113,7 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button className={styles.closeButton} onClick={onClose}>
+          <button className={`${styles.closeButton} btn btn-ghost`} onClick={onClose}>
             <FaTimes />
           </button>
 
@@ -323,10 +323,10 @@ const MatchingDetailModal = ({ opportunity, onClose, onConfirm }) => {
 
               {/* Action Buttons */}
               <div className={styles.actions}>
-                <button className={styles.cancelButton} onClick={onClose}>
+                <button className={`${styles.cancelButton} btn btn-ghost`} onClick={onClose}>
                   Cancel
                 </button>
-                <button className={styles.confirmButton} onClick={handleConfirm}>
+                <button className={`${styles.confirmButton} btn btn-primary`} onClick={handleConfirm}>
                   <FaHeart />
                   {opportunity.selectedCharityId || 
                    ((opportunity.matchType === 'direct' || opportunity.matchType === 'category_auto') && charity) || 

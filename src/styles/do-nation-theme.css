@@ -1,0 +1,282 @@
+/* ==========================================================================
+   Do‑Nation Theme v0.1 — world‑class polish with brand teal + charcoal
+   Drop this file into your app and import it once (e.g., index.jsx).
+   ========================================================================== */
+
+/* ---------------------------
+   1) Design Tokens (CSS vars)
+   --------------------------- */
+:root {
+  /* Brand — sampled from your screenshots */
+  --teal-700: #2f7e68;
+  --teal-600: #3d907a; /* primary (sampled) */
+  --teal-500: #4ab49e; /* primary bright (sampled) */
+  --teal-400: #71cbb6;
+  --teal-300: #9adccf;
+  --teal-100: #e8f6f2;
+
+  --charcoal-900: #0f1115;
+  --charcoal-800: #1a1c1f;
+  --charcoal-700: #222427;
+  --charcoal-600: #2b2d31;
+  --charcoal-500: #313133; /* navbar (sampled) */
+  --charcoal-400: #515352; /* muted text (sampled) */
+  --charcoal-300: #7a7c7c;
+  --charcoal-200: #afb1b6;
+  --charcoal-100: #e6e8eb;
+
+  --surface-0: #ffffff;
+  --surface-50: #fafafc;  /* panel background (sampled) */
+  --surface-100: #f6f7f9;
+
+  --success-600: #1b8a5a;
+  --warning-600: #f59e0b;
+  --danger-600: #e24a4a;
+  --info-600: var(--teal-600);
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.08), 0 1px 1px rgba(0,0,0,.04);
+  --shadow-md: 0 8px 20px rgba(17,24,39,.08), 0 3px 6px rgba(17,24,39,.06);
+  --shadow-lg: 0 22px 50px rgba(17,24,39,.14);
+  --ring-focus: 0 0 0 3px rgba(74,180,158,.35);
+
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.7, 0, .84, 0);
+  --speed-fast: 140ms;
+  --speed-med: 220ms;
+  --speed-slow: 380ms;
+
+  --font-ui: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* -----------------------------------
+   2) Base + Typography (neutral reset)
+   ----------------------------------- */
+html { font-family: var(--font-ui); }
+body {
+  color: #1b1f23;
+  background: var(--surface-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 { letter-spacing: -0.015em; line-height: 1.15; }
+h1 { font-size: 28px; font-weight: 750; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 650; }
+
+/* Utility text colors */
+.text-muted { color: var(--charcoal-400); }
+.text-teal  { color: var(--teal-600); }
+.text-quiet { color: var(--charcoal-300); }
+
+/* -------------------
+   3) Layout primitives
+   ------------------- */
+.container-xl {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 24px;
+}
+
+/* ---------------------------
+   4) Navigation (charcoal bar)
+   --------------------------- */
+.navbar {
+  background: var(--charcoal-500);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 10px 24px rgba(0,0,0,.16);
+}
+.navbar a {
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  padding: 14px 12px;
+  border-radius: var(--radius-xs);
+  transition: color var(--speed-fast) var(--ease-out), background var(--speed-fast) var(--ease-out);
+}
+.navbar a:hover { background: rgba(255,255,255,.06); color: #fff; }
+.navbar a[aria-current="page"] {
+  color: #fff;
+  position: relative;
+  font-weight: 650;
+}
+.navbar a[aria-current="page"]::after {
+  content: "";
+  position: absolute; left: 8px; right: 8px; bottom: -6px; height: 3px;
+  background: linear-gradient(90deg, var(--teal-500), var(--teal-600));
+  border-radius: 999px;
+}
+
+/* -------------
+   5) Components
+   ------------- */
+
+/* Cards */
+.card {
+  background: var(--surface-0);
+  border: 1px solid var(--charcoal-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--speed-med) var(--ease-out), box-shadow var(--speed-med) var(--ease-out);
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 20px 8px 20px;
+}
+.card-title { font-size: 18px; font-weight: 650; }
+.card-sub { color: var(--charcoal-400); font-size: 14px; margin-top: 2px; }
+.card-body { padding: 12px 20px 20px 20px; }
+.card-quiet { background: var(--surface-100); border-color: var(--surface-100); }
+
+/* Section headers */
+.section {
+  margin: 28px 0 18px;
+}
+.section .kicker {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--teal-600); font-weight: 700; letter-spacing: .02em;
+}
+.section .kicker::before {
+  content: "";
+  width: 36px; height: 3px; border-radius: 999px; display: inline-block;
+  background: linear-gradient(90deg, var(--teal-500), var(--teal-600));
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--speed-fast) var(--ease-out), box-shadow var(--speed-fast) var(--ease-out), background var(--speed-fast) var(--ease-out);
+}
+.btn:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, var(--teal-500), var(--teal-600));
+  box-shadow: 0 6px 14px rgba(74,180,158,.25);
+}
+.btn-primary:hover { box-shadow: 0 10px 20px rgba(74,180,158,.30); }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-outline {
+  background: #fff;
+  color: var(--teal-600);
+  border-color: var(--teal-400);
+}
+.btn-outline:hover { background: var(--teal-100); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--teal-600);
+}
+.btn-ghost:hover { background: rgba(0,0,0,.04); }
+
+/* Badges / Chips */
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 28px; padding: 0 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 700;
+}
+.badge.teal { background: rgba(74,180,158,.12); color: var(--teal-700); }
+.badge.warn { background: rgba(245,158,11,.12); color: #8a5a0a; }
+.badge.ok   { background: rgba(27,138,90,.14); color: var(--success-600); }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 4px;
+  background: var(--charcoal-500);
+  padding: 6px; border-radius: 999px; color: #fff;
+}
+.tab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.8);
+  cursor: pointer;
+}
+.tab[aria-selected="true"] {
+  color: #fff; background: linear-gradient(180deg, var(--teal-500), var(--teal-600));
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.1);
+}
+
+/* Progress (Tier) */
+.progress {
+  position: relative;
+  height: 10px; border-radius: 999px;
+  background: #eef1f3; overflow: hidden;
+}
+.progress > span {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--teal-500), var(--teal-600));
+  border-radius: inherit;
+  transition: width var(--speed-slow) var(--ease-out);
+}
+
+/* Conic Gauge (Impact Score) */
+.gauge {
+  --size: 220px; --track: 10px;
+  width: var(--size); height: var(--size); border-radius: 50%;
+  background:
+    radial-gradient(farthest-side, white calc(100% - var(--track) - 1px), transparent 0),
+    conic-gradient(var(--teal-600) var(--value, 0%), #efefef 0);
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+.gauge .dot {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--teal-600); box-shadow: 0 0 0 4px rgba(74,180,158,.2);
+}
+
+/* Empty States */
+.empty {
+  background: #fbfbfd; border: 1px dashed var(--charcoal-100);
+  border-radius: var(--radius-md); padding: 22px;
+  color: var(--charcoal-300);
+}
+
+/* Carousel Dots */
+.carousel-dots { display: flex; gap: 8px; align-items: center; }
+.carousel-dots button {
+  width: 8px; height: 8px; border-radius: 999px; border: 0;
+  background: #e3e6ea; cursor: pointer; transition: transform var(--speed-fast) var(--ease-out), background var(--speed-fast);
+}
+.carousel-dots button[aria-current="true"] { width: 24px; border-radius: 999px; background: var(--teal-500); }
+
+/* Focus visibility for keyboard users */
+:focus-visible { outline: none; box-shadow: var(--ring-focus); border-radius: 8px; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+
+/* -----------------
+   Optional Dark Mode
+   ------------------
+   Enable by placing data-theme="dark" on <html> or a wrapper.
+*/
+[data-theme="dark"] body { background: #121416; color: #e6e8ec; }
+[data-theme="dark"] .navbar { background: #1a1c1f; }
+[data-theme="dark"] .card { background: #16181b; border-color: #25282d; box-shadow: none; }
+[data-theme="dark"] .card-quiet { background: #14161a; border-color: #202327; }
+[data-theme="dark"] .text-muted { color: #98a2ad; }
+[data-theme="dark"] .empty { background: #14161a; border-color: #25282d; color: #98a2ad; }
+[data-theme="dark"] .btn-outline { background: transparent; color: #cdebe4; border-color: #417569; }
+[data-theme="dark"] .tabs { background: #202226; }
+[data-theme="dark"] .progress { background: #2a2d31; }
+[data-theme="dark"] .carousel-dots button { background: #2a2d31; }
+

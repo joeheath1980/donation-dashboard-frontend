@@ -256,6 +256,30 @@
   border: 1px solid #fecaca;
 }
 
+/* Reusable teal underline glow for secondary links/buttons */
+.tealUnderlineGlow {
+  position: relative;
+}
+
+.tealUnderlineGlow::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal-500, #4ab49e), var(--teal-600, #3d907a));
+  border-radius: 999px;
+  box-shadow: 0 0 6px rgba(74,180,158,0.45);
+  opacity: 0;
+  transition: opacity 140ms cubic-bezier(.16,1,.3,1);
+}
+
+.tealUnderlineGlow:hover::after,
+.tealUnderlineGlow:focus-visible::after {
+  opacity: 1;
+}
+
 .scrollIndicator {
   width: 100%;
   height: 4px;

@@ -64,6 +64,9 @@ function Layout({ children }) {
       <div className={layoutStyles.content}>
         {children}
       </div>
+      <footer className={layoutStyles.footer}>
+        Made with ❤️ by Do‑Nation. <a href="/about">Learn more</a>
+      </footer>
     </div>
   );
 }

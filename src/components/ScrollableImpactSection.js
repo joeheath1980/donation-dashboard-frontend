@@ -292,7 +292,7 @@ const BadgesDisplay = ({ isActive }) => {
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false }) => {
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -314,11 +314,12 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
 
   return (
     <div className={styles.scrollableImpactSection}>
-      <div className={styles.impactSectionNav}>
+      <div className={`${styles.impactSectionNav} ${useDarkNav ? styles.darkNav : ''} tabs`}>
         {sectionTitles.map((title, index) => (
           <button
             key={index}
-            className={`${styles.impactSectionNavButton} ${activeSection === index ? styles.active : ''}`}
+            className={`${styles.impactSectionNavButton} ${activeSection === index ? styles.active : ''} tab`}
+            aria-selected={activeSection === index}
             onClick={() => setActiveSection(index)}
           >
             {title}

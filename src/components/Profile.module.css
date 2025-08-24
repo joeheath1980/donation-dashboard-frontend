@@ -96,6 +96,50 @@
   margin-top: 32px;
 }
 
+/* Projects section band with very light slate tint */
+.projectsBand {
+  background: #f9fafb; /* light slate tint */
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+}
+
+.projectsHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 6px 0 10px 0;
+}
+
+.projectsHeader a {
+  position: relative;
+}
+
+.projectsHeader a::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal-500, #4ab49e), var(--teal-600, #3d907a));
+  border-radius: 999px;
+  box-shadow: 0 0 6px rgba(74,180,158,0.45);
+  opacity: 0;
+  transition: opacity 140ms cubic-bezier(.16,1,.3,1);
+}
+
+.projectsHeader a:hover::after,
+.projectsHeader a:focus-visible::after {
+  opacity: 1;
+}
+
+/* Matching section band to align with projects band */
+.matchingBand {
+  background: #f9fafb;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+}
+
 /* Total Impact Summary */
 .totalImpactSummary {
   background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);

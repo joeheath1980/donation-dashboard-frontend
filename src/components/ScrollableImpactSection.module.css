@@ -484,6 +484,23 @@
   border: 1px solid var(--border-light);
 }
 
+/* When opting into global theme tabs, defer to theme visuals */
+.impactSectionNav:global(.tabs) {
+  /* Match luxury slate nav bar */
+  background-color: #1a1f2e; /* Fallback */
+  background: linear-gradient(180deg, #0f172a 0%, #1f2937 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 6px 8px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 10px 24px rgba(0,0,0,.16);
+}
+
+/* Dark variant experiment for top tab bar */
+.impactSectionNav.darkNav {
+  background-color: #3A3A3C;
+  border-color: #2f2f31;
+}
+
 .impactSectionNavButton {
   background-color: transparent;
   border: none;
@@ -503,6 +520,59 @@
 .impactSectionNavButton.active {
   background: var(--primary-color);
   color: var(--white);
+}
+
+/* Inside theme tabs, rely on .tab states instead */
+.impactSectionNav:global(.tabs) .impactSectionNavButton {
+  background: transparent;
+  color: rgba(255,255,255,0.86);
+  font-weight: 500;
+  letter-spacing: .02em;
+  padding: 10px 16px;
+  border-radius: 999px;
+  transition: color 0.14s cubic-bezier(.16,1,.3,1), background 0.14s cubic-bezier(.16,1,.3,1);
+  position: relative; /* enable underline placement */
+}
+.impactSectionNav:global(.tabs) .impactSectionNavButton:hover { background: rgba(255,255,255,0.06); color: #d1d5db; }
+
+/* Active selection mirrors navbar: translucent teal pill + soft glow */
+.impactSectionNav:global(.tabs) .impactSectionNavButton[aria-selected="true"],
+.impactSectionNav:global(.tabs) .impactSectionNavButton.active {
+  background: rgba(74,180,158,0.12);
+  color: #ffffff;
+  box-shadow: 0 0 0 0 rgba(74,180,158,0), 0 0 10px rgba(74,180,158,0.22);
+}
+
+/* Teal underline glow under active tab, like navbar */
+.impactSectionNav:global(.tabs) .impactSectionNavButton[aria-selected="true"]::after,
+.impactSectionNav:global(.tabs) .impactSectionNavButton.active::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal-500, #4ab49e), var(--teal-600, #3d907a));
+  border-radius: 999px;
+  box-shadow: 0 0 6px rgba(74,180,158,0.45);
+}
+
+/* Chevron color on slate background */
+.impactSectionNav:global(.tabs) .chevronIcon { color: #9adccf; }
+.impactSectionNav:global(.tabs) .arrowButton:hover .chevronIcon { color: #71cbb6; }
+
+/* Button colors on dark nav background */
+.darkNav .impactSectionNavButton {
+  color: #f3f3f4;
+}
+
+.darkNav .impactSectionNavButton:hover {
+  background-color: rgba(94, 207, 182, 0.18); /* teal tint pops on dark */
+}
+
+.darkNav .impactSectionNavButton.active {
+  background: var(--primary-color);
+  color: #ffffff;
 }
 
 .arrowNavigation {
@@ -525,6 +595,11 @@
 }
 
 .arrowButton:hover .chevronIcon {
+  color: var(--primary-light);
+}
+
+/* Chevron contrast on dark nav */
+.darkNav .chevronIcon {
   color: var(--primary-light);
 }
 

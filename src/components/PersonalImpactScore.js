@@ -154,6 +154,16 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
             </React.Fragment>
           ))}
         </defs>
+        {/* Slate outer ring for grounding */}
+        <circle
+          cx={center}
+          cy={center}
+          r={rings[0].radius + 10}
+          fill="none"
+          stroke="#0f172a"
+          strokeOpacity="0.15"
+          strokeWidth="10"
+        />
         
         {rings.map((ring, index) => {
           const percentage = Math.min((ring.score / ring.maxScore) * 100, 100);
@@ -538,22 +548,22 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
         <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>
           <button 
             onClick={onAddContributions} 
-            className={styles.primaryButton}
+            className={`${styles.primaryButton} btn btn-primary`}
           >
             <FaPlus className={styles.buttonIcon} />
             Add Your Contributions
           </button>
           <Link 
             to="/activity" 
-            className={styles.secondaryButton}
+            className={`${styles.secondaryButton} btn btn-outline`}
           >
             <FaSearch className={styles.buttonIcon} />
             Discover Your Contributions
           </Link>
-          {(username || userId || userEmail || user?.username || user?.userId || user?._id) && (
+          {(username || user?.username) && (
             <Link 
-              to={`/profile/${username || user?.username || userId || user?.userId || user?._id || userEmail?.split('@')[0]}`} 
-              className={styles.tertiaryButton}
+              to={`/profile/${username || user?.username}`} 
+              className={`${styles.tertiaryButton} btn btn-ghost`}
             >
               <FaUserCircle className={styles.buttonIcon} />
               View Public Profile

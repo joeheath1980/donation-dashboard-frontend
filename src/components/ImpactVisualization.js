@@ -424,7 +424,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
     return points;
   }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore, hideAmounts]);
 
-  // Set up intersection observer to detect visibility
+  // Set up intersection observer to detect visibility with a safe fallback
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -432,17 +432,24 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
           setIsVisible(entry.isIntersecting);
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0 }
     );
+
+    let fallbackTimer = null;
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
+      // Fallback: if observer never fires (e.g., layout/overflow quirks), ensure we still render
+      fallbackTimer = setTimeout(() => {
+        setIsVisible(true);
+      }, 800);
     }
 
     return () => {
       if (containerRef.current) {
         observer.unobserve(containerRef.current);
       }
+      if (fallbackTimer) clearTimeout(fallbackTimer);
     };
   }, []);
 

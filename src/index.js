@@ -8,6 +8,8 @@ import './styles/dynamic-css-variables.css';
 import './styles/final-cleanup.css';
 import './styles/dynamic-styles.css';
 import App from './App';
+// Import the global theme LAST so it can gently override base/module styles
+import './styles/do-nation-theme.css';
 
 // Keep StrictMode enabled for better development experience
 const root = ReactDOM.createRoot(document.getElementById('root'));
