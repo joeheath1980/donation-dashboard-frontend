@@ -280,22 +280,9 @@
   opacity: 1;
 }
 
-/* Flat teal rim utility (brand accent) */
+/* Removed rim utility - no longer using side borders */
 .rimSlate {
-  position: relative;
-  overflow: hidden;
-}
-
-.rimSlate::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px; /* Increased from 6px for more visibility */
-  height: 100%;
-  background: #1e6b59; /* Flat darker teal color - matches var(--primary-dark) */
-  border-top-left-radius: inherit;
-  border-bottom-left-radius: inherit;
+  /* No special styling - class kept for compatibility */
 }
 
 .scrollIndicator {

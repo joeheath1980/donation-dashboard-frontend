@@ -560,10 +560,10 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             <FaSearch className={styles.buttonIcon} />
             Discover Your Contributions
           </Link>
-          {/* View Public Profile: only enable when we have a username */}
-          { (username || user?.username) ? (
+          {/* View Public Profile: always show as all users have usernames now */}
+          {(username || user?.username || userId || user?._id) ? (
             <Link 
-              to={`/profile/${username || user?.username}`} 
+              to={`/profile/${username || user?.username || userId || user?._id}`} 
               className={`${styles.tertiaryButton} btn btn-ghost`}
             >
               <FaUserCircle className={styles.buttonIcon} />
@@ -571,9 +571,9 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             </Link>
           ) : (
             <button 
-              className={`${styles.tertiaryButton} btn btn-ghost`} 
-              title="Sign in to view your public profile"
-              disabled
+              className={`${styles.tertiaryButton} btn btn-ghost`}
+              onClick={() => window.location.reload()}
+              title="Click to refresh and load profile"
             >
               <FaUserCircle className={styles.buttonIcon} />
               View Public Profile

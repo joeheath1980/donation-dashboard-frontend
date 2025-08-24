@@ -298,8 +298,10 @@ function Profile() {
         />
         
         <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand} rimSlate`}>
-          <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
-          <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
+          <div className={styles.headerBand}>
+            <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
+            <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
+          </div>
           
           {/* Always show matching feed - removed conditional rendering */}
           <div className={styles.matchingFeedContainer}>
@@ -311,8 +313,10 @@ function Profile() {
         </section>
 
         <section className={`${styles.section} ${styles.projectsBand} rimSlate`}>
-          <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
-          <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
+          <div className={styles.headerBand}>
+            <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
+            <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
+          </div>
           <div className={styles.projectsHeader}>
             <Link to="/search-charities" className="btn btn-ghost">See all projects</Link>
           </div>
@@ -440,8 +444,10 @@ function Profile() {
         </section>
         
         <section className={`${styles.section} ${styles.impactSection} card`}>
-          <SectionTitle icon={FaChartLine} title="Your Impact" />
-          <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
+          <div className={styles.headerBand}>
+            <SectionTitle icon={FaChartLine} title="Your Impact" />
+            <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
+          </div>
           
           {/* Total Impact Summary */}
           {(() => {

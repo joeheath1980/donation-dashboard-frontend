@@ -249,6 +249,34 @@
   margin-bottom: 32px;
 }
 
+/* Header Band that matches navbar styling */
+.headerBand {
+  background: var(--charcoal-500, #313133);
+  color: #fff;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: -8px -4px 20px -4px; /* subtle edge reach inside section */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.headerBand .sectionHeader { margin-bottom: 10px; }
+.headerBand .sectionIcon { color: rgba(255,255,255,.92); }
+.headerBand .sectionTitle { color: #fff; }
+.headerBand .gradientTitle {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  background-clip: initial !important;
+  color: #fff !important;
+}
+.headerBand .sectionTitleUnderline {
+  background: linear-gradient(90deg, var(--teal-500, #4ab49e), var(--teal-600, #3d907a));
+  opacity: .95;
+}
+.headerBand .sectionSubtitle {
+  color: rgba(255,255,255,.85);
+  margin: 8px 0 0 40px; /* align under title/icon */
+}
+
 /* Grid Layouts */
 .donationsGrid {
   display: grid;
