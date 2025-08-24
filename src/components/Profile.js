@@ -5,6 +5,7 @@ import './SharedStyles.css';
 import PersonalImpactScore from './PersonalImpactScore';
 import ScrollableImpactSection from './ScrollableImpactSection';
 import CarouselComponent from './CarouselComponent';
+import SectionHeader from './Common/SectionHeader';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { useAuth } from '../contexts/AuthContext';
 import DonationsComponent from './DonationsComponent';
@@ -298,10 +299,15 @@ function Profile() {
         />
         
         <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand} rimSlate`}>
-          <div className={styles.headerBand}>
-            <SectionTitle icon={FaHandshake} title="Matching Opportunities" />
-            <p className={styles.sectionSubtitle}>Partner with brands to help boost your contributions and impact to the charities or cause areas you care about</p>
-          </div>
+          <SectionHeader
+            eyebrow="Matched for you"
+            title="Matching Opportunities"
+            subhead="Partner with brands to help boost your contributions and impact to the charities or cause areas you care about."
+            variant="dark"
+            trim
+            icon={<FaHandshake />}
+            as="h2"
+          />
           
           {/* Always show matching feed - removed conditional rendering */}
           <div className={styles.matchingFeedContainer}>
@@ -313,10 +319,15 @@ function Profile() {
         </section>
 
         <section className={`${styles.section} ${styles.projectsBand} rimSlate`}>
-          <div className={styles.headerBand}>
-            <SectionTitle icon={FaProjectDiagram} title="Projects to Support" />
-            <p className={styles.sectionSubtitle}>Discover new charities and their projects, which have been carefully selected to align with your existing areas of support</p>
-          </div>
+          <SectionHeader
+            eyebrow="Matched for you"
+            title="Projects to Support"
+            subhead="Discover new charities and their projects, carefully selected to align with your existing areas of support."
+            variant="dark"
+            trim
+            icon={<FaProjectDiagram />}
+            as="h2"
+          />
           <div className={styles.projectsHeader}>
             <Link to="/search-charities" className="btn btn-ghost">See all projects</Link>
           </div>
@@ -444,10 +455,15 @@ function Profile() {
         </section>
         
         <section className={`${styles.section} ${styles.impactSection} card`}>
-          <div className={styles.headerBand}>
-            <SectionTitle icon={FaChartLine} title="Your Impact" />
-            <p className={styles.sectionSubtitle}>Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about.</p>
-          </div>
+          <SectionHeader
+            eyebrow="Your impact"
+            title="Your Impact"
+            subhead="Stay updated on your charitable activities and interests. Explore ways to enhance your impact and make a greater difference in the causes you care about."
+            variant="dark"
+            trim
+            icon={<FaChartLine />}
+            as="h2"
+          />
           
           {/* Total Impact Summary */}
           {(() => {

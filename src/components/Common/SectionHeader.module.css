@@ -1,0 +1,95 @@
+/* SectionHeader – reusable header with optional full-bleed trim band */
+
+.wrapper {
+  display: block;
+}
+
+/* Full-bleed band that matches the navbar and hugs container corners */
+.trimBand {
+  background: var(--charcoal-500, #313133);
+  color: #fff;
+  /* Assume parent has padding; negate common section paddings */
+  margin: -48px -32px 20px -32px;
+  padding: 18px 32px 16px 32px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  font-size: 20px;
+  color: rgba(255,255,255,.92);
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  font-weight: 600; /* medium/bold for legibility */
+  text-transform: none; /* avoid forced uppercase for i18n */
+}
+
+.title {
+  margin-top: 8px;
+  font-weight: 800; /* extra-bold */
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-size: clamp(24px, 2.2vw + 8px, 36px);
+}
+
+.accent {
+  margin-top: 12px;
+  height: 6px;
+  width: 64px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--teal-500, #4ab49e), var(--teal-600, #3d907a));
+  box-shadow: 0 0 0 1px rgba(45,212,191,.25) inset, 0 8px 18px rgba(45,212,191,.35);
+  transition: width 200ms cubic-bezier(.16,1,.3,1);
+}
+
+.subhead {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  max-width: 72ch;
+}
+
+/* Variants */
+.dark .eyebrow { color: rgba(125, 211, 213, 0.8); /* teal-300/80 approximation */ }
+.dark .title { color: #fff; }
+.dark .subhead { color: rgba(255,255,255,.85); }
+
+.light .eyebrow { color: var(--charcoal-400, #515352); }
+.light .title { color: var(--charcoal-900, #0f1115); }
+.light .subhead { color: var(--charcoal-400, #515352); }
+
+/* Focus/hover widening for accent; respect reduced motion */
+.interactive:hover,
+.interactive:focus-visible {
+  width: 72px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accent { transition: none; }
+  .interactive:focus-visible .accent,
+  .interactive:hover .accent { width: 64px; }
+}
+
+/* Responsive band alignment to common paddings */
+@media (max-width: 1024px) {
+  .trimBand { margin: -32px -24px 18px -24px; padding: 16px 24px 14px 24px; }
+}
+@media (max-width: 768px) {
+  .trimBand { margin: -24px -20px 16px -20px; padding: 14px 20px 12px 20px; }
+}
+@media (max-width: 480px) {
+  .trimBand { margin: -20px -16px 14px -16px; padding: 12px 16px 10px 16px; }
+}
