@@ -217,7 +217,10 @@ GET /api/auth/google
 Redirects to Google OAuth consent page
 
 #### Google OAuth Callback
-Frontend route: `/auth/google/callback?token=<jwt_token>`
+Frontend route: `/auth/google/callback`
+
+- No tokens in the URL. The frontend receives `status`/`code` parameters only.
+- The frontend exchanges the code via `POST /api/auth/exchange-code` and stores the returned tokens in memory.
 
 #### Microsoft OAuth
 ```http
@@ -226,7 +229,9 @@ GET /api/auth/microsoft
 Redirects to Microsoft OAuth consent page
 
 #### Microsoft OAuth Callback
-Frontend route: `/auth/microsoft/callback?token=<jwt_token>`
+Frontend route: `/auth/microsoft/callback`
+
+- No tokens in the URL. The frontend performs a code exchange via `POST /api/auth/exchange-code`.
 
 ## Donation Management
 

@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import styles from './PublicCharityProfile.module.css';
 import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
+import { getCspNonce, isJsonLdEnabled } from '../../utils/csp';
 import DonationModal from '../DonationModal';
 
 const PublicCharityProfile = () => {
@@ -118,9 +119,11 @@ const PublicCharityProfile = () => {
         <meta name="twitter:description" content={metaTags.description} />
         <meta name="twitter:image" content={metaTags.image} />
         <link rel="canonical" href={metaTags.url} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
+        {isJsonLdEnabled() && (
+          <script type="application/ld+json" nonce={getCspNonce() || undefined}>
+            {JSON.stringify(structuredData)}
+          </script>
+        )}
       </Helmet>
 
       <div className={styles.container}>

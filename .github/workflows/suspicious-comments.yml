@@ -1,0 +1,20 @@
+name: Lint Suspicious Comments
+
+on:
+  pull_request:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  check-suspicious-comments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Scan for suspicious comments
+        run: bash scripts/check_suspicious_comments.sh
+

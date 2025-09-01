@@ -11,6 +11,7 @@ import { EmailForwardingModal } from '../EmailForwarding';
 import { UserDataStorage, SecureTokenStorage } from '../../utils/auth.utils';
 import { FaGoogle, FaMicrosoft, FaEnvelope, FaSync, FaLock, FaCheck, FaInfoCircle, FaChevronRight, FaCopy, FaUpload } from 'react-icons/fa';
 import { API_CONFIG } from '../../config/api.config';
+import { csrfServiceAPI } from '../../services/api.service';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -472,28 +473,9 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         throw new Error('No authentication token found. Please log in again.');
       }
       
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/api/gmail-email-search`,
-        {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 401 && errorData.action === 'google_auth') {
-          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/google`;
-        } else {
-          throw new Error(errorData.error || `An error occurred while searching Gmail emails. Status: ${response.status}`);
-        }
-      } else {
-        const data = await response.json();
+      try {
+        const api = apiServices.client;
+        const { data } = await api.post('/api/gmail-email-search', {});
         console.log('[Activity] Gmail search response:', data);
         
         if (data.jobId) {
@@ -582,6 +564,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           console.log('[Activity] No jobId found in response');
           setLoading(false);
         }
+      } catch (err) {
+        const status = err.response?.status;
+        const errorData = err.response?.data;
+        if (status === 401 && errorData?.action === 'google_auth') {
+          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/google`;
+        } else {
+          throw new Error(errorData?.error || `An error occurred while searching Gmail emails. Status: ${status || 'unknown'}`);
+        }
       }
     } catch (error) {
       logError('Error during Gmail email search', error);
@@ -602,29 +592,9 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         throw new Error('No authentication token found. Please log in again.');
       }
       
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/api/outlook/outlook-email-search`,
-        {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.error === 'Microsoft authentication required' && errorData.action === 'microsoft_auth') {
-          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/microsoft`;
-        } else {
-          throw new Error(errorData.error || `An error occurred while searching Outlook emails. Status: ${response.status}`);
-        }
-      } else {
-        const data = await response.json();
+      try {
+        const api = apiServices.client;
+        const { data } = await api.post('/api/outlook/outlook-email-search', {});
         console.log('[Activity] Outlook search response:', data);
         
         if (data.jobId) {
@@ -734,6 +704,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           console.log('[Activity] No jobId found in response');
           setLoading(false);
         }
+      } catch (err) {
+        const status = err.response?.status;
+        const errorData = err.response?.data;
+        if (errorData?.error === 'Microsoft authentication required' && errorData?.action === 'microsoft_auth') {
+          window.location.href = `${API_CONFIG.BASE_URL}/api/auth/microsoft`;
+        } else {
+          throw new Error(errorData?.error || `An error occurred while searching Outlook emails. Status: ${status || 'unknown'}`);
+        }
       }
     } catch (error) {
       logError('Error during Outlook email search', error);
@@ -787,26 +765,21 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         throw new Error('No authentication token found');
       }
 
+      // Ensure CSRF for state-changing request
+      let csrf = null;
+      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
+
       const headers = {
         'Authorization': `Bearer ${token}`,
+        ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
         'Content-Type': 'application/json'
       };
 
+      const api = apiServices.client;
       const endpoint = selectedType === 'regular'
-        ? `${API_CONFIG.BASE_URL}/api/donations`
-        : `${API_CONFIG.BASE_URL}/api/contributions/one-off`;
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(formattedDonation)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add donation');
-      }
-
-      const result = await response.json();
+        ? '/api/donations'
+        : '/api/contributions/one-off';
+      const { data: result } = await api.post(endpoint, formattedDonation);
 
       if (result?._id) {
         console.log(`[Activity] Committed ${selectedType} donation:`, result._id);
@@ -1188,10 +1161,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           <div className={styles.progressContainer}>
             <p>Scanning your emails... {progress}%</p>
             <div className={styles.progressBarBackground}>
-              <div
-                className={styles.progressBarFill}
-                style={{ width: `${progress}%` }}
-              />
+              {(() => {
+                const rounded = Math.max(0, Math.min(100, Math.round((progress || 0) / 5) * 5));
+                const pctClass = styles['p' + String(rounded)];
+                return (
+                  <div className={`${styles.progressBarFill} ${pctClass}`} />
+                );
+              })()}
             </div>
           </div>
         )}

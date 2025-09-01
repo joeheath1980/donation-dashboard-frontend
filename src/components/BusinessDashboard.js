@@ -273,26 +273,20 @@ function BusinessDashboard() {
   return (
     <div className={styles.dashboardContainer}>
       {businessData?.csrProfile?.verificationStatus !== 'verified' && (
-        <div className={styles.helpMessage} style={{
-          padding: '10px 12px', background: '#fff4e5', border: '1px solid #ffd8a8', borderRadius: 8,
-          marginBottom: 12, color: '#92400e'
-        }}>
+        <div className={`${styles.helpMessage} ${styles.warnBanner}`}>
           Pending verification: Some actions are disabled until your business is verified.
         </div>
       )}
       {showSetupBanner && (
-        <div className={styles.helpMessage} style={{
-          padding: '12px 16px', background: '#fff9e6', border: '1px solid #ffd466', borderRadius: 10, marginBottom: 18,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontSize: 18, lineHeight: 1 }}><RiLightbulbLine /></div>
+        <div className={`${styles.helpMessage} ${styles.setupBanner}`}>
+          <div className={styles.setupBannerContent}>
+            <div className={styles.setupBannerIcon}><RiLightbulbLine /></div>
             <div>
-              <div style={{ fontWeight: 600 }}>Finish your setup</div>
-              <div style={{ fontSize: 13, color: '#6b6b6b' }}>Complete your CSR/AI stage to unlock insights and set your annual budget.</div>
+              <div className={styles.setupBannerTextTitle}>Finish your setup</div>
+              <div className={styles.setupBannerTextSubtitle}>Complete your CSR/AI stage to unlock insights and set your annual budget.</div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className={styles.setupBannerActions}>
             <button
               className={styles.createButton}
               onClick={() => navigate('/business-onboarding?enhanced=1')}

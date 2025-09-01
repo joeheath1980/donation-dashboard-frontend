@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SecureTokenStorage } from '../../utils/auth.utils';
+import apiServices from '../../services/api.service';
 import styles from './TaxExport.module.css';
 import { RiArrowLeftLine } from 'react-icons/ri';
 
@@ -24,21 +25,10 @@ const TaxExport = () => {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/export`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(exportConfig)
-        }
-      );
-      
-      if (response.ok) {
-        const blob = await response.blob();
+      const api = apiServices.client;
+      const response = await api.post('/api/business/tax/export', exportConfig, { responseType: 'blob' });
+      if (response && response.status === 200) {
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

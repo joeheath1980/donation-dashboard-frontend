@@ -505,10 +505,14 @@ function BusinessCampaignList() {
                     <td>
                       <div className={styles.budgetInfo}>
                         <div className={styles.budgetBar}>
-                          <div 
-                            className={styles.budgetFill}
-                            style={{ width: `${(campaign.spent / campaign.budget) * 100}%` }}
-                          />
+                          {(() => {
+                            const pct = campaign.budget > 0 ? (campaign.spent / campaign.budget) * 100 : 0;
+                            const rounded = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+                            const pctClass = styles['p' + String(rounded)];
+                            return (
+                              <div className={`${styles.budgetFill} ${pctClass}`} />
+                            );
+                          })()}
                         </div>
                         <span className={styles.budgetText}>
                           {formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}

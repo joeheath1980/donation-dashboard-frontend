@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SecureTokenStorage } from '../../utils/auth.utils';
+import apiServices from '../../services/api.service';
 import styles from './TaxReceipts.module.css';
 import { RiDownloadLine, RiArrowLeftLine } from 'react-icons/ri';
 
@@ -27,18 +28,10 @@ const TaxReceipts = () => {
   const fetchReceipts = async () => {
     setLoading(true);
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts?year=${filters.year}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
+      const api = apiServices.client;
+      const response = await api.get('/api/business/tax/receipts', { params: { year: filters.year } });
+      if (response && response.status === 200) {
+        const data = response.data;
         setReceipts(data.receipts || []);
       }
     } catch (error) {
@@ -85,18 +78,10 @@ const TaxReceipts = () => {
 
   const downloadReceipt = async (receiptId) => {
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts/${receiptId}/download`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      if (response.ok) {
-        const blob = await response.blob();
+      const api = apiServices.client;
+      const response = await api.get(`/api/business/tax/receipts/${receiptId}/download`, { responseType: 'blob' });
+      if (response && response.status === 200) {
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -115,21 +100,10 @@ const TaxReceipts = () => {
     if (selectedReceipts.length === 0) return;
     
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/receipts/bulk-download`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ receiptIds: selectedReceipts })
-        }
-      );
-      
-      if (response.ok) {
-        const blob = await response.blob();
+      const api = apiServices.client;
+      const response = await api.post('/api/business/tax/receipts/bulk-download', { receiptIds: selectedReceipts }, { responseType: 'blob' });
+      if (response && response.status === 200) {
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

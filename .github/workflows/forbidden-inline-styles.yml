@@ -1,0 +1,20 @@
+name: Lint Forbidden Inline Styles
+
+on:
+  pull_request:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  check-forbidden-inline-styles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Check forbidden inline styles (warn-only)
+        run: bash scripts/check_forbidden_inline_styles.sh
+

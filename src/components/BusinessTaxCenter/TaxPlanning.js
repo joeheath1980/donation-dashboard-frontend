@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SecureTokenStorage } from '../../utils/auth.utils';
+import apiServices from '../../services/api.service';
 import styles from './TaxPlanning.module.css';
 import {
   RiGiftLine,
@@ -30,24 +31,13 @@ const TaxPlanning = () => {
   const calculatePlanning = async () => {
     setLoading(true);
     try {
-      const token = SecureTokenStorage.getToken();
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3002'}/api/business/tax/planning`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            targetAmount: planningData.targetAmount,
-            taxRate: planningData.taxRate
-          })
-        }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
+      const api = apiServices.client;
+      const response = await api.post('/api/business/tax/planning', {
+        targetAmount: planningData.targetAmount,
+        taxRate: planningData.taxRate
+      });
+      if (response && response.status === 200) {
+        const data = response.data;
         setPlanningData(prev => ({
           ...prev,
           currentDonations: data.currentYearDonations || 0,

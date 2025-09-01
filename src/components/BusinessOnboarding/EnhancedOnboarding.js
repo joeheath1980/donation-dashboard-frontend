@@ -136,19 +136,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       return;
     }
     try {
-      // Include business ID in URL path (must match the one in the JWT token)
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`,
-        { headers: getAuthHeaders() }
-      );
+      const api = apiServices.client;
+      const response = await api.get(`/api/business/enhanced-onboarding/progress/${effectiveBusinessId}`);
       if (response.status === 403) {
         console.warn('Progress access forbidden (business mismatch)');
         return;
       }
-      if (response.ok) {
-        const data = await response.json();
-        setProgress(data.overall || 0);
-      }
+      const data = response.data;
+      setProgress(data.overall || 0);
     } catch (error) {
       console.error('Error fetching progress:', error);
     }
@@ -257,7 +252,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           <div className={styles.dataItem}><label>Website</label><div className={styles.value}>{formData.website || '—'}</div></div>
           <div className={styles.dataItem}><label>Industry</label><div className={styles.value}>{formData.industry || '—'}</div></div>
           <div className={styles.dataItem}><label>Country</label><div className={styles.value}>{formData.country || '—'}</div></div>
-          <div className={styles.dataItem} style={{ gridColumn: '1 / -1' }}>
+          <div className={`${styles.dataItem} ${styles.fullWidth}`}>
             <label>Additional Context</label>
             <div className={styles.value}>{formData.additionalContext || '—'}</div>
           </div>
@@ -318,9 +313,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
           <>
             {/* Show a hint if dataQuality is low to encourage manual entry */}
             {typeof data?.dataQuality?.score === 'number' && data.dataQuality.score < 50 && (
-              <div className={styles.helpMessage} style={{ 
-                padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 16
-              }}>
+              <div className={`${styles.helpMessage} ${styles.warningMessage}`}>
                 <RiAlertLine /> Our AI has low confidence in the detected figures. You can still save now and update your annual budget manually later in Account Settings.
               </div>
             )}
@@ -386,10 +379,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
                           <span className={styles.percentage}>{cat.percentage}%</span>
                         </div>
                         <div className={styles.categoryBar}>
-                          <div 
-                            className={styles.categoryFill}
-                            style={{ width: `${cat.percentage}%` }}
-                          />
+                          {(() => {
+                            const pct = typeof cat.percentage === 'number' ? cat.percentage : Number(cat.percentage || 0);
+                            const rounded = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+                            const pctClass = styles['p' + String(rounded)];
+                            return (
+                              <div className={`${styles.categoryFill} ${pctClass}`} />
+                            );
+                          })()}
                         </div>
                         <div className={styles.categoryAmount}>
                           ${(cat.amount / 1000000).toFixed(1)}M
@@ -590,20 +587,8 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
     setLoading(true);
     
     try {
-      // Ensure CSRF token for state-changing request
-      let csrf = null;
-      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/data-preference`,
-        {
-          method: 'POST',
-          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
-          body: JSON.stringify({ 
-            preference: method 
-          })
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.post('/api/business/enhanced-onboarding/data-preference', { preference: method });
 
       if (response.status === 503) {
         setIsKillSwitched(true);
@@ -613,18 +598,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       }
 
       if (response.status === 429) {
-        const retry = response.headers.get('Retry-After');
+        const retry = response.headers['retry-after'];
         const seconds = parseRetryAfter(retry);
         setRateLimitSeconds(seconds || 30);
         setError(`Rate limited. Try again in ${seconds || 30} seconds.`);
         return;
       }
 
-      if (!response.ok) {
-        throw new Error('Failed to set preference');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       if (method === 'ai-research') {
         setStep('ai-research-form');
@@ -667,21 +648,8 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         country: formData.country || 'Australia'
       };
       
-      // Get CSRF token for POST request
-      let csrf = null;
-      try { 
-        csrf = await csrfServiceAPI.initializeToken(); 
-      } catch (e) {
-        console.warn('Failed to get CSRF token:', e);
-      }
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/ai-research`,
-        {
-          method: 'POST',
-          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
-          body: JSON.stringify(requestBody)
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.post('/api/business/enhanced-onboarding/ai-research', requestBody);
 
       if (response.status === 503) {
         setIsKillSwitched(true);
@@ -691,7 +659,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       }
 
       if (response.status === 429) {
-        const retry = response.headers.get('Retry-After');
+        const retry = response.headers['retry-after'];
         const seconds = parseRetryAfter(retry);
         setRateLimitSeconds(seconds || 30);
         setStep('ai-research-form');
@@ -699,12 +667,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
         return;
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.message || 'AI research failed');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       console.log('AI research completed:', {
         success: data.success,
@@ -809,20 +772,12 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
 
       const { cleaned, meta } = sanitizeForConfirm(raw);
 
-      let csrf = null;
-      try { csrf = await csrfServiceAPI.initializeToken(); } catch {}
-      const response = await fetch(
-        `${API_BASE_URL}/api/business/enhanced-onboarding/confirm-research`,
-        {
-          method: 'POST',
-          headers: { ...getAuthHeaders(), ...(csrf ? { 'X-CSRF-Token': csrf } : {}) },
-          body: JSON.stringify({
-            confirmedData: cleaned,
-            corrections: {},
-            additionalData: { acceptableCharitiesRaw: meta.acceptableRaw || undefined }
-          })
-        }
-      );
+      const api = apiServices.client;
+      const response = await api.post('/api/business/enhanced-onboarding/confirm-research', {
+        confirmedData: cleaned,
+        corrections: {},
+        additionalData: { acceptableCharitiesRaw: meta.acceptableRaw || undefined }
+      });
 
       if (response.status === 503) {
         setIsKillSwitched(true);
@@ -832,20 +787,14 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       }
 
       if (response.status === 429) {
-        const retry = response.headers.get('Retry-After');
+        const retry = response.headers['retry-after'];
         const seconds = parseRetryAfter(retry);
         setRateLimitSeconds(seconds || 30);
         setError(`Rate limited. Try again in ${seconds || 30} seconds.`);
         return;
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        const mapped = mapValidationErrors(errorData?.errors || errorData?.details);
-        throw new Error(mapped || errorData.details || 'Failed to save research data');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       console.log('Research confirmed successfully:', {
         completionPercentage: data.completionPercentage,
@@ -889,26 +838,20 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       {/* Progress Bar */}
       <div className={styles.progressBar}>
         <div className={styles.progressTrack}>
-          <div 
-            className={styles.progressFill} 
-            style={{ width: `${progress}%` }}
-          />
+          {(() => {
+            const rounded = Math.max(0, Math.min(100, Math.round((progress || 0) / 5) * 5));
+            const pctClass = styles['p' + String(rounded)];
+            return (
+              <div className={`${styles.progressFill} ${pctClass}`} />
+            );
+          })()}
         </div>
         <span className={styles.progressLabel}>{progress}% Complete</span>
       </div>
       
       {/* Help Message for AI Research Flow */}
       {step === 'choose-method' && progress === 50 && (
-        <div className={styles.helpMessage} style={{ 
-          padding: '15px', 
-          backgroundColor: '#fff3cd', 
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
+        <div className={`${styles.helpMessage} ${styles.warningMessage}`}>
           <RiAlertLine className="color-hex-856404 font-size-20" />
           <div>
             <strong>Complete your AI Research:</strong> You've selected AI Research but haven't completed it yet. 
@@ -920,7 +863,7 @@ const EnhancedOnboarding = ({ businessId, onComplete, onSkip, initialCompanyData
       {/* Step Content */}
       <div className={styles.stepContent}>
         {rateLimitSeconds > 0 && (
-          <div className={styles.helpMessage} style={{ padding: '12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, marginBottom: 12 }}>
+          <div className={`${styles.helpMessage} ${styles.warningMessage}`}>
             Try again in {rateLimitSeconds} seconds.
           </div>
         )}

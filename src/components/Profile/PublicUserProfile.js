@@ -41,6 +41,7 @@ import styles from '../Profile.module.css';
 import publicStyles from './PublicUserProfile.module.css';
 import '../SharedStyles.css';
 import profileService from '../../services/profile.service';
+import { getCspNonce, isJsonLdEnabled } from '../../utils/csp';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
@@ -341,8 +342,8 @@ const PublicUserProfile = () => {
           <meta name="twitter:description" content={metaTags.description} />
           <meta name="twitter:image" content={metaTags.image} />
           <link rel="canonical" href={metaTags.url} />
-          {structuredData && (
-            <script type="application/ld+json">
+          {structuredData && isJsonLdEnabled() && (
+            <script type="application/ld+json" nonce={getCspNonce() || undefined}>
               {JSON.stringify(structuredData)}
             </script>
           )}

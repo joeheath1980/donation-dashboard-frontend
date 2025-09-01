@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import styles from './PublicBusinessProfile.module.css';
 import profileService from '../../services/profile.service';
 import LoadingSpinner from '../Common/LoadingSpinner';
+import { getCspNonce, isJsonLdEnabled } from '../../utils/csp';
 
 // Import new components
 import BusinessImpactScore from './components/BusinessImpactScore';
@@ -122,9 +123,11 @@ const PublicBusinessProfile = () => {
         <meta name="twitter:description" content={metaTags.description} />
         <meta name="twitter:image" content={metaTags.image} />
         <link rel="canonical" href={metaTags.url} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
+        {isJsonLdEnabled() && (
+          <script type="application/ld+json" nonce={getCspNonce() || undefined}>
+            {JSON.stringify(structuredData)}
+          </script>
+        )}
       </Helmet>
 
       <div className={styles.container}>
@@ -374,10 +377,14 @@ const PublicBusinessProfile = () => {
                       <div key={index} className={styles.categoryItem}>
                         <span>{category.name}</span>
                         <div className={styles.categoryBar}>
-                          <div 
-                            className={styles.categoryFill}
-                            style={{ width: `${category.percentage}%` }}
-                          />
+                          {(() => {
+                            const pct = typeof category.percentage === 'number' ? category.percentage : Number(category.percentage || 0);
+                            const rounded = Math.max(0, Math.min(100, Math.round(pct / 5) * 5));
+                            const pctClass = styles['p' + String(rounded)];
+                            return (
+                              <div className={`${styles.categoryFill} ${pctClass}`} />
+                            );
+                          })()}
                         </div>
                         <span>{category.percentage}%</span>
                       </div>

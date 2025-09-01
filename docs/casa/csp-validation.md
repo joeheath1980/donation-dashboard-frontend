@@ -20,3 +20,28 @@ CSP Validation Guide (Staging)
 - Screenshots of: Headers tab showing CSP; Console showing zero violations during normal flows; any third-party embeds functioning.
 - Keep policy version and commit SHA.
 
+6) JSON-LD With Nonce (optional, recommended)
+- For structured data on public profiles, use a per-request nonce instead of allowing unsafe-inline.
+- Frontend: `public/index.html` contains `<meta name="csp-nonce" content="__CSP_NONCE__">`. Components read it via `getCspNonce()` and only render JSON-LD when `REACT_APP_ENABLE_JSON_LD=true`.
+- Edge (nginx): inject the nonce into CSP and HTML.
+
+Example nginx snippet:
+
+  # Generate per-request nonce using $request_id and allow only nonced scripts
+  add_header Content-Security-Policy "\
+    default-src 'self'; \
+    script-src 'self' https://apis.google.com https://www.gstatic.com https://www.google.com https://www.googletagmanager.com https://js.stripe.com 'nonce-$request_id'; \
+    style-src 'self' https://fonts.googleapis.com; \
+    font-src 'self' https://fonts.gstatic.com data:; \
+    img-src 'self' https: data: blob:; \
+    connect-src 'self' https://api.stripe.com https://do-nation.space wss://do-nation.space; \
+    frame-src 'self' https://accounts.google.com https://www.google.com https://js.stripe.com https://hooks.stripe.com; \
+    frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;" always;
+
+  # Replace placeholder nonce in HTML with $request_id
+  sub_filter_once off;
+  sub_filter '__CSP_NONCE__' $request_id;
+
+Notes:
+- Keep `script-src` strict; do not re-enable `'unsafe-inline'`.
+- If JSON-LD is not required, set `REACT_APP_ENABLE_JSON_LD` to false (default) and keep CSP unchanged.

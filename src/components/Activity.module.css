@@ -75,6 +75,42 @@
   position: relative;
 }
 
+/* CSP-safe notice styling (replaces inline styles) */
+.notice {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+}
+
+.noticeText {
+  margin: 0;
+  color: #2c5282;
+}
+
+/* Discrete width classes for strict CSP (no inline styles) */
+.p0 { width: 0%; }
+.p5 { width: 5%; }
+.p10 { width: 10%; }
+.p15 { width: 15%; }
+.p20 { width: 20%; }
+.p25 { width: 25%; }
+.p30 { width: 30%; }
+.p35 { width: 35%; }
+.p40 { width: 40%; }
+.p45 { width: 45%; }
+.p50 { width: 50%; }
+.p55 { width: 55%; }
+.p60 { width: 60%; }
+.p65 { width: 65%; }
+.p70 { width: 70%; }
+.p75 { width: 75%; }
+.p80 { width: 80%; }
+.p85 { width: 85%; }
+.p90 { width: 90%; }
+.p95 { width: 95%; }
+.p100 { width: 100%; }
+
 .buttonContainer {
   display: flex;
   gap: 1rem;
@@ -460,6 +496,7 @@
   background-color: #4caf50;
   transition: width 0.5s ease;
 }
+
 }
 /* Redesigned to match Profile.js style */
 .emailSearchSection {
