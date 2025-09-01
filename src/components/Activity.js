@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { useUser } from '../contexts/UserContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styles from './Activity.module.css';
 import './SharedStyles.css';
 import { format, isValid, parseISO, differenceInDays } from 'date-fns';
@@ -11,6 +11,7 @@ import apiServices from '../services/api.service';
 import { EmailForwardingModal } from './EmailForwarding';
 import { csrfServiceAPI } from '../services/api.service';
 import { UserDataStorage, SecureTokenStorage } from '../utils/auth.utils';
+import { API_CONFIG } from '../config/api.config';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
@@ -91,6 +92,7 @@ function Activity() {
   const { addDonation, addOneOffContribution } = useContext(ImpactContext);
   const { currentUserId } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loadState, saveState, clearState } = useUserStorage(currentUserId);
 
   const [loading, setLoading] = useState(false);
@@ -372,6 +374,25 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   useEffect(() => {
     fetchForwardedEmails();
   }, [fetchForwardedEmails]);
+
+  // Handle Gmail auth redirect - automatically trigger search
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const gmailAuth = params.get('gmailAuth');
+    
+    if (gmailAuth === 'true') {
+      // Remove the query parameter from URL to prevent re-triggering
+      navigate('/activity', { replace: true });
+      
+      // Check if Gmail auth is successful and trigger search
+      checkGmailAuth().then(hasAuth => {
+        if (hasAuth) {
+          console.log('[Activity] Gmail auth successful, triggering search');
+          handleSearchGmailEmails();
+        }
+      });
+    }
+  }, [location.search, navigate, checkGmailAuth, handleSearchGmailEmails]);
 
   const handleClearAll = useCallback(() => {
     console.log('[Activity] Starting clear operation');

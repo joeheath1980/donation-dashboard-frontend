@@ -23,8 +23,9 @@ const GoogleAuthCallback = () => {
         const status = params.get('status');
         const code = params.get('code');
         const message = params.get('message');
+        const returnTo = params.get('returnTo');
 
-        logger.debug('Parameters extracted from URL', { status, hasCode: !!code });
+        logger.debug('Parameters extracted from URL', { status, hasCode: !!code, returnTo });
 
         if (status === 'error') {
           logger.error('OAuth error from backend', { message });
@@ -69,7 +70,13 @@ const GoogleAuthCallback = () => {
             }
             setUser({ ...userData, isBusiness: role === USER_TYPES.BUSINESS, isCharity: role === USER_TYPES.CHARITY });
             const isNewUser = !!userData?.isNewUser;
-            navigate(isNewUser ? '/activity' : '/dashboard');
+            
+            // Handle returnTo parameter for Gmail OAuth flow
+            if (returnTo === 'activity') {
+              navigate('/activity?gmailAuth=true');
+            } else {
+              navigate(isNewUser ? '/activity' : '/dashboard');
+            }
             return;
           } catch (e) {
             logger.error('Code exchange failed', { message: e.message, status: e.response?.status });
@@ -103,7 +110,13 @@ const GoogleAuthCallback = () => {
             // Note: token remains unset in memory; API auth relies on HttpOnly cookies
             // CSRF headers are still applied by interceptors for state-changing requests
             setUser({ ...userData, isBusiness: role === USER_TYPES.BUSINESS, isCharity: role === USER_TYPES.CHARITY });
-            navigate('/dashboard');
+            
+            // Handle returnTo parameter for Gmail OAuth flow
+            if (returnTo === 'activity') {
+              navigate('/activity?gmailAuth=true');
+            } else {
+              navigate('/dashboard');
+            }
             return;
           } catch (e) {
             logger.error('Cookie-mode hydration failed', { message: e.message, status: e.response?.status });
