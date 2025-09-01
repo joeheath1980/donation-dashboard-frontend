@@ -11,7 +11,7 @@ import { EmailForwardingModal } from '../EmailForwarding';
 import { UserDataStorage, SecureTokenStorage } from '../../utils/auth.utils';
 import { FaGoogle, FaMicrosoft, FaEnvelope, FaSync, FaLock, FaCheck, FaInfoCircle, FaChevronRight, FaCopy, FaUpload } from 'react-icons/fa';
 import { API_CONFIG } from '../../config/api.config';
-import { csrfServiceAPI } from '../../services/api.service';
+import apiServices, { csrfServiceAPI } from '../../services/api.service';
 
 // Create a logger instance for this component
 const logger = createLogger('Activity');
