@@ -12,28 +12,28 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
       title: 'Add One-off Donation',
       icon: FaDonate,
       description: 'Record a one-time donation to a charity',
-      color: '#4CAF50'
+      className: 'oneoff'
     },
     {
       id: 'regular',
       title: 'Add Regular Donation',
       icon: FaDonate,
       description: 'Set up a recurring donation',
-      color: '#2E7D32'
+      className: 'regular'
     },
     {
       id: 'volunteer',
       title: 'Add Volunteer Hours',
       icon: FaHandsHelping,
       description: 'Log your volunteer activities and hours',
-      color: '#2196F3'
+      className: 'volunteer'
     },
     {
       id: 'fundraising',
       title: 'Add Fundraising Campaign',
       icon: FaBullhorn,
       description: 'Create a new fundraising campaign',
-      color: '#FF9800'
+      className: 'fundraising'
     }
   ];
 
@@ -60,13 +60,13 @@ const ContributionSelectionModal = ({ isOpen, onClose, onSelectType }) => {
           {contributionTypes.map((type) => (
             <button
               key={type.id}
-              className={`${styles.optionCard} btn btn-outline`}
+              className={`${styles.optionCard} ${styles[type.className]}`}
               onClick={() => handleSelect(type.id)}
-              data-hover-color={type.color }
+              aria-label={type.title}
             >
               <type.icon 
-                className={`${styles.optionIcon} dynamic-color`}
-                data-type-color={type.color}
+                className={styles.optionIcon}
+                aria-hidden="true"
               />
               <h3 className={styles.optionTitle}>{type.title}</h3>
               <p className={styles.optionDescription}>{type.description}</p>
