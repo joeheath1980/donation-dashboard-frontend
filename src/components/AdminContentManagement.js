@@ -246,36 +246,32 @@ const AdminContentManagement = () => {
                           <select 
                             value={item.status} 
                             onChange={(e) => handleStatusChange(item._id, e.target.value)}
-                            className={styles.select}
-                            className="max-width-150"
+                            className={`${styles.select} max-width-150`}
                           >
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
                             <option value="archived">Archived</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} className="ml-10">
+                          <span className={`${styles.badge} ${statusBadge.className} ml-10`}>
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
                           <div className="display-flex gap-5">
                             <button 
-                              className={`${styles.button} ${styles.primaryButton}`} 
-                              className="font-size-12 p-5px-10px"
+                              className={`${styles.button} ${styles.primaryButton} font-size-12 p-5px-10px`}
                               title="View Content"
                             >
                               <FaEye />
                             </button>
                             <button 
-                              className={`${styles.button} ${styles.secondaryButton}`} 
-                              className="font-size-12 p-5px-10px"
+                              className={`${styles.button} ${styles.secondaryButton} font-size-12 p-5px-10px`}
                               title="Edit Content"
                             >
                               <FaEdit />
                             </button>
                             <button 
-                              className={`${styles.button} ${styles.dangerButton}`} 
-                              className="font-size-12 p-5px-10px"
+                              className={`${styles.button} ${styles.dangerButton} font-size-12 p-5px-10px`}
                               onClick={() => handleDelete(item._id)}
                               title="Delete Content"
                             >

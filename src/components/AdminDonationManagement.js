@@ -270,19 +270,18 @@ const AdminDonationManagement = () => {
                           <select 
                             value={donation.status} 
                             onChange={(e) => handleStatusChange(donation._id, e.target.value)}
-                            className={styles.select}
-                            className="max-width-150"
+                            className={`${styles.select} max-width-150`}
                           >
                             <option value="pending">Pending</option>
                             <option value="completed">Completed</option>
                             <option value="failed">Failed</option>
                           </select>
-                          <span className={`${styles.badge} ${statusBadge.className}`} className="ml-10">
+                          <span className={`${styles.badge} ${statusBadge.className} ml-10`}>
                             <statusBadge.Icon /> {statusBadge.text}
                           </span>
                         </td>
                         <td>
-                          <button className={`${styles.button} ${styles.primaryButton}`} className="font-size-12 p-5px-15px">
+                          <button className={`${styles.button} ${styles.primaryButton} font-size-12 p-5px-15px`}>
                             View Details
                           </button>
                         </td>

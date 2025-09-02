@@ -170,7 +170,7 @@ const AdminSystemIntegration = () => {
       case 'error':
         return <FaTimesCircle className="color-hex-ef4444" />;
       default:
-        return <FaSync className={styles.spinner} className="color-hex-3b82f6" />;
+        return <FaSync className={`${styles.spinner} color-hex-3b82f6`} />;
     }
   };
 
@@ -285,7 +285,7 @@ const AdminSystemIntegration = () => {
             </div>
             <div className={integrationStyles.statItem}>
               <span className={integrationStyles.statLabel}>Failed</span>
-              <span className={integrationStyles.statValue} className="color-hex-ef4444">
+              <span className={`${integrationStyles.statValue} color-hex-ef4444`}>
                 {emailStats.failed}
               </span>
             </div>

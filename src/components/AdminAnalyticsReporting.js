@@ -159,7 +159,7 @@ const AdminAnalyticsReporting = () => {
         </div>
       )}
 
-      <div className={styles.card} className="mb-20">
+      <div className={`${styles.card} mb-20`}>
         <div className="flex-align-center gap-20">
           <FaCalendarAlt />
           <div className={styles.filters}>

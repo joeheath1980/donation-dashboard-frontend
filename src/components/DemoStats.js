@@ -68,8 +68,8 @@ const DemoStats = () => {
               style={{ backgroundColor: `${item.color}20` }}
             >
               <item.icon 
-                className={styles.statIcon}
-                data-item-color={item.color} className="dynamic-color"
+                className={`${styles.statIcon} dynamic-color`}
+                data-item-color={item.color}
               />
             </div>
             <div className={styles.statContent}>

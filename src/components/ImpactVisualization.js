@@ -1099,23 +1099,23 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
       </div>
       <div className={styles.legend}>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} className="bg-regular-donation"></span>
+          <span className={`${styles.legendDot} bg-regular-donation`}></span>
           <span>Regular Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} className="bg-one-off-donation"></span>
+          <span className={`${styles.legendDot} bg-one-off-donation`}></span>
           <span>One-off Donations</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} className="bg-fundraising-campaign"></span>
+          <span className={`${styles.legendDot} bg-fundraising-campaign`}></span>
           <span>Fundraising Campaigns</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} className="bg-volunteer"></span>
+          <span className={`${styles.legendDot} bg-volunteer`}></span>
           <span>Volunteer Hours</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={styles.legendDot} className="bg-dense-pattern"></span>
+          <span className={`${styles.legendDot} bg-dense-pattern`}></span>
           <span>Multiple Activities</span>
         </div>
       </div>

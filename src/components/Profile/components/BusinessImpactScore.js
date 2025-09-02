@@ -206,7 +206,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
           <div className={styles.comparison}>
             <div className={styles.comparisonItem}>
               <span className={styles.comparisonLabel}>Your Score</span>
-              <span className={styles.comparisonValue} data-score-color={getScoreColor(score)} className="dynamic-color">
+              <span className={`${styles.comparisonValue} dynamic-color`} data-score-color={getScoreColor(score)}>
                 {score}
               </span>
             </div>
@@ -307,7 +307,7 @@ function BusinessImpactScore({ businessSlug, initialScore = 0 }) {
       {percentile && (
         <div className={styles.insights}>
           <div className={styles.insight}>
-            <FaTrophy className={styles.insightIcon} className="color-hex-ffd700" />
+            <FaTrophy className={`${styles.insightIcon} color-hex-ffd700`} />
             <p>This business ranks in the <strong>top {100 - percentile}%</strong> for corporate giving</p>
           </div>
         </div>

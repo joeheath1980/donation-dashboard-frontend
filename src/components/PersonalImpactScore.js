@@ -26,35 +26,52 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     return () => clearTimeout(timer);
   }, []);
 
-  if (!scoreDetails || !scoreDetails.breakdown) return null;
+  if (!scoreDetails) return null;
 
   // Get the tier multiplier from scoreDetails
   const multiplier = scoreDetails.multiplier || 1.0;
 
-  // Use weighted scores from breakdown and apply multiplier to match total score
-  const { 
-    donations: baseWeightedDonationScore = 0,
-    volunteering: baseWeightedVolunteerScore = 0,
-    fundraising: baseWeightedFundraisingScore = 0,
-    consistency: baseWeightedConsistencyScore = 0,
-    engagement: baseWeightedEngagementScore = 0
-  } = scoreDetails.breakdown;
-
-  // Apply multiplier to get actual contribution to total score
-  const weightedDonationScore = baseWeightedDonationScore * multiplier;
-  const weightedVolunteerScore = baseWeightedVolunteerScore * multiplier;
-  const weightedFundraisingScore = baseWeightedFundraisingScore * multiplier;
-  const weightedConsistencyScore = baseWeightedConsistencyScore * multiplier;
-  const weightedEngagementScore = baseWeightedEngagementScore * multiplier;
-
-  // Also get raw scores for tooltip display
-  const { 
-    donationScore = 0, 
-    volunteerScore = 0, 
+  // Raw (unweighted) scores for fallbacks and tooltip display
+  const {
+    donationScore = 0,
+    volunteerScore = 0,
     fundraisingScore = 0,
     consistencyScore = 0,
     engagementScore = 0
   } = scoreDetails;
+
+  // Safely pick values from breakdown allowing backend key variations and fallback to raw scores
+  const breakdown = scoreDetails.breakdown || {};
+  const toFinite = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
+
+  // Accept common alias keys, then fallback to raw scores if breakdown is missing/zero while raw > 0
+  const baseDonation = (() => {
+    const v = toFinite(breakdown.donations ?? breakdown.donation ?? breakdown.giving);
+    return v > 0 ? v : (donationScore || 0);
+  })();
+  const baseVolunteer = (() => {
+    const v = toFinite(breakdown.volunteering ?? breakdown.volunteer ?? breakdown.hours);
+    return v > 0 ? v : (volunteerScore || 0);
+  })();
+  const baseFundraising = (() => {
+    const v = toFinite(breakdown.fundraising ?? breakdown.raising ?? breakdown.campaigns);
+    return v > 0 ? v : (fundraisingScore || 0);
+  })();
+  const baseConsistency = (() => {
+    const v = toFinite(breakdown.consistency ?? breakdown.streaks);
+    return v > 0 ? v : (consistencyScore || 0);
+  })();
+  const baseEngagement = (() => {
+    const v = toFinite(breakdown.engagement ?? breakdown.participation);
+    return v > 0 ? v : (engagementScore || 0);
+  })();
+
+  // Apply multiplier to match how total score is formed
+  const weightedDonationScore = baseDonation * multiplier;
+  const weightedVolunteerScore = baseVolunteer * multiplier;
+  const weightedFundraisingScore = baseFundraising * multiplier;
+  const weightedConsistencyScore = baseConsistency * multiplier;
+  const weightedEngagementScore = baseEngagement * multiplier;
   
   // Ring configuration with 5 categories using weighted scores
   // Calculate dynamic max scores based on tier progression
@@ -66,13 +83,57 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     'Visionary': 4.0
   }[tier] || 1.0;
   
+  // Compute a dynamic max for Donations to avoid hitting 100% too early
+  const targetFill = 0.85;
+  const roundToStep = (value, step = 50) => Math.ceil(value / step) * step;
+
+  // Donations dynamic max
+  const donationBaselineMax = 600 * tierMultiplier;
+  const dynamicDonationMax = (() => {
+    const needed = weightedDonationScore > 0 ? roundToStep(weightedDonationScore / targetFill, 50) : donationBaselineMax;
+    const upperBound = 2000 * tierMultiplier;
+    return Math.min(Math.max(donationBaselineMax, needed), upperBound);
+  })();
+
+  // Volunteering dynamic max
+  const volunteeringBaselineMax = 400 * tierMultiplier;
+  const dynamicVolunteeringMax = (() => {
+    const needed = weightedVolunteerScore > 0 ? roundToStep(weightedVolunteerScore / targetFill, 50) : volunteeringBaselineMax;
+    const upperBound = 2000 * tierMultiplier;
+    return Math.min(Math.max(volunteeringBaselineMax, needed), upperBound);
+  })();
+
+  // Fundraising dynamic max
+  const fundraisingBaselineMax = 300 * tierMultiplier;
+  const dynamicFundraisingMax = (() => {
+    const needed = weightedFundraisingScore > 0 ? roundToStep(weightedFundraisingScore / targetFill, 50) : fundraisingBaselineMax;
+    const upperBound = 1500 * tierMultiplier;
+    return Math.min(Math.max(fundraisingBaselineMax, needed), upperBound);
+  })();
+
+  // Consistency dynamic max
+  const consistencyBaselineMax = 200 * tierMultiplier;
+  const dynamicConsistencyMax = (() => {
+    const needed = weightedConsistencyScore > 0 ? roundToStep(weightedConsistencyScore / targetFill, 50) : consistencyBaselineMax;
+    const upperBound = 1000 * tierMultiplier;
+    return Math.min(Math.max(consistencyBaselineMax, needed), upperBound);
+  })();
+
+  // Engagement dynamic max
+  const engagementBaselineMax = 150 * tierMultiplier;
+  const dynamicEngagementMax = (() => {
+    const needed = weightedEngagementScore > 0 ? roundToStep(weightedEngagementScore / targetFill, 50) : engagementBaselineMax;
+    const upperBound = 600 * tierMultiplier;
+    return Math.min(Math.max(engagementBaselineMax, needed), upperBound);
+  })();
+
   // Adjusted ring configuration with much tighter spacing for more center room
   const rings = [
     { 
       name: 'Donations',
       score: Math.round(weightedDonationScore),
       rawScore: donationScore,
-      maxScore: 600 * tierMultiplier,
+      maxScore: dynamicDonationMax,
       radius: 140, // Outer ring stays at edge
       strokeWidth: 8, // Thinner stroke
       color: { start: '#4DD0E1', end: '#00ACC1' },
@@ -83,7 +144,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Volunteering',
       score: Math.round(weightedVolunteerScore),
       rawScore: volunteerScore,
-      maxScore: 400 * tierMultiplier,
+      maxScore: dynamicVolunteeringMax,
       radius: 118, // Much tighter spacing
       strokeWidth: 8,
       color: { start: '#66BB6A', end: '#43A047' },
@@ -94,7 +155,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Fundraising',
       score: Math.round(weightedFundraisingScore),
       rawScore: fundraisingScore,
-      maxScore: 300 * tierMultiplier,
+      maxScore: dynamicFundraisingMax,
       radius: 96, // Tighter spacing
       strokeWidth: 8,
       color: { start: '#AB47BC', end: '#8E24AA' },
@@ -105,7 +166,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Consistency',
       score: Math.round(weightedConsistencyScore),
       rawScore: consistencyScore,
-      maxScore: 200 * tierMultiplier,
+      maxScore: dynamicConsistencyMax,
       radius: 74, // Tighter spacing
       strokeWidth: 8,
       color: { start: '#FF7043', end: '#F4511E' },
@@ -116,7 +177,7 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       name: 'Engagement',
       score: Math.round(weightedEngagementScore),
       rawScore: engagementScore,
-      maxScore: 150 * tierMultiplier,
+      maxScore: dynamicEngagementMax,
       radius: 52, // Much more room in center now
       strokeWidth: 8,
       color: { start: '#FFD54F', end: '#FFB300' },

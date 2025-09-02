@@ -247,7 +247,7 @@ const AdminUserManagement = () => {
                           <option value="business">Business</option>
                           <option value="admin">Admin</option>
                         </select>
-                        <span className={`${styles.badge} ${getRoleBadge(user.role).className}`} className="ml-10">
+                        <span className={`${styles.badge} ${getRoleBadge(user.role).className} ml-10`}>
                           {getRoleBadge(user.role).text}
                         </span>
                       </td>
@@ -261,8 +261,8 @@ const AdminUserManagement = () => {
                         <div className={userStyles.tierCell}>
                           <span className={userStyles.tierIcon}>{getTierIcon(user.tier)}</span>
                           <span 
-                            className={userStyles.tierBadge}
-                            data-tier-color={getTierColor(user.tier)} className="bg-tier"
+                            className={`${userStyles.tierBadge} bg-tier`}
+                            data-tier-color={getTierColor(user.tier)}
                           >
                             {user.tier ? user.tier.charAt(0).toUpperCase() + user.tier.slice(1) : 'None'}
                           </span>
@@ -277,7 +277,7 @@ const AdminUserManagement = () => {
                           <option value="active">Active</option>
                           <option value="suspended">Suspended</option>
                         </select>
-                        <span className={`${styles.badge} ${getStatusBadge(user.status).className}`} className="ml-10">
+                        <span className={`${styles.badge} ${getStatusBadge(user.status).className} ml-10`}>
                           {user.status === 'active' ? <FaCheckCircle /> : <FaTimesCircle />}
                           {getStatusBadge(user.status).text}
                         </span>
@@ -286,12 +286,11 @@ const AdminUserManagement = () => {
                         <div className="display-flex gap-10">
                           <button 
                             onClick={() => openScoreModal(user)}
-                            className={`${styles.button} ${styles.primaryButton}`} 
-                            className="font-size-12 p-5px-15px"
+                            className={`${styles.button} ${styles.primaryButton} font-size-12 p-5px-15px`}
                           >
                             <FaEdit /> Edit Score
                           </button>
-                          <button className={`${styles.button} ${styles.primaryButton}`} className="font-size-12 p-5px-15px">
+                          <button className={`${styles.button} ${styles.primaryButton} font-size-12 p-5px-15px`}>
                             View Details
                           </button>
                         </div>
