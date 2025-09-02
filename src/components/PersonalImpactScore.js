@@ -43,6 +43,11 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
   // Safely pick values from breakdown allowing backend key variations and fallback to raw scores
   const breakdown = scoreDetails.breakdown || {};
   const toFinite = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
+  
+  // Debug logging to understand the data structure
+  console.log('PersonalImpactScore - scoreDetails:', scoreDetails);
+  console.log('PersonalImpactScore - breakdown:', breakdown);
+  console.log('PersonalImpactScore - volunteerScore:', volunteerScore);
 
   // Accept common alias keys, then fallback to raw scores if breakdown is missing/zero while raw > 0
   const baseDonation = (() => {
@@ -50,8 +55,28 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
     return v > 0 ? v : (donationScore || 0);
   })();
   const baseVolunteer = (() => {
-    const v = toFinite(breakdown.volunteering ?? breakdown.volunteer ?? breakdown.hours);
-    return v > 0 ? v : (volunteerScore || 0);
+    // Check multiple possible keys for volunteer data
+    const v = toFinite(
+      breakdown.volunteering ?? 
+      breakdown.volunteer ?? 
+      breakdown.volunteerScore ?? 
+      breakdown.hours
+    );
+    
+    // If breakdown doesn't have volunteer data but we have a raw score, use it
+    const finalValue = v > 0 ? v : (volunteerScore || 0);
+    
+    console.log('PersonalImpactScore - baseVolunteer calculation:', {
+      'breakdown.volunteering': breakdown.volunteering,
+      'breakdown.volunteer': breakdown.volunteer,
+      'breakdown.volunteerScore': breakdown.volunteerScore,
+      'breakdown.hours': breakdown.hours,
+      'calculated v': v,
+      'volunteerScore (raw)': volunteerScore,
+      'final baseVolunteer': finalValue
+    });
+    
+    return finalValue;
   })();
   const baseFundraising = (() => {
     const v = toFinite(breakdown.fundraising ?? breakdown.raising ?? breakdown.campaigns);
@@ -72,6 +97,15 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
   const weightedFundraisingScore = baseFundraising * multiplier;
   const weightedConsistencyScore = baseConsistency * multiplier;
   const weightedEngagementScore = baseEngagement * multiplier;
+  
+  console.log('PersonalImpactScore - Weighted scores:', {
+    weightedDonationScore,
+    weightedVolunteerScore,
+    weightedFundraisingScore,
+    weightedConsistencyScore,
+    weightedEngagementScore,
+    multiplier
+  });
   
   // Ring configuration with 5 categories using weighted scores
   // Calculate dynamic max scores based on tier progression
@@ -149,7 +183,14 @@ const ConcentricRingsVisualization = ({ scoreDetails, totalScore, tier, tierColo
       strokeWidth: 8,
       color: { start: '#66BB6A', end: '#43A047' },
       bgColor: '#E8F5E9',
-      weight: '25%'
+      weight: '25%',
+      // Debug info (will be removed after fixing)
+      debug: {
+        baseVolunteer,
+        weightedVolunteerScore,
+        volunteerScore,
+        dynamicVolunteeringMax
+      }
     },
     { 
       name: 'Fundraising',

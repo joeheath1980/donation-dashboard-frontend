@@ -452,6 +452,15 @@ export const ImpactProvider = ({ children }) => {
       
       if (scoreRes.data && scoreRes.data.impactScore !== undefined) {
         console.log('Updated impact score from backend:', scoreRes.data);
+        console.log('Backend breakdown object:', scoreRes.data.breakdown);
+        console.log('Backend scoreBreakdown object:', scoreRes.data.scoreBreakdown);
+        
+        // Ensure breakdown includes volunteering data
+        const breakdown = scoreRes.data.breakdown || {};
+        if (!breakdown.volunteering && scoreRes.data.scoreBreakdown?.volunteerScore) {
+          breakdown.volunteering = scoreRes.data.scoreBreakdown.volunteerScore;
+        }
+        
         setImpactScore(scoreRes.data.impactScore);
         setScoreDetails({
           totalScore: scoreRes.data.impactScore,
@@ -460,7 +469,7 @@ export const ImpactProvider = ({ children }) => {
           fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
           consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
           engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
-          breakdown: scoreRes.data.breakdown || {},
+          breakdown: breakdown,
           multiplier: scoreRes.data.multiplier || 1.0
         });
         
@@ -527,6 +536,15 @@ export const ImpactProvider = ({ children }) => {
       // Use the backend-calculated score instead of local calculation
       if (scoreRes.data && scoreRes.data.impactScore !== undefined) {
         console.log('Using backend-calculated impact score:', scoreRes.data);
+        console.log('Backend breakdown object:', scoreRes.data.breakdown);
+        console.log('Backend scoreBreakdown object:', scoreRes.data.scoreBreakdown);
+        
+        // Ensure breakdown includes volunteering data
+        const breakdown = scoreRes.data.breakdown || {};
+        if (!breakdown.volunteering && scoreRes.data.scoreBreakdown?.volunteerScore) {
+          breakdown.volunteering = scoreRes.data.scoreBreakdown.volunteerScore;
+        }
+        
         setImpactScore(scoreRes.data.impactScore);
         setScoreDetails({
           totalScore: scoreRes.data.impactScore,
@@ -535,7 +553,7 @@ export const ImpactProvider = ({ children }) => {
           fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
           consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
           engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
-          breakdown: scoreRes.data.breakdown || {},
+          breakdown: breakdown,
           multiplier: scoreRes.data.multiplier || 1.0
         });
         
