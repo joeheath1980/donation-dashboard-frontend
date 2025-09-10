@@ -560,6 +560,15 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
           return;
         }
 
+    // Proactively destroy any Chart.js instance tied to this canvas
+    try {
+      const existing = Chart.getChart(chartRef.current);
+      if (existing) {
+        console.log('Chart.getChart found existing chart, destroying');
+        existing.destroy();
+      }
+    } catch (e) {}
+
     // Check for any existing chart on this canvas
     const existingChartId = chartRef.current.getAttribute('data-chart-id');
     if (existingChartId && window.__chartInstances.has(existingChartId)) {
@@ -683,7 +692,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
             if (point.isDense) {
               return COLORS.DENSE_SIMPLE;
             }
-            const activity = point.activities[0];
+            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
             switch (activity.type) {
               case 'donation': return COLORS.REGULAR_DONATION_SIMPLE;
               case 'oneOff': return COLORS.ONE_OFF_DONATION_SIMPLE;
@@ -702,7 +711,8 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
             // Milestone points are larger
             if (point.isDense) return 10;
             // Special activities get medium size
-            const activity = point.activities[0];
+            const activity = (point.activities && point.activities[0]);
+            if (!activity) return 4;
             if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
               return 8;
             }
@@ -711,7 +721,8 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
           pointHoverRadius: function(context) {
             const point = dataPoints[context.dataIndex];
             if (point.isDense) return 12;
-            const activity = point.activities[0];
+            const activity = (point.activities && point.activities[0]);
+            if (!activity) return 6;
             if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
               return 10;
             }
@@ -723,7 +734,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
             if (point.isDense) {
               return '#ff6b3d';
             }
-            const activity = point.activities[0];
+            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
             switch (activity.type) {
               case 'donation': return '#4ebfa6';
               case 'oneOff': return '#1d7f6b';
@@ -735,7 +746,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
           pointStyle: function(context) {
             const point = dataPoints[context.dataIndex];
             if (point.isDense) return 'rectRot';
-            const activity = point.activities[0];
+            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
             // Different shapes for different milestone types
             if (activity.type === 'fundraisingCampaign') return 'triangle';
             if (activity.type === 'volunteer') return 'rect';
@@ -794,7 +805,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
               if (tooltipModel.body) {
                 const titleLines = tooltipModel.title || [];
                 const dataPoint = dataPoints[context.tooltip.dataPoints[0].dataIndex];
-                const activities = dataPoint.activities;
+                const activities = (dataPoint && Array.isArray(dataPoint.activities)) ? dataPoint.activities : [];
 
                 let activitiesHtml = activities.map(activity => `
                   <div class="${styles.tooltipRow}">
@@ -820,6 +831,14 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
                     </span>
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
+                if (activities.length === 0) {
+                  activitiesHtml = `
+                    <div class="${styles.tooltipRow}">
+                      <span class="${styles.tooltipLabel}">Note:</span>
+                      <span class="${styles.tooltipValue}">Reconciled to current total</span>
+                    </div>
+                  `;
+                }
 
                 // Calculate previous total for clarity
                 const currentIndex = context.tooltip.dataPoints[0].dataIndex;
@@ -860,7 +879,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
               
               // Get activities from the data point
               const dataPoint = tooltipModel.dataPoints ? dataPoints[tooltipModel.dataPoints[0].dataIndex] : null;
-              const activities = dataPoint ? dataPoint.activities : [];
+              const activities = dataPoint && Array.isArray(dataPoint.activities) ? dataPoint.activities : [];
               
               // Calculate tooltip dimensions (estimate based on content)
               const tooltipWidth = 320; // max-width from CSS

@@ -292,31 +292,22 @@
   bottom: -40px;
 }
 
+/* Reset dot buttons to avoid global button styles and pseudo glyphs */
 :global(.slick-dots li button) {
-  width: 10px;
-  height: 10px;
+  border: 0;
   padding: 0;
-}
-
-:global(.slick-dots li button:before) {
-  font-size: 10px;
-  line-height: 10px;
+  margin: 0;
   width: 10px;
   height: 10px;
-  color: var(--border-light);
-  opacity: 1;
-  transition: var(--transition-standard);
+  border-radius: 9999px;
+  background: #E6EAED;
+  font-size: 0;
+  line-height: 0;
+  display: inline-block;
 }
 
-:global(.slick-dots li button:hover:before) {
-  color: var(--primary-light);
-}
-
-:global(.slick-dots li.slick-active button:before) {
-  color: var(--primary-color);
-  opacity: 1;
-  transform: scale(1.2);
-}
+:global(.slick-dots li button:before) { content: none !important; }
+:global(.slick-dots li.slick-active button) { background: #0EA5A2; }
 
 :global(.slick-slide > div) {
   margin: 0 15px;
@@ -327,6 +318,9 @@
   margin: 0 -15px;
   overflow: hidden;
 }
+
+/* Allow arrows to render outside the track if needed */
+:global(.slick-slider) { overflow: visible; }
 
 :global(.slick-track) {
   display: flex;
@@ -409,9 +403,20 @@
   }
 }
 /* Dots → slate-outlined pills */
+/* Use simple circular dots with spacing */
 :global(.slick-dots) { bottom: -26px; }
 :global(.slick-dots li) { margin: 0 6px; }
-:global(.slick-dots li button) {
-  width: 18px; height: 8px; border-radius: 999px; border: 1px solid rgba(15,23,42,0.25); background: transparent;
+
+/* Remove Slick’s default arrow pseudo-icons to avoid double chevrons */
+:global(.slick-prev::before),
+:global(.slick-next::before) { content: none !important; }
+
+/* Focus styles for accessibility */
+.slickArrow:focus-visible,
+:global(.slick-dots li button:focus-visible) {
+  outline: 3px solid #0EA5A2;
+  outline-offset: 2px;
 }
-:global(.slick-dots li.slick-active button) { width: 26px; background: rgba(15,23,42,0.25); }
+
+/* Let the carousel wrapper allow arrow overflow if clipped by parent */
+.carouselWrapper { overflow: visible; }

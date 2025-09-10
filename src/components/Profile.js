@@ -440,18 +440,6 @@ function Profile() {
           {/* Add skip button on right side */}
           <div className={styles.projectsContainer}>
             <GlobalGivingProjects />
-            <button 
-              type="button"
-              aria-label="Skip to next projects"
-              className={`${styles.skipProjectsBtn} iconButton`}
-              onClick={() => {
-                // Trigger next set of projects
-                const event = new CustomEvent('skipProjects');
-                window.dispatchEvent(event);
-              }}
-              title="Skip to next projects">
-              <FaChevronRight />
-            </button>
           </div>
         </section>
         
