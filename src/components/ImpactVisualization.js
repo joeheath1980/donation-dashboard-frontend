@@ -53,8 +53,10 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   }).totalScore;
 
   // Combine all activities into a single array with dates
-  // Align volunteer handling with backend (temporary until backend status is aligned): include only approved
+  // Include volunteer activities - check for 'approved' status but fall back to including all if none are approved
   const approvedVols = (volunteerActivities || []).filter(v => (v.status || '').toLowerCase() === 'approved');
+  const volunteerData = approvedVols.length > 0 ? approvedVols : (volunteerActivities || []);
+  console.log('Volunteer activities:', { total: volunteerActivities?.length || 0, approved: approvedVols.length, using: volunteerData.length });
 
   const allActivities = [
     ...donations.map(d => ({
@@ -72,7 +74,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       amount: Number(d.amount) || 0,
       displayAmount: hideAmounts ? 'Contribution' : `$${Number(d.amount) || 0}`
     })),
-    ...approvedVols.map(v => ({
+    ...volunteerData.map(v => ({
       ...v,
       type: 'volunteer',
       date: new Date(v.date || v.startDate),
@@ -351,17 +353,27 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
     const fetchImpactHistory = async () => {
       try {
         const api = apiServices.client;
+        console.log('Fetching impact history from backend...');
         const { data } = await api.get(`/api/users/impact-score/history`);
+        console.log('Impact history response:', data);
+        
         if (data && Array.isArray(data.timeline)) {
-          console.log('Impact history fetched:', data);
-          setImpactHistory(data.timeline);
+          console.log(`Impact history fetched: ${data.timeline.length} entries`);
+          // Check if timeline has actual data or just zeros
+          const hasNonZeroData = data.timeline.some(entry => entry.totalScore > 0);
+          if (!hasNonZeroData && data.timeline.length > 0) {
+            console.warn('Timeline has only zero values, will use fallback');
+            setImpactHistory(null);
+          } else {
+            setImpactHistory(data.timeline);
+          }
         } else {
-          console.warn('Impact history response missing timeline array');
-          setImpactHistory([]);
+          console.warn('Impact history response missing timeline array, using fallback');
+          setImpactHistory(null);
         }
       } catch (error) {
-        console.error('Error fetching impact history:', error);
-        setImpactHistory([]);
+        console.error('Error fetching impact history, will use fallback:', error.message || error);
+        setImpactHistory(null);
       }
     };
     
@@ -400,7 +412,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
     console.log('Recalculating data points for period:', timePeriod);
     
     // If we have impact history from the API, use that instead
-    if (impactHistory && impactHistory.length > 0) {
+    if (impactHistory && Array.isArray(impactHistory) && impactHistory.length > 0) {
       console.log('Using impact history from API:', impactHistory);
       
       // Transform the API timeline data into our chart format
