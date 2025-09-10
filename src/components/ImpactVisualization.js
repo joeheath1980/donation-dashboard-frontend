@@ -284,36 +284,39 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       };
     });
     
-    // Sum of post-multiplier deltas for this date
-    const dayPointsAddedPost = activitiesWithDetails.reduce((s, a) => s + (Number(a.pointsEarned) || 0), 0);
-    
-    cumulativeY = cumulativeY + dayPointsAddedPost;
+    // Compute actual day delta from full model (captures consistency/engagement bonuses)
+    const previousPostTotal = prevScoreResult.totalScore || 0;
+    const dayPostDelta = (scoreUpToDate || 0) - previousPostTotal;
+
+    // Sum of post-multiplier deltas we attributed to activities
+    const sumActivitiesPost = activitiesWithDetails.reduce((s, a) => s + (Number(a.pointsEarned) || 0), 0);
+
+    // If there is a residual (e.g., consistency bonuses), add a synthetic bonus item
+    const residual = dayPostDelta - sumActivitiesPost;
+    if (Math.round(residual) !== 0) {
+      activitiesWithDetails.push({
+        type: 'bonus',
+        details: 'Consistency/engagement adjustments',
+        recipient: 'System',
+        pointsEarned: Math.round(residual),
+        rawPoints: Math.abs(Math.round(residual)),
+        isDecayed: false
+      });
+    }
+
+    cumulativeY = cumulativeY + dayPostDelta;
     processedData.push({
       x: currentDate,
       y: cumulativeY,
       activities: activitiesWithDetails,
-      // Use the sum of per-activity post-multiplier deltas so single-activity days match exactly
-      pointsEarned: dayPointsAddedPost,
+      // Points added equals the actual day delta (post-multiplier)
+      pointsEarned: dayPostDelta,
       isDense: activities.length > 1
     });
   });
 
-  // Optionally append a final "current" point to reconcile to the stored total score
-  if (processedData.length > 0) {
-    const lastY = processedData[processedData.length - 1].y;
-    const finalDelta = Math.round(totalScore) - Math.round(lastY);
-    if (finalDelta !== 0) {
-      const lastDate = processedData[processedData.length - 1].x;
-      const finalDate = new Date(Math.max(Date.now(), lastDate.getTime() + 1000));
-      processedData.push({
-        x: finalDate,
-        y: Math.round(totalScore),
-        activities: [],
-        pointsEarned: finalDelta,
-        isDense: false
-      });
-    }
-  } else if (totalScore > 0) {
+  // If no processed data but there is a score, add a single point for today
+  if (processedData.length === 0 && totalScore > 0) {
     // If there's a score but no activities, add a single point for today
     processedData.push({
       x: new Date(),
@@ -698,6 +701,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
               case 'oneOff': return COLORS.ONE_OFF_DONATION_SIMPLE;
               case 'fundraisingCampaign': return COLORS.FUNDRAISING_CAMPAIGN_SIMPLE;
               case 'volunteer': return COLORS.VOLUNTEER_SIMPLE;
+              case 'bonus': return '#64748b'; // slate
               default: return COLORS.REGULAR_DONATION_SIMPLE;
             }
           },
@@ -740,6 +744,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
               case 'oneOff': return '#1d7f6b';
               case 'fundraisingCampaign': return '#8360cb';
               case 'volunteer': return '#ef6f40';
+              case 'bonus': return '#64748b';
               default: return '#4ebfa6';
             }
           },
