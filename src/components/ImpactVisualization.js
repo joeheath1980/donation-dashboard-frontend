@@ -348,8 +348,15 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
   const isMountedRef = useRef(true);
   const chartIdRef = useRef(null);
   
-  // Fetch impact history from the backend (authoritative)
+  // Fetch impact history from the backend (authoritative) - DISABLED for now
+  // The backend timeline API is returning zeros, so we'll use local calculation
   useEffect(() => {
+    // Temporarily disable backend timeline fetch since it's returning zeros
+    // and causing the chart to show no data
+    console.log('Backend timeline API disabled - using local calculation from donations/activities');
+    setImpactHistory(null); // Force use of local processData
+    
+    /* Original code - re-enable when backend is fixed:
     const fetchImpactHistory = async () => {
       try {
         const api = apiServices.client;
@@ -378,6 +385,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
     };
     
     fetchImpactHistory();
+    */
   }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
 
   // Track mounted state
