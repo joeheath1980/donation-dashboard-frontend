@@ -21,10 +21,13 @@ const defaultTiers = [
   { name: 'Giver', minScore: 0, icon: FaHeart, color: '#E74C3C' }
 ];
 
-const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers = defaultTiers }) => {
+const TierProgressModal = ({ currentTier, impactScore, pointsToNextTier: providedPointsToNextTier, preTierScore, hideTitle = false, tiers = defaultTiers }) => {
   const currentTierIndex = tiers.findIndex(tier => tier.name === currentTier);
   const nextTier = tiers[currentTierIndex - 1]; // Note: tiers are in descending order
-  const pointsToNextTier = nextTier ? nextTier.minScore - impactScore : 0;
+  // Prefer caller-provided pointsToNextTier (computed from PRE-multiplier). Fallback to using score.
+  const pointsToNextTier = typeof providedPointsToNextTier === 'number'
+    ? providedPointsToNextTier
+    : (nextTier ? nextTier.minScore - (preTierScore ?? impactScore) : 0);
 
   return (
     <div className={`${styles.modalContent} card`}>
@@ -40,13 +43,14 @@ const TierProgressModal = ({ currentTier, impactScore, hideTitle = false, tiers 
           const isAchieved = index >= currentTierIndex;
           const isNext = index === currentTierIndex - 1;
           
-          // Calculate progress for the next tier
+          // Calculate progress for the next tier based on PRE-multiplier score when available
           let progressPercentage = 0;
           if (isAchieved) {
             progressPercentage = 100;
           } else if (isNext) {
             const prevTier = tiers[index + 1];
-            progressPercentage = ((impactScore - prevTier.minScore) / (tier.minScore - prevTier.minScore)) * 100;
+            const basisScore = preTierScore ?? impactScore;
+            progressPercentage = ((basisScore - prevTier.minScore) / (tier.minScore - prevTier.minScore)) * 100;
           }
           
           return (

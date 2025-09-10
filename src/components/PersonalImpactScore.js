@@ -418,9 +418,15 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   const currentTierThreshold = currentTierRange.min;
   const tierSpan = nextTierThreshold - currentTierThreshold;
   
-  // Calculate how far through the current tier we are
-  const pointsInCurrentTier = score - currentTierThreshold;
-  const percentage = tier === 'Visionary' ? 100 : Math.min(100, Math.max(0, (pointsInCurrentTier / tierSpan) * 100));
+  // Calculate how far through the current tier we are based on PRE-multiplier progress
+  // Use pointsToNextTier relative to the current tier span; clamp only the percent
+  const percentage = tier === 'Visionary'
+    ? 100
+    : (() => {
+        const span = Math.max(1, tierSpan);
+        const pct = 100 * (1 - Math.max(0, Math.min(pointsToNextTier, span)) / span);
+        return Math.min(100, Math.max(0, pct));
+      })();
   
   const radius = 150;
   const strokeWidth = 22; // Reduced from 30

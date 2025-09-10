@@ -352,6 +352,8 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
           <TierProgressModal 
             currentTier={tier} 
             impactScore={impactScore}
+            pointsToNextTier={pointsToNextTier}
+            preTierScore={scoreDetails?.preMultiplierTotal}
             hideTitle={true}
             tiers={tiers}
           />
