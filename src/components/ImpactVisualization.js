@@ -112,6 +112,21 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   const processedData = [];
   const sortedDates = Object.keys(groupedActivities).sort();
   
+  // Helper to sum weighted pre-multiplier total from breakdown
+  const sumPreFromBreakdown = (scoreResult) => {
+    if (!scoreResult || !scoreResult.breakdown) return 0;
+    return Object.values(scoreResult.breakdown).reduce((s, v) => s + (Number(v) || 0), 0);
+  };
+
+  // Helper to get tier multiplier from pre-multiplier total
+  const getTierMultiplier = (pre) => {
+    if (pre >= 5000) return 1.5;      // Visionary
+    if (pre >= 2500) return 1.3;      // Champion
+    if (pre >= 1000) return 1.2;      // Philanthropist
+    if (pre >= 300) return 1.1;       // Altruist
+    return 1.0;                       // Giver
+  };
+
   // For each date, calculate the score up to that point
   sortedDates.forEach((dateKey, index) => {
     const currentDate = new Date(dateKey);
@@ -119,6 +134,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     
     // Get all activities up to and including this date
     const activitiesUpToDate = allActivities.filter(a => a.date <= currentDate);
+    const activitiesBeforeDate = allActivities.filter(a => a.date < currentDate);
     
     // Group them by type for the new scoring system
     const donationsUpToDate = activitiesUpToDate.filter(a => a.type === 'donation');
@@ -134,12 +150,23 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       fundraisingCampaigns: fundraisingUpToDate
     }).totalScore;
     
+    // Compute pre-multiplier running total up to the previous date (for post-multiplier delta attribution)
+    const prevScoreResult = calculateComplexImpactScore({
+      regularDonations: activitiesBeforeDate.filter(a => a.type === 'donation'),
+      oneOffDonations: activitiesBeforeDate.filter(a => a.type === 'oneOff'),
+      volunteeringActivities: activitiesBeforeDate.filter(a => a.type === 'volunteer'),
+      fundraisingCampaigns: activitiesBeforeDate.filter(a => a.type === 'fundraisingCampaign')
+    });
+    let runningPre = Math.round(sumPreFromBreakdown(prevScoreResult));
+    let runningPost = Math.round(runningPre * getTierMultiplier(runningPre));
+    
     // Calculate points for each individual activity
     const activitiesWithDetails = activities.map(activity => {
       // Calculate score with just this single activity
       let singleActivityScore = 0;
       let rawScore = 0;
       let decayFactor = 1;
+      let singlePreWeighted = 0;
       
       if (activity.type === 'donation' || activity.type === 'oneOff') {
         const tempScore = calculateComplexImpactScore({
@@ -149,6 +176,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: []
         });
         singleActivityScore = tempScore.donationScore;
+        singlePreWeighted = sumPreFromBreakdown(tempScore);
         
         // Calculate raw score without decay for display
         const amount = activity.amount || 0;
@@ -178,6 +206,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: []
         });
         singleActivityScore = tempScore.volunteerScore;
+        singlePreWeighted = sumPreFromBreakdown(tempScore);
         
         // Calculate raw score
         const hours = activity.hours || 0;
@@ -194,6 +223,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           fundraisingCampaigns: [activity]
         });
         singleActivityScore = tempScore.fundraisingScore;
+        singlePreWeighted = sumPreFromBreakdown(tempScore);
         
         // Calculate raw score for display
         const raisedAmount = activity.amountRaised || activity.raisedAmount || activity.amount || 0;
@@ -214,6 +244,18 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         decayFactor = rawScore > 0 ? singleActivityScore / rawScore : 1;
       }
       
+      // Compute points added to stored score (post-multiplier) attributable to this single activity
+      const preAfter = runningPre + Math.round(singlePreWeighted);
+      const mBefore = getTierMultiplier(runningPre);
+      const mAfter = getTierMultiplier(preAfter);
+      const postBefore = Math.round(runningPre * mBefore);
+      const postAfter = Math.round(preAfter * mAfter);
+      const pointsAddedPost = postAfter - postBefore;
+
+      // advance running pre/post for subsequent activities on same date
+      runningPre = preAfter;
+      runningPost = postAfter;
+
       // Debug log
       if (activity.amount >= 100 || activity.hours >= 10 || activity.type === 'fundraisingCampaign') {
         console.log('Activity scoring:', {
@@ -224,6 +266,8 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           rawScore: Math.round(rawScore),
           decayFactor: decayFactor.toFixed(2),
           finalScore: singleActivityScore,
+          singlePreWeighted: Math.round(singlePreWeighted),
+          pointsAddedPost,
           campaign: activity.type === 'fundraisingCampaign' ? activity.title || activity.name : undefined
         });
       }
@@ -232,17 +276,22 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         type: activity.type,
         details: activity.displayAmount,
         recipient: activity.organization || activity.charity || activity.charityName || 'Unknown',
-        pointsEarned: singleActivityScore,
+        // Display the actual post-multiplier delta so it matches the "Points Added" and the total change
+        pointsEarned: pointsAddedPost,
         rawPoints: Math.round(rawScore),
         isDecayed: decayFactor < 0.95
       };
     });
     
+    // Sum of post-multiplier deltas for this date
+    const dayPointsAddedPost = activitiesWithDetails.reduce((s, a) => s + (Number(a.pointsEarned) || 0), 0);
+    
     processedData.push({
       x: currentDate,
       y: scoreUpToDate,
       activities: activitiesWithDetails,
-      pointsEarned: index > 0 ? scoreUpToDate - processedData[index - 1].y : scoreUpToDate,
+      // Use the sum of per-activity post-multiplier deltas so single-activity days match exactly
+      pointsEarned: dayPointsAddedPost,
       isDense: activities.length > 1
     });
   });
@@ -259,11 +308,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       processedData.forEach(point => {
         point.y = Math.round(point.y * scaleFactor);
       });
-      
-      // Recalculate pointsEarned after scaling to ensure tooltip accuracy
-      processedData.forEach((point, index) => {
-        point.pointsEarned = index > 0 ? point.y - processedData[index - 1].y : point.y;
-      });
+      // Do NOT overwrite per-activity summed deltas; leave pointsEarned as computed above
     }
   }
 
