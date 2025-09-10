@@ -8,6 +8,7 @@ import { sanitizeHTML, sanitizeTooltipData } from '../utils/sanitizer';
 import styles from './ImpactVisualization.module.css';
 import './SharedStyles.css';
 import './ImpactVisualization.css';
+import apiServices from '../services/api.service';
 
 // Global chart instances tracking
 if (!window.__chartInstances) {
@@ -52,6 +53,9 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   }).totalScore;
 
   // Combine all activities into a single array with dates
+  // Align volunteer handling with backend (temporary until backend status is aligned): include only approved
+  const approvedVols = (volunteerActivities || []).filter(v => (v.status || '').toLowerCase() === 'approved');
+
   const allActivities = [
     ...donations.map(d => ({
       ...d,
@@ -68,7 +72,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       amount: Number(d.amount) || 0,
       displayAmount: hideAmounts ? 'Contribution' : `$${Number(d.amount) || 0}`
     })),
-    ...(volunteerActivities || []).map(v => ({
+    ...approvedVols.map(v => ({
       ...v,
       type: 'volunteer',
       date: new Date(v.date || v.startDate),
@@ -342,33 +346,27 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
   const isMountedRef = useRef(true);
   const chartIdRef = useRef(null);
   
-  // Fetch impact history from the new endpoint
+  // Fetch impact history from the backend (authoritative)
   useEffect(() => {
     const fetchImpactHistory = async () => {
-      if (!token) return;
-      
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/impact-score/history`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
+        const api = apiServices.client;
+        const { data } = await api.get(`/api/users/impact-score/history`);
+        if (data && Array.isArray(data.timeline)) {
           console.log('Impact history fetched:', data);
           setImpactHistory(data.timeline);
         } else {
-          console.error('Failed to fetch impact history:', response.status);
+          console.warn('Impact history response missing timeline array');
+          setImpactHistory([]);
         }
       } catch (error) {
         console.error('Error fetching impact history:', error);
+        setImpactHistory([]);
       }
     };
     
     fetchImpactHistory();
-  }, [token, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
+  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
 
   // Track mounted state
   useEffect(() => {
