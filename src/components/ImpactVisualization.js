@@ -337,7 +337,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
 }
 
 function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
-  const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore } = useContext(ImpactContext);
+  const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore, setImpactScore } = useContext(ImpactContext);
   const { token } = useContext(AuthContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
   const [isVisible, setIsVisible] = useState(false);
@@ -501,6 +501,19 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
     console.log('Chart Y values:', points.map(p => p.y));
     return points;
   }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore, hideAmounts]);
+
+  // Keep the ring score in sync with the visualization final total
+  useEffect(() => {
+    if (!dataPoints || dataPoints.length === 0) return;
+    const latestTotal = dataPoints[dataPoints.length - 1].y;
+    if (Number.isFinite(latestTotal) && Math.abs((impactScore || 0) - latestTotal) > 0) {
+      try {
+        setImpactScore(latestTotal);
+      } catch (e) {
+        console.warn('Failed to sync impact score from visualization', e);
+      }
+    }
+  }, [dataPoints, impactScore, setImpactScore]);
 
   // Set up intersection observer to detect visibility with a safe fallback
   useEffect(() => {
