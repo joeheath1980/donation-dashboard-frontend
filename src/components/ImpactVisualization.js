@@ -313,6 +313,15 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         isDense: false
       });
     }
+  } else if (totalScore > 0) {
+    // If there's a score but no activities, add a single point for today
+    processedData.push({
+      x: new Date(),
+      y: Math.round(totalScore),
+      activities: [],
+      pointsEarned: Math.round(totalScore),
+      isDense: false
+    });
   }
 
   return processedData;
