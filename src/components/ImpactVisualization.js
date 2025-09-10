@@ -127,7 +127,8 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     return 1.0;                       // Giver
   };
 
-  // For each date, calculate the score up to that point
+  // For each date, calculate deltas and build a cumulative timeline that matches per-activity deltas
+  let cumulativeY = 0;
   sortedDates.forEach((dateKey, index) => {
     const currentDate = new Date(dateKey);
     const activities = groupedActivities[dateKey];
@@ -286,9 +287,10 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     // Sum of post-multiplier deltas for this date
     const dayPointsAddedPost = activitiesWithDetails.reduce((s, a) => s + (Number(a.pointsEarned) || 0), 0);
     
+    cumulativeY = cumulativeY + dayPointsAddedPost;
     processedData.push({
       x: currentDate,
-      y: scoreUpToDate,
+      y: cumulativeY,
       activities: activitiesWithDetails,
       // Use the sum of per-activity post-multiplier deltas so single-activity days match exactly
       pointsEarned: dayPointsAddedPost,
@@ -296,19 +298,20 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     });
   });
 
-  // If we have processed data, scale all points proportionally to match the actual total score
+  // Optionally append a final "current" point to reconcile to the stored total score
   if (processedData.length > 0) {
-    const lastCalculatedScore = processedData[processedData.length - 1].y;
-    
-    // Only scale if there's a significant difference (more than 1%)
-    if (Math.abs(lastCalculatedScore - totalScore) > totalScore * 0.01) {
-      const scaleFactor = totalScore / lastCalculatedScore;
-      
-      // Scale all points proportionally to maintain the shape of the graph
-      processedData.forEach(point => {
-        point.y = Math.round(point.y * scaleFactor);
+    const lastY = processedData[processedData.length - 1].y;
+    const finalDelta = Math.round(totalScore) - Math.round(lastY);
+    if (finalDelta !== 0) {
+      const lastDate = processedData[processedData.length - 1].x;
+      const finalDate = new Date(Math.max(Date.now(), lastDate.getTime() + 1000));
+      processedData.push({
+        x: finalDate,
+        y: Math.round(totalScore),
+        activities: [],
+        pointsEarned: finalDelta,
+        isDense: false
       });
-      // Do NOT overwrite per-activity summed deltas; leave pointsEarned as computed above
     }
   }
 
