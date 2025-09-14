@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Do-Nation Beta Tester Guide</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 860px; margin: 0 auto; padding: 24px; }
+    h1, h2 { color: #2c3e50; }
+    ul { padding-left: 20px; }
+    li { margin: 6px 0; }
+    .meta { color: #666; margin-top: -10px; margin-bottom: 20px; }
+    .button { display: inline-block; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; }
+  </style>
+  </head>
+<body>
+  <h1>Beta Tester Guide</h1>
+  <p class="meta">Last updated: 26 March 2025</p>
+
+  <h2>1) Getting Started</h2>
+  <ul>
+    <li>Create an account (Google/Microsoft sign‑in supported).</li>
+    <li>Read and accept the Beta Agreement, Terms, and Privacy Policy.</li>
+    <li>Verify your email if prompted.</li>
+  </ul>
+
+  <h2>2) Email Forwarding (Optional)</h2>
+  <p>Forward donation receipts from Gmail/Outlook to enable automatic tracking. You can also use demo data to explore features.</p>
+
+  <h2>3) Explore Key Features</h2>
+  <ul>
+    <li>Dashboard: Impact Score, category breakdown</li>
+    <li>Matching: Browse opportunities and preview matches</li>
+    <li>History: Donation records and receipts</li>
+    <li>Perks: Tier, benefits, events</li>
+    <li>Privacy: Control profile visibility</li>
+  </ul>
+
+  <h2>4) Known Beta Limitations</h2>
+  <ul>
+    <li>Features may change; bugs and UI rough edges expected</li>
+    <li>Processing time for forwarded emails may be a few minutes</li>
+    <li>Some integrations/social features are placeholders</li>
+  </ul>
+
+  <h2>5) Report Issues / Suggest Features</h2>
+  <p>Use our Google Form to submit issues with steps to reproduce and expected vs actual behavior.</p>
+  <p><a class="button" href="#" onclick="window.open(getBugUrl(),'_blank','noopener');return false;">Open Bug Report Form</a></p>
+  <script>
+    function getBugUrl(){
+      return (window?.APP_LINKS_BUG_FORM_URL) || 'mailto:joeheath@do-nation.space?subject=Beta%20Bug%20Report';
+    }
+  </script>
+  <p>Severity quick reference:</p>
+  <ul>
+    <li>S0: Critical outage or data loss</li>
+    <li>S1: Major breakage of core functionality</li>
+    <li>S2: Minor bug with workaround</li>
+    <li>S3: Enhancement/idea</li>
+  </ul>
+
+  <h2>6) Support</h2>
+  <p>Email: <a href="mailto:joeheath@do-nation.space">joeheath@do-nation.space</a></p>
+
+  <h2>7) Privacy & Data</h2>
+  <ul>
+    <li>Only emails you explicitly forward/authorize are processed.</li>
+    <li>Adjust visibility in Privacy Settings; request deletion via email.</li>
+    <li>Google API compliance: Google data only powers user‑facing features; we do not transfer it to third parties except for security, legal compliance, or with explicit consent.</li>
+  </ul>
+
+  <h2>Policies</h2>
+  <ul>
+    <li><a href="/terms_of_service.html" target="_blank" rel="noopener">Terms of Service</a></li>
+    <li><a href="/privacy_policy.html" target="_blank" rel="noopener">Privacy Policy</a></li>
+    <li><a href="/beta_testing_agreement.html" target="_blank" rel="noopener">Beta Testing Agreement</a></li>
+  </ul>
+
+</body>
+</html>
+

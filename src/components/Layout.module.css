@@ -122,6 +122,17 @@
 
 .footer a:hover { color: #71cbb6; }
 
+.footerLinkButton {
+  background: none;
+  border: none;
+  color: #4ab49e;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.footerLinkButton:hover { color: #71cbb6; text-decoration: underline; }
+
 @media (max-width: 768px) {
   .navbarContent {
     flex-wrap: wrap;

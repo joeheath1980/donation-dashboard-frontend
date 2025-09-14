@@ -313,6 +313,43 @@ form {
   text-decoration: underline;
 }
 
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 320px;
+  box-sizing: border-box;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkboxLabel span {
+  flex: 1;
+}
+
+.checkboxLabel a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition-standard);
+}
+
+.checkboxLabel a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
   .signupContainer {
     padding: 32px 24px;

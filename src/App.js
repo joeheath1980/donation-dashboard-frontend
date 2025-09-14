@@ -72,6 +72,7 @@ const TaxSummary = lazy(() => import('./components/BusinessTaxCenter/TaxSummary'
 const TaxReceipts = lazy(() => import('./components/BusinessTaxCenter/TaxReceipts'));
 const TaxExport = lazy(() => import('./components/BusinessTaxCenter/TaxExport'));
 const TaxPlanning = lazy(() => import('./components/BusinessTaxCenter/TaxPlanning'));
+const Help = lazy(() => import('./components/Help'));
 const GoogleAuthCallback = lazy(() => import('./components/GoogleAuthCallback'));
 const MicrosoftAuthCallback = lazy(() => import('./components/MicrosoftAuthCallback'));
 const AuthCallback = lazy(() => import('./components/AuthCallback'));
@@ -322,6 +323,7 @@ function App() {
                 <Route path="/account-settings" element={<ProtectedRoute><Layout><SuspenseWrapper><AccountSettings /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/email-forwarding" element={<ProtectedRoute><Layout><SuspenseWrapper><EmailForwardingSetup /></SuspenseWrapper></Layout></ProtectedRoute>} />
                 <Route path="/your-impact" element={<ProtectedRoute><Layout><SuspenseWrapper><YourImpact /></SuspenseWrapper></Layout></ProtectedRoute>} />
+                <Route path="/help" element={<ProtectedRoute><SuspenseWrapper><Help /></SuspenseWrapper></ProtectedRoute>} />
                 
                 {/* Business routes */}
                 <Route path="/business-dashboard" element={<ProtectedRoute allowedUserTypes={['business']}><Layout><SuspenseWrapper><BusinessDashboard /></SuspenseWrapper></Layout></ProtectedRoute>} />

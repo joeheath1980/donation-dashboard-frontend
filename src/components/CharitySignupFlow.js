@@ -957,7 +957,7 @@ const CharitySignupFlow = () => {
             onChange={handleInputChange}
           />
           <span>
-            I accept the <a href="/terms" target="_blank">Terms and Conditions</a> *
+            I accept the <a href="/terms_of_service.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> *
           </span>
         </label>
         {validation.terms && (
@@ -972,12 +972,14 @@ const CharitySignupFlow = () => {
             onChange={handleInputChange}
           />
           <span>
-            I accept the <a href="/privacy" target="_blank">Privacy Policy</a> *
+            I accept the <a href="/privacy_policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> *
           </span>
         </label>
         {validation.privacy && (
           <span className={styles.errorText}>{validation.privacy}</span>
         )}
+
+        {/* Beta agreement acceptance not required for charity signup in this beta */}
       </div>
     </div>
   );

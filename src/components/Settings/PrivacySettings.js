@@ -308,6 +308,20 @@ const PrivacySettings = () => {
         </button>
       </div>
 
+      {/* Account Deletion */}
+      <div className={styles.section}>
+        <h3>Account Deletion</h3>
+        <p>
+          You can request deletion of your account and associated personal data at any time. During beta, deletion requests are processed manually.
+        </p>
+        <a
+          className={styles.saveButton}
+          href={`mailto:joeheath@do-nation.space?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20account%20and%20associated%20data.`}
+        >
+          Request Account Deletion
+        </a>
+      </div>
+
       <ToastContainer />
     </div>
   );

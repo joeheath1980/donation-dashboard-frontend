@@ -39,6 +39,7 @@ const SignUp = () => {
     password: false,
     confirmPassword: false
   });
+  const [betaAccepted, setBetaAccepted] = useState(false);
 
   const handleBlur = (e) => {
     const { name } = e.target;
@@ -114,10 +115,11 @@ const SignUp = () => {
     const formIsValid = nameValidation.valid && 
                        emailValidation.valid && 
                        passwordValidation.valid && 
-                       confirmPasswordValid;
+                       confirmPasswordValid &&
+                       betaAccepted;
 
     if (!formIsValid) {
-        setError('Please correct the errors in the form');
+        setError(!betaAccepted ? 'You must accept the Beta Testing Participation Agreement' : 'Please correct the errors in the form');
         return;
     }
 
@@ -126,6 +128,7 @@ const SignUp = () => {
       const result = await userSignup(formData.name, formData.email, formData.password);
       // userSignup returns the user object on success
       if (result) {
+        try { localStorage.setItem('betaAgreementAcceptedAt', new Date().toISOString()); } catch {}
         setSuccess('Account created successfully! Redirecting to dashboard...');
         setTimeout(() => {
           navigate('/dashboard');
@@ -288,6 +291,20 @@ const SignUp = () => {
                 {validations.confirmPassword.message}
               </span>
             )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={betaAccepted}
+                onChange={(e) => setBetaAccepted(e.target.checked)}
+                required
+              />
+              <span>
+                I agree to the <a href="/beta_testing_agreement.html" target="_blank" rel="noopener noreferrer">Beta Testing Participation Agreement</a>
+              </span>
+            </label>
           </div>
 
           <button 

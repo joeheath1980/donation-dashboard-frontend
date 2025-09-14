@@ -8,6 +8,11 @@ export const API_CONFIG = {
   WITH_CREDENTIALS: true,
 };
 
+// Application external links
+export const APP_LINKS = {
+  BUG_REPORT_FORM_URL: process.env.REACT_APP_BUG_REPORT_FORM_URL || 'mailto:joeheath@do-nation.space?subject=Beta%20Bug%20Report'
+};
+
 // Security Headers
 export const SECURITY_HEADERS = {
   'Content-Type': 'application/json',
