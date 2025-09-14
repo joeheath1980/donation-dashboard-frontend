@@ -451,6 +451,53 @@
   color: var(--text-secondary);
 }
 
+/* Why Do-Nation Section */
+.whySection {
+  padding: 80px 0;
+  background: var(--light-gray);
+}
+
+.whyGrid {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.whyCard {
+  text-align: center;
+  padding: 32px;
+  background: var(--white);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.whyCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.whyIcon {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+}
+
+.whyCard h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.whyCard p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 /* User Types Section */
 .userTypes {
   padding: 80px 0;
@@ -633,6 +680,45 @@
   color: var(--text-secondary);
 }
 
+/* FAQ Section */
+.faqSection {
+  padding: 80px 0;
+  background: var(--white);
+}
+
+.faqContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.faqItem {
+  padding: 24px;
+  background: var(--light-gray);
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.faqItem:hover {
+  transform: translateY(-2px);
+}
+
+.faqItem h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.faqItem p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 /* Security Section */
 .security {
   padding: 40px 0;
@@ -648,6 +734,7 @@
   align-items: center;
   justify-content: center;
   gap: 24px;
+  text-align: left;
 }
 
 .securityIcon {
@@ -864,6 +951,14 @@
   }
 
   .userTypeCards {
+    grid-template-columns: 1fr;
+  }
+
+  .whyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .faqContainer {
     grid-template-columns: 1fr;
   }
 

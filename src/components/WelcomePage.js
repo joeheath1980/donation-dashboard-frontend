@@ -94,7 +94,7 @@ const WelcomePage = () => {
             <a href="#how-it-works" className={styles.navLink}>How It Works</a>
             {/* Pricing hidden during beta */}
           <Link to="/login" className={styles.loginButton}>Log In</Link>
-            <a href="mailto:joeheath@do-nation.space" className={styles.signupButton}>Request Access</a>
+            <Link to="/signup" className={styles.signupButton}>Request Access</Link>
           </nav>
         </div>
       </header>
@@ -118,10 +118,10 @@ const WelcomePage = () => {
               helps unlock corporate matching, and shows your real impact — all in one place.
             </p>
             <div className={styles.heroActions}>
-              <a href="mailto:joeheath@do-nation.space" className={styles.primaryCta}>
+              <Link to="/signup" className={styles.primaryCta}>
                 Request Beta Access
                 <RiArrowRightLine className={styles.ctaIcon} />
-              </a>
+              </Link>
               <a href="#demo" className={styles.secondaryCta}>
                 See How It Works
               </a>
@@ -175,8 +175,8 @@ const WelcomePage = () => {
             </div>
             <h3 className={styles.featureTitle}>Automated Donation Tracking</h3>
             <p className={styles.featureDescription}>
-              Simply forward receipts to your unique email or connect your inbox. 
-              Our AI extracts details, categorizes giving, and builds your complete history.
+              Simply forward receipts to your unique email or connect your inbox.
+              Our AI extracts details, categorises giving, and builds your complete history.
             </p>
             <ul className={styles.featureList}>
               <li><RiCheckLine /> Email receipt scanning</li>
@@ -222,7 +222,7 @@ const WelcomePage = () => {
             </div>
             <h3 className={styles.featureTitle}>Smart Giving Insights</h3>
             <p className={styles.featureDescription}>
-              AI-powered recommendations help you discover high-impact charities 
+              AI-powered recommendations help you discover high-impact charities
               and optimise your giving strategy.
             </p>
             <ul className={styles.featureList}>
@@ -234,17 +234,35 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section id="stats-section" className={styles.statsSection}>
-        <div className={styles.statsContent}>
-          <h2 className={styles.statsTitle}>Making a real difference, together</h2>
-          <div className={styles.statsGrid}>
-            {stats.map((stat, index) => (
-              <div key={index} className={`${styles.statCard} ${stat.animate ? styles.animate : ''}`}>
-                <div className={styles.statValue}>{stat.value}</div>
-                <div className={styles.statLabel}>{stat.label}</div>
-              </div>
-            ))}
+
+      {/* Why Do-Nation Section */}
+      <section className={styles.whySection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Why choose Do-Nation?</h2>
+          <p className={styles.sectionSubtitle}>
+            We're building the future of charitable giving, one feature at a time
+          </p>
+        </div>
+        <div className={styles.whyGrid}>
+          <div className={styles.whyCard}>
+            <RiMailLine className={styles.whyIcon} />
+            <h3>Effortless Tracking</h3>
+            <p>Just forward receipts to your unique email. We handle the rest automatically.</p>
+          </div>
+          <div className={styles.whyCard}>
+            <RiTrophyLine className={styles.whyIcon} />
+            <h3>Gamified Giving</h3>
+            <p>Earn achievements, track streaks, and celebrate milestones as you give.</p>
+          </div>
+          <div className={styles.whyCard}>
+            <RiPieChartLine className={styles.whyIcon} />
+            <h3>Clear Impact</h3>
+            <p>See exactly where your money goes and the difference you're making.</p>
+          </div>
+          <div className={styles.whyCard}>
+            <RiRefreshLine className={styles.whyIcon} />
+            <h3>Tax Ready</h3>
+            <p>Generate comprehensive reports for Gift Aid claims and tax returns instantly.</p>
           </div>
         </div>
       </section>
@@ -261,7 +279,7 @@ const WelcomePage = () => {
               <RiGroupLine />
             </div>
             <h3>For Individual Donors</h3>
-            <p>Your complete giving command center. Track donations, earn achievements, create campaigns.</p>
+            <p>Your complete giving command centre. Track donations, earn achievements, create campaigns.</p>
             <Link to="/signup" className={styles.userTypeLink}>
               Start Free <RiArrowRightLine />
             </Link>
@@ -299,7 +317,7 @@ const WelcomePage = () => {
         <div className={styles.stepsContainer}>
           <div className={styles.step}>
             <div className={styles.stepNumber}>1</div>
-            <h3>Sign Up Free</h3>
+            <h3><s>Sign Up</s> Free</h3>
             <p>Create your account with Google, Microsoft, or email in seconds</p>
           </div>
           <div className={styles.stepConnector}></div>
@@ -323,16 +341,36 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className={styles.testimonials}>
-        <div className={styles.testimonialCard}>
-          <p className={styles.testimonialText}>
-            "Do-Nation transformed how I think about giving. I discovered I was already donating $3,000 
-            a year – and qualified for another $2,000 in matching!"
-          </p>
-          <div className={styles.testimonialAuthor}>
-            <strong>Sarah M.</strong>
-            <span>Teacher</span>
+
+      {/* FAQ Section */}
+      <section className={styles.faqSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
+        </div>
+        <div className={styles.faqContainer}>
+          <div className={styles.faqItem}>
+            <h3>How does the beta work?</h3>
+            <p>We're currently in private beta, onboarding users gradually to ensure a great experience. Request access and we'll be in touch within 48 hours.</p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>Is it really free?</h3>
+            <p>Yes! During beta, all features are completely free. We're focused on building the best platform for charitable giving.</p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>How do you track my donations?</h3>
+            <p>Simply forward your donation receipts to your unique Do-Nation email address, or connect your inbox for automatic scanning. Our AI extracts the details securely.</p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>Which charities are supported?</h3>
+            <p>We support all registered UK charities and major international organisations. If your favourite charity isn't listed, we'll add it for you.</p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>How does corporate matching work?</h3>
+            <p>We help you discover if your employer offers donation matching, guide you through the application process, and track your matching funds automatically.</p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>Is my data secure?</h3>
+            <p>Absolutely. We use bank-level encryption, never sell your data, and you can delete everything at any time. Read our privacy policy for full details.</p>
           </div>
         </div>
       </section>
@@ -341,8 +379,10 @@ const WelcomePage = () => {
       <section className={styles.security}>
         <div className={styles.securityContent}>
           <RiShieldCheckLine className={styles.securityIcon} />
-          <h3>Your data, protected</h3>
-          <p>Encryption in transit • Privacy-first design • No data selling</p>
+          <div>
+            <h3>Your data, protected</h3>
+            <p>Bank-level encryption • Privacy-first design • GDPR compliant • No data selling</p>
+          </div>
         </div>
       </section>
 
@@ -352,10 +392,10 @@ const WelcomePage = () => {
           <h2 className={styles.ctaTitle}>Ready to amplify your impact?</h2>
           <p className={styles.ctaSubtitle}>Join our beta community of early users.</p>
           <div className={styles.ctaActions}>
-            <a href="mailto:joeheath@do-nation.space" className={styles.primaryCta}>
+            <Link to="/signup" className={styles.primaryCta}>
               Request Access
               <RiArrowRightLine className={styles.ctaIcon} />
-            </a>
+            </Link>
             <a href="#demo" className={styles.secondaryCta}>
               Schedule Demo
             </a>
@@ -388,7 +428,7 @@ const WelcomePage = () => {
               </div>
               <div className={styles.footerColumn}>
                 <h4>Support</h4>
-                <a href="#help">Help Center</a>
+                <a href="#help">Help Centre</a>
                 <a href="#contact">Contact</a>
                 <a href="#api">API Docs</a>
               </div>
