@@ -621,24 +621,12 @@
 }
 
 .stepConnector {
-  position: absolute;
-  top: 24px;
-  width: calc(25% - 24px);
+  flex: 0 0 auto;
+  width: 60px;
   height: 2px;
   background: var(--border-light);
+  margin-top: 23px;
   z-index: 0;
-}
-
-.stepConnector:nth-of-type(2) {
-  left: calc(25% + 24px);
-}
-
-.stepConnector:nth-of-type(4) {
-  left: calc(50% + 24px);
-}
-
-.stepConnector:nth-of-type(6) {
-  left: calc(75% + 24px);
 }
 
 /* Testimonials */

@@ -317,7 +317,7 @@ const WelcomePage = () => {
         <div className={styles.stepsContainer}>
           <div className={styles.step}>
             <div className={styles.stepNumber}>1</div>
-            <h3><s>Sign Up</s> Free</h3>
+            <h3>Sign Up Free</h3>
             <p>Create your account with Google, Microsoft, or email in seconds</p>
           </div>
           <div className={styles.stepConnector}></div>
