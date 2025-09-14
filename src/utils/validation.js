@@ -32,7 +32,7 @@ export const validatePassword = (password) => {
   }
   
   const requirements = {
-    length: password.length >= 12,
+    length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
@@ -40,7 +40,7 @@ export const validatePassword = (password) => {
   };
   
   if (!requirements.length) {
-    errors.push('at least 12 characters');
+    errors.push('at least 8 characters');
   } else {
     strength++;
   }
@@ -63,13 +63,13 @@ export const validatePassword = (password) => {
     strength++;
   }
   
-  if (!requirements.special) {
-    errors.push('one special character');
-  } else {
+  // Special character is optional - adds to strength but not required
+  if (requirements.special) {
     strength++;
   }
-  
-  const isValid = Object.values(requirements).every(req => req === true);
+
+  // Valid if has length, uppercase, lowercase, and number (special is optional)
+  const isValid = requirements.length && requirements.uppercase && requirements.lowercase && requirements.number;
   
   return {
     valid: isValid,
