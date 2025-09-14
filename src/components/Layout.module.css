@@ -105,6 +105,22 @@
   width: 100%;
 }
 
+.betaBanner {
+  width: 100%;
+  background: #fff8e1;
+  color: #7a5d00;
+  border-bottom: 1px solid #ffe7a3;
+  padding: 10px 24px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.betaBanner a {
+  color: #7a5d00;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .footer {
   margin-top: auto;
   background: linear-gradient(180deg, #0f172a 0%, #1f2937 100%);

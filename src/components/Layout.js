@@ -96,6 +96,10 @@ function Layout({ children }) {
           <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>
       </nav>
+      <div className={layoutStyles.betaBanner}>
+        We’re in beta. To request access, email
+        {' '}<a href="mailto:joeheath@do-nation.space">joeheath@do-nation.space</a>.
+      </div>
       <div className={layoutStyles.content}>
         {children}
       </div>

@@ -109,6 +109,23 @@
   background: var(--primary-color-hover);
 }
 
+/* Beta Banner */
+.betaBanner {
+  width: 100%;
+  background: #fff8e1;
+  color: #7a5d00;
+  border-bottom: 1px solid #ffe7a3;
+  padding: 10px 24px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.betaBanner a {
+  color: #7a5d00;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 /* Hero Section */
 .hero {
   padding-top: 120px;
@@ -303,6 +320,12 @@
   font-size: 18px;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+.betaNote {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .featuresGrid {

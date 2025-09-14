@@ -92,12 +92,18 @@ const WelcomePage = () => {
           <nav className={styles.nav}>
             <a href="#features" className={styles.navLink}>Features</a>
             <a href="#how-it-works" className={styles.navLink}>How It Works</a>
-            <a href="#pricing" className={styles.navLink}>Pricing</a>
-            <Link to="/login" className={styles.loginButton}>Log In</Link>
-            <Link to="/signup" className={styles.signupButton}>Sign Up Free</Link>
+            {/* Pricing hidden during beta */}
+          <Link to="/login" className={styles.loginButton}>Log In</Link>
+            <a href="mailto:joeheath@do-nation.space" className={styles.signupButton}>Request Access</a>
           </nav>
         </div>
       </header>
+
+      {/* Beta Banner */}
+      <div className={styles.betaBanner}>
+        We’re in beta. To request access, email
+        {' '}<a href="mailto:joeheath@do-nation.space">joeheath@do-nation.space</a>.
+      </div>
 
       {/* Hero Section */}
       <section className={styles.hero}>
@@ -108,27 +114,27 @@ const WelcomePage = () => {
               <span className={styles.heroTitleGradient}>Amplify Your Impact.</span>
             </h1>
             <p className={styles.heroSubtitle}>
-              The intelligent donation platform that automatically tracks your charitable giving, 
-              unlocks corporate matching, and shows your real impact – all in one place.
+              The intelligent donation platform that helps you track your charitable giving,
+              helps unlock corporate matching, and shows your real impact — all in one place.
             </p>
             <div className={styles.heroActions}>
-              <Link to="/signup" className={styles.primaryCta}>
-                Start Your Impact Journey
+              <a href="mailto:joeheath@do-nation.space" className={styles.primaryCta}>
+                Request Beta Access
                 <RiArrowRightLine className={styles.ctaIcon} />
-              </Link>
+              </a>
               <a href="#demo" className={styles.secondaryCta}>
                 See How It Works
               </a>
             </div>
             <div className={styles.heroStats}>
               <div className={styles.heroStat}>
-                <span className={styles.heroStatValue}>$2,000</span>
-                <span className={styles.heroStatLabel}>Avg. yearly matching left unclaimed</span>
+                <span className={styles.heroStatValue}>Matching, simplified</span>
+                <span className={styles.heroStatLabel}>Guidance to help access employer programs</span>
               </div>
               <div className={styles.heroStatDivider}></div>
               <div className={styles.heroStat}>
-                <span className={styles.heroStatValue}>2 min</span>
-                <span className={styles.heroStatLabel}>Setup time</span>
+                <span className={styles.heroStatValue}>Quick setup</span>
+                <span className={styles.heroStatLabel}>Get started quickly</span>
               </div>
             </div>
           </div>
@@ -138,16 +144,16 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Trust Indicators */}
+      {/* Trust/Status Indicators */}
       <section className={styles.trustSection}>
         <div className={styles.trustContent}>
-          <p className={styles.trustText}>Trusted by leading organizations</p>
+          <p className={styles.trustText}>Private beta underway with early users</p>
           <div className={styles.trustLogos}>
             {/* Placeholder for partner logos */}
-            <div className={styles.trustLogo}>Partner 1</div>
-            <div className={styles.trustLogo}>Partner 2</div>
-            <div className={styles.trustLogo}>Partner 3</div>
-            <div className={styles.trustLogo}>Partner 4</div>
+            <div className={styles.trustLogo}>Early User</div>
+            <div className={styles.trustLogo}>Early User</div>
+            <div className={styles.trustLogo}>Early User</div>
+            <div className={styles.trustLogo}>Early User</div>
           </div>
         </div>
       </section>
@@ -159,6 +165,7 @@ const WelcomePage = () => {
           <p className={styles.sectionSubtitle}>
             One platform. Complete visibility. Maximum impact.
           </p>
+          <p className={styles.betaNote}>Beta: Some features are limited while we finish testing.</p>
         </div>
 
         <div className={styles.featuresGrid}>
@@ -184,13 +191,12 @@ const WelcomePage = () => {
             </div>
             <h3 className={styles.featureTitle}>Corporate Matching Made Easy</h3>
             <p className={styles.featureDescription}>
-              Unlock millions in unused corporate matching funds. Instant matching, 
-              real-time notifications, zero paperwork.
+              Discover and track matching opportunities with less effort. Matching features are in active beta.
             </p>
             <ul className={styles.featureList}>
-              <li><RiCheckLine /> Automatic qualification</li>
-              <li><RiCheckLine /> Micro-matching on all donations</li>
-              <li><RiCheckLine /> No deadlines to miss</li>
+              <li><RiCheckLine /> Matching discovery and guidance</li>
+              <li><RiCheckLine /> Notifications for key steps</li>
+              <li><RiCheckLine /> Progress tracking</li>
             </ul>
           </div>
 
@@ -336,7 +342,7 @@ const WelcomePage = () => {
         <div className={styles.securityContent}>
           <RiShieldCheckLine className={styles.securityIcon} />
           <h3>Your data, protected</h3>
-          <p>Bank-level encryption • SOC 2 compliant • GDPR compliant • No data selling</p>
+          <p>Encryption in transit • Privacy-first design • No data selling</p>
         </div>
       </section>
 
@@ -344,19 +350,17 @@ const WelcomePage = () => {
       <section className={styles.ctaSection}>
         <div className={styles.ctaContent}>
           <h2 className={styles.ctaTitle}>Ready to amplify your impact?</h2>
-          <p className={styles.ctaSubtitle}>
-            Join thousands of donors making their giving count.
-          </p>
+          <p className={styles.ctaSubtitle}>Join our beta community of early users.</p>
           <div className={styles.ctaActions}>
-            <Link to="/signup" className={styles.primaryCta}>
-              Start Free Today
+            <a href="mailto:joeheath@do-nation.space" className={styles.primaryCta}>
+              Request Access
               <RiArrowRightLine className={styles.ctaIcon} />
-            </Link>
+            </a>
             <a href="#demo" className={styles.secondaryCta}>
               Schedule Demo
             </a>
           </div>
-          <p className={styles.ctaNote}>No credit card required • Set up in under 2 minutes</p>
+          <p className={styles.ctaNote}>Beta access by request • Setup in minutes</p>
         </div>
       </section>
 
@@ -372,7 +376,8 @@ const WelcomePage = () => {
               <div className={styles.footerColumn}>
                 <h4>Product</h4>
                 <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
+                {/* Pricing hidden during beta */}
+                <a href="#about">Roadmap</a>
                 <a href="#security">Security</a>
               </div>
               <div className={styles.footerColumn}>
