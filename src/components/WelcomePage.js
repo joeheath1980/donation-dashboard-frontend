@@ -5,6 +5,7 @@ import styles from './WelcomePage.module.css';
 import './SharedStyles.css';
 import logoSvg from '../assets/logodark.png';
 import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.png';
+import impactImage from '../assets/22849491-979d-4fb2-b7a9-9857db6dcb82.jpeg';
 import { API_CONFIG } from '../config/api.config';
 import { 
   RiBarChartLine, 
@@ -263,6 +264,36 @@ const WelcomePage = () => {
             <RiRefreshLine className={styles.whyIcon} />
             <h3>Tax Ready</h3>
             <p>Generate comprehensive reports for Gift Aid claims and tax returns instantly.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Visual Impact Section */}
+      <section className={styles.visualImpact}>
+        <div className={styles.visualImpactContent}>
+          <div className={styles.visualImpactText}>
+            <h2 className={styles.visualImpactTitle}>See Your Impact Come to Life</h2>
+            <p className={styles.visualImpactDescription}>
+              Every donation creates ripples of change. Track your giving journey with beautiful visualisations
+              that show how your contributions grow into meaningful impact over time.
+            </p>
+            <div className={styles.visualImpactFeatures}>
+              <div className={styles.visualImpactFeature}>
+                <RiBarChartLine className={styles.visualImpactIcon} />
+                <span>Real-time impact tracking</span>
+              </div>
+              <div className={styles.visualImpactFeature}>
+                <RiTrophyLine className={styles.visualImpactIcon} />
+                <span>Achievement milestones</span>
+              </div>
+              <div className={styles.visualImpactFeature}>
+                <RiHeartLine className={styles.visualImpactIcon} />
+                <span>Community impact scores</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.visualImpactImageContainer}>
+            <img src={impactImage} alt="Visualise Your Impact" className={styles.visualImpactImage} />
           </div>
         </div>
       </section>
