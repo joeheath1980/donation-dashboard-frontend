@@ -4,7 +4,7 @@ import apiServices from '../services/api.service';
 import styles from './WelcomePage.module.css';
 import './SharedStyles.css';
 import logoSvg from '../assets/logodark.png';
-import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.png';
+import heroImage from '../assets/joe1980_light_trails_tracing_the_activity_of_two_young_people_b68a16e7-3e53-4c8b-b824-9edc7aa00c80_0.jpeg';
 import impactImage from '../assets/22849491-979d-4fb2-b7a9-9857db6dcb82.jpeg';
 import { API_CONFIG } from '../config/api.config';
 import { 
