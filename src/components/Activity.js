@@ -559,21 +559,16 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           
           const pollInterval = setInterval(async () => {
             try {
-              const statusResponse = await fetch(
-                `${API_CONFIG.BASE_URL}/api/outlook/outlook-email-search-status/${data.jobId}`,
+              const statusResponse = await api.get(
+                `/api/outlook/outlook-email-search-status/${data.jobId}`,
                 {
                   headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${token}`
                   }
                 }
               );
-              
-              if (!statusResponse.ok) {
-                throw new Error(`Status check failed: ${statusResponse.status}`);
-              }
-              
-              const statusData = await statusResponse.json();
+
+              const statusData = statusResponse?.data || statusResponse;
               const jobState = statusData.status || statusData.state;
               logger.debug('[Outlook Polling] Status received:', { 
                 status: jobState, 
@@ -586,17 +581,26 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               }
 
               // Handle completed job
-              if (jobState === 'completed' && statusData.result) {
-                logger.info('[Outlook Polling] Job completed with results count:', statusData.result?.length || 0);
+              if (jobState === 'completed') {
+                const rawResults = statusData.result
+                  ?? statusData.results
+                  ?? statusData.data
+                  ?? statusData.returnvalue
+                  ?? [];
+                const normalizedResults = Array.isArray(rawResults)
+                  ? rawResults
+                  : rawResults?.donations && Array.isArray(rawResults.donations)
+                    ? rawResults.donations
+                    : [];
+
+                logger.info('[Outlook Polling] Job completed with results count:', normalizedResults.length);
 
                 // Add IDs and timestamp to each result
-                const resultsWithIds = Array.isArray(statusData.result)
-                  ? statusData.result.map(result => ({
+                const resultsWithIds = normalizedResults.map(result => ({
                       ...result,
                       id: `outlook-${timestamp.getTime()}-${Math.random()}`,
                       searchTimestamp: timestamp
-                    }))
-                  : [];
+                    }));
                 
                 // Update search history with results
                 setSearchHistory(prev => {
