@@ -613,7 +613,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           const pollInterval = setInterval(async () => {
             try {
               const statusResponse = await fetch(
-                `${API_CONFIG.BASE_URL}/api/outlook/status/${data.jobId}`,
+                `${API_CONFIG.BASE_URL}/api/outlook/outlook-email-search-status/${data.jobId}`,
                 {
                   headers: {
                     'Authorization': `Bearer ${token}`,
@@ -627,18 +627,19 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               }
               
               const statusData = await statusResponse.json();
+              const jobState = statusData.status || statusData.state;
               logger.debug('[Outlook Polling] Status received:', { 
-                state: statusData.state, 
+                status: jobState, 
                 progress: statusData.progress 
               });
-              
+
               // Update progress if available
               if (statusData.progress !== undefined) {
                 setProgress(statusData.progress);
               }
-              
+
               // Handle completed job
-              if (statusData.state === 'completed' && statusData.result) {
+              if (jobState === 'completed' && statusData.result) {
                 logger.info('[Outlook Polling] Job completed with results count:', statusData.result.length);
                 trackEvent('import_completed', { source: 'outlook', count: statusData.result.length });
                 
@@ -673,7 +674,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 clearInterval(pollInterval);
                 setLoading(false);
                 
-              } else if (statusData.state === 'failed' || statusData.error) {
+              } else if (jobState === 'failed' || statusData.error) {
                 logger.error('[Outlook Polling] Job failed:', statusData.error);
                 setError(`Outlook search failed: ${statusData.error || 'Unknown error'}`);
                 clearInterval(pollInterval);
