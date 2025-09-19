@@ -24,55 +24,33 @@ npm start  # Runs on http://localhost:3000
 3. Update SHARED_API_SPECS.md with new endpoints
 4. Test API with Postman before frontend integration
 
-## DEPLOYMENT INSTRUCTIONS - CRITICAL
-**IMPORTANT**: Do NOT use `npm run deploy` or GitHub Pages deployment!
+## Deployment Instructions (critical recap)
+Do **not** use `npm run deploy` or GitHub Pages. Follow the canonical guide at `docs/FRONTEND_DEPLOYMENT_GUIDE.md` for step-by-step instructions.
 
-### 🚨 CRITICAL NGINX CONFIGURATION 🚨
-**⚠️ NGINX SERVES FROM A SYMLINK - MUST UNDERSTAND THIS! ⚠️**
-- **Nginx document root**: `/var/www/do-nation.space` (THIS IS A SYMLINK!)
-- **Actual deployment directory**: `/var/www/donation-dashboard/`
-- **The symlink**: `/var/www/do-nation.space` → `/var/www/donation-dashboard`
-- **NEVER** delete the symlink or deploy directly to `/var/www/do-nation.space/`
-- **ALWAYS** deploy to `/var/www/donation-dashboard/`
-- **See**: `/Users/josephheath/donation-dashboard/docs/DEPLOYMENT_CRITICAL.md` for full details
+### Minimum command checklist
+```bash
+cd /Users/josephheath/donation-dashboard
+REACT_APP_API_BASE_URL=https://do-nation.space \
+REACT_APP_API_URL=https://do-nation.space/api \
+REACT_APP_WEBSOCKET_URL=https://do-nation.space \
+npm run build
+./deploy-frontend.sh
+```
+The deploy script uploads the build, refreshes `/var/www/donation-dashboard/`, verifies the nginx symlink (`/var/www/do-nation.space`), fixes permissions, and reloads nginx.
 
-### Correct Frontend Deployment Process (FOLLOW EXACTLY):
-1. **Build locally with production env**: 
-   ```bash
-   REACT_APP_API_BASE_URL=https://do-nation.space REACT_APP_API_URL=https://do-nation.space/api npm run build
-   ```
-2. **Copy build to server**:
-   ```bash
-   rsync -avz build/ do-nation-server:/home/ubuntu/build/
-   ```
-3. **Deploy on server to CORRECT directory**:
-   ```bash
-   ssh do-nation-server "sudo rsync -avz --delete /home/ubuntu/build/ /var/www/donation-dashboard/"
-   ```
-4. **Set permissions**:
-   ```bash
-   ssh do-nation-server "sudo chown -R www-data:www-data /var/www/donation-dashboard && sudo chmod -R 755 /var/www/donation-dashboard"
-   ```
-5. **Verify symlink exists** (CRITICAL!):
-   ```bash
-   ssh do-nation-server "ls -la /var/www/ | grep do-nation.space"
-   # Should show: lrwxrwxrwx ... do-nation.space -> /var/www/donation-dashboard
-   # If not, run: ssh do-nation-server "sudo ln -sf /var/www/donation-dashboard /var/www/do-nation.space"
-   ```
-6. **Reload nginx**:
-   ```bash
-   ssh do-nation-server "sudo systemctl reload nginx"
-   ```
-7. **Verify deployment**:
-   ```bash
-   curl -I https://do-nation.space | head -1
-   # Should show: HTTP/1.1 200 OK
-   ```
-8. **Production URL**: https://do-nation.space (NOT GitHub Pages)
+### Nginx symlink reminder
+- Document root: `/var/www/do-nation.space` (symlink)
+- Actual files: `/var/www/donation-dashboard/`
+- If the symlink is missing, recreate it with:
+  ```bash
+  ssh do-nation-server "sudo ln -sf /var/www/donation-dashboard /var/www/do-nation.space"
+  ```
+- Run the verification commands in `docs/DEPLOYMENT_CRITICAL.md` after every deploy.
+
 
 ### Git Workflow:
 - **Push code**: `git push origin <branch-name>` (YES - always push to GitHub)
-- **Deploy**: Follow COMPLETE_DEPLOYMENT_GUIDE.md (NO GitHub Pages)
+- **Deploy**: Follow docs/FRONTEND_DEPLOYMENT_GUIDE.md (NO GitHub Pages)
 - The `npm run deploy` script in package.json should NOT be used - it deploys to GitHub Pages which we don't use
 
 ### Server Details:

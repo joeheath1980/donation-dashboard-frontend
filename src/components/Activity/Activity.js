@@ -609,11 +609,20 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           
           // Use polling instead of SSE to avoid token in URL (security fix)
           logger.debug('[Activity] Starting secure polling for job:', data.jobId);
-          
+
           const pollInterval = setInterval(async () => {
             try {
+              const statusUrl = `/api/outlook/outlook-email-search-status/${data.jobId}`;
+              const fullUrl = `${API_CONFIG.BASE_URL}${statusUrl}`;
+              logger.debug('[Outlook Polling] Requesting status:', {
+                path: statusUrl,
+                fullUrl: fullUrl,
+                jobId: data.jobId
+              });
+              console.log('[Outlook Polling] Making request to:', fullUrl);
+
               const statusResponse = await api.get(
-                `/api/outlook/outlook-email-search-status/${data.jobId}`,
+                statusUrl,
                 {
                   headers: {
                     'Authorization': `Bearer ${token}`
@@ -685,8 +694,20 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 setLoading(false);
               }
             } catch (error) {
-              logger.error('[Outlook Polling] Error:', error);
-              setError('Error checking status. Please try again.');
+              logger.error('[Outlook Polling] Error:', {
+                error: error.message,
+                url: error.config?.url,
+                baseURL: error.config?.baseURL,
+                fullUrl: error.config?.baseURL + error.config?.url,
+                status: error.response?.status,
+                data: error.response?.data
+              });
+              console.error('[Outlook Polling] Failed to poll:', {
+                requestedUrl: `/api/outlook/outlook-email-search-status/${data.jobId}`,
+                error: error.message,
+                response: error.response?.status
+              });
+              setError(`Error checking Outlook status: ${error.response?.status || error.message}`);
               clearInterval(pollInterval);
               setLoading(false);
             }

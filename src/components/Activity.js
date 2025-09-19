@@ -40,6 +40,8 @@ const CHARITY_TYPES = [
 ];
 
 // Custom hook for user storage
+// CASA Note: This stores non-sensitive UI state only (search history, donation statuses)
+// No tokens, passwords, or sensitive user data is stored in localStorage
 const useUserStorage = (userId) => {
   const STORAGE_KEY = userId ? `user-${userId}-donation-activity-state` : 'donation-activity-state-guest';
   const EXPIRATION_DAYS = 30;
@@ -58,7 +60,7 @@ const useUserStorage = (userId) => {
         if (parsed.userId === userId) return parsed;
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {
-        console.error('Error parsing localStorage data:', e);
+        logger.error('Error parsing storage data');
         localStorage.removeItem(STORAGE_KEY);
       }
     }
@@ -75,10 +77,10 @@ const useUserStorage = (userId) => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
     } catch (e) {
       if (e.name === 'QuotaExceededError') {
-        console.error('Storage quota exceeded. Clearing all data.');
+        logger.error('Storage quota exceeded. Clearing all data.');
         localStorage.clear();
       } else {
-        console.error('Error saving to localStorage:', e);
+        logger.error('Error saving to storage');
       }
     }
   }, [STORAGE_KEY, userId]);
@@ -151,7 +153,7 @@ function Activity() {
                   : []
               };
             } catch (entryError) {
-              console.warn('Error parsing search history entry:', entryError);
+              logger.warn('Error parsing search history entry');
               return null;
             }
           })
@@ -170,13 +172,13 @@ function Activity() {
       }
   
       if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
-        console.log('[Activity] Initializing with saved state:', { validSearchHistory, validDonationStatuses });
+        logger.debug('[Activity] Initializing with saved state');
         setSearchHistory(validSearchHistory);
         setDonationStatuses(validDonationStatuses);
         hasSavedData.current = true;
       }
     } else {
-      console.warn('Loaded state does not match current user. Ignoring.');
+      logger.warn('Loaded state does not match current user. Ignoring.');
       setSearchHistory([]);
       setDonationStatuses({});
     }
@@ -202,7 +204,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     if (!isInitialized.current) return;
 
     const isEmpty = searchHistory.length === 0 && Object.keys(donationStatuses).length === 0;
-    console.log('[Activity] State change detected:', {
+    logger.debug('[Activity] State change detected', {
       isEmpty,
       wasCleared: wasCleared.current,
       searchHistoryLength: searchHistory.length,
@@ -210,7 +212,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     });
 
     if (wasCleared.current && isEmpty) {
-      console.log('[Activity] Skipping save due to cleared state');
+      logger.debug('[Activity] Skipping save due to cleared state');
       return;
     }
 
@@ -254,15 +256,16 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           localStorage.removeItem(key);
         }
       } catch (e) {
-        console.error('Error parsing localStorage data:', e);
+        logger.error('Error parsing storage data');
         localStorage.removeItem(key);
       }
     });
   }, [currentUserId]);
 
   const logError = useCallback((message, error) => {
-    console.error(message, error);
-    setError(`${message}: ${error.message}`);
+    logger.error(message, { error: error.message });
+    // CASA: Don't expose internal error details to user
+    setError(message);
   }, []);
 
   const checkGmailAuth = useCallback(async () => {
@@ -292,7 +295,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setHasGmailAuth(false);
       return false;
     } catch (error) {
-      console.error('Error checking Gmail auth status:', error);
+      logger.error('Error checking Gmail auth status', { error: error.message });
       setHasGmailAuth(false);
       return false;
     } finally {
@@ -305,7 +308,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     try {
       const token = SecureTokenStorage.getToken();
       if (!token) {
-        console.warn('No token for forwarded emails');
+        logger.warn('No token for forwarded emails');
         return;
       }
 
@@ -356,7 +359,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         }
       }
     } catch (error) {
-      console.error('Error fetching forwarded emails:', error);
+      logger.error('Error fetching forwarded emails', { error: error.message });
     } finally {
       setLoadingForwarded(false);
     }
@@ -387,33 +390,33 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       // Check if Gmail auth is successful and trigger search
       checkGmailAuth().then(hasAuth => {
         if (hasAuth) {
-          console.log('[Activity] Gmail auth successful, triggering search');
-          handleSearchGmailEmails();
+          logger.debug('[Activity] Gmail auth successful, triggering search');
+          handleSearchEmails();
         }
       });
     }
-  }, [location.search, navigate, checkGmailAuth, handleSearchGmailEmails]);
+  }, [location.search, navigate, checkGmailAuth, handleSearchEmails]);
 
   const handleClearAll = useCallback(() => {
-    console.log('[Activity] Starting clear operation');
+    logger.debug('[Activity] Starting clear operation');
     setIsClearing(true);
     wasCleared.current = true;
 
-    console.log('[Activity] Removing data from localStorage');
+    logger.debug('[Activity] Clearing stored data');
     clearState();
 
-    console.log('[Activity] Resetting all states');
+    logger.debug('[Activity] Resetting all states');
     setSearchHistory([]);
     setDonationStatuses({});
     setSelectedTypes({});
     setSelectedCharityTypes({});
 
-    console.log('[Activity] Resetting refs');
+    logger.debug('[Activity] Resetting refs');
     lastSavedState.current = null;
     hasSavedData.current = false;
 
     clearingTimeout.current = setTimeout(() => {
-      console.log('[Activity] Finishing clear operation');
+      logger.debug('[Activity] Finishing clear operation');
       setIsClearing(false);
     }, 300);
   }, [clearState]);
@@ -432,10 +435,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       try {
         const api = apiServices.client;
         const { data } = await api.post('/api/gmail-email-search', {});
-        console.log('[Activity] Gmail search response:', data);
+        logger.debug('[Activity] Gmail search initiated');
         
         if (data.jobId) {
-          console.log('[Activity] Gmail job started with jobId:', data.jobId);
+          logger.debug('[Activity] Gmail job started', { jobId: data.jobId });
           const timestamp = new Date();
           
           // Add the job to search history
@@ -459,7 +462,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               }
               
               const statusData = await statusResponse.json();
-              console.log('[Gmail Polling] Status update:', statusData);
+              logger.debug('[Gmail Polling] Status update received');
               
               // Update progress if available
               if (statusData.progress !== undefined) {
@@ -468,7 +471,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               
               // Handle completed job
               if (statusData.state === 'completed' && statusData.result) {
-                console.log('[Gmail Polling] Job completed with results:', statusData.result);
+                logger.debug('[Gmail Polling] Job completed', { resultCount: statusData.result?.length || 0 });
                 
                 // Add IDs and timestamp to each result
                 const resultsWithIds = Array.isArray(statusData.result)
@@ -498,21 +501,21 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 setLoading(false);
                 
               } else if (statusData.state === 'failed') {
-                console.error('[Gmail Polling] Job failed');
+                logger.error('[Gmail Polling] Job failed');
                 setError(`Gmail search failed: ${statusData.error || 'Unknown error'}`);
                 clearInterval(pollInterval);
                 setLoading(false);
               }
             } catch (error) {
-              console.error('[Gmail Polling] Error checking status:', error);
-              setError('Error checking job status');
+              logger.error('[Gmail Polling] Error checking status', { error: error.message });
+              setError('Unable to check import status. Please try again.');
               clearInterval(pollInterval);
               setLoading(false);
             }
           }, 2000); // Poll every 2 seconds
           
         } else {
-          console.log('[Activity] No jobId found in response');
+          logger.debug('[Activity] No jobId found in response');
           setLoading(false);
         }
       } catch (err) {
@@ -544,10 +547,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       try {
         const api = apiServices.client;
         const { data } = await api.post('/api/outlook/outlook-email-search', {});
-        console.log('[Activity] Outlook search response:', data);
+        logger.debug('[Activity] Outlook search initiated');
         
         if (data.jobId) {
-          console.log('[Activity] Outlook job started with jobId:', data.jobId);
+          logger.debug('[Activity] Outlook job started', { jobId: data.jobId });
           const timestamp = new Date();
           
           // Add the job to search history
@@ -556,11 +559,21 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           
           // Use polling instead of SSE to avoid token in URL (security fix)
           logger.debug('[Activity] Starting secure polling for job:', data.jobId);
-          
+
           const pollInterval = setInterval(async () => {
             try {
+              const statusUrl = `/api/outlook/outlook-email-search-status/${data.jobId}`;
+              const fullUrl = `${API_CONFIG.BASE_URL}${statusUrl}`;
+              logger.debug('[Outlook Polling] Requesting status:', {
+                path: statusUrl,
+                fullUrl: fullUrl,
+                jobId: data.jobId
+              });
+              // Only log URL path for security (CASA compliance)
+              logger.debug('[Outlook Polling] Making request to path:', statusUrl);
+
               const statusResponse = await api.get(
-                `/api/outlook/outlook-email-search-status/${data.jobId}`,
+                statusUrl,
                 {
                   headers: {
                     'Authorization': `Bearer ${token}`
@@ -627,8 +640,24 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 setLoading(false);
               }
             } catch (error) {
-              logger.error('[Outlook Polling] Error:', error);
-              setError('Error checking status. Please try again.');
+              logger.error('[Outlook Polling] Error:', {
+                error: error.message,
+                url: error.config?.url,
+                baseURL: error.config?.baseURL,
+                fullUrl: error.config?.baseURL + error.config?.url,
+                status: error.response?.status,
+                data: error.response?.data
+              });
+              // Don't log full URLs or tokens (CASA compliance)
+              logger.error('[Outlook Polling] Failed to poll:', {
+                error: error.message,
+                status: error.response?.status
+              });
+              // CASA: Don't expose internal error details
+              const userMessage = error.response?.status === 401
+                ? 'Authentication expired. Please reconnect Outlook.'
+                : 'Unable to check Outlook import status. Please try again.';
+              setError(userMessage);
               clearInterval(pollInterval);
               setLoading(false);
             }
@@ -648,7 +677,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           };
           
         } else {
-          console.log('[Activity] No jobId found in response');
+          logger.debug('[Activity] No jobId found in response');
           setLoading(false);
         }
       } catch (err) {
@@ -691,7 +720,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     };
   }, [selectedCharityTypes]);
 
-  const handleCommit = useCallback(async (donation, isOutlook = false) => {
+  const handleCommit = useCallback(async (donation) => {
     const selectedType = selectedTypes[donation.id];
     const formattedDonation = formatDonationData(donation);
 
@@ -707,19 +736,27 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
     try {
       const token = SecureTokenStorage.getToken();
-      logger.debug('Token retrieved for handleCommit', { hasToken: !!token });
       if (!token) {
         throw new Error('No authentication token found');
+      }
+
+      // CASA compliance: Ensure CSRF token for state-changing request
+      try {
+        await csrfServiceAPI.initializeToken();
+      } catch (csrfError) {
+        logger.debug('CSRF token initialization failed, continuing without it');
       }
 
       const api = apiServices.client;
       const endpoint = selectedType === 'regular'
         ? '/api/donations'
         : '/api/contributions/one-off';
+
+      // The api client should automatically include CSRF token via interceptor
       const { data: result } = await api.post(endpoint, formattedDonation);
 
       if (result?._id) {
-        console.log(`[Activity] Committed ${selectedType} donation:`, result._id);
+        logger.debug(`[Activity] Committed ${selectedType} donation`);
         setDonationStatuses(prev => ({
           ...prev,
           [donation.id]: {
@@ -736,7 +773,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         }
 
         wasCleared.current = false;
-        console.log('[Activity] Reset wasCleared due to new data');
+        logger.debug('[Activity] Reset wasCleared due to new data');
       }
     } catch (error) {
       logError('Error committing donation', error);
@@ -749,7 +786,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   }, [selectedTypes, selectedCharityTypes, formatDonationData, addDonation, addOneOffContribution, logError]);
 
   const handleDelete = useCallback((donationId) => {
-    console.log('[Activity] Deleting donation:', donationId);
+    logger.debug('[Activity] Deleting donation', { donationId });
     setDonationStatuses(prev => ({
       ...prev,
       [donationId]: {
@@ -758,24 +795,24 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       }
     }));
     wasCleared.current = false;
-    console.log('[Activity] Reset wasCleared due to new data');
+    logger.debug('[Activity] Reset wasCleared due to new data');
   }, []);
 
   const handleRestore = useCallback((donationId) => {
-    console.log('[Activity] Restoring donation:', donationId);
+    logger.debug('[Activity] Restoring donation', { donationId });
     setDonationStatuses(prev => {
       const newStatuses = { ...prev };
       delete newStatuses[donationId];
       return newStatuses;
     });
     wasCleared.current = false;
-    console.log('[Activity] Reset wasCleared due to new data');
+    logger.debug('[Activity] Reset wasCleared due to new data');
   }, []);
 
   const navigateToDonation = useCallback((donation, type) => {
     const status = donationStatuses[donation.id];
     if (!status?.resultId) {
-      console.error('No result ID found for donation');
+      logger.error('No result ID found for donation');
       return;
     }
 
@@ -783,7 +820,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     navigate(`${path}?highlight=${status.resultId}`);
   }, [donationStatuses, navigate]);
 
-  const renderDonationCard = useCallback((donation, source) => {
+  const renderDonationCard = useCallback((donation) => {
     const status = donationStatuses[donation.id];
     const isCommitted = status?.type?.startsWith('committed');
     const isDeleted = status?.type === 'deleted';
@@ -832,7 +869,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               ))}
             </select>
             <button
-              onClick={() => handleCommit(donation, source === 'outlook')}
+              onClick={() => handleCommit(donation)}
               className={`${styles.saveButton} button`}
               disabled={!selectedTypes[donation.id] || !selectedCharityTypes[donation.id]}
             >
@@ -881,7 +918,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             }
           </h5>
           <ul className={styles.emailResultsList}>
-            {(entry.results || []).map(result => renderDonationCard(result, entry.source))}
+            {(entry.results || []).map(result => renderDonationCard(result))}
           </ul>
         </div>
       ))}
