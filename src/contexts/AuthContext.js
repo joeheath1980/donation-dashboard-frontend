@@ -59,9 +59,10 @@ axios.interceptors.response.use(
           const response = await axios.post(getApiUrl('/auth/refresh-token'), {
             refreshToken
           });
-          
-          const { accessToken } = response.data;
-          SecureTokenStorage.setToken(accessToken);
+
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          // CASA Compliance: Store both tokens - backend implements token rotation
+          SecureTokenStorage.setToken(accessToken, newRefreshToken || refreshToken);
           setupAxiosDefaults(accessToken);
           
           // Retry all queued requests with new token
