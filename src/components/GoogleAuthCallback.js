@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -12,10 +12,17 @@ const logger = createLogger('GoogleAuthCallback');
 const GoogleAuthCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { socialLogin, setUser } = useAuth();
+  const { setUser } = useAuth();
+  const exchangeInProgressRef = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      if (exchangeInProgressRef.current) {
+        logger.debug('Skipping duplicate Google auth callback handling attempt');
+        return;
+      }
+      exchangeInProgressRef.current = true;
+
       logger.debug('Handling Google auth callback');
       try {
         // Extract parameters from the URL
@@ -130,11 +137,13 @@ const GoogleAuthCallback = () => {
       } catch (error) {
         logger.error('Error handling Google authentication callback', { message: error.message });
         navigate(`/login?error=${encodeURIComponent(error.message || 'Authentication failed')}`);
+      } finally {
+        exchangeInProgressRef.current = false;
       }
     };
 
     handleCallback();
-  }, [navigate, location, socialLogin]);
+  }, [navigate, location.search, setUser]);
 
   return <div>Processing Google authentication...</div>;
 };

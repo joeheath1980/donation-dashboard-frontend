@@ -16,6 +16,39 @@ import { API_CONFIG } from '../config/api.config';
 // Create a logger instance for this component
 const logger = createLogger('Activity');
 
+const deriveJobState = status => status?.status || status?.state;
+
+const deriveJobProgress = status => {
+  if (typeof status?.progress === 'number') {
+    return status.progress;
+  }
+  if (status?.phases) {
+    const phaseOrder = ['discovery', 'extraction', 'parsing'];
+    const perPhase = 100 / phaseOrder.length;
+    let progress = 0;
+    phaseOrder.forEach(phase => {
+      const phaseStatus = status.phases[phase];
+      if (phaseStatus === 'completed') {
+        progress += perPhase;
+      } else if (phaseStatus === 'running') {
+        progress += perPhase * 0.5;
+      }
+    });
+    return Math.round(Math.min(progress, 100));
+  }
+  return undefined;
+};
+
+const extractCandidates = status => {
+  if (Array.isArray(status?.candidates)) {
+    return status.candidates;
+  }
+  if (Array.isArray(status?.result)) {
+    return status.result;
+  }
+  return [];
+};
+
 // Helper function for safe date formatting
 function safeFormatDate(dateValue, dateFormat) {
   if (!dateValue) return "N/A";
@@ -424,6 +457,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const handleSearchEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setProgress(0);
     try {
       const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchEmails', { hasToken: !!token });
@@ -464,23 +498,22 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               const statusData = await statusResponse.json();
               logger.debug('[Gmail Polling] Status update received');
               
-              // Update progress if available
-              if (statusData.progress !== undefined) {
-                setProgress(statusData.progress);
+              const progressValue = deriveJobProgress(statusData);
+              if (progressValue !== undefined) {
+                setProgress(progressValue);
               }
-              
-              // Handle completed job
-              if (statusData.state === 'completed' && statusData.result) {
-                logger.debug('[Gmail Polling] Job completed', { resultCount: statusData.result?.length || 0 });
+
+              const jobState = deriveJobState(statusData);
+
+              if (jobState === 'completed') {
+                const candidates = extractCandidates(statusData);
+                logger.debug('[Gmail Polling] Job completed', { resultCount: candidates.length });
                 
-                // Add IDs and timestamp to each result
-                const resultsWithIds = Array.isArray(statusData.result)
-                  ? statusData.result.map(result => ({
-                      ...result,
-                      id: `gmail-${timestamp.getTime()}-${Math.random()}`,
-                      searchTimestamp: timestamp
-                    }))
-                  : [];
+                const resultsWithIds = candidates.map(result => ({
+                  ...result,
+                  id: `gmail-${timestamp.getTime()}-${Math.random()}`,
+                  searchTimestamp: timestamp
+                }));
                 
                 // Update search history with results
                 setSearchHistory(prev => {
@@ -500,9 +533,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 clearInterval(pollInterval);
                 setLoading(false);
                 
-              } else if (statusData.state === 'failed') {
-                logger.error('[Gmail Polling] Job failed');
-                setError(`Gmail search failed: ${statusData.error || 'Unknown error'}`);
+              } else if (jobState === 'failed') {
+                const errorMessage = statusData.error || statusData.errors?.[0]?.message || 'Unknown error';
+                logger.error('[Gmail Polling] Job failed', { error: errorMessage });
+                setError(`Gmail search failed: ${errorMessage}`);
                 clearInterval(pollInterval);
                 setLoading(false);
               }
