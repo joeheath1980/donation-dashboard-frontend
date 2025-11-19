@@ -143,7 +143,7 @@ function Activity() {
   const [hasGmailAuth, setHasGmailAuth] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(false);
   const [loadingForwarded, setLoadingForwarded] = useState(false);
-  
+
   // Check user type - Gmail search is only for regular users
   const userType = UserDataStorage.getUserType();
   const isRegularUser = userType === 'user' || !userType; // Default to user if not set
@@ -162,14 +162,14 @@ function Activity() {
 
   useLayoutEffect(() => {
     if (isInitialized.current) return;
-  
+
     clearOldStorageKeys();
-  
+
     const savedState = loadState(); // Updated to call loadState directly
     if (savedState && savedState.userId === currentUserId) {
       let validSearchHistory = [];
       let validDonationStatuses = {};
-  
+
       if (savedState?.searchHistory && Array.isArray(savedState?.searchHistory)) {
         validSearchHistory = savedState.searchHistory
           .map(entry => {
@@ -179,10 +179,10 @@ function Activity() {
                 timestamp: new Date(entry.timestamp || Date.now()),
                 results: Array.isArray(entry.results)
                   ? entry.results.map(result => ({
-                      ...result,
-                      id: result.id || `recovered-${Date.now()}-${Math.random()}`,
-                      searchTimestamp: new Date(result.searchTimestamp || Date.now())
-                    }))
+                    ...result,
+                    id: result.id || `recovered-${Date.now()}-${Math.random()}`,
+                    searchTimestamp: new Date(result.searchTimestamp || Date.now())
+                  }))
                   : []
               };
             } catch (entryError) {
@@ -192,7 +192,7 @@ function Activity() {
           })
           .filter(Boolean);
       }
-  
+
       if (savedState?.donationStatuses && typeof savedState.donationStatuses === 'object') {
         Object.entries(savedState.donationStatuses).forEach(([key, value]) => {
           if (value && typeof value === 'object' && value.type) {
@@ -203,7 +203,7 @@ function Activity() {
           }
         });
       }
-  
+
       if (validSearchHistory.length > 0 || Object.keys(validDonationStatuses).length > 0) {
         logger.debug('[Activity] Initializing with saved state');
         setSearchHistory(validSearchHistory);
@@ -215,18 +215,18 @@ function Activity() {
       setSearchHistory([]);
       setDonationStatuses({});
     }
-  
+
     isInitialized.current = true;
   }, [loadState, clearOldStorageKeys, currentUserId]);
 
-// Memoize the inner function with useCallback
-const saveFunction = useCallback((newState) => {
-  saveState(newState);
-  lastSavedState.current = newState;
-}, [saveState]);
+  // Memoize the inner function with useCallback
+  const saveFunction = useCallback((newState) => {
+    saveState(newState);
+    lastSavedState.current = newState;
+  }, [saveState]);
 
-// Memoize the debounced function with useMemo
-const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunction]);
+  // Memoize the debounced function with useMemo
+  const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunction]);
 
   useEffect(() => {
     if (mountCount.current === 0) {
@@ -324,7 +324,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         setHasGmailAuth(data.hasGmailAuth);
         return data.hasGmailAuth;
       }
-      
+
       setHasGmailAuth(false);
       return false;
     } catch (error) {
@@ -367,7 +367,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
             source: 'forwarded',
             originalEmail: email
           }));
-        
+
         // Add to search history with a special entry
         if (transformedEmails.length > 0) {
           setSearchHistory(prev => {
@@ -378,7 +378,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               source: 'forwarded',
               results: transformedEmails
             };
-            
+
             if (existingIndex >= 0) {
               // Update existing entry
               const updated = [...prev];
@@ -415,11 +415,11 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const gmailAuth = params.get('gmailAuth');
-    
+
     if (gmailAuth === 'true') {
       // Remove the query parameter from URL to prevent re-triggering
       navigate('/activity', { replace: true });
-      
+
       // Check if Gmail auth is successful and trigger search
       checkGmailAuth().then(hasAuth => {
         if (hasAuth) {
@@ -453,7 +453,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setIsClearing(false);
     }, 300);
   }, [clearState]);
-  
+
   const handleSearchEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -461,24 +461,24 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     try {
       const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchEmails', { hasToken: !!token });
-      
+
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      
+
       try {
         const api = apiServices.client;
         const { data } = await api.post('/api/gmail-email-search', {});
         logger.debug('[Activity] Gmail search initiated');
-        
+
         if (data.jobId) {
           logger.debug('[Activity] Gmail job started', { jobId: data.jobId });
           const timestamp = new Date();
-          
+
           // Add the job to search history
           setSearchHistory(prev => [{ timestamp, source: 'gmail', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
-          
+
           // Poll for status updates instead of using SSE (temporary fix for 401 error)
           const pollInterval = setInterval(async () => {
             try {
@@ -490,14 +490,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   }
                 }
               );
-              
+
               if (!statusResponse.ok) {
                 throw new Error('Failed to get job status');
               }
-              
+
               const statusData = await statusResponse.json();
               logger.debug('[Gmail Polling] Status update received');
-              
+
               const progressValue = deriveJobProgress(statusData);
               if (progressValue !== undefined) {
                 setProgress(progressValue);
@@ -508,13 +508,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               if (jobState === 'completed') {
                 const candidates = extractCandidates(statusData);
                 logger.debug('[Gmail Polling] Job completed', { resultCount: candidates.length });
-                
+
                 const resultsWithIds = candidates.map(result => ({
                   ...result,
                   id: `gmail-${timestamp.getTime()}-${Math.random()}`,
                   searchTimestamp: timestamp
                 }));
-                
+
                 // Update search history with results
                 setSearchHistory(prev => {
                   const updatedHistory = [...prev];
@@ -529,10 +529,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   }
                   return updatedHistory;
                 });
-                
+
                 clearInterval(pollInterval);
                 setLoading(false);
-                
+
               } else if (jobState === 'failed') {
                 const errorMessage = statusData.error || statusData.errors?.[0]?.message || 'Unknown error';
                 logger.error('[Gmail Polling] Job failed', { error: errorMessage });
@@ -547,7 +547,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               setLoading(false);
             }
           }, 2000); // Poll every 2 seconds
-          
+
         } else {
           logger.debug('[Activity] No jobId found in response');
           setLoading(false);
@@ -566,35 +566,43 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setLoading(false);
     }
   }, [logError]);
-  
+
   const handleSearchOutlookEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const token = SecureTokenStorage.getToken();
       logger.debug('Token retrieved for handleSearchOutlookEmails', { hasToken: !!token });
-      
+
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
-      
+
       try {
         const api = apiServices.client;
         const { data } = await api.post('/api/outlook/outlook-email-search', {});
         logger.debug('[Activity] Outlook search initiated');
-        
+
         if (data.jobId) {
           logger.debug('[Activity] Outlook job started', { jobId: data.jobId });
           const timestamp = new Date();
-          
+
           // Add the job to search history
           setSearchHistory(prev => [{ timestamp, source: 'outlook', jobId: data.jobId }, ...prev]);
           wasCleared.current = false;
-          
+
           // Use polling instead of SSE to avoid token in URL (security fix)
           logger.debug('[Activity] Starting secure polling for job:', data.jobId);
 
-          const pollInterval = setInterval(async () => {
+          let timeoutId = null;
+          let pollInterval = null;
+
+          const cleanup = () => {
+            if (pollInterval) clearInterval(pollInterval);
+            if (timeoutId) clearTimeout(timeoutId);
+          };
+
+          pollInterval = setInterval(async () => {
             try {
               const statusUrl = `/api/outlook/outlook-email-search-status/${data.jobId}`;
               const fullUrl = `${API_CONFIG.BASE_URL}${statusUrl}`;
@@ -617,9 +625,9 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
               const statusData = statusResponse?.data || statusResponse;
               const jobState = statusData.status || statusData.state;
-              logger.debug('[Outlook Polling] Status received:', { 
-                status: jobState, 
-                progress: statusData.progress 
+              logger.debug('[Outlook Polling] Status received:', {
+                status: jobState,
+                progress: statusData.progress
               });
 
               // Update progress if available
@@ -644,11 +652,11 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
                 // Add IDs and timestamp to each result
                 const resultsWithIds = normalizedResults.map(result => ({
-                      ...result,
-                      id: `outlook-${timestamp.getTime()}-${Math.random()}`,
-                      searchTimestamp: timestamp
-                    }));
-                
+                  ...result,
+                  id: `outlook-${timestamp.getTime()}-${Math.random()}`,
+                  searchTimestamp: timestamp
+                }));
+
                 // Update search history with results
                 setSearchHistory(prev => {
                   const updatedHistory = [...prev];
@@ -663,14 +671,14 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   }
                   return updatedHistory;
                 });
-                
-                clearInterval(pollInterval);
+
+                cleanup();
                 setLoading(false);
-                
+
               } else if (jobState === 'failed' || statusData.error) {
                 logger.error('[Outlook Polling] Job failed:', statusData.error);
                 setError(`Outlook search failed: ${statusData.error || 'Unknown error'}`);
-                clearInterval(pollInterval);
+                cleanup();
                 setLoading(false);
               }
             } catch (error) {
@@ -692,24 +700,18 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 ? 'Authentication expired. Please reconnect Outlook.'
                 : 'Unable to check Outlook import status. Please try again.';
               setError(userMessage);
-              clearInterval(pollInterval);
+              cleanup();
               setLoading(false);
             }
           }, 2000); // Poll every 2 seconds
-          
+
           // Store interval ID for cleanup
-          const timeoutId = setTimeout(() => {
-            clearInterval(pollInterval);
+          timeoutId = setTimeout(() => {
+            cleanup();
             setError('Outlook search timed out. Please try again.');
             setLoading(false);
           }, 60000); // 60 second timeout
-          
-          // Cleanup function
-          return () => {
-            clearInterval(pollInterval);
-            clearTimeout(timeoutId);
-          };
-          
+
         } else {
           logger.debug('[Activity] No jobId found in response');
           setLoading(false);
@@ -728,7 +730,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       setLoading(false);
     }
   }, [logError]);
-  
+
   const handleTypeChange = useCallback((index, event) => {
     setSelectedTypes(prev => ({ ...prev, [index]: event.target.value }));
   }, []);
@@ -859,9 +861,8 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     const isCommitted = status?.type?.startsWith('committed');
     const isDeleted = status?.type === 'deleted';
 
-    const cardClassName = `${styles.emailResultItem} card ${
-      isCommitted ? styles.committedDonation : ''
-    } ${isDeleted ? styles.deletedDonation : ''} ${isClearing ? styles.clearing : ''}`;
+    const cardClassName = `${styles.emailResultItem} card ${isCommitted ? styles.committedDonation : ''
+      } ${isDeleted ? styles.deletedDonation : ''} ${isClearing ? styles.clearing : ''}`;
 
     return (
       <li key={donation.id} className={cardClassName}>
@@ -876,8 +877,8 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
           </div>
         </div>
         <div className={styles.donationContent}>
-          <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br/>
-          <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br/>
+          <strong>Date:</strong> {safeFormatDate(donation.date, 'dd/MM/yyyy')}<br />
+          <strong>Amount:</strong> {parseFloat(donation.amount.replace(/[^0-9.-]+/g, '')).toFixed(2)}<br />
         </div>
 
         {!isCommitted && !isDeleted && (
@@ -946,7 +947,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       {(searchHistory || []).map((entry, index) => (
         <div key={index} className={`${styles.searchEntry} ${isClearing ? styles.clearing : ''}`}>
           <h5 className="heading">
-            {entry.source === 'forwarded' 
+            {entry.source === 'forwarded'
               ? `Forwarded Email Donations - Last Updated: ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
               : `Search Results from ${entry.source.toUpperCase()} - ${safeFormatDate(entry.timestamp, 'dd/MM/yyyy HH:mm:ss')}`
             }
@@ -969,7 +970,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {!isRegularUser && userType === 'charity' && (
           <div className={`${styles.infoMessage} ${styles.notice}`}>
             <p className={styles.noticeText}>
-              As a charity account, you can view donations made to your organization in the dashboard. 
+              As a charity account, you can view donations made to your organization in the dashboard.
               Email search is available for individual donors to import their personal donation receipts.
             </p>
           </div>
@@ -977,7 +978,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {!isRegularUser && userType === 'business' && (
           <div className={`${styles.infoMessage} ${styles.notice}`}>
             <p className={styles.noticeText}>
-              As a business account, you can manage corporate donations through the business dashboard. 
+              As a business account, you can manage corporate donations through the business dashboard.
               Email search is available for individual donors to import their personal donation receipts.
             </p>
           </div>
@@ -988,7 +989,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               <h3 className={styles.sectionTitle}>Import Your Donations</h3>
               <p className={styles.sectionSubtitle}>Connect your email to automatically find and import donation receipts</p>
             </div>
-            
+
             <div className={styles.buttonGrid}>
               {isRegularUser && (
                 <button
@@ -1008,7 +1009,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                 >
                   <div className={styles.buttonContent}>
                     <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+                      <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor" />
                     </svg>
                     <span className={styles.buttonLabel}>
                       {checkingAuth ? 'Checking...' : loading ? 'Searching...' : hasGmailAuth ? 'Search Gmail' : 'Connect Gmail'}
@@ -1016,7 +1017,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
                   </div>
                 </button>
               )}
-              
+
               <button
                 onClick={handleSearchOutlookEmails}
                 disabled={loading || isClearing}
@@ -1024,26 +1025,26 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               >
                 <div className={styles.buttonContent}>
                   <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+                    <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor" />
                   </svg>
                   <span className={styles.buttonLabel}>
                     {loading ? 'Searching...' : 'Search Outlook'}
                   </span>
                 </div>
               </button>
-              
+
               <button
                 onClick={() => setShowEmailForwarding(true)}
                 className={styles.emailButton}
               >
                 <div className={styles.buttonContent}>
                   <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2L4 5V11.5C4 12.12 4.15 12.7 4.4 13.24L10.5 9.5L14 2ZM20 11L10.5 9.5L4.4 13.24C5.14 14.53 6.41 15.5 8 15.84V18L12 20L16 18V15.84C18.66 15.23 20 13.13 20 11Z" fill="currentColor"/>
+                    <path d="M14 2L4 5V11.5C4 12.12 4.15 12.7 4.4 13.24L10.5 9.5L14 2ZM20 11L10.5 9.5L4.4 13.24C5.14 14.53 6.41 15.5 8 15.84V18L12 20L16 18V15.84C18.66 15.23 20 13.13 20 11Z" fill="currentColor" />
                   </svg>
                   <span className={styles.buttonLabel}>Email Forwarding</span>
                 </div>
               </button>
-              
+
               <button
                 onClick={fetchForwardedEmails}
                 disabled={loadingForwarded}
@@ -1051,7 +1052,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               >
                 <div className={styles.buttonContent}>
                   <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z" fill="currentColor"/>
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z" fill="currentColor" />
                   </svg>
                   <span className={styles.buttonLabel}>
                     {loadingForwarded ? 'Checking...' : 'Check Forwarded'}
@@ -1060,12 +1061,12 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               </button>
             </div>
           </div>
-          
+
           <div className={styles.impactLinkSection}>
             <Link to="/profile" className={styles.viewImpactButton}>
               View Your Impact Dashboard
               <svg className={styles.arrowIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
           </div>
@@ -1104,9 +1105,9 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {searchHistory.length > 0 && renderSearchResults()}
       </div>
 
-      <EmailForwardingModal 
-        isOpen={showEmailForwarding} 
-        onClose={() => setShowEmailForwarding(false)} 
+      <EmailForwardingModal
+        isOpen={showEmailForwarding}
+        onClose={() => setShowEmailForwarding(false)}
       />
     </div>
   );
