@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from './NavBar.module.css';
 import layoutStyles from './Layout.module.css';
 import logo from '../assets/logo.png';
-import './NavReset.css';
 import { APP_LINKS } from '../config/api.config';
 
 function Layout({ children }) {
@@ -22,12 +21,18 @@ function Layout({ children }) {
     }
   };
   
-  const handleLogout = () => {
-    // Perform logout which now handles all data clearing
-    logout();
-    
-    // Immediately navigate to login page
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Perform logout which now handles OAuth token revocation and data clearing
+      await logout();
+
+      // Navigate to login page after logout completes
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Navigate to login even if logout fails
+      navigate('/login', { replace: true });
+    }
   };
 
   const handleReportBug = () => {
@@ -65,16 +70,20 @@ function Layout({ children }) {
   return (
     <div className={layoutStyles.layoutContainer}>
       <nav className={styles.navBar}>
-        <div className={layoutStyles.logoContainer} onClick={handleLogoClick}>
+        <div className={layoutStyles.logoContainer} onClick={handleLogoClick} role="button" tabIndex={0} onKeyPress={(e) => (e.key === 'Enter' || e.key === ' ') && handleLogoClick()}>
           <img src={logo} alt="DonateSpace Logo" className={layoutStyles.logo} />
         </div>
         <button 
           className={layoutStyles.hamburger}
+          type="button"
+          aria-label="Toggle navigation"
+          aria-expanded={isNavExpanded}
+          aria-controls="primary-navigation"
           onClick={() => setIsNavExpanded(!isNavExpanded)}
         >
           ☰
         </button>
-        <div className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
+        <div id="primary-navigation" className={`${styles.navLinks} ${isNavExpanded ? styles.expanded : ''}`}>
           <NavLink 
             to={user?.isBusiness ? "/business-dashboard" : user?.isCharity ? "/charity-dashboard" : "/dashboard"} 
             className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
@@ -92,8 +101,8 @@ function Layout({ children }) {
           )}
           <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
           <NavLink to="/help" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Help</NavLink>
-          <button onClick={handleReportBug} className={styles.navItem}>Report a bug</button>
-          <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
+          <button type="button" onClick={handleReportBug} className={styles.navItem}>Report a bug</button>
+          <button type="button" onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>
       </nav>
       <div className={layoutStyles.betaBanner}>

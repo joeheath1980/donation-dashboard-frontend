@@ -531,17 +531,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Enhanced logout function
-  const logout = () => {
-    // Clear all user data
-    clearUserData();
-    
-    // Clear CSRF token
-    csrfServiceAPI.clearToken();
-    
-    // Reset user state
-    setUser(null);
-    
-    logger.info('User logged out successfully');
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint to revoke OAuth tokens and invalidate refresh tokens
+      const token = SecureTokenStorage.getToken();
+      if (token) {
+        try {
+          const api = apiServices.client;
+          await api.post(API_ENDPOINTS.USER_LOGOUT);
+          logger.info('Backend logout successful - OAuth tokens revoked');
+        } catch (backendError) {
+          // Log but continue with local cleanup even if backend fails
+          logger.warn('Backend logout failed, continuing with local cleanup', {
+            error: backendError.message
+          });
+        }
+      }
+    } catch (error) {
+      logger.error('Error during logout', { error: error.message });
+    } finally {
+      // Always clear all user data regardless of backend success
+      clearUserData();
+
+      // Clear CSRF token
+      csrfServiceAPI.clearToken();
+
+      // Reset user state
+      setUser(null);
+
+      logger.info('User logged out successfully - local data cleared');
+    }
   };
 
   // Function to get auth headers

@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
   USER_LOGIN: '/api/auth/login',
   USER_REGISTER: '/api/users/register',
   USER_PROFILE: '/api/users/me',
+  USER_LOGOUT: '/api/users/logout',
   
   // Business endpoints
   BUSINESS_LOGIN: '/api/business/auth/login',
