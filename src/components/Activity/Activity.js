@@ -683,36 +683,39 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     });
   };
 
-  const refreshResults = useCallback(async (jobId, statusPayload) => {
+  const refreshResults = useCallback(async (jobId, statusPayload, sourceOverride = null) => {
     try {
       const api = apiServices.client;
       const { data } = await api.get(`/api/email-search-results/${jobId}`);
       const timestamp = new Date();
+
+      const existingEntry = searchHistory.find(entry => entry.jobId === jobId);
+      const source = sourceOverride || statusPayload?.source || existingEntry?.source || 'gmail';
 
       const transformCandidate = (candidate, isRejected = false) => ({
         ...candidate,
         id: candidate.candidateId || candidate.dedupeHash || candidate.emailMessageId || `${jobId}:${isRejected ? 'rejected' : 'candidate'}:${Math.random().toString(36).slice(2)}`,
         jobId,
         searchTimestamp: timestamp,
-        source: 'gmail'
+        source
       });
 
       const transformedCandidates = (data.candidates || []).map(candidate => transformCandidate(candidate, false));
       const transformedRejected = (data.rejected || []).map(rejected => transformCandidate(rejected, true));
 
       setSearchHistory(prev => {
-        const existingIndex = prev.findIndex(entry => entry.jobId === jobId && entry.source === 'gmail');
-        const existingEntry = existingIndex >= 0 ? prev[existingIndex] : null;
+        const existingIndex = prev.findIndex(entry => entry.jobId === jobId);
+        const matchedEntry = existingIndex >= 0 ? prev[existingIndex] : null;
         const updatedEntry = {
           jobId,
-          source: 'gmail',
-          timestamp: existingEntry?.timestamp || timestamp,
+          source,
+          timestamp: matchedEntry?.timestamp || timestamp,
           results: transformedCandidates,
           rejected: transformedRejected,
-          stats: data.stats || existingEntry?.stats || {},
-          summary: statusPayload?.summary || existingEntry?.summary || {},
-          counts: statusPayload?.counts || existingEntry?.counts || {},
-          status: statusPayload?.status || existingEntry?.status || 'processing'
+          stats: data.stats || matchedEntry?.stats || {},
+          summary: statusPayload?.summary || matchedEntry?.summary || {},
+          counts: statusPayload?.counts || matchedEntry?.counts || {},
+          status: statusPayload?.status || matchedEntry?.status || 'processing'
         };
 
         if (existingIndex >= 0) {
@@ -750,7 +753,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     } catch (error) {
       logError('Error refreshing Gmail results', error);
     }
-  }, [setSearchHistory, logError]);
+  }, [setSearchHistory, searchHistory, logError]);
 
   const resetMissingForm = useCallback((jobIdValue = '') => {
     setMissingForm({
@@ -943,42 +946,21 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
 
               // Handle completed job
               if (statusData.status === 'completed') {
-                logger.info('[Outlook Polling] Job completed, fetching results');
+                logger.info('[Outlook Polling] Job completed, refreshing results');
 
-                // Fetch results using Gmail job manager
-                const resultsResponse = await api.get(`/api/email-search-results/${data.jobId}`);
-                const resultsData = resultsResponse.data;
+                await refreshResults(data.jobId, { ...statusData, source: 'outlook' }, 'outlook');
 
-                const candidates = resultsData.candidates || [];
-                const rejected = resultsData.rejected || [];
+                const updatedEntry = searchHistory.find(entry => entry.jobId === data.jobId);
+                const candidateCount = updatedEntry?.results?.length || 0;
 
-                logger.info('[Outlook Polling] Retrieved results:', {
-                  candidates: candidates.length,
-                  rejected: rejected.length
-                });
+                trackEvent('import_completed', { source: 'outlook', count: candidateCount });
 
-                trackEvent('import_completed', { source: 'outlook', count: candidates.length });
-
-                // Update search history with results (same format as Gmail)
-                setSearchHistory(prev => {
-                  const updatedHistory = [...prev];
-                  const index = updatedHistory.findIndex(entry => entry.jobId === data.jobId);
-                  if (index !== -1) {
-                    updatedHistory[index] = {
-                      ...updatedHistory[index],
-                      results: candidates,
-                      rejected: rejected,
-                      stats: resultsData.stats
-                    };
-                  }
-                  return updatedHistory;
-                });
-
-                if (candidates.length === 0) {
+                if (candidateCount === 0) {
                   trackEvent('import_zero_results', { source: 'outlook' });
                 }
 
                 clearInterval(pollInterval);
+                setProgress(100);
                 setLoading(false);
 
               } else if (statusData.status === 'failed') {
@@ -1114,7 +1096,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
       return;
     }
 
-    const entry = searchHistory.find(item => item.jobId === jobId && (item.source === 'gmail' || item.source === 'uploaded'));
+    const entry = searchHistory.find(item => item.jobId === jobId && (item.source === 'gmail' || item.source === 'uploaded' || item.source === 'outlook'));
     if (!entry) {
       setError('Unable to locate results for this search.');
       return;
@@ -1543,7 +1525,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     const isDuplicate = status?.type === 'duplicate';
     const isDeleted = status?.type === 'deleted';
     const isFinalized = isCommitted || isDuplicate;
-    const isGmailSource = source === 'gmail' || source === 'uploaded'; // Include uploaded receipts
+    const isGmailSource = source === 'gmail' || source === 'uploaded' || source === 'outlook'; // Include uploaded receipts
 
     const cardClassName = `${styles.emailResultItem} card ${
       isCommitted ? styles.committedDonation : ''
@@ -1809,7 +1791,7 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const renderSearchResults = useCallback(() => (
     <div className={`${styles.searchHistory} ${isClearing ? styles.clearing : ''}`}>
       {(searchHistory || []).map((entry, index) => {
-        const isGmailSource = entry.source === 'gmail' || entry.source === 'uploaded';
+        const isGmailSource = entry.source === 'gmail' || entry.source === 'uploaded' || entry.source === 'outlook';
         const counts = entry.counts || jobStatusMap[entry.jobId]?.counts || {};
         const stats = entry.stats || {};
         const selectedCount = isGmailSource ? Object.keys(selectedCandidates[entry.jobId] || {}).length : 0;
