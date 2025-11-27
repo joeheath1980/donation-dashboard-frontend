@@ -980,18 +980,13 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
               setLoading(false);
             }
           }, 2000); // Poll every 2 seconds
-          
-          // Store interval ID for cleanup
-          const timeoutId = setTimeout(() => {
-            clearInterval(pollInterval);
-            setError('Outlook search timed out. Please try again.');
-            setLoading(false);
-          }, 60000); // 60 second timeout
-          
+
+          // No timeout - allow search to run as long as needed
+          // Searching entire inbox history can take 5-15 minutes for large mailboxes
+
           // Cleanup function
           return () => {
             clearInterval(pollInterval);
-            clearTimeout(timeoutId);
           };
           
         } else {
