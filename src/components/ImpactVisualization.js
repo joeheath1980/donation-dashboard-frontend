@@ -336,7 +336,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   return processedData;
 }
 
-function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
+function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImpactScore = null, publicImpactHistory = null }) {
   const { donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore, setImpactScore } = useContext(ImpactContext);
   const { token } = useContext(AuthContext);
   const [timePeriod, setTimePeriod] = useState(TIME_PERIODS.ALL);
@@ -348,45 +348,14 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
   const isMountedRef = useRef(true);
   const chartIdRef = useRef(null);
   
-  // Fetch impact history from the backend (authoritative) - DISABLED for now
-  // The backend timeline API is returning zeros, so we'll use local calculation
+  // Accept public impact history when provided to override context data
   useEffect(() => {
-    // Temporarily disable backend timeline fetch since it's returning zeros
-    // and causing the chart to show no data
-    console.log('Backend timeline API disabled - using local calculation from donations/activities');
-    setImpactHistory(null); // Force use of local processData
-    
-    /* Original code - re-enable when backend is fixed:
-    const fetchImpactHistory = async () => {
-      try {
-        const api = apiServices.client;
-        console.log('Fetching impact history from backend...');
-        const { data } = await api.get(`/api/users/impact-score/history`);
-        console.log('Impact history response:', data);
-        
-        if (data && Array.isArray(data.timeline)) {
-          console.log(`Impact history fetched: ${data.timeline.length} entries`);
-          // Check if timeline has actual data or just zeros
-          const hasNonZeroData = data.timeline.some(entry => entry.totalScore > 0);
-          if (!hasNonZeroData && data.timeline.length > 0) {
-            console.warn('Timeline has only zero values, will use fallback');
-            setImpactHistory(null);
-          } else {
-            setImpactHistory(data.timeline);
-          }
-        } else {
-          console.warn('Impact history response missing timeline array, using fallback');
-          setImpactHistory(null);
-        }
-      } catch (error) {
-        console.error('Error fetching impact history, will use fallback:', error.message || error);
-        setImpactHistory(null);
-      }
-    };
-    
-    fetchImpactHistory();
-    */
-  }, [donations, oneOffContributions, volunteerActivities, fundraisingCampaigns]);
+    if (publicImpactHistory && Array.isArray(publicImpactHistory)) {
+      setImpactHistory(publicImpactHistory);
+    } else {
+      setImpactHistory(null);
+    }
+  }, [publicImpactHistory]);
 
   // Track mounted state
   useEffect(() => {
@@ -415,6 +384,8 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
       }
     };
   }, []);
+
+  const effectiveImpactScore = publicImpactScore ?? impactScore;
 
   const dataPoints = useMemo(() => {
     console.log('Recalculating data points for period:', timePeriod);
@@ -494,18 +465,19 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
       oneOffContributions,
       volunteerActivities,
       fundraisingCampaigns,
-      impactScore
+      effectiveImpactScore
     });
-    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, impactScore, hideAmounts);
+    const points = processData(donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, effectiveImpactScore, hideAmounts);
     console.log('Processed data points:', points);
     console.log('Chart Y values:', points.map(p => p.y));
     return points;
-  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, impactScore, hideAmounts]);
+  }, [impactHistory, donations, oneOffContributions, volunteerActivities, fundraisingCampaigns, timePeriod, effectiveImpactScore, hideAmounts]);
 
   // Keep the ring score in sync with the visualization final total
   useEffect(() => {
     if (!dataPoints || dataPoints.length === 0) return;
     const latestTotal = dataPoints[dataPoints.length - 1].y;
+    if (publicImpactScore !== null) return; // don't overwrite context when rendering public profiles
     if (Number.isFinite(latestTotal) && Math.abs((impactScore || 0) - latestTotal) > 0) {
       try {
         setImpactScore(latestTotal);
@@ -513,7 +485,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
         console.warn('Failed to sync impact score from visualization', e);
       }
     }
-  }, [dataPoints, impactScore, setImpactScore]);
+  }, [dataPoints, impactScore, setImpactScore, publicImpactScore]);
 
   // Set up intersection observer to detect visibility with a safe fallback
   useEffect(() => {
@@ -1191,19 +1163,19 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false }) {
               <div 
                 className={styles.progressFill} 
                 style={{ 
-                  width: `${Math.min((impactScore / 500) * 100, 100)}%`,
-                  background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min((impactScore / 500) * 100, 100)}%)`
+                  width: `${Math.min(((publicImpactScore ?? impactScore) / 500) * 100, 100)}%`,
+                  background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min(((publicImpactScore ?? impactScore) / 500) * 100, 100)}%)`
                 }}
               />
             </div>
             <div className={styles.progressText}>
-              {impactScore < 25 ? 'Keep going! You\'re making an impact' :
-               impactScore < 50 ? 'Great progress! Your impact is growing' :
-               impactScore < 75 ? 'Amazing! You\'re making a significant difference' :
-               impactScore < 300 ? 'Incredible! You\'re building great momentum' :
-               impactScore < 1000 ? 'Outstanding! You\'re an Altruist making waves' :
-               impactScore < 2500 ? 'Exceptional! You\'re a true Philanthropist' :
-               impactScore < 5000 ? 'Legendary! You\'re a Champion for change' :
+              {(publicImpactScore ?? impactScore) < 25 ? 'Keep going! You\'re making an impact' :
+               (publicImpactScore ?? impactScore) < 50 ? 'Great progress! Your impact is growing' :
+               (publicImpactScore ?? impactScore) < 75 ? 'Amazing! You\'re making a significant difference' :
+               (publicImpactScore ?? impactScore) < 300 ? 'Incredible! You\'re building great momentum' :
+               (publicImpactScore ?? impactScore) < 1000 ? 'Outstanding! You\'re an Altruist making waves' :
+               (publicImpactScore ?? impactScore) < 2500 ? 'Exceptional! You\'re a true Philanthropist' :
+               (publicImpactScore ?? impactScore) < 5000 ? 'Legendary! You\'re a Champion for change' :
                'Visionary! You\'re transforming the world'}
             </div>
           </div>

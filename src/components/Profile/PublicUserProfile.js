@@ -41,6 +41,7 @@ import styles from '../Profile.module.css';
 import publicStyles from './PublicUserProfile.module.css';
 import '../SharedStyles.css';
 import profileService from '../../services/profile.service';
+import apiServices from '../../services/api.service';
 import { getCspNonce, isJsonLdEnabled } from '../../utils/csp';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import PersonalImpactScore from '../PersonalImpactScore';
@@ -74,6 +75,8 @@ const PublicUserProfile = () => {
   const [mounted, setMounted] = useState(false);
   const [activeImpactSection, setActiveImpactSection] = useState(0);
   const [showAllFollowedCharities, setShowAllFollowedCharities] = useState(false);
+  const [publicImpact, setPublicImpact] = useState(null);
+  const [publicImpactHistory, setPublicImpactHistory] = useState(null);
   
   // Debug helpers (dev-only)
   const __DEV__ = process.env.NODE_ENV === 'development';
@@ -159,6 +162,33 @@ const PublicUserProfile = () => {
         pointsToNextTier: data?.pointsToNextTier
       });
       setProfile(data);
+      
+      // Fetch public impact summary/history for this profile to drive visualizations
+      try {
+        const api = apiServices.client;
+        const [impactSummaryRes, impactHistoryRes] = await Promise.all([
+          api.get(`/api/public/profile/impact/${username}`),
+          api.get(`/api/public/profile/impact/${username}/history`)
+        ]);
+        
+        setPublicImpact(impactSummaryRes.data || null);
+        
+        if (impactHistoryRes.data?.timeline) {
+          // Transform timeline to match ImpactVisualization expectations
+          const transformed = impactHistoryRes.data.timeline.map(entry => ({
+            ...entry,
+            totalScore: entry.cumulative ?? entry.totalScore ?? entry.points ?? 0,
+            score: entry.points ?? entry.totalScore ?? entry.cumulative ?? 0
+          }));
+          setPublicImpactHistory(transformed);
+        } else {
+          setPublicImpactHistory(null);
+        }
+      } catch (impactErr) {
+        console.error('Failed to fetch public impact summary/history', impactErr);
+        setPublicImpact(null);
+        setPublicImpactHistory(null);
+      }
     } catch (err) {
       console.error('Profile fetch error in component:', err);
       setError(err.message);
@@ -270,7 +300,8 @@ const PublicUserProfile = () => {
     devLog('USING CONTEXT DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
   } else {
     // Fallback to API provided values for other profiles
-    actualScore = profile?.impactScore || profile?.actualImpactScore || 
+    actualScore = publicImpact?.impactScore ||
+                 profile?.impactScore || profile?.actualImpactScore || 
                  stats?.impactScore || stats?.totalScore ||
                  user?.actualImpactScore || user?.impactScore || 0;
                  
@@ -299,7 +330,7 @@ const PublicUserProfile = () => {
     tier: actualTier,
     joinDate: user?.joinDate || new Date().toISOString(),
     avatar: user?.profilePictureUrl || user?.profilePicture || user?.avatar,
-    publicScore: actualScore,
+    publicScore: publicImpact?.impactScore ?? actualScore,
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
     ...user
@@ -493,7 +524,9 @@ const PublicUserProfile = () => {
             hideAmounts={true}
             totalSections={impactSections.length}
             sectionTitles={impactSections.map(section => section.title)}
-          />
+            publicImpactScore={publicImpact?.impactScore}
+            publicImpactHistory={publicImpactHistory}
+            />
 
           {/* Impact Statement & Giving Philosophy */}
           {(safeUser.impactStatement || safeUser.givingPhilosophy) && (

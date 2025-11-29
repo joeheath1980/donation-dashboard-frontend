@@ -292,7 +292,7 @@ const BadgesDisplay = ({ isActive }) => {
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null }) => {
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -346,7 +346,12 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
         watchSlidesProgress={true}
       >
         <SwiperSlide>
-          <ImpactVisualization hideTitle={true} hideAmounts={hideAmounts} />
+          <ImpactVisualization 
+            hideTitle={true} 
+            hideAmounts={hideAmounts} 
+            publicImpactScore={publicImpactScore}
+            publicImpactHistory={publicImpactHistory}
+          />
         </SwiperSlide>
         <SwiperSlide>
           <TierProgressModal 
