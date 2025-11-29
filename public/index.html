@@ -27,6 +27,30 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    <!-- Fetch shim: rewrite /api/users/impact-score to public endpoint on profile pages -->
+    <script>
+      (function(){
+        try {
+          if (!window.fetch) return;
+          const path = window.location.pathname || "";
+          const match = path.match(/\/(?:public\/profile|profile|user)\/([^/?#]+)/i);
+          const target = match ? decodeURIComponent(match[1]) : null;
+          if (!target) return;
+          const origFetch = window.fetch;
+          window.fetch = function(input, init) {
+            try {
+              const url = typeof input === 'string' ? input : (input && input.url) || '';
+              if (url.includes('/api/users/impact-score')) {
+                const isHistory = url.includes('/impact-score/history');
+                const base = '/api/public/profile/impact/' + encodeURIComponent(target);
+                input = isHistory ? base + '/history' : base;
+              }
+            } catch(e) {}
+            return origFetch(input, init);
+          };
+        } catch(e) { /* fail open */ }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
