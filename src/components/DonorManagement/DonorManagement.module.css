@@ -1,17 +1,4 @@
-/* DonorManagement.module.css */
-:root {
-  --primary-color: #2d8f7b;
-  --primary-hover: #1e6b59;
-  --secondary-color: #5ecfb6;
-  --success-color: #00D4AA;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --dark-gray: #2D2D32;
-  --medium-gray: #6D6D78;
-  --light-gray: #F5F5FA;
-  --white: #FFFFFF;
-  --border-light: #E5E5EA;
-}
+/* DonorManagement.module.css - Using Do-Nation Design System */
 
 .container {
   min-height: 100vh;

@@ -1,23 +1,4 @@
-/* Do-Nation design system */
-:root {
-  --primary-color: #2d8f7b;
-  --primary-color-hover: #1e6b59;
-  --primary-light: #5ecfb6;
-  --dark-gray: #2D2D32;
-  --medium-gray: #6D6D78;
-  --light-gray: #F5F5FA;
-  --white: #FFFFFF;
-  --border-light: #E5E5EA;
-  --text-primary: #2D2D32;
-  --text-secondary: #6D6D78;
-  --success-green: #00D4AA;
-  --error-red: #EF4444;
-  --gradient-start: #2d8f7b;
-  --gradient-end: #5ecfb6;
-  --purple-primary: #8B5CF6;
-  --purple-light: #A78BFA;
-  --purple-bg: rgba(139, 92, 246, 0.1);
-}
+/* PersonalImpactScore.module.css - Using Do-Nation Design System */
 
 /* Main container */
 .mainContainer {

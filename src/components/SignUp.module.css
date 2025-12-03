@@ -1,20 +1,21 @@
-/* SignUp.module.css */
+/* SignUp.module.css - Using Do-Nation Design System */
+
 .pageContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
+  padding: var(--spacing-lg);
   background-color: var(--background-light);
 }
 
 .signupContainer {
   width: 100%;
   max-width: 400px;
-  padding: 48px 40px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-2xl) 40px;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
 }
@@ -39,8 +40,8 @@
 
 .title {
   text-align: center;
-  font-size: 32px;
-  font-weight: 700;
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
   color: var(--text-primary);
   margin-bottom: 40px;
 }
@@ -52,40 +53,40 @@ form {
 }
 
 .formGroup {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg);
   width: 320px;
   box-sizing: border-box;
 }
 
 .formGroup label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-sm);
   color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
 }
 
 .formGroup input {
   width: 320px;
   height: 48px;
-  padding: 0 16px;
+  padding: 0 var(--spacing-md);
   border: 2px solid var(--border-light);
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   color: var(--text-primary);
-  background-color: white;
-  transition: var(--transition-standard);
+  background-color: var(--white);
+  transition: all var(--transition-base);
   box-sizing: border-box;
 }
 
 .formGroup input:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(45, 143, 123, 0.1);
+  box-shadow: var(--ring-focus);
 }
 
 .formGroup input.error {
-  border-color: #dc2626;
+  border-color: var(--error-color);
 }
 
 .passwordWrapper {
@@ -101,10 +102,10 @@ form {
   transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 8px;
+  padding: var(--spacing-sm);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition-standard);
+  transition: color var(--transition-base);
 }
 
 .toggleButton:hover {
@@ -112,10 +113,10 @@ form {
 }
 
 .passwordStrength {
-  margin-top: 8px;
+  margin-top: var(--spacing-sm);
   height: 4px;
   background-color: var(--border-light);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
   width: 320px;
   box-sizing: border-box;
@@ -123,34 +124,34 @@ form {
 
 .passwordStrengthBar {
   height: 100%;
-  transition: var(--transition-standard);
+  transition: all var(--transition-base);
 }
 
 .passwordStrengthBar.weak {
   width: 25%;
-  background-color: #dc2626;
+  background-color: var(--error-color);
 }
 
 .passwordStrengthBar.medium {
   width: 50%;
-  background-color: #f59e0b;
+  background-color: var(--warning-color);
 }
 
 .passwordStrengthBar.strong {
   width: 75%;
-  background-color: #10b981;
+  background-color: var(--success-color);
 }
 
 .passwordStrengthBar.veryStrong {
   width: 100%;
-  background-color: #059669;
+  background-color: var(--success-600);
 }
 
 .passwordStrengthText {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   text-align: right;
-  margin-top: 4px;
+  margin-top: var(--spacing-xs);
   width: 320px;
   box-sizing: border-box;
 }
@@ -158,30 +159,30 @@ form {
 .submitButton {
   width: 320px;
   height: 48px;
-  margin-top: 16px;
+  margin-top: var(--spacing-md);
   background: var(--primary-color);
-  color: white;
+  color: var(--white);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: var(--transition-standard);
+  transition: all var(--transition-base);
   box-sizing: border-box;
 }
 
-.submitButton:hover {
-  background: var(--primary-dark);
+.submitButton:hover:not(:disabled) {
+  background: var(--primary-color-hover);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-primary);
 }
 
-.submitButton:active {
+.submitButton:active:not(:disabled) {
   transform: translateY(0);
 }
 
 .submitButton:disabled {
-  background: #a0a0a0;
+  background: var(--charcoal-300);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -196,14 +197,14 @@ form {
 
 .socialLogin h3 {
   color: var(--text-secondary);
-  font-size: 15px;
-  margin-bottom: 20px;
-  font-weight: 500;
+  font-size: var(--text-base);
+  margin-bottom: var(--spacing-lg);
+  font-weight: var(--font-medium);
 }
 
 .socialButtons {
   display: grid;
-  gap: 12px;
+  gap: var(--spacing-sm);
   width: 320px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -213,17 +214,17 @@ form {
   width: 320px;
   height: 48px;
   border: 2px solid var(--border-light);
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  background: white;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  background: var(--white);
   color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  transition: var(--transition-standard);
+  gap: var(--spacing-sm);
+  transition: all var(--transition-base);
   box-sizing: border-box;
 }
 
@@ -244,13 +245,13 @@ form {
 
 .error,
 .success {
-  padding: 14px 16px;
-  margin-bottom: 24px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 14px var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-sm);
   width: 320px;
   margin-left: auto;
   margin-right: auto;
@@ -258,15 +259,15 @@ form {
 }
 
 .error {
-  background-color: #fef2f2;
-  border-left: 4px solid #dc2626;
-  color: #dc2626;
+  background-color: var(--error-light);
+  border-left: 4px solid var(--error-600);
+  color: var(--error-600);
 }
 
 .success {
-  background-color: #ecfdf5;
-  border-left: 4px solid #059669;
-  color: #059669;
+  background-color: var(--success-light);
+  border-left: 4px solid var(--success-600);
+  color: var(--success-600);
 }
 
 .error svg,
@@ -277,24 +278,24 @@ form {
 }
 
 .validationMessage {
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: var(--text-sm);
+  margin-top: var(--spacing-xs);
   display: block;
   width: 320px;
   box-sizing: border-box;
 }
 
 .validationMessage.error {
-  color: #dc2626;
+  color: var(--error-600);
   background: none;
   border: none;
   padding: 0;
-  margin: 4px 0 0;
+  margin: var(--spacing-xs) 0 0;
 }
 
 .toggleText {
   text-align: center;
-  margin-top: 24px;
+  margin-top: var(--spacing-lg);
   width: 320px;
   margin-left: auto;
   margin-right: auto;
@@ -303,21 +304,21 @@ form {
 .toggleText a {
   color: var(--primary-color);
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  transition: var(--transition-standard);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  transition: color var(--transition-base);
 }
 
 .toggleText a:hover {
-  color: var(--primary-dark);
+  color: var(--primary-color-hover);
   text-decoration: underline;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 14px;
+  gap: var(--spacing-sm);
+  font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--text-secondary);
   cursor: pointer;
@@ -341,34 +342,34 @@ form {
 .checkboxLabel a {
   color: var(--primary-color);
   text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition-standard);
+  font-weight: var(--font-medium);
+  transition: color var(--transition-base);
 }
 
 .checkboxLabel a:hover {
-  color: var(--primary-dark);
+  color: var(--primary-color-hover);
   text-decoration: underline;
 }
 
 @media (max-width: 480px) {
   .signupContainer {
-    padding: 32px 24px;
+    padding: var(--spacing-xl) var(--spacing-lg);
   }
 
   .title {
-    font-size: 28px;
+    font-size: var(--text-3xl);
   }
 
   .formGroup input,
   .submitButton,
   .socialButton {
     height: 46px;
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
 
   .logo {
     width: 120px;
     height: 120px;
-    margin-bottom: 32px;
+    margin-bottom: var(--spacing-xl);
   }
 }

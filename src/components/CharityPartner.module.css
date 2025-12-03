@@ -1,17 +1,4 @@
-:root {
-  --primary-color: #2d8f7b;
-  --primary-light: #5ecfb6;
-  --primary-dark: #236e61;
-  --primary-gradient: linear-gradient(to bottom, #5ecfb6, #2d8f7b);
-  --hover-color: #236e61;
-  --text-primary: #212121;
-  --text-secondary: #757575;
-  --background-light: #f8f8f8;
-  --border-light: #e0e0e0;
-  --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
-  --transition-standard: all 0.3s ease;
-}
+/* CharityPartner.module.css - Using Do-Nation Design System */
 
 .container {
   max-width: 1200px;

@@ -1,24 +1,4 @@
-/* Do-Nation design system variables */
-:root {
-  --primary-color: #2d8f7b;
-  --primary-color-hover: #1e6b59;
-  --primary-light: #5ecfb6;
-  --dark-gray: #2D2D32;
-  --medium-gray: #6D6D78;
-  --light-gray: #F5F5FA;
-  --white: #FFFFFF;
-  --border-light: #E5E5EA;
-  --text-primary: #2D2D32;
-  --text-secondary: #6D6D78;
-  --success-green: #00D4AA;
-  --gradient-start: #2d8f7b;
-  --gradient-end: #5ecfb6;
-  --primary-gradient: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  --subtle-gradient: linear-gradient(135deg, #f8fafb 0%, #f0f4f7 100%);
-  --error-red: #ef5350;
-  --error-bg: #ffebee;
-  --error-border: #ffcdd2;
-}
+/* CharityOnboarding.module.css - Using Do-Nation Design System */
 
 /* Main Container */
 .charityOnboarding {
