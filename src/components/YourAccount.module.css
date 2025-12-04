@@ -106,6 +106,32 @@
   margin-bottom: 0.5rem;
 }
 
+.buttonDisabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 1rem;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  border-radius: 4px;
+  cursor: not-allowed;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.comingSoonBadge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .accountPage {
     padding: 1rem;
