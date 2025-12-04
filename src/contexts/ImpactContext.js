@@ -466,6 +466,7 @@ export const ImpactProvider = ({ children }) => {
         const multiplier = scoreRes.data.multiplier || 1.0;
         const displayScore = scoreRes.data.impactScore || 0;
         const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round(displayScore / (multiplier || 1));
+        const tierBasis = Math.max(displayScore, preMultiplierTotal || 0);
         
         setImpactScore(displayScore);
         setScoreDetails({
@@ -479,8 +480,8 @@ export const ImpactProvider = ({ children }) => {
           multiplier: multiplier,
           preMultiplierTotal
         });
-        // Align tier/points with the displayed score (post-multiplier)
-        const currentTier = getTier(displayScore);
+        // Align tier/points with the largest reliable basis (displayed or pre-multiplier)
+        const currentTier = getTier(tierBasis);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       }
@@ -506,10 +507,11 @@ export const ImpactProvider = ({ children }) => {
       // Derive pre-multiplier total from weighted breakdown
       const preMultiplierTotal = Math.round(Object.values(scoreResult.breakdown || {}).reduce((s, v) => s + (Number(v) || 0), 0));
       const displayScore = scoreResult.totalScore || 0;
+      const tierBasis = Math.max(displayScore, preMultiplierTotal || 0);
       setScoreDetails({ ...scoreResult, preMultiplierTotal });
 
-      // Determine tier from the displayed (post-multiplier) score in fallback too
-      const currentTier = getTier(displayScore);
+      // Determine tier from the largest reliable basis in fallback too
+      const currentTier = getTier(tierBasis);
       setTier(currentTier.name);
       setPointsToNextTier(currentTier.pointsToNextTier);
     }
@@ -560,6 +562,7 @@ export const ImpactProvider = ({ children }) => {
         const multiplier = scoreRes.data.multiplier || 1.0;
         const displayScore = scoreRes.data.impactScore || 0;
         const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round(displayScore / (multiplier || 1));
+        const tierBasis = Math.max(displayScore, preMultiplierTotal || 0);
         
         setImpactScore(displayScore);
         setScoreDetails({
@@ -573,8 +576,8 @@ export const ImpactProvider = ({ children }) => {
           multiplier: multiplier,
           preMultiplierTotal
         });
-        // Align tier and points with the displayed score (post-multiplier)
-        const currentTier = getTier(displayScore);
+        // Align tier and points with the largest reliable basis (displayed or pre-multiplier)
+        const currentTier = getTier(tierBasis);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       } else {
@@ -589,9 +592,10 @@ export const ImpactProvider = ({ children }) => {
         setImpactScore(scoreResult.totalScore);
         const preMultiplierTotal = Math.round(Object.values(scoreResult.breakdown || {}).reduce((s, v) => s + (Number(v) || 0), 0));
         const displayScore = scoreResult.totalScore || 0;
+        const tierBasis = Math.max(displayScore, preMultiplierTotal || 0);
         setScoreDetails({ ...scoreResult, preMultiplierTotal });
         
-        const currentTier = getTier(displayScore);
+        const currentTier = getTier(tierBasis);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       }
