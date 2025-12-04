@@ -448,6 +448,7 @@ export const ImpactProvider = ({ children }) => {
 
   // getTier must be defined before callbacks that use it
   const getTier = (score) => {
+    console.log('getTier CALLED with score:', score, 'type:', typeof score);
     if (score >= 5000) return {
       tier: "Visionary",
       name: "Visionary",
