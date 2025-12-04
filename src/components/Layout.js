@@ -92,23 +92,21 @@ function Layout({ children }) {
           </NavLink>
           <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
           {!user?.isBusiness && (
-            <NavLink to="/your-perks" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Perks</NavLink>
+            <span className={styles.navItemDisabled}>
+              Your Perks
+              <span className={styles.comingSoonBadge}>Coming Soon</span>
+            </span>
           )}
           {user?.isBusiness ? (
             <NavLink to="/business-dashboard/account-settings" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Account Settings</NavLink>
           ) : (
             <NavLink to="/YourAccount" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Your Account</NavLink>
           )}
-          <NavLink to="/about" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>About</NavLink>
           <NavLink to="/help" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Help</NavLink>
           <button type="button" onClick={handleReportBug} className={styles.navItem}>Report a bug</button>
           <button type="button" onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
         </div>
       </nav>
-      <div className={layoutStyles.betaBanner}>
-        We’re in beta. To request access, email
-        {' '}<a href="mailto:joeheath@do-nation.space">joeheath@do-nation.space</a>.
-      </div>
       <div className={layoutStyles.content}>
         {children}
       </div>
