@@ -95,15 +95,14 @@ const WelcomePage = () => {
             <a href="#how-it-works" className={styles.navLink}>How It Works</a>
             {/* Pricing hidden during beta */}
           <Link to="/login" className={styles.loginButton}>Log In</Link>
-            <Link to="/signup" className={styles.signupButton}>Request Access</Link>
+            <Link to="/signup" className={styles.signupButton}>Sign Up Free</Link>
           </nav>
         </div>
       </header>
 
       {/* Beta Banner */}
       <div className={styles.betaBanner}>
-        We’re in beta. To request access, email
-        {' '}<a href="mailto:joeheath@do-nation.space">joeheath@do-nation.space</a>.
+        We're in beta — sign up today and help shape the future of giving!
       </div>
 
       {/* Hero Section */}
@@ -120,10 +119,10 @@ const WelcomePage = () => {
             </p>
             <div className={styles.heroActions}>
               <Link to="/signup" className={styles.primaryCta}>
-                Request Beta Access
+                Get Started Free
                 <RiArrowRightLine className={styles.ctaIcon} />
               </Link>
-              <a href="#demo" className={styles.secondaryCta}>
+              <a href="#how-it-works" className={styles.secondaryCta}>
                 See How It Works
               </a>
             </div>
@@ -148,13 +147,12 @@ const WelcomePage = () => {
       {/* Trust/Status Indicators */}
       <section className={styles.trustSection}>
         <div className={styles.trustContent}>
-          <p className={styles.trustText}>Private beta underway with early users</p>
+          <p className={styles.trustText}>Trusted by donors who want to maximise their impact</p>
           <div className={styles.trustLogos}>
-            {/* Placeholder for partner logos */}
-            <div className={styles.trustLogo}>Early User</div>
-            <div className={styles.trustLogo}>Early User</div>
-            <div className={styles.trustLogo}>Early User</div>
-            <div className={styles.trustLogo}>Early User</div>
+            <div className={styles.trustLogo}><RiShieldCheckLine /> Secure</div>
+            <div className={styles.trustLogo}><RiHeartLine /> Free to Use</div>
+            <div className={styles.trustLogo}><RiCheckLine /> Easy Setup</div>
+            <div className={styles.trustLogo}><RiBarChartLine /> Impact Tracking</div>
           </div>
         </div>
       </section>
@@ -381,7 +379,7 @@ const WelcomePage = () => {
         <div className={styles.faqContainer}>
           <div className={styles.faqItem}>
             <h3>How does the beta work?</h3>
-            <p>We're currently in private beta, onboarding users gradually to ensure a great experience. Request access and we'll be in touch within 48 hours.</p>
+            <p>We're currently in beta, which means you get early access to all features for free. Sign up now and start tracking your giving journey while we continue to improve the platform.</p>
           </div>
           <div className={styles.faqItem}>
             <h3>Is it really free?</h3>
@@ -421,17 +419,17 @@ const WelcomePage = () => {
       <section className={styles.ctaSection}>
         <div className={styles.ctaContent}>
           <h2 className={styles.ctaTitle}>Ready to amplify your impact?</h2>
-          <p className={styles.ctaSubtitle}>Join our beta community of early users.</p>
+          <p className={styles.ctaSubtitle}>Join thousands of donors making a difference.</p>
           <div className={styles.ctaActions}>
             <Link to="/signup" className={styles.primaryCta}>
-              Request Access
+              Sign Up Free
               <RiArrowRightLine className={styles.ctaIcon} />
             </Link>
-            <a href="#demo" className={styles.secondaryCta}>
-              Schedule Demo
-            </a>
+            <Link to="/login" className={styles.secondaryCta}>
+              Log In
+            </Link>
           </div>
-          <p className={styles.ctaNote}>Beta access by request • Setup in minutes</p>
+          <p className={styles.ctaNote}>Free during beta • Setup in minutes</p>
         </div>
       </section>
 
