@@ -534,7 +534,9 @@ export const ImpactProvider = ({ children }) => {
           preMultiplierTotal
         });
         // Align tier/points with the largest reliable basis (displayed or pre-multiplier)
+        console.log('TIER DEBUG updateImpactScore:', { displayScore, preMultiplierTotal, tierBasis, breakdown, breakdownSum });
         const currentTier = getTier(tierBasis);
+        console.log('TIER DEBUG currentTier:', currentTier);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       }
@@ -630,7 +632,9 @@ export const ImpactProvider = ({ children }) => {
           preMultiplierTotal
         });
         // Align tier and points with the largest reliable basis (displayed or pre-multiplier)
+        console.log('TIER DEBUG fetchImpactData:', { displayScore, preMultiplierTotal, tierBasis, breakdown, breakdownSum });
         const currentTier = getTier(tierBasis);
+        console.log('TIER DEBUG fetchImpactData currentTier:', currentTier);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       } else {
