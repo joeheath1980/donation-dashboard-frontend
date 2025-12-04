@@ -464,11 +464,12 @@ export const ImpactProvider = ({ children }) => {
         // Compute pre-multiplier total from weighted breakdown; fallback to dividing by multiplier
         const breakdownSum = Object.values(breakdown).reduce((sum, v) => sum + (Number(v) || 0), 0);
         const multiplier = scoreRes.data.multiplier || 1.0;
-        const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round((scoreRes.data.impactScore || 0) / (multiplier || 1));
+        const displayScore = scoreRes.data.impactScore || 0;
+        const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round(displayScore / (multiplier || 1));
         
-        setImpactScore(scoreRes.data.impactScore);
+        setImpactScore(displayScore);
         setScoreDetails({
-          totalScore: scoreRes.data.impactScore,
+          totalScore: displayScore,
           donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
           volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
           fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
@@ -478,8 +479,8 @@ export const ImpactProvider = ({ children }) => {
           multiplier: multiplier,
           preMultiplierTotal
         });
-        // IMPORTANT: Determine tier and points based on PRE-multiplier total
-        const currentTier = getTier(preMultiplierTotal);
+        // Align tier/points with the displayed score (post-multiplier)
+        const currentTier = getTier(displayScore);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       }
@@ -504,10 +505,11 @@ export const ImpactProvider = ({ children }) => {
       setImpactScore(scoreResult.totalScore);
       // Derive pre-multiplier total from weighted breakdown
       const preMultiplierTotal = Math.round(Object.values(scoreResult.breakdown || {}).reduce((s, v) => s + (Number(v) || 0), 0));
+      const displayScore = scoreResult.totalScore || 0;
       setScoreDetails({ ...scoreResult, preMultiplierTotal });
 
-      // Determine tier from pre-multiplier in fallback too
-      const currentTier = getTier(preMultiplierTotal);
+      // Determine tier from the displayed (post-multiplier) score in fallback too
+      const currentTier = getTier(displayScore);
       setTier(currentTier.name);
       setPointsToNextTier(currentTier.pointsToNextTier);
     }
@@ -556,11 +558,12 @@ export const ImpactProvider = ({ children }) => {
         // Compute pre-multiplier total from weighted breakdown; fallback to dividing by multiplier
         const breakdownSum = Object.values(breakdown).reduce((sum, v) => sum + (Number(v) || 0), 0);
         const multiplier = scoreRes.data.multiplier || 1.0;
-        const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round((scoreRes.data.impactScore || 0) / (multiplier || 1));
+        const displayScore = scoreRes.data.impactScore || 0;
+        const preMultiplierTotal = breakdownSum > 0 ? Math.round(breakdownSum) : Math.round(displayScore / (multiplier || 1));
         
-        setImpactScore(scoreRes.data.impactScore);
+        setImpactScore(displayScore);
         setScoreDetails({
-          totalScore: scoreRes.data.impactScore,
+          totalScore: displayScore,
           donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
           volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
           fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
@@ -570,8 +573,8 @@ export const ImpactProvider = ({ children }) => {
           multiplier: multiplier,
           preMultiplierTotal
         });
-        // IMPORTANT: Determine tier and points from PRE-multiplier total
-        const currentTier = getTier(preMultiplierTotal);
+        // Align tier and points with the displayed score (post-multiplier)
+        const currentTier = getTier(displayScore);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       } else {
@@ -585,9 +588,10 @@ export const ImpactProvider = ({ children }) => {
         const scoreResult = calculateComplexImpactScore(userData);
         setImpactScore(scoreResult.totalScore);
         const preMultiplierTotal = Math.round(Object.values(scoreResult.breakdown || {}).reduce((s, v) => s + (Number(v) || 0), 0));
+        const displayScore = scoreResult.totalScore || 0;
         setScoreDetails({ ...scoreResult, preMultiplierTotal });
         
-        const currentTier = getTier(preMultiplierTotal);
+        const currentTier = getTier(displayScore);
         setTier(currentTier.name);
         setPointsToNextTier(currentTier.pointsToNextTier);
       }
