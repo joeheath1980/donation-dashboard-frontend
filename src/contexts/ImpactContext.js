@@ -442,6 +442,59 @@ export const ImpactProvider = ({ children }) => {
 
   const getAuthHeaders = useCallback(() => buildAuthHeaders(), []);
 
+  // getTier must be defined before callbacks that use it
+  const getTier = (score) => {
+    if (score >= 5000) return {
+      tier: "Visionary",
+      name: "Visionary",
+      nextTier: null,
+      pointsToNextTier: 0,
+      description: "Visionaries shape the future of giving",
+      minPoints: 5000,
+      maintenance: 150
+    };
+    if (score >= 2500) return {
+      tier: "Champion",
+      name: "Champion",
+      nextTier: "Visionary",
+      pointsToNextTier: 5000 - score,
+      description: "Champions inspire others through their dedication",
+      minPoints: 2500,
+      maxPoints: 4999,
+      maintenance: 120
+    };
+    if (score >= 1000) return {
+      tier: "Philanthropist",
+      name: "Philanthropist",
+      nextTier: "Champion",
+      pointsToNextTier: 2500 - score,
+      description: "Strategic giving multiplies impact across communities",
+      minPoints: 1000,
+      maxPoints: 2499,
+      maintenance: 80
+    };
+    if (score >= 300) return {
+      tier: "Altruist",
+      name: "Altruist",
+      nextTier: "Philanthropist",
+      pointsToNextTier: 1000 - score,
+      description: "Whether daily drops or monthly waves, your kindness creates ripples",
+      minPoints: 300,
+      maxPoints: 999,
+      maintenance: 40
+    };
+    return {
+      tier: "Giver",
+      name: "Giver",
+      nextTier: "Altruist",
+      pointsToNextTier: 300 - score,
+      description: "Every journey begins with a single act of kindness",
+      minPoints: 0,
+      maxPoints: 299,
+      maintenance: 0
+    };
+  };
+
   const updateImpactScore = useCallback(async () => {
     // CRITICAL: Fetch from backend to get properly calculated score with FAIR weights
     // apiClient adds Authorization/CSRF; explicit headers optional
@@ -630,58 +683,6 @@ export const ImpactProvider = ({ children }) => {
       setPointsToNextTier(300);
     }
   }, [getAuthHeaders]);
-
-  const getTier = (score) => {
-    if (score >= 5000) return { 
-      tier: "Visionary", 
-      name: "Visionary",
-      nextTier: null, 
-      pointsToNextTier: 0,
-      description: "Visionaries shape the future of giving",
-      minPoints: 5000,
-      maintenance: 150
-    };
-    if (score >= 2500) return { 
-      tier: "Champion", 
-      name: "Champion",
-      nextTier: "Visionary", 
-      pointsToNextTier: 5000 - score,
-      description: "Champions inspire others through their dedication",
-      minPoints: 2500,
-      maxPoints: 4999,
-      maintenance: 120
-    };
-    if (score >= 1000) return { 
-      tier: "Philanthropist", 
-      name: "Philanthropist",
-      nextTier: "Champion", 
-      pointsToNextTier: 2500 - score,
-      description: "Strategic giving multiplies impact across communities",
-      minPoints: 1000,
-      maxPoints: 2499,
-      maintenance: 80
-    };
-    if (score >= 300) return { 
-      tier: "Altruist", 
-      name: "Altruist",
-      nextTier: "Philanthropist", 
-      pointsToNextTier: 1000 - score,
-      description: "Whether daily drops or monthly waves, your kindness creates ripples",
-      minPoints: 300,
-      maxPoints: 999,
-      maintenance: 40
-    };
-    return { 
-      tier: "Giver", 
-      name: "Giver",
-      nextTier: "Altruist", 
-      pointsToNextTier: 300 - score,
-      description: "Every journey begins with a single act of kindness",
-      minPoints: 0,
-      maxPoints: 299,
-      maintenance: 0
-    };
-  };
 
   const addDonation = useCallback(async (donation, alreadySaved = false) => {
     try {
