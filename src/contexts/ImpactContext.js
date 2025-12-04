@@ -419,7 +419,11 @@ export const ImpactProvider = ({ children }) => {
   const [impactScore, setImpactScore] = useState(0);
   const [scoreDetails, setScoreDetails] = useState(defaultScoreDetails);
   const [lastYearImpactScore, setLastYearImpactScore] = useState(0);
-  const [tier, setTier] = useState("Giver");
+  const [tier, setTierInternal] = useState("Giver");
+  const setTier = (newTier) => {
+    console.log('TIER CHANGE:', { from: tier, to: newTier, stack: new Error().stack?.split('\n').slice(1, 4).join(' <- ') });
+    setTierInternal(newTier);
+  };
   const [pointsToNextTier, setPointsToNextTier] = useState(0);
   const [donations, setDonations] = useState([]);
   const [oneOffContributions, setOneOffContributions] = useState([]);
