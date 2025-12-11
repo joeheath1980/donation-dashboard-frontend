@@ -13,7 +13,6 @@ import OneOffContributionsComponent from './OneOffContributionsComponent';
 import VolunteerActivitiesComponent from './VolunteerActivitiesComponent';
 import FundraisingCampaignsComponent from './FundraisingCampaignsComponent';
 import GlobalGivingProjects from './GlobalGivingProjects';
-import MatchOpportunityFeed from './matching/MatchOpportunityFeed';
 import MatchSuccessModal from './matching/MatchSuccessModal';
 import MatchingDetailModal from './matching/MatchingDetailModal';
 import ContributionSelectionModal from './ContributionSelectionModal';
@@ -210,13 +209,7 @@ function Profile() {
     }
   };
 
-  const handleSelectOpportunity = (opportunity) => {
-    // Show the detail modal instead of navigating directly
-    setSelectedOpportunity(opportunity);
-    setShowMatchingDetail(true);
-    setShowMatchingFeed(false);
-  };
-
+  
   const handleFindNextMatch = () => {
     setShowMatchSuccess(false);
     setMatchSuccessData(null);
@@ -301,21 +294,18 @@ function Profile() {
         <section className={`${styles.section} ${styles.matchingSection} ${styles.matchingBand} rimSlate`}>
           <SectionHeader
             eyebrow="Matched for you"
-            title="Matching Opportunities"
+            title={
+              <span className={styles.comingSoonTitle}>
+                <span className={styles.titleStrikethrough}>Matching Opportunities</span>
+                <span className={styles.comingSoonBadge}>Coming Soon</span>
+              </span>
+            }
             subhead="Partner with brands to help boost your contributions and impact to the charities or cause areas you care about."
             variant="dark"
             trim
             icon={<FaHandshake />}
             as="h2"
           />
-          
-          {/* Always show matching feed - removed conditional rendering */}
-          <div className={styles.matchingFeedContainer}>
-            <MatchOpportunityFeed 
-              onSelectOpportunity={handleSelectOpportunity}
-              autoShow={true}
-            />
-          </div>
         </section>
 
         <section className={`${styles.section} ${styles.projectsBand} rimSlate`}>

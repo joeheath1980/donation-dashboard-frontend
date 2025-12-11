@@ -574,7 +574,7 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   );
 };
 
-const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions, username, userId, userEmail }) => {
+const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions, username }) => {
   const { user } = useAuth();
   const { scoreDetails } = useContext(ImpactContext);
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
@@ -668,25 +668,14 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
             <FaSearch className={styles.buttonIcon} />
             Discover Your Contributions
           </Link>
-          {/* View Public Profile: always show as all users have usernames now */}
-          {(username || user?.username || userId || user?._id) ? (
-            <Link 
-              to={`/profile/${username || user?.username || userId || user?._id}`} 
-              className={`${styles.tertiaryButton} btn btn-ghost`}
-            >
-              <FaUserCircle className={styles.buttonIcon} />
-              View Public Profile
-            </Link>
-          ) : (
-            <button 
-              className={`${styles.tertiaryButton} btn btn-ghost`}
-              onClick={() => window.location.reload()}
-              title="Click to refresh and load profile"
-            >
-              <FaUserCircle className={styles.buttonIcon} />
-              View Public Profile
-            </button>
-          )}
+          {/* View Public Profile */}
+          <Link
+            to={username || user?.username ? `/profile/${username || user?.username}` : '/profile/me'}
+            className={`${styles.tertiaryButton} btn btn-ghost`}
+          >
+            <FaUserCircle className={styles.buttonIcon} />
+            View Public Profile
+          </Link>
         </div>
       ) : onBackToDashboard ? (
         <div className={`${styles.buttonRow} ${animate ? styles.animate : ''}`}>

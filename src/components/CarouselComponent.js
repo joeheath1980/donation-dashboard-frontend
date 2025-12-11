@@ -133,26 +133,26 @@ const CarouselComponent = ({ items, isLoading, error }) => {
   );
 };
 
-const PrevArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
-      className="style-spread-base display-block"
-      onClick={onClick}
-    />
-  );
-};
+const PrevArrow = ({ className, onClick }) => (
+  <div
+    className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
+    role="button"
+    tabIndex={0}
+    aria-label="Previous"
+    onClick={onClick}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
+  />
+);
 
-const NextArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
-      className="style-spread-base display-block"
-      onClick={onClick}
-    />
-  );
-};
+const NextArrow = ({ className, onClick }) => (
+  <div
+    className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
+    role="button"
+    tabIndex={0}
+    aria-label="Next"
+    onClick={onClick}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
+  />
+);
 
 export default CarouselComponent;

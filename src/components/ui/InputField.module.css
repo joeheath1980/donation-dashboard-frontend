@@ -1,0 +1,85 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.control {
+  position: relative;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.label {
+  color: var(--text-primary, #1b1f23);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.required {
+  color: var(--danger-600, #e24a4a);
+  font-weight: 700;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--charcoal-100, #e6e8eb);
+  background: #fff;
+  color: var(--text-primary, #1b1f23);
+  font-size: 15px;
+  transition: border-color var(--speed-fast, 140ms) ease, box-shadow var(--speed-fast, 140ms) ease;
+  min-height: 48px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--teal-500, #4ab49e);
+  box-shadow: var(--ring-focus, 0 0 0 3px rgba(74,180,158,.35));
+}
+
+.input.error {
+  border-color: var(--danger-600, #e24a4a);
+  box-shadow: 0 0 0 2px rgba(226, 74, 74, 0.12);
+}
+
+.hasAfter .input {
+  padding-right: 64px;
+}
+
+.after {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal-400, #515352);
+  height: 100%;
+  gap: 4px;
+}
+
+.after > * {
+  padding: 6px 10px;
+  min-height: 0;
+  line-height: 1.2;
+  border-radius: 8px;
+}
+
+.hint {
+  color: var(--charcoal-400, #515352);
+  font-size: 13px;
+}
+
+.errorText {
+  color: var(--danger-600, #e24a4a);
+  font-size: 13px;
+  font-weight: 600;
+}

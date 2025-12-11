@@ -141,6 +141,9 @@ function Activity() {
   const [donationStatuses, setDonationStatuses] = useState({});
   const [isClearing, setIsClearing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState('');
+  const [scanStartTime, setScanStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [showEmailForwarding, setShowEmailForwarding] = useState(false);
   const [hasGmailAuth, setHasGmailAuth] = useState(false);
   const [hasOutlookAuth, setHasOutlookAuth] = useState(false);
@@ -625,6 +628,19 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     });
   }, []);
 
+  // Elapsed time counter during scanning
+  useEffect(() => {
+    let intervalId;
+    if (loading && scanStartTime) {
+      intervalId = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - scanStartTime) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [loading, scanStartTime]);
+
   const handleClearAll = useCallback(async () => {
     console.log('[Activity] Starting clear operation');
     setIsClearing(true);
@@ -788,6 +804,20 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         setProgress(progressValue);
       }
 
+      // Update current phase for display
+      if (statusData.currentPhase) {
+        setCurrentPhase(statusData.currentPhase);
+      } else if (statusData.phases) {
+        // Derive current phase from phases object
+        const phaseOrder = ['discovery', 'extraction', 'parsing'];
+        for (const phase of phaseOrder) {
+          if (statusData.phases[phase] === 'running') {
+            setCurrentPhase(phase);
+            break;
+          }
+        }
+      }
+
       if (statusData.status === 'completed') {
         if (statusData.summary?.candidateCount > 0) {
           trackEvent('import_completed', { source: 'gmail', count: statusData.summary.candidateCount });
@@ -828,6 +858,9 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
     setLoading(true);
     setError(null);
     setProgress(0);
+    setScanStartTime(Date.now());
+    setCurrentPhase('discovery');
+    setElapsedTime(0);
     trackEvent('connect_gmail_clicked');
 
     try {
@@ -894,6 +927,10 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
   const handleSearchOutlookEmails = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setProgress(0);
+    setScanStartTime(Date.now());
+    setCurrentPhase('discovery');
+    setElapsedTime(0);
     trackEvent('connect_outlook_clicked');
     
     try {
@@ -2042,16 +2079,32 @@ const saveToLocalStorage = useMemo(() => debounce(saveFunction, 500), [saveFunct
         {/* Progress Indicator */}
         {loading && (
           <div className={styles.progressContainer}>
-            <p>Scanning your emails... {progress}%</p>
+            <div className={styles.progressHeader}>
+              <p className={styles.progressPhase}>
+                {currentPhase === 'discovery' && 'Searching for receipts...'}
+                {currentPhase === 'extraction' && 'Extracting receipt data...'}
+                {currentPhase === 'parsing' && 'Processing donations...'}
+                {!currentPhase && 'Starting scan...'}
+              </p>
+              <span className={styles.progressPercent}>{progress}%</span>
+            </div>
             <div className={styles.progressBarBackground}>
               {(() => {
                 const rounded = Math.max(0, Math.min(100, Math.round((progress || 0) / 5) * 5));
                 const pctClass = styles['p' + String(rounded)];
                 return (
-                  <div className={`${styles.progressBarFill} ${pctClass}`} />
+                  <div className={`${styles.progressBarFill} ${styles.progressPulse} ${pctClass}`} />
                 );
               })()}
             </div>
+            <div className={styles.progressMeta}>
+              <span className={styles.elapsedTime}>
+                Elapsed: {Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}
+              </span>
+            </div>
+            <p className={styles.progressNote}>
+              This may take 5-10 minutes for large inboxes. We're scanning your emails for donation receipts.
+            </p>
           </div>
         )}
 

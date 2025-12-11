@@ -223,8 +223,9 @@
   display: flex !important;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 10;
   cursor: pointer;
+  pointer-events: auto !important;
   background: var(--white);
   border: 1px solid var(--border-light);
   border-radius: 50%;
@@ -240,17 +241,20 @@
 }
 
 .slickArrow::before {
-  content: '';
-  display: block;
-  width: 14px;
-  height: 14px;
-  border-top: 2px solid var(--primary-color);
-  border-right: 2px solid var(--primary-color);
+  content: '' !important;
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-top: 2px solid var(--primary-color) !important;
+  border-right: 2px solid var(--primary-color) !important;
   transition: var(--transition-standard);
+  position: relative;
+  top: -1px;
+  left: -2px;
 }
 
 .slickArrow:hover::before {
-  border-color: var(--white);
+  border-color: var(--white) !important;
 }
 
 .slickPrev {
@@ -262,11 +266,13 @@
 }
 
 .slickPrev::before {
-  transform: rotate(-135deg);
+  transform: rotate(-135deg) !important;
+  left: 2px;
 }
 
 .slickNext::before {
-  transform: rotate(45deg);
+  transform: rotate(45deg) !important;
+  left: -4px;
 }
 
 /* Override slick-carousel default styles */
@@ -407,9 +413,12 @@
 :global(.slick-dots) { bottom: -26px; }
 :global(.slick-dots li) { margin: 0 6px; }
 
-/* Remove Slick’s default arrow pseudo-icons to avoid double chevrons */
+/* Hide Slick's default arrow text characters but allow our CSS chevrons */
 :global(.slick-prev::before),
-:global(.slick-next::before) { content: none !important; }
+:global(.slick-next::before) {
+  font-size: 0 !important;
+  color: transparent !important;
+}
 
 /* Focus styles for accessibility */
 .slickArrow:focus-visible,
