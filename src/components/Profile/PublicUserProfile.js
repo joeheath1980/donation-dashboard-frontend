@@ -101,6 +101,13 @@ const PublicUserProfile = () => {
     { title: 'Tier Progress', component: 'TierProgress' },
     { title: 'Your Badges', component: 'BadgesDisplay' },
   ];
+  const hasStoredToken = () => {
+    try {
+      return !!(SecureTokenStorage.getToken() || SecureTokenStorage.getRefreshToken());
+    } catch {
+      return false;
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -119,7 +126,11 @@ const PublicUserProfile = () => {
     // Handle /profile/me specially: wait for auth to resolve
     if (username === 'me') {
       // Check if there's a token - if so, user is likely logged in but auth context hasn't loaded yet
-      const hasToken = !!SecureTokenStorage.getToken();
+      const hasToken = hasStoredToken();
+      // Always stay in loading when a token exists but the auth context hasn't hydrated the user yet
+      if (hasToken && !currentUser) {
+        setLoading(true);
+      }
 
       if (authLoading) {
         // Wait for auth context to resolve before taking action
