@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  FaLock, 
-  FaGlobe, 
-  FaEye, 
-  FaEyeSlash,
+import {
+  FaLock,
+  FaGlobe,
+  FaEye,
   FaToggleOn,
   FaToggleOff,
   FaInfoCircle,
@@ -14,8 +13,9 @@ import {
   FaGlobeAfrica,
   FaChartLine,
   FaMedal,
-  FaFire,
   FaCalendar,
+  FaEnvelope,
+  FaUser,
   FaSearch,
   FaHandshake
 } from 'react-icons/fa';
@@ -26,18 +26,26 @@ import profileService from '../../services/profile.service';
 
 const PrivacySettings = () => {
   const { user } = useAuth();
-  const [settings, setSettings] = useState({
+  // Defaults mirror backend allowlist in /api/users/privacy
+  const defaultSettings = {
     profileVisibility: 'public', // public, friends, private
-    showAmount: true,
-    showCount: true,
+    showRealName: false,
+    showEmail: false,
+    showDonationAmount: true,
+    showDonationCount: true,
     showCharities: true,
-    showActivity: true,
     showBadges: true,
+    showActivity: true,
+    showImpactScore: true,
     showStreak: true,
     showJoinDate: true,
+    showLocation: true,
+    showSocialLinks: true,
     allowSearch: true,
     shareDataWithCharities: false
-  });
+  };
+
+  const [settings, setSettings] = useState(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profileUrl, setProfileUrl] = useState('');
@@ -52,7 +60,8 @@ const PrivacySettings = () => {
   const fetchPrivacySettings = async () => {
     try {
       const data = await profileService.getUserPrivacySettings();
-      setSettings(data);
+      // Merge with defaults to avoid missing fields breaking toggles
+      setSettings(prev => ({ ...defaultSettings, ...prev, ...data }));
     } catch (error) {
       console.error('Error fetching privacy settings:', error);
       toast.error('Failed to load privacy settings');
@@ -123,60 +132,90 @@ const PrivacySettings = () => {
 
   const privacyOptions = [
     {
-      field: 'showAmount',
-      label: 'Show Total Impact Score',
+      field: 'showRealName',
+      label: 'Show real name',
+      description: 'Display your real name on your public profile',
+      icon: <FaLock />
+    },
+    {
+      field: 'showEmail',
+      label: 'Show email',
+      description: 'Allow visitors to see your email on your profile',
+      icon: <FaEnvelope />
+    },
+    {
+      field: 'showImpactScore',
+      label: 'Show Impact Score',
       description: 'Display your total giving score publicly',
       icon: <FaTrophy />
     },
     {
-      field: 'showCount',
-      label: 'Show Donation Count',
-      description: 'Display number of donations made',
+      field: 'showDonationAmount',
+      label: 'Show donation amounts',
+      description: 'Display amounts alongside your donations',
       icon: <FaHeart />
     },
     {
+      field: 'showDonationCount',
+      label: 'Show donation count',
+      description: 'Display number of donations made',
+      icon: <FaCalendar />
+    },
+    {
+      field: 'showStreak',
+      label: 'Show donation streak',
+      description: 'Display your current giving streak',
+      icon: <FaCalendar />
+    },
+    {
+      field: 'showJoinDate',
+      label: 'Show member since date',
+      description: 'Display when you joined Do-Nation',
+      icon: <FaCalendar />
+    },
+    {
       field: 'showCharities',
-      label: 'Show Supported Charities',
-      description: 'Display list of charities you support',
+      label: 'Show supported charities',
+      description: 'Display the charities you support',
       icon: <FaGlobeAfrica />
     },
     {
-      field: 'showActivity',
-      label: 'Show Recent Activity',
-      description: 'Display your donation activity feed',
-      icon: <FaChartLine />
-    },
-    {
       field: 'showBadges',
-      label: 'Show Badges & Achievements',
+      label: 'Show badges & achievements',
       description: 'Display earned badges on your profile',
       icon: <FaMedal />
     },
     {
-      field: 'showStreak',
-      label: 'Show Donation Streak',
-      description: 'Display your current giving streak',
-      icon: <FaFire />
-    },
-    {
-      field: 'showJoinDate',
-      label: 'Show Member Since Date',
-      description: 'Display when you joined Do-Nation',
-      icon: <FaCalendar />
+      field: 'showActivity',
+      label: 'Show recent activity',
+      description: 'Display your donation activity feed',
+      icon: <FaChartLine />
     }
   ];
 
   const additionalOptions = [
     {
+      field: 'showLocation',
+      label: 'Show location',
+      description: 'Display your city/state on your profile',
+      icon: <FaGlobe />
+    },
+    {
+      field: 'showSocialLinks',
+      label: 'Show social links',
+      description: 'Display your social links on your profile',
+      icon: <FaGlobe />
+    },
+    {
       field: 'allowSearch',
-      label: 'Appear in Search Results',
+      label: 'Appear in search results',
       description: 'Allow others to find your profile through search',
       icon: <FaSearch />
     },
     {
       field: 'shareDataWithCharities',
-      label: 'Share Data with Charities',
-      description: 'Allow charities you support to see your contact info',
+      label: 'Share data with charities',
+      description: 'Allow supported charities to see your contact info',
       icon: <FaHandshake />
     }
   ];
