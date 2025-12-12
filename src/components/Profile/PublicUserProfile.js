@@ -48,6 +48,7 @@ import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
 import { useAuth } from '../../contexts/AuthContext';
 import { ImpactContext } from '../../contexts/ImpactContext';
+import { SecureTokenStorage } from '../../utils/auth.utils';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -117,12 +118,20 @@ const PublicUserProfile = () => {
 
     // Handle /profile/me specially: wait for auth to resolve
     if (username === 'me') {
+      // Check if there's a token - if so, user is likely logged in but auth context hasn't loaded yet
+      const hasToken = !!SecureTokenStorage.getToken();
+
       if (authLoading) {
         // Wait for auth context to resolve before taking action
         return;
       }
       if (currentUser?.username) {
         navigate(`/profile/${currentUser.username}`, { replace: true });
+        return;
+      }
+      // If we have a token but no currentUser yet, wait a bit more for auth to complete
+      if (hasToken && !currentUser) {
+        devLog('Has token but no currentUser yet, waiting for auth...');
         return;
       }
       // Not authenticated or no username available
