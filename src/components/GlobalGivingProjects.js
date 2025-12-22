@@ -11,27 +11,35 @@ import { API_CONFIG } from '../config/api.config';
 // Define the EXTERNAL GlobalGiving API URL.  This is *NOT* your backend.
 const GLOBAL_GIVING_API_URL = 'https://api.globalgiving.org/api/public/projectservice/all/projects/summary';
 
-const PrevArrow = ({ className, style, onClick }) => (
-  <div
-    className={`${className} ${styles.slickArrow} ${styles.slickPrev} iconButton`}
-    role="button"
-    tabIndex={0}
-    aria-label="Previous"
-    onClick={onClick}
-    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
-  />
-);
+const PrevArrow = ({ className, style, onClick }) => {
+  const isDisabled = className?.includes('slick-disabled');
+  return (
+    <button
+      type="button"
+      className={`${className} ${styles.slickArrow} ${styles.slickPrev}`}
+      style={style}
+      aria-label="Previous"
+      aria-disabled={isDisabled}
+      disabled={isDisabled}
+      onClick={onClick}
+    />
+  );
+};
 
-const NextArrow = ({ className, style, onClick }) => (
-  <div
-    className={`${className} ${styles.slickArrow} ${styles.slickNext} iconButton`}
-    role="button"
-    tabIndex={0}
-    aria-label="Next"
-    onClick={onClick}
-    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(e); }}
-  />
-);
+const NextArrow = ({ className, style, onClick }) => {
+  const isDisabled = className?.includes('slick-disabled');
+  return (
+    <button
+      type="button"
+      className={`${className} ${styles.slickArrow} ${styles.slickNext}`}
+      style={style}
+      aria-label="Next"
+      aria-disabled={isDisabled}
+      disabled={isDisabled}
+      onClick={onClick}
+    />
+  );
+};
 
 function GlobalGivingProjects() {
   const [projects, setProjects] = useState([]);

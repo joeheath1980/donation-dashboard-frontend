@@ -220,6 +220,8 @@
   transform: translateY(-50%);
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -229,6 +231,10 @@
   background: var(--white);
   border: 1px solid var(--border-light);
   border-radius: 50%;
+  padding: 0;
+  box-sizing: border-box;
+  appearance: none;
+  touch-action: manipulation;
   transition: var(--transition-standard);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -276,18 +282,10 @@
 }
 
 /* Override slick-carousel default styles */
-:global(.slick-prev),
-:global(.slick-next) {
+:global(.slick-prev):not(.slickArrow),
+:global(.slick-next):not(.slickArrow) {
   font-size: 0;
   line-height: 0;
-  position: absolute;
-  top: 50%;
-  display: block;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  transform: translate(0, -50%);
-  cursor: pointer;
   color: transparent;
   border: none;
   outline: none;
@@ -425,6 +423,20 @@
 :global(.slick-dots li button:focus-visible) {
   outline: 3px solid #0EA5A2;
   outline-offset: 2px;
+}
+
+.slickArrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+
+.slickArrow:disabled:hover {
+  background: var(--white);
+  border-color: var(--border-light);
+  box-shadow: none;
+  transform: translateY(-50%);
 }
 
 /* Let the carousel wrapper allow arrow overflow if clipped by parent */
