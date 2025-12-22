@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   FaLock,
@@ -49,10 +50,11 @@ const PrivacySettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profileUrl, setProfileUrl] = useState('');
+  const profileIdentifier = user?.username || user?._id || user?.id;
+  const profilePath = profileIdentifier ? `/profile/${profileIdentifier}` : '';
 
   useEffect(() => {
     fetchPrivacySettings();
-    const profileIdentifier = user?.username || user?._id || user?.id;
     if (profileIdentifier) {
       setProfileUrl(profileService.generateProfileUrl('user', profileIdentifier));
     } else {
@@ -238,9 +240,13 @@ const PrivacySettings = () => {
         <h3>Your Public Profile</h3>
         <div className={styles.urlBox}>
           <FaGlobe />
-          <a href={profileUrl} target="_blank" rel="noopener noreferrer">
-            {profileUrl}
-          </a>
+          {profilePath ? (
+            <Link to={profilePath}>
+              {profileUrl}
+            </Link>
+          ) : (
+            <span>{profileUrl}</span>
+          )}
         </div>
         <p className={styles.previewNote}>
           <FaInfoCircle /> This is how others will find and view your profile
