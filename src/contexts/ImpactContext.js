@@ -402,6 +402,110 @@ const defaultScoreDetails = {
   preMultiplierTotal: 0
 };
 
+const normalizeBreakdown = (rawBreakdown = {}, scoreBreakdown = {}) => {
+  const breakdown = { ...(rawBreakdown || {}) };
+  const toNumber = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+  };
+  const ensureValue = (key, ...candidates) => {
+    if (toNumber(breakdown[key]) > 0) {
+      return;
+    }
+    for (const candidate of candidates) {
+      const num = toNumber(candidate);
+      if (num > 0) {
+        breakdown[key] = num;
+        return;
+      }
+    }
+  };
+
+  ensureValue(
+    'donations',
+    breakdown.donationScore,
+    breakdown.donationPoints,
+    breakdown.donation,
+    breakdown.giving,
+    scoreBreakdown.donationScore
+  );
+  ensureValue(
+    'volunteering',
+    breakdown.volunteerScore,
+    breakdown.volunteer,
+    breakdown.hours,
+    scoreBreakdown.volunteerScore
+  );
+  ensureValue(
+    'fundraising',
+    breakdown.fundraisingScore,
+    breakdown.raising,
+    breakdown.campaigns,
+    scoreBreakdown.fundraisingScore
+  );
+  ensureValue(
+    'consistency',
+    breakdown.consistencyScore,
+    breakdown.streaks,
+    scoreBreakdown.consistencyScore
+  );
+  ensureValue(
+    'engagement',
+    breakdown.engagementScore,
+    breakdown.participation,
+    scoreBreakdown.engagementScore
+  );
+
+  return breakdown;
+};
+
+const mergeScoreBreakdownWithLocal = (scoreBreakdown = {}, localScoreResult = null) => {
+  const merged = { ...(scoreBreakdown || {}) };
+  if (!localScoreResult) {
+    return merged;
+  }
+
+  const mergeValue = (key, value) => {
+    const current = Number(merged[key]);
+    const candidate = Number(value);
+    if (!(current > 0) && candidate > 0) {
+      merged[key] = candidate;
+    }
+  };
+
+  mergeValue('donationScore', localScoreResult.donationScore);
+  mergeValue('volunteerScore', localScoreResult.volunteerScore);
+  mergeValue('fundraisingScore', localScoreResult.fundraisingScore);
+  mergeValue('consistencyScore', localScoreResult.consistencyScore);
+  mergeValue('engagementScore', localScoreResult.engagementScore);
+
+  return merged;
+};
+
+const mergeBreakdownWithLocal = (breakdown = {}, localScoreResult = null) => {
+  if (!localScoreResult) {
+    return breakdown;
+  }
+
+  const merged = { ...(breakdown || {}) };
+  const localBreakdown = localScoreResult.breakdown || {};
+  const mergeValue = (key) => {
+    const current = Number(merged[key]);
+    const candidate = Number(localBreakdown[key]);
+    if (!(current > 0) && candidate > 0) {
+      merged[key] = candidate;
+    }
+  };
+
+  mergeValue('donations');
+  mergeValue('volunteering');
+  mergeValue('fundraising');
+  mergeValue('consistency');
+  mergeValue('engagement');
+
+  return merged;
+};
+
 const extractKeywords = (text) => {
   if (!text) return [];
   const stopwords = new Set([
@@ -514,11 +618,21 @@ export const ImpactProvider = ({ children }) => {
         console.log('Backend breakdown object:', scoreRes.data.breakdown);
         console.log('Backend scoreBreakdown object:', scoreRes.data.scoreBreakdown);
         
-        // Ensure breakdown includes volunteering data
-        const breakdown = scoreRes.data.breakdown || {};
-        if (!breakdown.volunteering && scoreRes.data.scoreBreakdown?.volunteerScore) {
-          breakdown.volunteering = scoreRes.data.scoreBreakdown.volunteerScore;
-        }
+        const localScoreResult = calculateComplexImpactScore({
+          regularDonations: donations,
+          oneOffDonations: oneOffContributions,
+          volunteeringActivities: volunteerActivities,
+          fundraisingCampaigns: fundraisingCampaigns,
+          profileComplete: user?.profileComplete,
+          bio: user?.bio,
+          profilePictureUrl: user?.profilePictureUrl,
+          impactStatement: user?.impactStatement,
+          followedCharities: followedCharities,
+          dailyActionsCount: user?.dailyActionsCount || 0
+        });
+        const scoreBreakdown = mergeScoreBreakdownWithLocal(scoreRes.data.scoreBreakdown || {}, localScoreResult);
+        let breakdown = normalizeBreakdown(scoreRes.data.breakdown, scoreBreakdown);
+        breakdown = mergeBreakdownWithLocal(breakdown, localScoreResult);
         // Compute pre-multiplier total from weighted breakdown; fallback to dividing by multiplier
         const breakdownSum = Object.values(breakdown).reduce((sum, v) => sum + (Number(v) || 0), 0);
         const multiplier = scoreRes.data.multiplier || 1.0;
@@ -529,11 +643,11 @@ export const ImpactProvider = ({ children }) => {
         setImpactScore(displayScore);
         setScoreDetails({
           totalScore: displayScore,
-          donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
-          volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
-          fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
-          consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
-          engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
+          donationScore: scoreBreakdown.donationScore || breakdown.donations || 0,
+          volunteerScore: scoreBreakdown.volunteerScore || breakdown.volunteering || 0,
+          fundraisingScore: scoreBreakdown.fundraisingScore || breakdown.fundraising || 0,
+          consistencyScore: scoreBreakdown.consistencyScore || breakdown.consistency || 0,
+          engagementScore: scoreBreakdown.engagementScore || breakdown.engagement || 0,
           breakdown: breakdown,
           multiplier: multiplier,
           preMultiplierTotal
@@ -612,11 +726,21 @@ export const ImpactProvider = ({ children }) => {
         console.log('Backend breakdown object:', scoreRes.data.breakdown);
         console.log('Backend scoreBreakdown object:', scoreRes.data.scoreBreakdown);
         
-        // Ensure breakdown includes volunteering data
-        const breakdown = scoreRes.data.breakdown || {};
-        if (!breakdown.volunteering && scoreRes.data.scoreBreakdown?.volunteerScore) {
-          breakdown.volunteering = scoreRes.data.scoreBreakdown.volunteerScore;
-        }
+        const localScoreResult = calculateComplexImpactScore({
+          regularDonations: donationsRes.data,
+          oneOffDonations: oneOffRes.data,
+          volunteeringActivities: volunteerRes.data,
+          fundraisingCampaigns: fundraisingRes.data,
+          profileComplete: user?.profileComplete,
+          bio: user?.bio,
+          profilePictureUrl: user?.profilePictureUrl,
+          impactStatement: user?.impactStatement,
+          followedCharities: followedCharities,
+          dailyActionsCount: user?.dailyActionsCount || 0
+        });
+        const scoreBreakdown = mergeScoreBreakdownWithLocal(scoreRes.data.scoreBreakdown || {}, localScoreResult);
+        let breakdown = normalizeBreakdown(scoreRes.data.breakdown, scoreBreakdown);
+        breakdown = mergeBreakdownWithLocal(breakdown, localScoreResult);
         // Compute pre-multiplier total from weighted breakdown; fallback to dividing by multiplier
         const breakdownSum = Object.values(breakdown).reduce((sum, v) => sum + (Number(v) || 0), 0);
         const multiplier = scoreRes.data.multiplier || 1.0;
@@ -627,11 +751,11 @@ export const ImpactProvider = ({ children }) => {
         setImpactScore(displayScore);
         setScoreDetails({
           totalScore: displayScore,
-          donationScore: scoreRes.data.scoreBreakdown?.donationScore || 0,
-          volunteerScore: scoreRes.data.scoreBreakdown?.volunteerScore || 0,
-          fundraisingScore: scoreRes.data.scoreBreakdown?.fundraisingScore || 0,
-          consistencyScore: scoreRes.data.scoreBreakdown?.consistencyScore || 0,
-          engagementScore: scoreRes.data.scoreBreakdown?.engagementScore || 0,
+          donationScore: scoreBreakdown.donationScore || breakdown.donations || 0,
+          volunteerScore: scoreBreakdown.volunteerScore || breakdown.volunteering || 0,
+          fundraisingScore: scoreBreakdown.fundraisingScore || breakdown.fundraising || 0,
+          consistencyScore: scoreBreakdown.consistencyScore || breakdown.consistency || 0,
+          engagementScore: scoreBreakdown.engagementScore || breakdown.engagement || 0,
           breakdown: breakdown,
           multiplier: multiplier,
           preMultiplierTotal

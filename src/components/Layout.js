@@ -90,7 +90,7 @@ function Layout({ children }) {
           >
             Dashboard
           </NavLink>
-          <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Search</NavLink>
+          <NavLink to="/search" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>Community</NavLink>
           {!user?.isBusiness && (
             <span className={styles.navItemDisabled}>
               Your Perks
