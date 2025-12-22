@@ -7,6 +7,7 @@ import { Icons } from './icons';
 
 const YourAccount = () => {
   const { user } = useAuth();
+  const profileIdentifier = user?.username || user?._id || user?.id;
   
   
   return (
@@ -25,8 +26,8 @@ const YourAccount = () => {
             <p className="cardText">Manage your personal information and preferences.</p>
             <div className={styles.cardActions}>
               <Link to="/profile/edit" className="button">Edit Profile</Link>
-              {user?.username && (
-                <Link to={`/profile/${user.username}`} className="button secondary">View Public Profile</Link>
+              {profileIdentifier && (
+                <Link to={`/profile/${profileIdentifier}`} className="button secondary">View Public Profile</Link>
               )}
             </div>
             <span className={`${styles.ctaTip} tip`}>Keep your profile updated for a better experience!</span>

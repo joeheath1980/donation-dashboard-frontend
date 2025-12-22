@@ -407,7 +407,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         if (entry.type === 'donation') {
           activities.push({
             type: 'donation',
-            details: `$${entry.amount || 0}`,
+            details: hideAmounts ? 'Contribution' : `$${entry.amount || 0}`,
             recipient: entry.charity || 'Unknown',
             pointsEarned: actualPointsEarned,
             rawPoints: entry.score || 0,
@@ -416,7 +416,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         } else if (entry.type === 'oneOff') {
           activities.push({
             type: 'oneOff',
-            details: `$${entry.amount || 0}`,
+            details: hideAmounts ? 'Contribution' : `$${entry.amount || 0}`,
             recipient: entry.charity || 'Unknown',
             pointsEarned: actualPointsEarned,
             rawPoints: entry.score || 0,
@@ -425,7 +425,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         } else if (entry.type === 'volunteer') {
           activities.push({
             type: 'volunteer',
-            details: `${entry.hours || 0} hours`,
+            details: hideAmounts ? 'Volunteer Activity' : `${entry.hours || 0} hours`,
             recipient: entry.organization || 'Unknown',
             pointsEarned: actualPointsEarned,
             rawPoints: entry.score || 0,
@@ -434,7 +434,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         } else if (entry.type === 'fundraising') {
           activities.push({
             type: 'fundraisingCampaign',
-            details: `$${entry.amount || 0} raised`,
+            details: hideAmounts ? 'Campaign' : `$${entry.amount || 0} raised`,
             recipient: entry.title || entry.charity || 'Fundraising Campaign',
             pointsEarned: actualPointsEarned,
             rawPoints: entry.score || 0,

@@ -574,13 +574,14 @@ const CircularProgressBar = ({ score, pointsToNextTier, tier, scoreChange, color
   );
 };
 
-const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions, username }) => {
+const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier, isPublicProfile = false, onBackToDashboard, onAddContributions, username, userId }) => {
   const { user } = useAuth();
   const { scoreDetails } = useContext(ImpactContext);
   const tierColor = tierColors[tier] || { start: '#E5C9A7', end: '#CD7F32', gap: '#F2E6D9' };
   const [animate, setAnimate] = useState(false);
   const [viewMode, setViewMode] = useState('total'); // 'total' or 'breakdown'
   const [isToggleAnimating, setIsToggleAnimating] = useState(false);
+  const profileIdentifier = username || user?.username || userId || user?.id || user?._id;
 
   // Trigger animations on mount
   useEffect(() => {
@@ -670,7 +671,7 @@ const PersonalImpactScore = ({ impactScore, scoreChange, tier, pointsToNextTier,
           </Link>
           {/* View Public Profile */}
           <Link
-            to={username || user?.username ? `/profile/${username || user?.username}` : '/profile/me'}
+            to={profileIdentifier ? `/profile/${profileIdentifier}` : '/profile/me'}
             className={`${styles.tertiaryButton} btn btn-ghost`}
           >
             <FaUserCircle className={styles.buttonIcon} />

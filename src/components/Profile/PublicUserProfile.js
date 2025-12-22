@@ -6,6 +6,7 @@ import {
   FaMedal, 
   FaCalendar,
   FaLock,
+  FaEnvelope,
   FaTwitter,
   FaFacebook,
   FaLinkedin,
@@ -48,7 +49,6 @@ import PersonalImpactScore from '../PersonalImpactScore';
 import ScrollableImpactSection from '../ScrollableImpactSection';
 import { useAuth } from '../../contexts/AuthContext';
 import { ImpactContext } from '../../contexts/ImpactContext';
-import { SecureTokenStorage } from '../../utils/auth.utils';
 
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className={styles.sectionHeader}>
@@ -62,7 +62,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 const PublicUserProfile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, loading: authLoading } = useAuth();
+  const { user: currentUser } = useAuth();
   const { 
     impactScore: contextImpactScore,
     lastYearImpactScore,
@@ -96,19 +96,6 @@ const PublicUserProfile = () => {
     });
   }, [contextImpactScore, lastYearImpactScore, contextTier, contextPointsToNextTier]);
 
-  const impactSections = [
-    { title: 'Impact Journey', component: 'ImpactVisualization' },
-    { title: 'Tier Progress', component: 'TierProgress' },
-    { title: 'Your Badges', component: 'BadgesDisplay' },
-  ];
-  const hasStoredToken = () => {
-    try {
-      return !!(SecureTokenStorage.getToken() || SecureTokenStorage.getRefreshToken());
-    } catch {
-      return false;
-    }
-  };
-
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -119,51 +106,20 @@ const PublicUserProfile = () => {
     devLog('=== EFFECT TRIGGERED === v2');
     devLog('Mounted:', mounted);
     devLog('Username:', username);
-    devLog('Auth loading:', authLoading);
     // Temporary alert to confirm new version
     devWarn('🚀 NEW VERSION DEPLOYED - PublicUserProfile v2');
+    fetchProfile(username);
+  }, [username, mounted, currentUser]);
 
-    // Handle /profile/me specially: wait for auth to resolve
-    if (username === 'me') {
-      // Check if there's a token - if so, user is likely logged in but auth context hasn't loaded yet
-      const hasToken = hasStoredToken();
-      // Always stay in loading when a token exists but the auth context hasn't hydrated the user yet
-      if (hasToken && !currentUser) {
-        setLoading(true);
-      }
-
-      if (authLoading) {
-        // Wait for auth context to resolve before taking action
-        return;
-      }
-      if (currentUser?.username) {
-        navigate(`/profile/${currentUser.username}`, { replace: true });
-        return;
-      }
-      // If we have a token but no currentUser yet, wait a bit more for auth to complete
-      if (hasToken && !currentUser) {
-        devLog('Has token but no currentUser yet, waiting for auth...');
-        return;
-      }
-      // Not authenticated or no username available
-      setError('You need to be logged in to view your public profile.');
-      setLoading(false);
-      return;
-    }
-
-    // Normal fetch path for explicit usernames
-    fetchProfile();
-  }, [username, mounted, currentUser, authLoading, navigate]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = async (identifier) => {
     try {
       setLoading(true);
       devLog('=== PUBLIC PROFILE DEBUG === v2', new Date().toISOString());
-      devLog('1. Fetching profile for username:', username);
+      devLog('1. Fetching profile for identifier:', identifier);
       devLog('2. Current user from auth:', currentUser);
       devLog('3. Current user ID:', currentUser?._id);
       devLog('4. Type of currentUser._id:', typeof currentUser?._id);
-      devLog('6. Are they equal?', currentUser?.username === username);
+      devLog('6. Are they equal?', currentUser?.username === identifier);
       devLog('7. Context values:', {
         contextImpactScore,
         contextTier,
@@ -171,7 +127,7 @@ const PublicUserProfile = () => {
         lastYearImpactScore
       });
       
-      const data = await profileService.getUserPublicProfile(username);
+      const data = await profileService.getUserPublicProfile(identifier);
       devLog('8. Profile data received:', data);
       devLog('9. Full profile details:', {
         user: data?.user,
@@ -182,13 +138,21 @@ const PublicUserProfile = () => {
         pointsToNextTier: data?.pointsToNextTier
       });
       setProfile(data);
+
+      const impactIdentifier = data?.user?.username || data?.user?._id || data?.user?.id || identifier;
+
+      if (data?.privacy?.showImpactScore === false) {
+        setPublicImpact(null);
+        setPublicImpactHistory(null);
+        return;
+      }
       
       // Fetch public impact summary/history for this profile to drive visualizations
       try {
         const api = apiServices.client;
         const [impactSummaryRes, impactHistoryRes] = await Promise.all([
-          api.get(`/api/public/profile/impact/${username}`),
-          api.get(`/api/public/profile/impact/${username}/history`)
+          api.get(`/api/public/profile/impact/${impactIdentifier}`),
+          api.get(`/api/public/profile/impact/${impactIdentifier}/history`)
         ]);
         
         setPublicImpact(impactSummaryRes.data || null);
@@ -218,7 +182,8 @@ const PublicUserProfile = () => {
   };
 
   const handleShare = (platform) => {
-    const url = profileService.generateProfileUrl('user', username);
+    const profileIdentifier = profile?.user?.username || profile?.user?._id || profile?.user?.id || username;
+    const url = profileService.generateProfileUrl('user', profileIdentifier);
     const displayName = profile?.user?.displayName || 'this';
     const text = `Check out ${displayName}'s giving profile on Do-Nation!`;
 
@@ -263,6 +228,18 @@ const PublicUserProfile = () => {
   }
 
   const { user, stats, recentActivity, charityPortfolio } = profile;
+  const privacy = profile?.privacy || {};
+  const showImpactScore = privacy.showImpactScore !== false;
+  const showBadges = privacy.showBadges !== false;
+  const showDonationAmount = privacy.showDonationAmount !== false;
+  const showDonationCount = privacy.showDonationCount !== false;
+  const showStreak = privacy.showStreak !== false;
+  const showCharities = privacy.showCharities !== false;
+  const showJoinDate = privacy.showJoinDate !== false;
+  const showLocation = privacy.showLocation !== false;
+  const showSocialLinks = privacy.showSocialLinks !== false;
+  const showRealName = privacy.showRealName === true;
+  const showEmail = privacy.showEmail === true;
   
   // Debug: Check all available score and tier fields
   devLog('=== API DATA STRUCTURE === v2', new Date().toISOString());
@@ -291,11 +268,13 @@ const PublicUserProfile = () => {
   devLog('Type of currentUser._id:', typeof currentUser?._id);
   devLog('Type of username:', typeof username);
   
+  const profileId = user?._id || user?.id;
+  const profileUsername = user?.username;
+
   // Try multiple ways to check if it's own profile
   const isOwnProfile = currentUser && (
-    currentUser.username === username ||
-    currentUser._id === username || 
-    currentUser.id === username
+    (profileUsername && currentUser.username === profileUsername) ||
+    (profileId && (currentUser._id === profileId || currentUser.id === profileId))
   );
   
   devLog('isOwnProfile result:', isOwnProfile);
@@ -309,16 +288,16 @@ const PublicUserProfile = () => {
   devLog('=== SCORE CALCULATION DEBUG ===');
   devLog('Context Impact Score defined?', contextImpactScore !== undefined);
   devLog('Context Impact Score value:', contextImpactScore);
-  devLog('Should use context?', isOwnProfile && contextImpactScore !== undefined);
+  devLog('Should use context?', isOwnProfile && contextImpactScore !== undefined && showImpactScore);
   
-  if (isOwnProfile && contextImpactScore !== undefined) {
+  if (showImpactScore && isOwnProfile && contextImpactScore !== undefined) {
     // Use the authoritative data from ImpactContext for own profile
     actualScore = contextImpactScore;
     actualTier = contextTier;
     pointsToNextTier = contextPointsToNextTier;
     scoreChange = contextImpactScore - lastYearImpactScore;
     devLog('USING CONTEXT DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
-  } else {
+  } else if (showImpactScore) {
     // Fallback to API provided values for other profiles
     actualScore = publicImpact?.impactScore ||
                  profile?.impactScore || profile?.actualImpactScore || 
@@ -337,6 +316,11 @@ const PublicUserProfile = () => {
     
     devLog('USING API DATA:', { actualScore, actualTier, pointsToNextTier, scoreChange });
     devLog('Reason:', isOwnProfile ? 'Context score undefined' : 'Not own profile');
+  } else {
+    actualScore = 0;
+    actualTier = user?.tier || 'Giver';
+    scoreChange = 0;
+    pointsToNextTier = 0;
   }
   
   devLog('=== FINAL VALUES === v2', new Date().toISOString());
@@ -346,14 +330,15 @@ const PublicUserProfile = () => {
   devLog('Final scoreChange:', scoreChange);
   
   const safeUser = {
+    ...user,
     displayName: user?.displayName || 'Anonymous User',
     tier: actualTier,
-    joinDate: user?.joinDate || new Date().toISOString(),
+    joinDate: user?.joinDate || null,
     avatar: user?.profilePictureUrl || user?.profilePicture || user?.avatar,
     publicScore: publicImpact?.impactScore ?? actualScore,
     impactStatement: user?.impactStatement,
     badges: user?.badges || [],
-    ...user
+    socialLinks: profile?.socialLinks || user?.socialLinks || {}
   };
   
   const safeStats = {
@@ -365,6 +350,15 @@ const PublicUserProfile = () => {
   const userData = { ...safeUser, stats: safeStats };
   const metaTags = profileService.generateMetaTags(userData, 'user');
   const structuredData = profileService.generateStructuredData(userData, 'user');
+  const impactSections = [
+    { title: 'Impact Journey', component: 'ImpactVisualization' },
+    { title: 'Tier Progress', component: 'TierProgress' },
+    ...(showBadges ? [{ title: 'Your Badges', component: 'BadgesDisplay' }] : [])
+  ];
+  const hasSocialLinks = !!safeUser.socialLinks && Object.values(safeUser.socialLinks).some(Boolean);
+  const showStatsSection = showDonationCount ||
+    (showStreak && safeStats.currentStreak > 0) ||
+    (showCharities && charityPortfolio && charityPortfolio.length > 0);
 
 
   const getDisplayedFollowedCharities = () => {
@@ -420,10 +414,12 @@ const PublicUserProfile = () => {
                 {safeUser.username && (
                   <p className={publicStyles.username}>@{safeUser.username}</p>
                 )}
-                <div className={publicStyles.joinDate}>
-                  <FaCalendar />
-                  Member since {format(new Date(safeUser.joinDate), 'MMMM yyyy')}
-                </div>
+                {showJoinDate && safeUser.joinDate && (
+                  <div className={publicStyles.joinDate}>
+                    <FaCalendar />
+                    Member since {format(new Date(safeUser.joinDate), 'MMMM yyyy')}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -445,9 +441,11 @@ const PublicUserProfile = () => {
           </div>
 
           {/* Profile Information Section */}
-          {(safeUser.bio || safeUser.professionalTitle || 
-            (safeUser.location && (safeUser.location.city || safeUser.location.state || safeUser.location.country)) ||
-            (safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks)) && (
+          {(safeUser.bio || safeUser.professionalTitle ||
+            (showRealName && safeUser.realName) ||
+            (showEmail && safeUser.email) ||
+            (showLocation && safeUser.location && (safeUser.location.city || safeUser.location.state || safeUser.location.country)) ||
+            (showSocialLinks && hasSocialLinks)) && (
             <section className={publicStyles.profileInfoSection}>
               {safeUser.bio && (
                 <div className={publicStyles.bio}>
@@ -456,6 +454,20 @@ const PublicUserProfile = () => {
               )}
               
               <div className={publicStyles.infoGrid}>
+                {showRealName && safeUser.realName && (
+                  <div className={publicStyles.infoItem}>
+                    <FaUser />
+                    <span>{safeUser.realName}</span>
+                  </div>
+                )}
+
+                {showEmail && safeUser.email && (
+                  <div className={publicStyles.infoItem}>
+                    <FaEnvelope />
+                    <span>{safeUser.email}</span>
+                  </div>
+                )}
+
                 {safeUser.professionalTitle && (
                   <div className={publicStyles.infoItem}>
                     <FaBriefcase />
@@ -463,7 +475,7 @@ const PublicUserProfile = () => {
                   </div>
                 )}
                 
-                {safeUser.privacy?.showLocation !== false && safeUser.location && 
+                {showLocation && safeUser.location && 
                  (safeUser.location.city || safeUser.location.state || safeUser.location.country) && (
                   <div className={publicStyles.infoItem}>
                     <FaMapMarkerAlt />
@@ -475,7 +487,7 @@ const PublicUserProfile = () => {
                   </div>
                 )}
                 
-                {safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks?.website && (
+                {showSocialLinks && safeUser.socialLinks?.website && (
                   <div className={publicStyles.infoItem}>
                     <FaGlobe />
                     <a href={safeUser.socialLinks.website} target="_blank" rel="noopener noreferrer">
@@ -485,7 +497,7 @@ const PublicUserProfile = () => {
                 )}
               </div>
               
-              {safeUser.privacy?.showSocialLinks !== false && safeUser.socialLinks && (
+              {showSocialLinks && hasSocialLinks && (
                 <div className={publicStyles.socialLinks}>
                   {safeUser.socialLinks.twitter && (
                     <a href={safeUser.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
@@ -513,40 +525,45 @@ const PublicUserProfile = () => {
           )}
 
           {/* Impact Score Section */}
-          <div className={styles.impactScoreWrapper}>
-            {devLog('=== RENDERING PersonalImpactScore === v2', new Date().toISOString())}
-            {devLog('Props being passed:', {
-              impactScore: actualScore,
-              scoreChange,
-              tier: actualTier,
-              pointsToNextTier,
-              isPublicProfile: true,
-              isOwnProfile
-            })}
-            <PersonalImpactScore
+          {showImpactScore && (
+            <div className={styles.impactScoreWrapper}>
+              {devLog('=== RENDERING PersonalImpactScore === v2', new Date().toISOString())}
+              {devLog('Props being passed:', {
+                impactScore: actualScore,
+                scoreChange,
+                tier: actualTier,
+                pointsToNextTier,
+                isPublicProfile: true,
+                isOwnProfile
+              })}
+              <PersonalImpactScore
+                impactScore={actualScore}
+                scoreChange={scoreChange}
+                tier={actualTier}
+                pointsToNextTier={pointsToNextTier}
+                isPublicProfile={true}
+                onBackToDashboard={isOwnProfile ? handleBackToDashboard : null}
+              />
+            </div>
+          )}
+          
+          {/* Scrollable Impact Section */}
+          {showImpactScore && (
+            <ScrollableImpactSection 
               impactScore={actualScore}
-              scoreChange={scoreChange}
+              scoreDetails={null}
               tier={actualTier}
               pointsToNextTier={pointsToNextTier}
-              isPublicProfile={true}
-              onBackToDashboard={isOwnProfile ? handleBackToDashboard : null}
+              activeSection={activeImpactSection}
+              setActiveSection={setActiveImpactSection}
+              hideAmounts={!showDonationAmount}
+              totalSections={impactSections.length}
+              sectionTitles={impactSections.map(section => section.title)}
+              showBadges={showBadges}
+              publicImpactScore={publicImpact?.impactScore}
+              publicImpactHistory={publicImpactHistory}
             />
-          </div>
-          
-          {/* Scrollable Impact Section - Hide amounts on public profile */}
-          <ScrollableImpactSection 
-            impactScore={actualScore}
-            scoreDetails={null}
-            tier={actualTier}
-            pointsToNextTier={pointsToNextTier}
-            activeSection={activeImpactSection}
-            setActiveSection={setActiveImpactSection}
-            hideAmounts={true}
-            totalSections={impactSections.length}
-            sectionTitles={impactSections.map(section => section.title)}
-            publicImpactScore={publicImpact?.impactScore}
-            publicImpactHistory={publicImpactHistory}
-            />
+          )}
 
           {/* Impact Statement & Giving Philosophy */}
           {(safeUser.impactStatement || safeUser.givingPhilosophy) && (
@@ -581,7 +598,7 @@ const PublicUserProfile = () => {
           )}
           
           {/* Charities Following Details */}
-          {charityPortfolio && charityPortfolio.length > 0 && (
+          {showCharities && charityPortfolio && charityPortfolio.length > 0 && (
             <section className={`${styles.section} ${styles.impactSection}`}>
               <SectionTitle icon={FaRegHeart} title="Charities Following" />
               
@@ -623,38 +640,42 @@ const PublicUserProfile = () => {
           )}
 
           {/* Activity Stats */}
-          <section className={styles.section}>
-            <div className={publicStyles.statsGrid}>
-              <div className={publicStyles.statCard}>
-                <FaGlobeAfrica className={publicStyles.statIcon} />
-                <div className={publicStyles.statValue}>
-                  {safeStats.charitiesSupported} <span>charities</span>
-                </div>
-                <div className={publicStyles.statLabel}>Supported</div>
+          {showStatsSection && (
+            <section className={styles.section}>
+              <div className={publicStyles.statsGrid}>
+                {showDonationCount && (
+                  <div className={publicStyles.statCard}>
+                    <FaGlobeAfrica className={publicStyles.statIcon} />
+                    <div className={publicStyles.statValue}>
+                      {safeStats.charitiesSupported} <span>charities</span>
+                    </div>
+                    <div className={publicStyles.statLabel}>Supported</div>
+                  </div>
+                )}
+
+                {showStreak && safeStats.currentStreak > 0 && (
+                  <div className={publicStyles.statCard}>
+                    <FaFire className={publicStyles.statIcon} />
+                    <div className={publicStyles.statValue}>
+                      {safeStats.currentStreak} <span>days</span>
+                    </div>
+                    <div className={publicStyles.statLabel}>Current Streak</div>
+                  </div>
+                )}
+
+                {/* Charities Following */}
+                {showCharities && charityPortfolio && charityPortfolio.length > 0 && (
+                  <div className={publicStyles.statCard}>
+                    <FaRegHeart className={publicStyles.statIcon} />
+                    <div className={publicStyles.statValue}>
+                      {charityPortfolio.length} <span>charities</span>
+                    </div>
+                    <div className={publicStyles.statLabel}>Following</div>
+                  </div>
+                )}
               </div>
-
-              {safeStats.currentStreak > 0 && (
-                <div className={publicStyles.statCard}>
-                  <FaFire className={publicStyles.statIcon} />
-                  <div className={publicStyles.statValue}>
-                    {safeStats.currentStreak} <span>days</span>
-                  </div>
-                  <div className={publicStyles.statLabel}>Current Streak</div>
-                </div>
-              )}
-
-              {/* Charities Following */}
-              {charityPortfolio && charityPortfolio.length > 0 && (
-                <div className={publicStyles.statCard}>
-                  <FaRegHeart className={publicStyles.statIcon} />
-                  <div className={publicStyles.statValue}>
-                    {charityPortfolio.length} <span>charities</span>
-                  </div>
-                  <div className={publicStyles.statLabel}>Following</div>
-                </div>
-              )}
-            </div>
-          </section>
+            </section>
+          )}
         </div>
       </div>
     </>

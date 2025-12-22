@@ -28,7 +28,7 @@ const PrivacySettings = () => {
   const { user } = useAuth();
   // Defaults mirror backend allowlist in /api/users/privacy
   const defaultSettings = {
-    profileVisibility: 'public', // public, friends, private
+    profileVisibility: 'public', // public, registered, private
     showRealName: false,
     showEmail: false,
     showDonationAmount: true,
@@ -52,16 +52,20 @@ const PrivacySettings = () => {
 
   useEffect(() => {
     fetchPrivacySettings();
-    if (user?.username) {
-      setProfileUrl(profileService.generateProfileUrl('user', user.username));
+    const profileIdentifier = user?.username || user?._id || user?.id;
+    if (profileIdentifier) {
+      setProfileUrl(profileService.generateProfileUrl('user', profileIdentifier));
+    } else {
+      setProfileUrl('');
     }
   }, [user]);
 
   const fetchPrivacySettings = async () => {
     try {
       const data = await profileService.getUserPrivacySettings();
+      const normalizedVisibility = data?.profileVisibility === 'friends' ? 'registered' : data?.profileVisibility;
       // Merge with defaults to avoid missing fields breaking toggles
-      setSettings(prev => ({ ...defaultSettings, ...prev, ...data }));
+      setSettings(prev => ({ ...defaultSettings, ...prev, ...data, profileVisibility: normalizedVisibility || prev.profileVisibility }));
     } catch (error) {
       console.error('Error fetching privacy settings:', error);
       toast.error('Failed to load privacy settings');
@@ -117,10 +121,10 @@ const PrivacySettings = () => {
       description: 'Anyone can view your profile'
     },
     {
-      value: 'friends',
-      label: 'Friends Only',
+      value: 'registered',
+      label: 'Members Only',
       icon: <FaEye />,
-      description: 'Only people you follow can view'
+      description: 'Only logged-in users can view your profile'
     },
     {
       value: 'private',

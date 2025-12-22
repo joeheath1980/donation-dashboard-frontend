@@ -292,8 +292,52 @@ const BadgesDisplay = ({ isActive }) => {
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null, showBadges = true }) => {
   const swiperRef = useRef(null);
+  const defaultTitles = ['Impact Journey', 'Tier Progress', 'Your Badges'];
+  const resolvedTitles = Array.isArray(sectionTitles) && sectionTitles.length ? sectionTitles : defaultTitles;
+  const sections = [
+    {
+      key: 'impact',
+      title: resolvedTitles[0] || defaultTitles[0],
+      content: (
+        <ImpactVisualization 
+          hideTitle={true} 
+          hideAmounts={hideAmounts} 
+          publicImpactScore={publicImpactScore}
+          publicImpactHistory={publicImpactHistory}
+        />
+      )
+    },
+    {
+      key: 'tier',
+      title: resolvedTitles[1] || defaultTitles[1],
+      content: (
+        <TierProgressModal 
+          currentTier={tier} 
+          impactScore={impactScore}
+          pointsToNextTier={pointsToNextTier}
+          preTierScore={scoreDetails?.preMultiplierTotal}
+          hideTitle={true}
+          tiers={tiers}
+        />
+      )
+    }
+  ];
+
+  if (showBadges) {
+    sections.push({
+      key: 'badges',
+      title: resolvedTitles[2] || defaultTitles[2],
+      content: (
+        <div className={styles.badgesContainer}>
+          <BadgesDisplay isActive={activeSection === 2} />
+        </div>
+      )
+    });
+  }
+
+  const resolvedTotalSections = sections.length;
 
   useEffect(() => {
     if (swiperRef.current && swiperRef.current.swiper) {
@@ -301,28 +345,34 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
     }
   }, [activeSection]);
 
+  useEffect(() => {
+    if (activeSection >= resolvedTotalSections) {
+      setActiveSection(0);
+    }
+  }, [activeSection, resolvedTotalSections, setActiveSection]);
+
   const handleSlideChange = (swiper) => {
     setActiveSection(swiper.activeIndex);
   };
 
   const navigateSection = (direction) => {
     const newIndex = direction === 'next' 
-      ? (activeSection + 1) % totalSections 
-      : (activeSection - 1 + totalSections) % totalSections;
+      ? (activeSection + 1) % resolvedTotalSections 
+      : (activeSection - 1 + resolvedTotalSections) % resolvedTotalSections;
     setActiveSection(newIndex);
   };
 
   return (
     <div className={styles.scrollableImpactSection}>
       <div className={`${styles.impactSectionNav} ${useDarkNav ? styles.darkNav : ''} tabs`}>
-        {sectionTitles.map((title, index) => (
+        {sections.map((section, index) => (
           <button
             key={index}
             className={`${styles.impactSectionNavButton} ${activeSection === index ? styles.active : ''} tab`}
             aria-selected={activeSection === index}
             onClick={() => setActiveSection(index)}
           >
-            {title}
+            {section.title}
           </button>
         ))}
         <div className={styles.arrowNavigation}>
@@ -345,29 +395,11 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
         updateOnWindowResize={true}
         watchSlidesProgress={true}
       >
-        <SwiperSlide>
-          <ImpactVisualization 
-            hideTitle={true} 
-            hideAmounts={hideAmounts} 
-            publicImpactScore={publicImpactScore}
-            publicImpactHistory={publicImpactHistory}
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <TierProgressModal 
-            currentTier={tier} 
-            impactScore={impactScore}
-            pointsToNextTier={pointsToNextTier}
-            preTierScore={scoreDetails?.preMultiplierTotal}
-            hideTitle={true}
-            tiers={tiers}
-          />
-        </SwiperSlide>
-        <SwiperSlide>
-          <div className={styles.badgesContainer}>
-            <BadgesDisplay isActive={activeSection === 2} />
-          </div>
-        </SwiperSlide>
+        {sections.map((section) => (
+          <SwiperSlide key={section.key}>
+            {section.content}
+          </SwiperSlide>
+        ))}
       </Swiper>
     </div>
   );
