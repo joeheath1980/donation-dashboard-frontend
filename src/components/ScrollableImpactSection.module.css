@@ -102,6 +102,18 @@
   padding-right: 10px;
 }
 
+/* Giving Profile container */
+.givingProfileContainer {
+  width: 100%;
+  min-height: 400px;
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
 /* Ensure Swiper slides are interactive */
 :global(.swiper-slide-active) {
   pointer-events: auto !important;

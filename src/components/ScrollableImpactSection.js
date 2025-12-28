@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import ImpactVisualization from './ImpactVisualization';
 import TierProgressModal from './TierProgressModal';
+import GivingProfileSpider from './GivingProfileSpider';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { 
   FaHeartbeat, 
@@ -292,18 +293,18 @@ const BadgesDisplay = ({ isActive }) => {
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null, showBadges = true }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null, showBadges = true, showGivingProfile = true }) => {
   const swiperRef = useRef(null);
-  const defaultTitles = ['Impact Journey', 'Tier Progress', 'Your Badges'];
+  const defaultTitles = ['Impact Journey', 'Tier Progress', 'Your Badges', 'Giving Profile'];
   const resolvedTitles = Array.isArray(sectionTitles) && sectionTitles.length ? sectionTitles : defaultTitles;
   const sections = [
     {
       key: 'impact',
       title: resolvedTitles[0] || defaultTitles[0],
       content: (
-        <ImpactVisualization 
-          hideTitle={true} 
-          hideAmounts={hideAmounts} 
+        <ImpactVisualization
+          hideTitle={true}
+          hideAmounts={hideAmounts}
           publicImpactScore={publicImpactScore}
           publicImpactHistory={publicImpactHistory}
         />
@@ -313,8 +314,8 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
       key: 'tier',
       title: resolvedTitles[1] || defaultTitles[1],
       content: (
-        <TierProgressModal 
-          currentTier={tier} 
+        <TierProgressModal
+          currentTier={tier}
           impactScore={impactScore}
           pointsToNextTier={pointsToNextTier}
           preTierScore={scoreDetails?.preMultiplierTotal}
@@ -332,6 +333,18 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
       content: (
         <div className={styles.badgesContainer}>
           <BadgesDisplay isActive={activeSection === 2} />
+        </div>
+      )
+    });
+  }
+
+  if (showGivingProfile) {
+    sections.push({
+      key: 'givingProfile',
+      title: resolvedTitles[3] || defaultTitles[3],
+      content: (
+        <div className={styles.givingProfileContainer}>
+          <GivingProfileSpider />
         </div>
       )
     });
