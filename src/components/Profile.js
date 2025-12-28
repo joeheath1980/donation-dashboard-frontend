@@ -97,7 +97,7 @@ function Profile() {
     { title: 'Impact Journey', component: 'ImpactVisualization' },
     { title: 'Tier Progress', component: 'TierProgress' },
     { title: 'Your Badges', component: 'BadgesDisplay' },
-    { title: 'Giving Profile', component: 'GivingProfileSpider' },
+    { title: 'Giver DNA', component: 'GivingProfileSpider' },
   ];
 
   useEffect(() => {
@@ -266,17 +266,19 @@ function Profile() {
   return (
     <div className={styles.profileBackground}>
       <div className={styles.profileContainer}>
-        <PersonalImpactScore
-          impactScore={impactScore}
-          scoreChange={scoreChange}
-          arrow={arrow}
-          tier={tier}
-          pointsToNextTier={pointsToNextTier}
-          onAddContributions={handleAddContributions}
-          username={user?.username}
-          userId={user?._id}
-          userEmail={user?.email}
-        />
+        <div className={styles.impactScoreWrapper}>
+          <PersonalImpactScore
+            impactScore={impactScore}
+            scoreChange={scoreChange}
+            arrow={arrow}
+            tier={tier}
+            pointsToNextTier={pointsToNextTier}
+            onAddContributions={handleAddContributions}
+            username={user?.username}
+            userId={user?._id}
+            userEmail={user?.email}
+          />
+        </div>
         
         <ScrollableImpactSection 
           impactScore={impactScore}

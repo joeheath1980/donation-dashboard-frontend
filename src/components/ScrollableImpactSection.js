@@ -293,9 +293,9 @@ const BadgesDisplay = ({ isActive }) => {
   );
 };
 
-const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null, showBadges = true, showGivingProfile = true }) => {
+const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNextTier, activeSection, setActiveSection, totalSections, sectionTitles, hideAmounts = false, useDarkNav = false, publicImpactScore = null, publicImpactHistory = null, showBadges = true, showGivingProfile = true, givingProfileData = null, useGivingProfileApi = true }) => {
   const swiperRef = useRef(null);
-  const defaultTitles = ['Impact Journey', 'Tier Progress', 'Your Badges', 'Giving Profile'];
+  const defaultTitles = ['Impact Journey', 'Tier Progress', 'Your Badges', 'Giver DNA'];
   const resolvedTitles = Array.isArray(sectionTitles) && sectionTitles.length ? sectionTitles : defaultTitles;
   const sections = [
     {
@@ -344,7 +344,7 @@ const ScrollableImpactSection = ({ impactScore, scoreDetails, tier, pointsToNext
       title: resolvedTitles[3] || defaultTitles[3],
       content: (
         <div className={styles.givingProfileContainer}>
-          <GivingProfileSpider />
+          <GivingProfileSpider profileData={givingProfileData} useApi={useGivingProfileApi} />
         </div>
       )
     });

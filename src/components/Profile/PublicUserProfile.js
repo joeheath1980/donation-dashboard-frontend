@@ -560,6 +560,9 @@ const PublicUserProfile = () => {
               totalSections={impactSections.length}
               sectionTitles={impactSections.map(section => section.title)}
               showBadges={showBadges}
+              showGivingProfile={true}
+              givingProfileData={profile?.givingProfile || null}
+              useGivingProfileApi={false}
               publicImpactScore={publicImpact?.impactScore}
               publicImpactHistory={publicImpactHistory}
             />
