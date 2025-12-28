@@ -6,6 +6,7 @@ import PersonalImpactScore from './PersonalImpactScore';
 import ScrollableImpactSection from './ScrollableImpactSection';
 import CarouselComponent from './CarouselComponent';
 import SectionHeader from './Common/SectionHeader';
+import GivingProfileSpider from './GivingProfileSpider';
 import { ImpactContext } from '../contexts/ImpactContext';
 import { useAuth } from '../contexts/AuthContext';
 import DonationsComponent from './DonationsComponent';
@@ -265,7 +266,7 @@ function Profile() {
   return (
     <div className={styles.profileBackground}>
       <div className={styles.profileContainer}>
-        <div className={styles.impactScoreWrapper}>
+        <div className={styles.impactHero}>
           <PersonalImpactScore
             impactScore={impactScore}
             scoreChange={scoreChange}
@@ -277,6 +278,7 @@ function Profile() {
             userId={user?._id}
             userEmail={user?.email}
           />
+          <GivingProfileSpider />
         </div>
         
         <ScrollableImpactSection 

@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
   USER_REGISTER: '/api/users/register',
   USER_PROFILE: '/api/users/me',
   USER_LOGOUT: '/api/users/logout',
+  USER_GIVING_PROFILE: '/api/users/giving-profile',
   
   // Business endpoints
   BUSINESS_LOGIN: '/api/business/auth/login',

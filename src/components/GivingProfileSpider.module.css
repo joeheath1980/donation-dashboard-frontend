@@ -1,0 +1,72 @@
+.card {
+  background: var(--white, #ffffff);
+  border: 1px solid var(--border-light, #e5e5ea);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #6d6d78);
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  color: var(--text-primary, #2d2d32);
+}
+
+.typePill {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-color, #2d8f7b);
+  background: rgba(45, 143, 123, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chartArea {
+  position: relative;
+  height: 260px;
+  margin-top: 8px;
+}
+
+.chartArea canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.summary {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary, #6d6d78);
+}
+
+@media (max-width: 900px) {
+  .card {
+    padding: 24px;
+  }
+
+  .chartArea {
+    height: 240px;
+  }
+}
