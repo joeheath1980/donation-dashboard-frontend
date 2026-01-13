@@ -84,8 +84,8 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     ...(fundraisingCampaigns || [])
       .filter(campaign => {
         // Include campaigns that have raised money or are completed/archived
-        const hasRaisedMoney = (campaign.amountRaised && campaign.amountRaised > 0) || 
-                               (campaign.raisedAmount && campaign.raisedAmount > 0);
+        const hasRaisedMoney = (campaign.amountRaised && campaign.amountRaised > 0) ||
+          (campaign.raisedAmount && campaign.raisedAmount > 0);
         return hasRaisedMoney || campaign.status === 'archived' || campaign.status === 'completed';
       })
       .map(campaign => ({
@@ -117,7 +117,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
 
   const processedData = [];
   const sortedDates = Object.keys(groupedActivities).sort();
-  
+
   // Helper to sum weighted pre-multiplier total from breakdown
   const sumPreFromBreakdown = (scoreResult) => {
     if (!scoreResult || !scoreResult.breakdown) return 0;
@@ -138,17 +138,17 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
   sortedDates.forEach((dateKey, index) => {
     const currentDate = new Date(dateKey);
     const activities = groupedActivities[dateKey];
-    
+
     // Get all activities up to and including this date
     const activitiesUpToDate = allActivities.filter(a => a.date <= currentDate);
     const activitiesBeforeDate = allActivities.filter(a => a.date < currentDate);
-    
+
     // Group them by type for the new scoring system
     const donationsUpToDate = activitiesUpToDate.filter(a => a.type === 'donation');
     const oneOffsUpToDate = activitiesUpToDate.filter(a => a.type === 'oneOff');
     const volunteeringUpToDate = activitiesUpToDate.filter(a => a.type === 'volunteer');
     const fundraisingUpToDate = activitiesUpToDate.filter(a => a.type === 'fundraisingCampaign');
-    
+
     // Calculate score up to this point using the new scoring system
     const scoreUpToDate = calculateComplexImpactScore({
       regularDonations: donationsUpToDate,
@@ -156,7 +156,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       volunteeringActivities: volunteeringUpToDate,
       fundraisingCampaigns: fundraisingUpToDate
     }).totalScore;
-    
+
     // Compute pre-multiplier running total up to the previous date (for post-multiplier delta attribution)
     const prevScoreResult = calculateComplexImpactScore({
       regularDonations: activitiesBeforeDate.filter(a => a.type === 'donation'),
@@ -166,7 +166,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
     });
     let runningPre = Math.round(sumPreFromBreakdown(prevScoreResult));
     let runningPost = Math.round(runningPre * getTierMultiplier(runningPre));
-    
+
     // Calculate points for each individual activity
     const activitiesWithDetails = activities.map(activity => {
       // Calculate score with just this single activity
@@ -174,7 +174,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
       let rawScore = 0;
       let decayFactor = 1;
       let singlePreWeighted = 0;
-      
+
       if (activity.type === 'donation' || activity.type === 'oneOff') {
         const tempScore = calculateComplexImpactScore({
           regularDonations: activity.type === 'donation' ? [activity] : [],
@@ -184,7 +184,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         });
         singleActivityScore = tempScore.donationScore;
         singlePreWeighted = sumPreFromBreakdown(tempScore);
-        
+
         // Calculate raw score without decay for display
         const amount = activity.amount || 0;
         if (amount < 15) {
@@ -214,7 +214,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         });
         singleActivityScore = tempScore.volunteerScore;
         singlePreWeighted = sumPreFromBreakdown(tempScore);
-        
+
         // Calculate raw score
         const hours = activity.hours || 0;
         rawScore = hours * 2; // 2 points per hour
@@ -231,12 +231,12 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         });
         singleActivityScore = tempScore.fundraisingScore;
         singlePreWeighted = sumPreFromBreakdown(tempScore);
-        
+
         // Calculate raw score for display
         const raisedAmount = activity.amountRaised || activity.raisedAmount || activity.amount || 0;
         rawScore = 0;
         let remaining = raisedAmount;
-        
+
         // Progressive scoring based on amount raised
         if (remaining > 0) rawScore += Math.min(remaining, 100) * 0.5;
         remaining -= 100;
@@ -247,10 +247,10 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         if (remaining > 0) rawScore += Math.min(remaining, 3000) * 0.1;
         remaining -= 3000;
         if (remaining > 0) rawScore += remaining * 0.05;
-        
+
         decayFactor = rawScore > 0 ? singleActivityScore / rawScore : 1;
       }
-      
+
       // Compute points added to stored score (post-multiplier) attributable to this single activity
       const preAfter = runningPre + Math.round(singlePreWeighted);
       const mBefore = getTierMultiplier(runningPre);
@@ -278,7 +278,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
           campaign: activity.type === 'fundraisingCampaign' ? activity.title || activity.name : undefined
         });
       }
-      
+
       return {
         type: activity.type,
         details: activity.displayAmount,
@@ -289,7 +289,7 @@ function processData(donations, oneOffContributions, volunteerActivities, fundra
         isDecayed: decayFactor < 0.95
       };
     });
-    
+
     // Compute actual day delta from full model (captures consistency/engagement bonuses)
     const previousPostTotal = prevScoreResult.totalScore || 0;
     const dayPostDelta = (scoreUpToDate || 0) - previousPostTotal;
@@ -347,7 +347,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
   const containerRef = useRef(null);
   const isMountedRef = useRef(true);
   const chartIdRef = useRef(null);
-  
+
   // Accept public impact history when provided to override context data
   useEffect(() => {
     if (publicImpactHistory && Array.isArray(publicImpactHistory)) {
@@ -389,20 +389,22 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
 
   const dataPoints = useMemo(() => {
     console.log('Recalculating data points for period:', timePeriod);
-    
+
     // If we have impact history from the API, use that instead
     if (impactHistory && Array.isArray(impactHistory) && impactHistory.length > 0) {
       console.log('Using impact history from API:', impactHistory);
-      
+
       // Transform the API timeline data into our chart format
       const points = impactHistory.map((entry, index) => {
         const activities = [];
-        
+
         // Calculate the actual points added to total score
         // This is the difference between current total and previous total
-        const previousTotal = index > 0 ? (impactHistory[index - 1].totalScore || 0) : 0;
-        const actualPointsEarned = (entry.totalScore || 0) - previousTotal;
-        
+        // BACKEND RETURNS 'cumulative', NOT 'totalScore'
+        const previousTotal = index > 0 ? (impactHistory[index - 1].cumulative || impactHistory[index - 1].totalScore || 0) : 0;
+        const currentTotal = entry.cumulative || entry.totalScore || 0;
+        const actualPointsEarned = currentTotal - previousTotal;
+
         // Build activities array from the entry
         if (entry.type === 'donation') {
           activities.push({
@@ -441,10 +443,10 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
             isDecayed: false
           });
         }
-        
+
         return {
           x: new Date(entry.date),
-          y: entry.totalScore || 0,
+          y: currentTotal,
           activities: activities,
           pointsEarned: actualPointsEarned,
           isDense: false,
@@ -452,13 +454,13 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
           fundraisingTotal: entry.fundraisingTotal || 0
         };
       });
-      
+
       console.log('Processed impact history points:', points);
       console.log('Chart Y values (total scores):', points.map(p => p.y));
       console.log('Fundraising totals:', points.map(p => p.fundraisingTotal));
       return points;
     }
-    
+
     // Fall back to the old processing if no history available
     console.log('Raw data:', {
       donations,
@@ -534,7 +536,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         console.log('Component unmounted, skipping chart creation');
         return;
       }
-      
+
       if (!chartRef.current) {
         console.warn('Chart ref lost during timeout');
         return;
@@ -547,280 +549,280 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
       }
 
       console.log('Creating chart with', dataPoints.length, 'data points');
-      
+
       try {
         if (!chartRef.current) {
           console.error('Chart ref is null');
           return;
         }
-        
+
         // Extra safety check for Chart.js
         if (!Chart || !Chart.defaults) {
           console.error('Chart.js not properly loaded or initialized');
           return;
         }
-        
+
         const ctx = chartRef.current.getContext('2d');
         if (!ctx) {
           console.error('Could not get 2D context from canvas');
           return;
         }
 
-    // Proactively destroy any Chart.js instance tied to this canvas
-    try {
-      const existing = Chart.getChart(chartRef.current);
-      if (existing) {
-        console.log('Chart.getChart found existing chart, destroying');
-        existing.destroy();
-      }
-    } catch (e) {}
-
-    // Check for any existing chart on this canvas
-    const existingChartId = chartRef.current.getAttribute('data-chart-id');
-    if (existingChartId && window.__chartInstances.has(existingChartId)) {
-      const existingChart = window.__chartInstances.get(existingChartId);
-      console.log('Found existing chart on canvas, destroying it');
-      try {
-        existingChart.destroy();
-        window.__chartInstances.delete(existingChartId);
-      } catch (error) {
-        console.error('Error destroying existing chart from global registry:', error);
-      }
-    }
-
-    if (chartInstance.current) {
-      console.log('Destroying existing chart before creating new one');
-      try {
-        chartInstance.current.destroy();
-        chartInstance.current = null;
-      } catch (error) {
-        console.error('Error destroying existing chart:', error);
-      }
-    }
-
-    const maxScore = Math.max(impactScore, ...dataPoints.map(point => point.y));
-    let yAxisMax, stepSize;
-
-    // Updated scaling for new scoring system
-    if (maxScore <= 50) {
-      yAxisMax = 50;
-      stepSize = 10;
-    } else if (maxScore <= 100) {
-      yAxisMax = 100;
-      stepSize = 20;
-    } else if (maxScore <= 300) {
-      yAxisMax = 300;
-      stepSize = 50;
-    } else if (maxScore <= 500) {
-      yAxisMax = 500;
-      stepSize = 100;
-    } else if (maxScore <= 1000) {
-      yAxisMax = 1000;
-      stepSize = 200;
-    } else if (maxScore <= 2500) {
-      yAxisMax = 2500;
-      stepSize = 500;
-    } else if (maxScore <= 5000) {
-      yAxisMax = 5000;
-      stepSize = 1000;
-    } else {
-      yAxisMax = Math.ceil(maxScore / 1000) * 1000;
-      stepSize = yAxisMax / 5;
-    }
-
-    // Create multiple gradients for enhanced visual effect
-    const lineGradient = ctx.createLinearGradient(0, 0, chartRef.current.width, 0);
-    lineGradient.addColorStop(0, 'rgba(94, 207, 182, 0.6)');
-    lineGradient.addColorStop(0.5, '#5ecfb6');
-    lineGradient.addColorStop(1, '#2d8f7b');
-    
-    const fillGradient = ctx.createLinearGradient(0, 0, 0, 400);
-    fillGradient.addColorStop(0, 'rgba(94, 207, 182, 0.3)');
-    fillGradient.addColorStop(0.5, 'rgba(94, 207, 182, 0.1)');
-    fillGradient.addColorStop(1, 'rgba(94, 207, 182, 0.01)');
-
-    // Double-check the canvas is still valid before creating chart
-    if (!chartRef.current || !document.body.contains(chartRef.current)) {
-      console.warn('Canvas element is no longer in document');
-      return;
-    }
-
-    // Generate unique ID for this chart
-    const chartId = `impact-viz-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Ensure Chart.js is properly loaded
-    if (!Chart || typeof Chart !== 'function') {
-      console.error('Chart.js is not properly loaded');
-      return;
-    }
-    
-    let newChart;
-    try {
-      // Store chart instance with cleanup check
-      newChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dataPoints.map(point => {
-          const date = new Date(point.x);
-          return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric',
-            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-          });
-        }),
-        datasets: [{
-          label: 'Personal Impact Score',
-          data: dataPoints.map(point => point.y),
-          borderColor: lineGradient,
-          backgroundColor: fillGradient,
-          borderWidth: function(context) {
-            const index = context.dataIndex;
-            const total = context.dataset.data.length;
-            // Progressive line thickness from 2px to 4px
-            return 2 + (index / total) * 2;
-          },
-          tension: 0.4,
-          fill: true,
-          segment: {
-            borderColor: function(context) {
-              // Create gradient effect along the line
-              const index = context.p1DataIndex;
-              const total = dataPoints.length;
-              const progress = index / total;
-              const r = Math.round(45 + (progress * 49));  // 45-94
-              const g = Math.round(143 + (progress * 64)); // 143-207
-              const b = Math.round(123 + (progress * 59)); // 123-182
-              return `rgb(${r}, ${g}, ${b})`;
-            }
-          },
-          pointBackgroundColor: function(context) {
-            const point = dataPoints[context.dataIndex];
-            if (point.isDense) {
-              return COLORS.DENSE_SIMPLE;
-            }
-            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
-            switch (activity.type) {
-              case 'donation': return COLORS.REGULAR_DONATION_SIMPLE;
-              case 'oneOff': return COLORS.ONE_OFF_DONATION_SIMPLE;
-              case 'fundraisingCampaign': return COLORS.FUNDRAISING_CAMPAIGN_SIMPLE;
-              case 'volunteer': return COLORS.VOLUNTEER_SIMPLE;
-              case 'bonus': return '#64748b'; // slate
-              default: return COLORS.REGULAR_DONATION_SIMPLE;
-            }
-          },
-          pointBorderColor: function(context) {
-            return 'rgba(255, 255, 255, 0.8)';
-          },
-          pointBorderWidth: 2,
-          pointHoverBorderWidth: 3,
-          pointRadius: function(context) {
-            const point = dataPoints[context.dataIndex];
-            // Milestone points are larger
-            if (point.isDense) return 10;
-            // Special activities get medium size
-            const activity = (point.activities && point.activities[0]);
-            if (!activity) return 4;
-            if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
-              return 8;
-            }
-            return 6;
-          },
-          pointHoverRadius: function(context) {
-            const point = dataPoints[context.dataIndex];
-            if (point.isDense) return 12;
-            const activity = (point.activities && point.activities[0]);
-            if (!activity) return 6;
-            if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
-              return 10;
-            }
-            return 8;
-          },
-          pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
-          pointHoverBackgroundColor: function(context) {
-            const point = dataPoints[context.dataIndex];
-            if (point.isDense) {
-              return '#ff6b3d';
-            }
-            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
-            switch (activity.type) {
-              case 'donation': return '#4ebfa6';
-              case 'oneOff': return '#1d7f6b';
-              case 'fundraisingCampaign': return '#8360cb';
-              case 'volunteer': return '#ef6f40';
-              case 'bonus': return '#64748b';
-              default: return '#4ebfa6';
-            }
-          },
-          pointStyle: function(context) {
-            const point = dataPoints[context.dataIndex];
-            if (point.isDense) return 'rectRot';
-            const activity = (point.activities && point.activities[0]) || { type: 'donation' };
-            // Different shapes for different milestone types
-            if (activity.type === 'fundraisingCampaign') return 'triangle';
-            if (activity.type === 'volunteer') return 'rect';
-            return 'circle';
+        // Proactively destroy any Chart.js instance tied to this canvas
+        try {
+          const existing = Chart.getChart(chartRef.current);
+          if (existing) {
+            console.log('Chart.getChart found existing chart, destroying');
+            existing.destroy();
           }
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 0
-        },
-        layout: {
-          padding: {
-            left: 30,
-            right: 20,
-            top: 10,
-            bottom: 10
+        } catch (e) { }
+
+        // Check for any existing chart on this canvas
+        const existingChartId = chartRef.current.getAttribute('data-chart-id');
+        if (existingChartId && window.__chartInstances.has(existingChartId)) {
+          const existingChart = window.__chartInstances.get(existingChartId);
+          console.log('Found existing chart on canvas, destroying it');
+          try {
+            existingChart.destroy();
+            window.__chartInstances.delete(existingChartId);
+          } catch (error) {
+            console.error('Error destroying existing chart from global registry:', error);
           }
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          crosshair: {
-            line: {
-              color: 'rgba(94, 207, 182, 0.3)',
-              width: 1,
-              dashPattern: [5, 5]
+        }
+
+        if (chartInstance.current) {
+          console.log('Destroying existing chart before creating new one');
+          try {
+            chartInstance.current.destroy();
+            chartInstance.current = null;
+          } catch (error) {
+            console.error('Error destroying existing chart:', error);
+          }
+        }
+
+        const maxScore = Math.max(impactScore, ...dataPoints.map(point => point.y));
+        let yAxisMax, stepSize;
+
+        // Updated scaling for new scoring system
+        if (maxScore <= 50) {
+          yAxisMax = 50;
+          stepSize = 10;
+        } else if (maxScore <= 100) {
+          yAxisMax = 100;
+          stepSize = 20;
+        } else if (maxScore <= 300) {
+          yAxisMax = 300;
+          stepSize = 50;
+        } else if (maxScore <= 500) {
+          yAxisMax = 500;
+          stepSize = 100;
+        } else if (maxScore <= 1000) {
+          yAxisMax = 1000;
+          stepSize = 200;
+        } else if (maxScore <= 2500) {
+          yAxisMax = 2500;
+          stepSize = 500;
+        } else if (maxScore <= 5000) {
+          yAxisMax = 5000;
+          stepSize = 1000;
+        } else {
+          yAxisMax = Math.ceil(maxScore / 1000) * 1000;
+          stepSize = yAxisMax / 5;
+        }
+
+        // Create multiple gradients for enhanced visual effect
+        const lineGradient = ctx.createLinearGradient(0, 0, chartRef.current.width, 0);
+        lineGradient.addColorStop(0, 'rgba(94, 207, 182, 0.6)');
+        lineGradient.addColorStop(0.5, '#5ecfb6');
+        lineGradient.addColorStop(1, '#2d8f7b');
+
+        const fillGradient = ctx.createLinearGradient(0, 0, 0, 400);
+        fillGradient.addColorStop(0, 'rgba(94, 207, 182, 0.3)');
+        fillGradient.addColorStop(0.5, 'rgba(94, 207, 182, 0.1)');
+        fillGradient.addColorStop(1, 'rgba(94, 207, 182, 0.01)');
+
+        // Double-check the canvas is still valid before creating chart
+        if (!chartRef.current || !document.body.contains(chartRef.current)) {
+          console.warn('Canvas element is no longer in document');
+          return;
+        }
+
+        // Generate unique ID for this chart
+        const chartId = `impact-viz-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Ensure Chart.js is properly loaded
+        if (!Chart || typeof Chart !== 'function') {
+          console.error('Chart.js is not properly loaded');
+          return;
+        }
+
+        let newChart;
+        try {
+          // Store chart instance with cleanup check
+          newChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: dataPoints.map(point => {
+                const date = new Date(point.x);
+                return date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                });
+              }),
+              datasets: [{
+                label: 'Personal Impact Score',
+                data: dataPoints.map(point => point.y),
+                borderColor: lineGradient,
+                backgroundColor: fillGradient,
+                borderWidth: function (context) {
+                  const index = context.dataIndex;
+                  const total = context.dataset.data.length;
+                  // Progressive line thickness from 2px to 4px
+                  return 2 + (index / total) * 2;
+                },
+                tension: 0.4,
+                fill: true,
+                segment: {
+                  borderColor: function (context) {
+                    // Create gradient effect along the line
+                    const index = context.p1DataIndex;
+                    const total = dataPoints.length;
+                    const progress = index / total;
+                    const r = Math.round(45 + (progress * 49));  // 45-94
+                    const g = Math.round(143 + (progress * 64)); // 143-207
+                    const b = Math.round(123 + (progress * 59)); // 123-182
+                    return `rgb(${r}, ${g}, ${b})`;
+                  }
+                },
+                pointBackgroundColor: function (context) {
+                  const point = dataPoints[context.dataIndex];
+                  if (point.isDense) {
+                    return COLORS.DENSE_SIMPLE;
+                  }
+                  const activity = (point.activities && point.activities[0]) || { type: 'donation' };
+                  switch (activity.type) {
+                    case 'donation': return COLORS.REGULAR_DONATION_SIMPLE;
+                    case 'oneOff': return COLORS.ONE_OFF_DONATION_SIMPLE;
+                    case 'fundraisingCampaign': return COLORS.FUNDRAISING_CAMPAIGN_SIMPLE;
+                    case 'volunteer': return COLORS.VOLUNTEER_SIMPLE;
+                    case 'bonus': return '#64748b'; // slate
+                    default: return COLORS.REGULAR_DONATION_SIMPLE;
+                  }
+                },
+                pointBorderColor: function (context) {
+                  return 'rgba(255, 255, 255, 0.8)';
+                },
+                pointBorderWidth: 2,
+                pointHoverBorderWidth: 3,
+                pointRadius: function (context) {
+                  const point = dataPoints[context.dataIndex];
+                  // Milestone points are larger
+                  if (point.isDense) return 10;
+                  // Special activities get medium size
+                  const activity = (point.activities && point.activities[0]);
+                  if (!activity) return 4;
+                  if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
+                    return 8;
+                  }
+                  return 6;
+                },
+                pointHoverRadius: function (context) {
+                  const point = dataPoints[context.dataIndex];
+                  if (point.isDense) return 12;
+                  const activity = (point.activities && point.activities[0]);
+                  if (!activity) return 6;
+                  if (activity.type === 'fundraisingCampaign' || activity.type === 'volunteer') {
+                    return 10;
+                  }
+                  return 8;
+                },
+                pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
+                pointHoverBackgroundColor: function (context) {
+                  const point = dataPoints[context.dataIndex];
+                  if (point.isDense) {
+                    return '#ff6b3d';
+                  }
+                  const activity = (point.activities && point.activities[0]) || { type: 'donation' };
+                  switch (activity.type) {
+                    case 'donation': return '#4ebfa6';
+                    case 'oneOff': return '#1d7f6b';
+                    case 'fundraisingCampaign': return '#8360cb';
+                    case 'volunteer': return '#ef6f40';
+                    case 'bonus': return '#64748b';
+                    default: return '#4ebfa6';
+                  }
+                },
+                pointStyle: function (context) {
+                  const point = dataPoints[context.dataIndex];
+                  if (point.isDense) return 'rectRot';
+                  const activity = (point.activities && point.activities[0]) || { type: 'donation' };
+                  // Different shapes for different milestone types
+                  if (activity.type === 'fundraisingCampaign') return 'triangle';
+                  if (activity.type === 'volunteer') return 'rect';
+                  return 'circle';
+                }
+              }]
             },
-            sync: {
-              enabled: false
-            },
-            zoom: {
-              enabled: false
-            }
-          },
-          tooltip: {
-            enabled: false,
-            external: function(context) {
-              let tooltipEl = document.getElementById('chartjs-tooltip');
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: {
+                duration: 0
+              },
+              layout: {
+                padding: {
+                  left: 30,
+                  right: 20,
+                  top: 10,
+                  bottom: 10
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                },
+                crosshair: {
+                  line: {
+                    color: 'rgba(94, 207, 182, 0.3)',
+                    width: 1,
+                    dashPattern: [5, 5]
+                  },
+                  sync: {
+                    enabled: false
+                  },
+                  zoom: {
+                    enabled: false
+                  }
+                },
+                tooltip: {
+                  enabled: false,
+                  external: function (context) {
+                    let tooltipEl = document.getElementById('chartjs-tooltip');
 
-              if (!tooltipEl) {
-                tooltipEl = document.createElement('div');
-                tooltipEl.id = 'chartjs-tooltip';
-                document.body.appendChild(tooltipEl);
-              }
+                    if (!tooltipEl) {
+                      tooltipEl = document.createElement('div');
+                      tooltipEl.id = 'chartjs-tooltip';
+                      document.body.appendChild(tooltipEl);
+                    }
 
-              const tooltipModel = context.tooltip;
-              if (tooltipModel.opacity === 0) {
-                tooltipEl.style.opacity = 0;
-                return;
-              }
+                    const tooltipModel = context.tooltip;
+                    if (tooltipModel.opacity === 0) {
+                      tooltipEl.style.opacity = 0;
+                      return;
+                    }
 
-              if (tooltipModel.body) {
-                const titleLines = tooltipModel.title || [];
-                const dataPoint = dataPoints[context.tooltip.dataPoints[0].dataIndex];
-                const activities = (dataPoint && Array.isArray(dataPoint.activities)) ? dataPoint.activities : [];
+                    if (tooltipModel.body) {
+                      const titleLines = tooltipModel.title || [];
+                      const dataPoint = dataPoints[context.tooltip.dataPoints[0].dataIndex];
+                      const activities = (dataPoint && Array.isArray(dataPoint.activities)) ? dataPoint.activities : [];
 
-                let activitiesHtml = activities.map(activity => `
+                      let activitiesHtml = activities.map(activity => `
                   <div class="${styles.tooltipRow}">
                     <span class="${styles.tooltipLabel}">Type:</span>
                     <span class="${styles.tooltipValue}">
-                      ${activity.type === 'fundraisingCampaign' ? 'Fundraising Campaign' : 
-                        activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                      ${activity.type === 'fundraisingCampaign' ? 'Fundraising Campaign' :
+                          activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
                     </span>
                   </div>
                   <div class="${styles.tooltipRow}">
@@ -839,21 +841,21 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
                     </span>
                   </div>
                 `).join(`<hr class="${styles.tooltipDivider}">`);
-                if (activities.length === 0) {
-                  activitiesHtml = `
+                      if (activities.length === 0) {
+                        activitiesHtml = `
                     <div class="${styles.tooltipRow}">
                       <span class="${styles.tooltipLabel}">Note:</span>
                       <span class="${styles.tooltipValue}">Reconciled to current total</span>
                     </div>
                   `;
-                }
+                      }
 
-                // Calculate previous total for clarity
-                const currentIndex = context.tooltip.dataPoints[0].dataIndex;
-                const previousTotal = currentIndex > 0 ? dataPoints[currentIndex - 1].y : 0;
-                const pointsEarnedTotal = dataPoint.pointsEarned;
-                
-                const tooltipHTML = `
+                      // Calculate previous total for clarity
+                      const currentIndex = context.tooltip.dataPoints[0].dataIndex;
+                      const previousTotal = currentIndex > 0 ? dataPoints[currentIndex - 1].y : 0;
+                      const pointsEarnedTotal = dataPoint.pointsEarned;
+
+                      const tooltipHTML = `
                   <div class="${styles.tooltipContent}">
                     <div class="${styles.tooltipHeader}">
                       <span class="${styles.tooltipDate}"><i class="fa fa-calendar-alt"></i> ${sanitizeTooltipData(titleLines[0])}</span>
@@ -877,208 +879,208 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
                     </div>
                   </div>
                 `;
-                
-                // Use sanitizeHTML to clean the entire tooltip HTML
-                tooltipEl.innerHTML = sanitizeHTML(tooltipHTML);
-              }
 
-              const position = context.chart.canvas.getBoundingClientRect();
-              const chartContainer = chartRef.current.parentElement.getBoundingClientRect();
-              
-              // Get activities from the data point
-              const dataPoint = tooltipModel.dataPoints ? dataPoints[tooltipModel.dataPoints[0].dataIndex] : null;
-              const activities = dataPoint && Array.isArray(dataPoint.activities) ? dataPoint.activities : [];
-              
-              // Calculate tooltip dimensions (estimate based on content)
-              const tooltipWidth = 320; // max-width from CSS
-              const tooltipHeight = Math.min(400, 100 + (activities.length * 80)); // dynamic height based on content
-              
-              // Calculate initial position
-              let left = position.left + window.pageXOffset + tooltipModel.caretX;
-              let top = position.top + window.pageYOffset + tooltipModel.caretY;
-              
-              // Add offset to prevent overlapping with cursor/point
-              const cursorOffset = 15;
-              
-              // Check if we have enough space below the cursor
-              const viewportHeight = window.innerHeight;
-              const scrollTop = window.pageYOffset;
-              const tooltipBottom = top + tooltipHeight + cursorOffset;
-              const viewportBottom = scrollTop + viewportHeight;
-              
-              // Position tooltip above or below based on available space
-              if (tooltipBottom > viewportBottom - 20) {
-                // Not enough space below, position above
-                top = top - tooltipHeight - cursorOffset;
-              } else {
-                // Enough space below, add offset
-                top = top + cursorOffset;
-              }
-              
-              // Adjust horizontal position to keep tooltip within viewport
-              const viewportWidth = window.innerWidth;
-              const rightEdge = left + tooltipWidth;
-              
-              if (rightEdge > viewportWidth - 20) {
-                // Position tooltip to the left of the cursor
-                left = left - tooltipWidth - cursorOffset;
-              } else if (left < 20) {
-                // Too close to left edge
-                left = 20;
-              }
-              
-              // Final bounds check to ensure tooltip stays within chart container
-              const chartRightEdge = chartContainer.left + window.pageXOffset + chartContainer.width;
-              const chartLeftEdge = chartContainer.left + window.pageXOffset;
-              
-              if (left + tooltipWidth > chartRightEdge) {
-                left = chartRightEdge - tooltipWidth - 10;
-              }
-              if (left < chartLeftEdge) {
-                left = chartLeftEdge + 10;
-              }
-              
-              tooltipEl.style.opacity = 1;
-              tooltipEl.style.position = 'absolute';
-              tooltipEl.style.left = left + 'px';
-              tooltipEl.style.top = top + 'px';
-              tooltipEl.style.pointerEvents = 'none';
-              tooltipEl.style.zIndex = '9999';
-            }
-          }
-        },
-        scales: {
-          x: {
-            type: 'category',
-            labels: dataPoints.map(point => {
-              const date = new Date(point.x);
-              return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-              });
-            }),
-            title: {
-              display: false
-            },
-            grid: {
-              display: false
-            },
-            ticks: {
-              color: '#2d8f7b',
-              maxRotation: 45,
-              minRotation: 45,
-              autoSkip: true,
-              maxTicksLimit: 10,
-              padding: 10,
-              font: {
-                weight: '500',
-                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              },
-              callback: function(value, index) {
-                const date = new Date(dataPoints[index].x);
-                const label = value;
-                // Add year markers for January or first point
-                if (date.getMonth() === 0 || index === 0) {
-                  return [label, `(${date.getFullYear()})`];
+                      // Use sanitizeHTML to clean the entire tooltip HTML
+                      tooltipEl.innerHTML = sanitizeHTML(tooltipHTML);
+                    }
+
+                    const position = context.chart.canvas.getBoundingClientRect();
+                    const chartContainer = chartRef.current.parentElement.getBoundingClientRect();
+
+                    // Get activities from the data point
+                    const dataPoint = tooltipModel.dataPoints ? dataPoints[tooltipModel.dataPoints[0].dataIndex] : null;
+                    const activities = dataPoint && Array.isArray(dataPoint.activities) ? dataPoint.activities : [];
+
+                    // Calculate tooltip dimensions (estimate based on content)
+                    const tooltipWidth = 320; // max-width from CSS
+                    const tooltipHeight = Math.min(400, 100 + (activities.length * 80)); // dynamic height based on content
+
+                    // Calculate initial position
+                    let left = position.left + window.pageXOffset + tooltipModel.caretX;
+                    let top = position.top + window.pageYOffset + tooltipModel.caretY;
+
+                    // Add offset to prevent overlapping with cursor/point
+                    const cursorOffset = 15;
+
+                    // Check if we have enough space below the cursor
+                    const viewportHeight = window.innerHeight;
+                    const scrollTop = window.pageYOffset;
+                    const tooltipBottom = top + tooltipHeight + cursorOffset;
+                    const viewportBottom = scrollTop + viewportHeight;
+
+                    // Position tooltip above or below based on available space
+                    if (tooltipBottom > viewportBottom - 20) {
+                      // Not enough space below, position above
+                      top = top - tooltipHeight - cursorOffset;
+                    } else {
+                      // Enough space below, add offset
+                      top = top + cursorOffset;
+                    }
+
+                    // Adjust horizontal position to keep tooltip within viewport
+                    const viewportWidth = window.innerWidth;
+                    const rightEdge = left + tooltipWidth;
+
+                    if (rightEdge > viewportWidth - 20) {
+                      // Position tooltip to the left of the cursor
+                      left = left - tooltipWidth - cursorOffset;
+                    } else if (left < 20) {
+                      // Too close to left edge
+                      left = 20;
+                    }
+
+                    // Final bounds check to ensure tooltip stays within chart container
+                    const chartRightEdge = chartContainer.left + window.pageXOffset + chartContainer.width;
+                    const chartLeftEdge = chartContainer.left + window.pageXOffset;
+
+                    if (left + tooltipWidth > chartRightEdge) {
+                      left = chartRightEdge - tooltipWidth - 10;
+                    }
+                    if (left < chartLeftEdge) {
+                      left = chartLeftEdge + 10;
+                    }
+
+                    tooltipEl.style.opacity = 1;
+                    tooltipEl.style.position = 'absolute';
+                    tooltipEl.style.left = left + 'px';
+                    tooltipEl.style.top = top + 'px';
+                    tooltipEl.style.pointerEvents = 'none';
+                    tooltipEl.style.zIndex = '9999';
+                  }
                 }
-                return label;
+              },
+              scales: {
+                x: {
+                  type: 'category',
+                  labels: dataPoints.map(point => {
+                    const date = new Date(point.x);
+                    return date.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                    });
+                  }),
+                  title: {
+                    display: false
+                  },
+                  grid: {
+                    display: false
+                  },
+                  ticks: {
+                    color: '#2d8f7b',
+                    maxRotation: 45,
+                    minRotation: 45,
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                    font: {
+                      weight: '500',
+                      family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    },
+                    callback: function (value, index) {
+                      const date = new Date(dataPoints[index].x);
+                      const label = value;
+                      // Add year markers for January or first point
+                      if (date.getMonth() === 0 || index === 0) {
+                        return [label, `(${date.getFullYear()})`];
+                      }
+                      return label;
+                    }
+                  }
+                },
+                y: {
+                  title: {
+                    display: false
+                  },
+                  min: 0,
+                  max: yAxisMax,
+                  grid: {
+                    color: 'rgba(94, 207, 182, 0.1)',
+                    drawBorder: false
+                  },
+                  ticks: {
+                    color: '#2d8f7b',
+                    padding: 15,
+                    stepSize: stepSize,
+                    font: {
+                      weight: '600',
+                      family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    },
+                    callback: function (value) {
+                      return value.toLocaleString('en-US');
+                    }
+                  },
+                  position: 'left',
+                  offset: true
+                }
+              },
+              hover: {
+                mode: 'nearest',
+                intersect: true,
+                animationDuration: 200
+              },
+              onHover: function (event, activeElements) {
+                chartRef.current.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+
+                // Add vertical guide line
+                if (activeElements.length > 0) {
+                  const activePoint = activeElements[0];
+                  const ctx = newChart.ctx;
+                  const x = activePoint.element.x;
+                  const topY = newChart.scales.y.top;
+                  const bottomY = newChart.scales.y.bottom;
+
+                  // Clear previous drawings
+                  newChart.render();
+
+                  // Draw vertical line
+                  ctx.save();
+                  ctx.beginPath();
+                  ctx.moveTo(x, topY);
+                  ctx.lineTo(x, bottomY);
+                  ctx.lineWidth = 1;
+                  ctx.strokeStyle = 'rgba(94, 207, 182, 0.3)';
+                  ctx.setLineDash([5, 5]);
+                  ctx.stroke();
+                  ctx.restore();
+                }
               }
             }
-          },
-          y: {
-            title: {
-              display: false
-            },
-            min: 0,
-            max: yAxisMax,
-            grid: {
-              color: 'rgba(94, 207, 182, 0.1)',
-              drawBorder: false
-            },
-            ticks: {
-              color: '#2d8f7b',
-              padding: 15,
-              stepSize: stepSize,
-              font: {
-                weight: '600',
-                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              },
-              callback: function(value) {
-                return value.toLocaleString('en-US');
-              }
-            },
-            position: 'left',
-            offset: true
+          });
+        } catch (chartError) {
+          console.error('Error creating Chart.js instance:', chartError);
+          console.error('Error stack:', chartError.stack);
+          console.error('Chart.js version:', Chart.version);
+          console.error('Chart.js registries:', Chart.registry);
+
+          // Clean up any partial instance
+          if (newChart) {
+            try {
+              newChart.destroy();
+            } catch (destroyError) {
+              console.error('Error destroying partial chart:', destroyError);
+            }
           }
-        },
-        hover: {
-          mode: 'nearest',
-          intersect: true,
-          animationDuration: 200
-        },
-        onHover: function(event, activeElements) {
-          chartRef.current.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-          
-          // Add vertical guide line
-          if (activeElements.length > 0) {
-            const activePoint = activeElements[0];
-            const ctx = newChart.ctx;
-            const x = activePoint.element.x;
-            const topY = newChart.scales.y.top;
-            const bottomY = newChart.scales.y.bottom;
-            
-            // Clear previous drawings
-            newChart.render();
-            
-            // Draw vertical line
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(x, topY);
-            ctx.lineTo(x, bottomY);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(94, 207, 182, 0.3)';
-            ctx.setLineDash([5, 5]);
-            ctx.stroke();
-            ctx.restore();
-          }
+          return;
         }
-      }
-    });
-    } catch (chartError) {
-      console.error('Error creating Chart.js instance:', chartError);
-      console.error('Error stack:', chartError.stack);
-      console.error('Chart.js version:', Chart.version);
-      console.error('Chart.js registries:', Chart.registry);
-      
-      // Clean up any partial instance
-      if (newChart) {
-        try {
+
+        // Only store if still mounted
+        if (isMountedRef.current) {
+          chartInstance.current = newChart;
+          chartIdRef.current = chartId;
+          // Store chart ID on canvas element
+          chartRef.current.setAttribute('data-chart-id', chartId);
+          // Register in global registry
+          if (window.__chartInstances) {
+            window.__chartInstances.set(chartId, newChart);
+            console.log(`Chart created successfully and registered with ID: ${chartId}`);
+          } else {
+            console.log('Chart created successfully (no global registry available)');
+          }
+        } else {
+          console.log('Component unmounted during chart creation, destroying');
           newChart.destroy();
-        } catch (destroyError) {
-          console.error('Error destroying partial chart:', destroyError);
         }
-      }
-      return;
-    }
-    
-    // Only store if still mounted
-    if (isMountedRef.current) {
-      chartInstance.current = newChart;
-      chartIdRef.current = chartId;
-      // Store chart ID on canvas element
-      chartRef.current.setAttribute('data-chart-id', chartId);
-      // Register in global registry
-      if (window.__chartInstances) {
-        window.__chartInstances.set(chartId, newChart);
-        console.log(`Chart created successfully and registered with ID: ${chartId}`);
-      } else {
-        console.log('Chart created successfully (no global registry available)');
-      }
-    } else {
-      console.log('Component unmounted during chart creation, destroying');
-      newChart.destroy();
-    }
       } catch (error) {
         console.error('Error in chart creation:', error);
         if (chartInstance.current) {
@@ -1090,7 +1092,7 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         }
       }
     }, 100); // 100ms delay to ensure DOM is ready
-  
+
     return () => {
       clearTimeout(timeoutId);
       if (chartInstance.current) {
@@ -1141,8 +1143,8 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
             <FaChartBar className="mr-10 text-primary" /> Impact Journey
           </h2>
           <div className={styles.controls}>
-            <select 
-              value={timePeriod} 
+            <select
+              value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value)}
               className={styles.periodSelect}
             >
@@ -1160,9 +1162,9 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
         {dataPoints.length > 0 && (
           <div className={styles.progressIndicator}>
             <div className={styles.progressBar}>
-              <div 
-                className={styles.progressFill} 
-                style={{ 
+              <div
+                className={styles.progressFill}
+                style={{
                   width: `${Math.min(((publicImpactScore ?? impactScore) / 500) * 100, 100)}%`,
                   background: `linear-gradient(90deg, #5ecfb6 0%, #2d8f7b ${Math.min(((publicImpactScore ?? impactScore) / 500) * 100, 100)}%)`
                 }}
@@ -1170,13 +1172,13 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
             </div>
             <div className={styles.progressText}>
               {(publicImpactScore ?? impactScore) < 25 ? 'Keep going! You\'re making an impact' :
-               (publicImpactScore ?? impactScore) < 50 ? 'Great progress! Your impact is growing' :
-               (publicImpactScore ?? impactScore) < 75 ? 'Amazing! You\'re making a significant difference' :
-               (publicImpactScore ?? impactScore) < 300 ? 'Incredible! You\'re building great momentum' :
-               (publicImpactScore ?? impactScore) < 1000 ? 'Outstanding! You\'re an Altruist making waves' :
-               (publicImpactScore ?? impactScore) < 2500 ? 'Exceptional! You\'re a true Philanthropist' :
-               (publicImpactScore ?? impactScore) < 5000 ? 'Legendary! You\'re a Champion for change' :
-               'Visionary! You\'re transforming the world'}
+                (publicImpactScore ?? impactScore) < 50 ? 'Great progress! Your impact is growing' :
+                  (publicImpactScore ?? impactScore) < 75 ? 'Amazing! You\'re making a significant difference' :
+                    (publicImpactScore ?? impactScore) < 300 ? 'Incredible! You\'re building great momentum' :
+                      (publicImpactScore ?? impactScore) < 1000 ? 'Outstanding! You\'re an Altruist making waves' :
+                        (publicImpactScore ?? impactScore) < 2500 ? 'Exceptional! You\'re a true Philanthropist' :
+                          (publicImpactScore ?? impactScore) < 5000 ? 'Legendary! You\'re a Champion for change' :
+                            'Visionary! You\'re transforming the world'}
             </div>
           </div>
         )}
