@@ -397,12 +397,19 @@ function ImpactVisualization({ hideTitle = false, hideAmounts = false, publicImp
       // Transform the API timeline data into our chart format
       const points = impactHistory.map((entry, index) => {
         const activities = [];
+        const isLastEntry = index === impactHistory.length - 1;
 
         // Calculate the actual points added to total score
         // This is the difference between current total and previous total
         // BACKEND RETURNS 'cumulative', NOT 'totalScore'
         const previousTotal = index > 0 ? (impactHistory[index - 1].cumulative || impactHistory[index - 1].totalScore || 0) : 0;
-        const currentTotal = entry.cumulative || entry.totalScore || 0;
+
+        // For public profiles, use publicImpactScore for the final entry to ensure alignment
+        // with the displayed score (handles any backend calculation discrepancies)
+        let currentTotal = entry.cumulative || entry.totalScore || 0;
+        if (isLastEntry && publicImpactScore !== null && publicImpactScore !== undefined) {
+          currentTotal = publicImpactScore;
+        }
         const actualPointsEarned = currentTotal - previousTotal;
 
         // Build activities array from the entry
